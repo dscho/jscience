@@ -1,0 +1,29 @@
+<body>
+<p> Provides common types of {@link org.jscience.mathematics.matrices.Operable operable} numbers.</p>
+<p> Although numbers defined in this package are not as fast as primitives types
+    (e.g. <code>int</code> or <code>double</code>). They have many
+    advantages (such as arbitrary size for {@link org.jscience.mathematics.numbers.LargeInteger LargeInteger}
+    or precision for {@link org.jscience.mathematics.numbers.Real Real}) which
+    make them irreplaceable in some calculations. This can be illustrated with the following example:<pre>
+        double x = 10864;
+        double y = 18817;
+        double z = 9 * Math.pow(x, 4.0)- Math.pow(y, 4.0) + 2 * Math.pow(y, 2.0);
+        System.out.println("Result : " + z);
+
+        > Result : 2.0</pre>
+    The mathematically correct value is z=1. However, Java compilers
+    using ANSI/IEEE double precision numbers evaluate z=2. Not even the first
+    digit is correct! This is due to a rounding error occurring when subtracting
+    two nearly equal floating point numbers. Now, lets write the same formula
+    using {@link org.jscience.mathematics.numbers.Real Real} numbers:<pre>
+        Real.setIntegerAccuracy(20); // 20 digits accuracy for integer values.
+        Real x = Real.valueOf(10864);
+        Real y = Real.valueOf(18817);
+        Real z = (Real) Real.valueOf(9).times(x.pow(4)).plus(y.pow(4).opposite()).plus(Real.valueOf(2).times(y.pow(2)));
+        System.out.println("Result : " + z);
+
+        > Result   : 1.000</pre>
+
+    Not only the correct result is returned, but this result is also <b>guaranteed</b> to be <code>1 ± 0.001</code>
+    (only exact digits are written out).</p>
+</body>

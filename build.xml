@@ -1,0 +1,119 @@
+<!-- ANT BUILD FILE (Ref. http://jakarta.apache.org/ant ) -->
+<project name="jScience" default="distribution" basedir=".">
+    <description>
+    	jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+    </description>
+    
+    <target name="info">
+    	<echo>This software requires the Javolution Library (http://javolution.org) to build and run</echo>
+    </target>	
+    <target name="init">
+    	<tstamp/>
+        <property name="library"   value="jscience" />
+        <property name="version"   value="1.0" />
+        <property name="release"   value="0" />
+        <property name="src"       value="src" />
+        <property name="bin"       value="bin" />
+        <property name="lib"       value="lib" />
+        <property name="api"       value="api" />
+        <property name="debug"     value="false" />
+        <property name="optimize"  value="true" />
+        <property name="encoding"  value="UTF-8" />
+    </target>
+	
+	<target name="compile" depends="init">
+        <mkdir dir="${bin}" />
+        <!-- Compile -->
+        <javac srcdir="${src}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
+               debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
+        <!-- Updates version information (Javolution class) -->
+		<delete file="${bin}/org/jscience/JScience.class"/>
+        <filter token="VERSION" value="${version}.${release} ${TODAY}"/>
+        <copy file="src/org/jscience/JScience.java"
+              todir="${bin}/org/jscience" filtering="true"/>
+        <javac srcdir="${bin}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
+               debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
+    </target>
+	
+    <target name="javadoc" depends="init">
+        <mkdir dir="${api}" />
+        <javadoc sourcepath="${src}"
+                 destdir="${api}"
+                 windowtitle="jScience v${version} API"
+                 overview="src/overview.html"
+                 author="true"
+                 version="true"
+                 classpath="${bin};${lib}/javolution.jar"
+                 charset="${encoding}"
+                 encoding="${encoding}"
+                 docencoding="${encoding}"
+                 splitindex="true">
+            <header>
+                <![CDATA[<b><a href="http://jScience.org">jScience v${version}</a></b>]]>
+            </header>
+            <bottom>
+               <![CDATA[<i>Copyright &#169; 2004 jScience Consortium.</i>]]>
+            </bottom>
+            <packageset dir="${src}" defaultexcludes="yes">
+                <include name="org/jscience/**/*" />
+                <exclude name="**/doc-files/**"/>
+                <exclude name="**/res-files/**"/>
+            </packageset>
+        </javadoc>
+    </target>
+
+    <target name="jarfile" depends="compile">
+        <jar jarfile="${library}.jar"
+             basedir="${bin}"
+             update="false">
+             <manifest>
+                 <attribute name="Main-Class"
+                           value="org.jscience.JScience"/>
+                <attribute name="Class-Path"
+                          value="lib/javolution.jar"/>
+                 <attribute name="Specification-Title"
+                            value="jScience - Core"/>
+                 <attribute name="Specification-Version"
+                            value="${version}"/>
+                 <attribute name="Specification-Vendor"
+                            value="Free Software Foundation"/>
+                 <attribute name="Implementation-Title"
+                            value="org.jscience"/>
+                 <attribute name="Implementation-URL"
+                            value="http://jscience.org"/>
+                 <attribute name="Implementation-Vendor"
+                            value="Free Software Foundation"/>
+                 <attribute name="Implementation-Version"
+                            value="${version}.${release} ${TODAY}"/>
+             </manifest>
+        </jar>
+    </target>
+
+	<target name="clean" depends="init">
+        <delete dir="${bin}" />
+        <delete dir="${api}" />
+        <delete file="${library}.jar"/>
+        <delete file="${library}-${version}.${release}-src.zip"/>
+        <delete file="${library}-${version}.${release}-bin.zip"/>
+        <delete file="${library}-www.zip"/>
+    </target>
+
+	<target name="distribution" depends="info, clean, jarfile, javadoc">
+        <zip destfile="${library}-${version}.${release}-src.zip" update="false">
+            <zipfileset dir="." prefix="${library}-${version}"
+                        includes="${src}/**/*, doc/**/*, ${lib}/javolution.jar,
+                                  index.html, build.xml" />
+        </zip>
+        <zip destfile="${library}-${version}.${release}-bin.zip" update="false">
+            <zipfileset dir="." prefix="${library}-${version}"
+                        includes="doc/**/*, ${api}/**/*, ${lib}/javolution.jar,
+                                  index.html, ${library}.jar" />
+        </zip>
+        <zip destfile="${library}-www.zip" update="false">
+            <zipfileset dir="." prefix="${library}-${version}"
+                        includes="${library}-${version}.${release}-src.zip,
+                                  ${library}-${version}.${release}-bin.zip,
+                                  doc/**/*, ${api}/**/*, index.html" />
+        </zip>
+    </target>
+</project>

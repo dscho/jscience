@@ -1,0 +1,59 @@
+<body>
+<p> Provides support for <a href="http://mathworld.wolfram.com/LinearAlgebra.html">linear algebra</a>
+    in the form of {@link org.jscience.mathematics.matrices.Matrix matrices} and 
+    {@link org.jscience.mathematics.matrices.Vector vectors}.</p>
+<p> With the {@link org.jscience.mathematics.matrices.Matrix Matrix} class,
+    you should be able to resolve linear systems of equations
+    involving any kind of elements such as 
+    {@link org.jscience.mathematics.numbers.LargeInteger LargeInteger} (modulo operations),
+    {@link org.jscience.mathematics.numbers.Complex Complex},
+    {@link org.jscience.mathematics.functions.Function Function}, etc.
+    The only requirement being that  your elements implement the interface 
+    {@link org.jscience.mathematics.matrices.Operable Operable}  (basically any class which defines the additive 
+    and multiplicative operations as well as their respective inverses).</p>
+<p> All {@link org.jscience.mathematics.numbers numbers} types and the matrix 
+    class itself implement the {@link org.jscience.mathematics.matrices.Operable Operable}  interface.
+    Non-commutative multiplication is supported which allows for the resolution of 
+    systems of equations with matrix coefficients (matrices of matrices).</p>
+<p> For classes embedding automatic error calculation (e.g.
+    {@link org.jscience.mathematics.numbers.Real reals} or {@link org.jscience.physics.quantities quantities}),
+    the error on the solution obtained tells you if can trust that solution or not 
+    (e.g. system close to singularity). The following example illustrates this point.</p>
+<p> Let's say you have a simple electric circuit composed of 2 resistors in series
+    with a battery. You want to know the voltage (U1, U2) at the nodes of the
+    resistors and the current (I) traversing the circuit.<pre>
+        ElectricResistance R1 = (ElectricResistance) Quantity.valueOf(100, 0.1, SI.OHM); // 0.1% error.
+        ElectricResistance R2 = (ElectricResistance) Quantity.valueOf(300, 0.3, SI.OHM); // 0.1% error.
+        ElectricPotential U0 = (ElectricPotential) Quantity.valueOf(28, 0.1, SI.VOLT); // 0.1 V fluctuation.
+
+        // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
+        //             U1 = R1 * I    =&gt;  |-1 0  R1| * |U2| = |0 |
+        //             U2 = R2 * I        |0 -1  R2|   |I |   |0 |
+        //
+        //                                    A      *  X   =  B
+        //
+        Matrix A = Matrix.valueOf(new Quantity[][]{
+                {Scalar.ONE,          Scalar.ONE,          ElectricResistance.ZERO},
+                {Scalar.ONE.negate(), Scalar.ZERO,         R1},
+                {Scalar.ZERO,         Scalar.ONE.negate(), R2}});
+        Vector B = Vector.valueOf(new Quantity[]{
+                U0, ElectricPotential.ZERO, ElectricPotential.ZERO});
+        Vector X = (Vector) A.lu().solve(B);
+        ElectricCurrent.showAs(SI.MILLI(SI.AMPERE));
+        System.out.println(X);
+        System.out.println("Estimated current = " + ((Quantity) X.get(2)).doubleValue());
+        System.out.println("Absolute error  = " + ((Quantity) X.get(2)).getAbsoluteError());
+
+        &gt; {7 V, 21 V, 70 mA}
+        &gt; Estimated current = 0.070000320000327
+        &gt; Absolute error  = 3.2000032000058243E-4</pre>
+        
+    As you can see the estimated current (70.00032 mA) is slightly higher than the current
+    you would get using real numbers (28.0 / 400.0 = 70mA). This is due to the errors
+    on the input values (R1, R2, U0) and the fact that the relationship between the
+    resistors and the current is not linear (I = U/R).
+    The estimated value is the median value of the quantity interval. In this particular
+    case, the current is <i>guaranteed</i> to be: <code>70.00032 ±0.32 mA</code>.
+    If the inputs have no error specified, the error on the result corresponds to
+    calculations numeric errors only.</p>
+</body>
