@@ -12,9 +12,9 @@ package org.jscience.mathematics.numbers;
 
 import java.io.IOException;
 
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -252,17 +252,17 @@ public final class Rational extends RealtimeNumber implements Comparable {
 
     /**
      * Appends the text representation of this {@link Rational} to the
-     * <code>Appendable</code> argument in the specified radix.
+     * <code>TextBuilder</code> argument in the specified radix.
      *
-     * @param a the <code>Appendable</code> to append.
+     * @param tb the <code>TextBuilder</code> to append.
      * @param radix the radix of the representation.
      * @return the specified <code>Appendable</code>.
      * @throws IOException if an I/O exception occurs.
      */
-    Appendable appendTo(Appendable a, int radix) throws IOException {
-        _dividend.appendTo(a, radix);
-        a.append('/');
-        return _divisor.appendTo(a, radix);
+    TextBuilder appendTo(TextBuilder tb, int radix) throws IOException {
+        _dividend.appendTo(tb, radix);
+        tb.append('/');
+        return _divisor.appendTo(tb, radix);
     }
 
     /**
@@ -395,4 +395,5 @@ public final class Rational extends RealtimeNumber implements Comparable {
         _divisor.move(cs);
     }
 
+    private static final long serialVersionUID = 3544957653609363764L;
 }

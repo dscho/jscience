@@ -12,9 +12,10 @@ package org.jscience.mathematics.numbers;
 
 import java.io.IOException;
 
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -195,7 +196,7 @@ public final class Float32 extends RealtimeNumber implements Comparable {
      */
     public Float32 abs() {
         Float32 r = (Float32) FACTORY.object();
-        r._value = Math.abs(this._value);
+        r._value = MathLib.abs(this._value);
         return r;
     }
 
@@ -225,7 +226,7 @@ public final class Float32 extends RealtimeNumber implements Comparable {
      *         <code>false</code> otherwise.
      */
     public boolean equals(Float32 that, float tolerance) {
-        return Math.abs(this._value - that._value) <= tolerance;
+        return MathLib.abs(this._value - that._value) <= tolerance;
     }
 
     /**
@@ -329,4 +330,5 @@ public final class Float32 extends RealtimeNumber implements Comparable {
         return this.inverse();
     }
 
+    private static final long serialVersionUID = 3257844372648507701L;
 }

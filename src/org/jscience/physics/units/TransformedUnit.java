@@ -20,15 +20,15 @@ package org.jscience.physics.units;
  * <p> Transformed units have no intrinsic symbol. But like any other units,
  *     they may have labels attached to them:
  *     <pre><code>
- *         FOOT = UnitFormat.label(METER.multiply(0.3048), "ft");
- *         CENTIMETER = UnitFormat.label(METER.multiply(0.01), "cm");
- *         CALENDAR_YEAR = UnitFormat.label(DAY.multiply(365), "year");
+ *         FOOT = METER.multiply(0.3048).label("ft");
+ *         CENTIMETER = METER.multiply(0.01).label"cm");
+ *         CALENDAR_YEAR = DAY.multiply(365).label("year");
  *     </code></pre>
  *     or aliases:
  *     <pre><code>
- *         UnitFormat.alias(KELVIN.add(273.15), "Celsius");
- *         UnitFormat.alias(METER.multiply(0.01), "centimeter");
- *         UnitFormat.alias(METER.multiply(0.01), "centimetre");
+ *         KELVIN.add(273.15).alias("Celsius");
+ *         METER.multiply(0.01).alias("centimeter");
+ *         METER.multiply(0.01).alias("centimetre");
  *     </code></pre>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>

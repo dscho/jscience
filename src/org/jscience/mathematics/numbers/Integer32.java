@@ -13,9 +13,10 @@ package org.jscience.mathematics.numbers;
 import java.io.IOException;
 
 import javolution.realtime.LocalContext.Variable;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -190,7 +191,7 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
      */
     public Integer32 abs() {
         Integer32 r = (Integer32) FACTORY.object();
-        r._value = Math.abs(this._value);
+        r._value = MathLib.abs(this._value);
         return r;
     }
 
@@ -375,4 +376,6 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
             throw new IllegalStateException("Modulus is not set");
         }
     }
+
+    private static final long serialVersionUID = 3763095280064411193L;
 }

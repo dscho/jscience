@@ -8,6 +8,8 @@
  * 2.1 of the License, or any later version.
  */
 package org.jscience.physics.quantities;
+import javolution.util.MathLib;
+
 import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
@@ -96,25 +98,25 @@ public class Angle extends Quantity {
         if ((x.getMinimum() < 0.0) && (x.getMaximum() > 0.0) &&
             (y.getMinimum() < 0.0) && (y.getMaximum() > 0.0)) {
             // Encompasses (0,0), all angles are possible
-            return (Angle) valueOf(0, Math.PI, SI.RADIAN);
+            return (Angle) valueOf(0, MathLib.PI, SI.RADIAN);
         }
-        double a1 = Math.atan2(y.getMinimum(), x.getMinimum());
-        double a2 = Math.atan2(y.getMinimum(), x.getMaximum());
-        double a3 = Math.atan2(y.getMaximum(), x.getMinimum());
-        double a4 = Math.atan2(y.getMaximum(), x.getMaximum());
+        double a1 = MathLib.atan2(y.getMinimum(), x.getMinimum());
+        double a2 = MathLib.atan2(y.getMinimum(), x.getMaximum());
+        double a3 = MathLib.atan2(y.getMaximum(), x.getMinimum());
+        double a4 = MathLib.atan2(y.getMaximum(), x.getMaximum());
         // Discontinuity at -Pi
         if (x.getMaximum() <= 0.0) {
             if (a1 < 0) {
-                a1 += 2 * Math.PI;
+                a1 += 2 * MathLib.PI;
             }
             if (a2 < 0) {
-                a2 += 2 * Math.PI;
+                a2 += 2 * MathLib.PI;
             }
             if (a3 < 0) {
-                a3 += 2 * Math.PI;
+                a3 += 2 * MathLib.PI;
             }
             if (a4 < 0) {
-                a4 += 2 * Math.PI;
+                a4 += 2 * MathLib.PI;
             }
         }
         // Search for minimum
@@ -159,7 +161,7 @@ public class Angle extends Quantity {
     public Scalar cos() {
         return sine(getMinimum() + SQUARE_ANGLE, getMaximum() + SQUARE_ANGLE);
     }
-    private static final double SQUARE_ANGLE =  Math.PI / 2;
+    private static final double SQUARE_ANGLE =  MathLib.PI / 2;
 
     /**
      * Returns the trigonometric tangent of this {@link Angle}.
@@ -168,16 +170,16 @@ public class Angle extends Quantity {
      */
     public Scalar tan() {
         // Bounds min to [-Pi/2, Pi/2]
-        double minBounded = Math.IEEEremainder(this.getMinimum(), Math.PI);
+        double minBounded = MathLib.rem(this.getMinimum(), MathLib.PI);
         // Measures distance to the next discontinuity
-        double nextDisc = Math.PI / 2 - minBounded;
+        double nextDisc = MathLib.PI / 2 - minBounded;
         // Test if this quantity passes across a discontinuity
         if (getMinimum() + nextDisc < getMaximum()) {
             return (Scalar) Factory.getInstance(Unit.ONE).rangeExact(
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
         return (Scalar) Factory.getInstance(Unit.ONE).rangeApprox(
-            Math.tan(getMinimum()), Math.tan(getMaximum()));
+            MathLib.tan(getMinimum()), MathLib.tan(getMaximum()));
     }
 
     /**
@@ -190,7 +192,7 @@ public class Angle extends Quantity {
     public Angle bounded() {
         double error = getAbsoluteError();
         double value = doubleValue();
-        double boundedValue = Math.IEEEremainder(value, 2.0 * Math.PI);
+        double boundedValue = MathLib.rem(value, 2.0 * MathLib.PI);
         return (Angle) valueOf(boundedValue, error, SI.RADIAN);
     }
 
@@ -204,17 +206,17 @@ public class Angle extends Quantity {
      */
     private Scalar sine(double min, double max) {
         // Bounds min to [-Pi, Pi]
-        double minBounded = Math.IEEEremainder(min, 2.0 * Math.PI);
-        double nextMax = Math.PI / 2 - minBounded;
+        double minBounded = MathLib.rem(min, 2.0 * MathLib.PI);
+        double nextMax = MathLib.PI / 2 - minBounded;
         if (nextMax < 0) {
-            nextMax += 2 * Math.PI;
+            nextMax += 2 * MathLib.PI;
         }
-        double nextMin = -Math.PI / 2 - minBounded;
+        double nextMin = -MathLib.PI / 2 - minBounded;
         if (nextMin < 0) {
-            nextMin += 2 * Math.PI;
+            nextMin += 2 * MathLib.PI;
         }
-        double sineMin = Math.sin(min);
-        double sineMax = Math.sin(max);
+        double sineMin = MathLib.sin(min);
+        double sineMax = MathLib.sin(max);
         if (sineMin > sineMax) { // Swaps.
             double tmp = sineMin;
             sineMin = sineMax;

@@ -11,7 +11,7 @@
     	<tstamp/>
         <property name="library"   value="jscience" />
         <property name="version"   value="1.0" />
-        <property name="release"   value="0" />
+        <property name="release"   value="2" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />
@@ -23,16 +23,25 @@
 	
 	<target name="compile" depends="init">
         <mkdir dir="${bin}" />
-        <!-- Compile -->
+
+		<!-- Compile -->
         <javac srcdir="${src}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
                debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
-        <!-- Updates version information (Javolution class) -->
+
+		<!-- Updates version information (Javolution class) -->
 		<delete file="${bin}/org/jscience/JScience.class"/>
         <filter token="VERSION" value="${version}.${release} ${TODAY}"/>
         <copy file="src/org/jscience/JScience.java"
               todir="${bin}/org/jscience" filtering="true"/>
         <javac srcdir="${bin}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
                debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
+
+		<!-- Copies resources if any -->
+		<copy todir="${bin}"  > 
+		    <fileset dir="${src}" >
+		        <include name="**/res-files/*" />
+		    </fileset>
+		</copy>
     </target>
 	
     <target name="javadoc" depends="init">
@@ -95,7 +104,6 @@
         <delete file="${library}.jar"/>
         <delete file="${library}-${version}.${release}-src.zip"/>
         <delete file="${library}-${version}.${release}-bin.zip"/>
-        <delete file="${library}-www.zip"/>
     </target>
 
 	<target name="distribution" depends="info, clean, jarfile, javadoc">
@@ -108,12 +116,6 @@
             <zipfileset dir="." prefix="${library}-${version}"
                         includes="doc/**/*, ${api}/**/*, ${lib}/javolution.jar,
                                   index.html, ${library}.jar" />
-        </zip>
-        <zip destfile="${library}-www.zip" update="false">
-            <zipfileset dir="." prefix="${library}-${version}"
-                        includes="${library}-${version}.${release}-src.zip,
-                                  ${library}-${version}.${release}-bin.zip,
-                                  doc/**/*, ${api}/**/*, index.html" />
         </zip>
     </target>
 </project>

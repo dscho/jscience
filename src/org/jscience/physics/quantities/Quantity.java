@@ -15,9 +15,10 @@ import java.io.ObjectOutputStream;
 
 import javolution.realtime.LocalContext;
 import javolution.util.FastMap;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -75,7 +76,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
                 max = cvtr.convert(q._maximum);
             }
             double amount = (min + max) / 2.0;
-            double error = Math.abs(max - min) / 2.0;
+            double error = MathLib.abs(max - min) / 2.0;
             xml.setAttribute("amount", amount);
             if (error != 0) {
                 TextBuilder tb = TextBuilder.newInstance();
@@ -104,7 +105,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      * Holds the relative error due to the inexact representation of
      * <code>double</code> values (64 bits IEEE 754 format).
      */
-    static final double DOUBLE_RELATIVE_ERROR = Math.pow(2, -53);
+    static final double DOUBLE_RELATIVE_ERROR = MathLib.pow(2, -53);
 
     /**
      * Holds the factor decrementing <code>double</code> values by
@@ -424,7 +425,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
     public final Quantity root(int n) {
         if (n > 0) {
             Factory factory = Factory.getInstance(_factory._unit.root(n));
-            return factory.rangeApprox(Math.pow(_minimum, 1.0 / n), Math.pow(
+            return factory.rangeApprox(MathLib.pow(_minimum, 1.0 / n), MathLib.pow(
                     _maximum, 1.0 / n));
         } else if (n < 0) {
             return root(-n).inverse();
@@ -446,11 +447,11 @@ public class Quantity extends RealtimeNumber implements Comparable {
             int n = (int) exp;
             if (n == exp) { // Integer exponent.
                 Factory factory = Factory.getInstance(_factory._unit.pow(n));
-                return factory.rangeApprox(Math.pow(_minimum, n), Math.pow(
+                return factory.rangeApprox(MathLib.pow(_minimum, n), MathLib.pow(
                         _maximum, n));
             } else if (_factory._unit == Unit.ONE) { // Dimensionless.
                 Factory factory = Factory.getInstance(Unit.ONE);
-                return factory.rangeApprox(Math.pow(_minimum, exp), Math.pow(
+                return factory.rangeApprox(MathLib.pow(_minimum, exp), MathLib.pow(
                         _maximum, exp));
             } else {
                 throw new java.lang.ArithmeticException(
@@ -477,7 +478,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      *         <code>this.getMinimum{} &lt; r &gt; this.getMaximum()</code>.
      */
     public final double random() {
-        return _minimum + Math.random() * (_maximum - _minimum);
+        return _minimum + MathLib.random() * (_maximum - _minimum);
     }
 
     //////////////////////
@@ -693,7 +694,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      *         to type <code>int</code>.
      */
     public final int intValue() {
-        return (int) Math.round(doubleValue());
+        return (int) MathLib.round(doubleValue());
     }
 
     /**
@@ -704,7 +705,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      *         to type <code>long</code>.
      */
     public final long longValue() {
-        return Math.round(doubleValue());
+        return MathLib.round(doubleValue());
     }
 
     /**
@@ -740,7 +741,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      *         quantity to be stated in the specified unit.
      */
     public final int intValue(Unit unit) {
-        return (int) Math.round(doubleValue(unit));
+        return (int) MathLib.round(doubleValue(unit));
     }
 
     /**
@@ -754,7 +755,7 @@ public class Quantity extends RealtimeNumber implements Comparable {
      *         quantity to be stated in the specified unit.
      */
     public final long longValue(Unit unit) {
-        return Math.round(doubleValue(unit));
+        return MathLib.round(doubleValue(unit));
     }
 
     /**
@@ -1078,4 +1079,6 @@ public class Quantity extends RealtimeNumber implements Comparable {
     static {
         org.jscience.JScience.initialize();
     }
+
+    private static final long serialVersionUID = 3257001068738394169L;
 }

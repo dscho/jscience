@@ -31,13 +31,13 @@ import org.jscience.physics.units.MultiplyConverter;
  * <p> By default, the label associated to a currency is its ISO-4217 code
  *     (see the <a href="http://www.bsi-global.com/iso4217currency"> ISO 4217
  *     maintenance agency</a> for a table of currency codes). An application may
- *     change this default using the {@link org.jscience.physics.units.UnitFormat#label
- *     UnitFormat.label(...)} static method.
+ *     change this default using the {@link org.jscience.physics.units.Unit#label
+ *     Unit.label(String)} method.
  *     For example:<pre>
- *     UnitFormat.label(Currency.EUR, "€");
- *     UnitFormat.label(Currency.GBP, "£");
- *     UnitFormat.label(Currency.JPY, "¥");
- *     UnitFormat.label(Currency.USD, "$");
+ *     Currency.EUR.label("€");
+ *     Currency.GBP.label("£");
+ *     Currency.JPY.label("¥");
+ *     Currency.USD.label("$");
  *     </pre></p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>

@@ -12,9 +12,10 @@ package org.jscience.mathematics.numbers;
 
 import java.io.IOException;
 
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -195,7 +196,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 abs() {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.abs(this._value);
+        r._value = MathLib.abs(this._value);
         return r;
     }
 
@@ -206,7 +207,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 sqrt() {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.sqrt(this._value);
+        r._value = MathLib.sqrt(this._value);
         return r;
     }
 
@@ -218,7 +219,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 exp() {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.exp(this._value);
+        r._value = MathLib.exp(this._value);
         return r;
     }
 
@@ -229,7 +230,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 log() {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.log(this._value);
+        r._value = MathLib.log(this._value);
         return r;
     }
 
@@ -241,7 +242,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 pow(double e) {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.pow(this._value, e);
+        r._value = MathLib.pow(this._value, e);
         return r;
     }
 
@@ -253,7 +254,7 @@ public final class Float64 extends RealtimeNumber implements Comparable {
      */
     public Float64 pow(Float64 that) {
         Float64 r = (Float64) FACTORY.object();
-        r._value = Math.pow(this._value, that._value);
+        r._value = MathLib.pow(this._value, that._value);
         return r;
     }
 
@@ -373,4 +374,6 @@ public final class Float64 extends RealtimeNumber implements Comparable {
     public Operable reciprocal() {
         return this.inverse();
     }
+
+    private static final long serialVersionUID = 3258125860459590456L;
 }

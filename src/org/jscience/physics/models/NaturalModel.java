@@ -9,6 +9,8 @@
  */
 package org.jscience.physics.models;
 
+import javolution.util.MathLib;
+
 import org.jscience.physics.units.Converter;
 import org.jscience.physics.units.MultiplyConverter;
 import org.jscience.physics.units.SI;
@@ -57,14 +59,14 @@ public final class NaturalModel extends PhysicalModel {
         // MAGNETIC CONSTANT (NEWTON / AMPERE^2) = 1
         // GRAVITATIONAL CONSTANT (METER^3 / KILOGRAM / SECOND^2) = 1
         SI.SECOND.setDimension(Unit.ONE, new MultiplyConverter((c * c)
-                * Math.sqrt(c / (hBar * G))));
+                * MathLib.sqrt(c / (hBar * G))));
         SI.METER.setDimension(Unit.ONE, new MultiplyConverter(c
-                * Math.sqrt(c / (hBar * G))));
-        SI.KILOGRAM.setDimension(Unit.ONE, new MultiplyConverter(Math.sqrt(G
+                * MathLib.sqrt(c / (hBar * G))));
+        SI.KILOGRAM.setDimension(Unit.ONE, new MultiplyConverter(MathLib.sqrt(G
                 / (hBar * c))));
         SI.KELVIN.setDimension(Unit.ONE, new MultiplyConverter(k
-                * Math.sqrt(G / (hBar * c)) / (c * c)));
-        SI.AMPERE.setDimension(Unit.ONE, new MultiplyConverter(Math
+                * MathLib.sqrt(G / (hBar * c)) / (c * c)));
+        SI.AMPERE.setDimension(Unit.ONE, new MultiplyConverter(MathLib
                 .sqrt(µ0 * G)
                 / (c * c)));
         SI.MOLE.setDimension(SI.MOLE, Converter.IDENTITY);

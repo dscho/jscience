@@ -12,8 +12,8 @@ package org.jscience.mathematics.functions;
 import java.util.Set;
 
 import javolution.util.FastSet;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 
 import org.jscience.mathematics.matrices.Operable;
 

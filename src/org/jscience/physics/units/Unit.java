@@ -16,8 +16,8 @@ import java.util.Collections;
 
 import javolution.realtime.LocalContext;
 import javolution.util.FastMap;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 
 /**
  * <p> This class represents a unit of physical quantity.</p>
@@ -387,6 +387,76 @@ public abstract class Unit implements Serializable {
         } else { // n < 0
             return ONE.divide(this.pow(-n));
         }
+    }
+
+    /**
+     * Attaches a system-wide label to the specified unit. This method overrides
+     * the previous unit's label (e.g. label from unit database) as units may
+     * only have one label (but multiple aliases). For example:
+     * <pre><code>
+     *     DAY.multiply(365).label("year");
+     *     Unit FOOT = METER.multiply(0.3048).label("ft");
+     * </code></pre>
+     *
+     * @param  label the new label for this unit or <code>null</code>
+     *         to detache the previous label (if any).
+     * @return this unit.
+     * @throws IllegalArgumentException if the specified label is a known symbol
+     *         or if the specified label is already attached to a different
+     *         unit (must be detached first).
+     * @see    #alias
+     */
+    public Unit label(String label) {
+        // Checks label argument.
+        if (label != null) {
+            if (Unit.searchSymbol(label) != null) {
+                throw new IllegalArgumentException("Label: " + label
+                        + " is a known symbol");
+            } else {
+                Unit u = (Unit) UnitFormat.LABEL_TO_UNIT.get(label);
+                if ((u != null) && (u != this)) {
+                    throw new IllegalArgumentException("Label: " + label
+                            + " is attached to a different unit"
+                            + " (must be detached first)");
+                }
+            }
+        }
+        // Updates unit database.
+        synchronized (UnitFormat.class) {
+            // Removes previous unit mapping.
+            String prevLabel = (String) UnitFormat.UNIT_TO_LABEL.remove(this);
+            UnitFormat.LABEL_TO_UNIT.remove(prevLabel);
+
+            // Removes previous label mapping.
+            Unit prevUnit = (Unit) UnitFormat.LABEL_TO_UNIT.remove(label);
+            UnitFormat.UNIT_TO_LABEL.remove(prevUnit);
+
+            // Maps unit and label together.
+            UnitFormat.LABEL_TO_UNIT.put(label, this);
+            UnitFormat.UNIT_TO_LABEL.put(this, label);
+        }
+        return this;
+    }
+
+    /**
+     * Attaches a system-wide alias to this unit. Multiple aliases may
+     * be attached to the same unit. Aliases are used during parsing to
+     * recognize different variants of the same unit. For example:
+     * <pre><code>
+     *     METER.multiply(0.3048).alias("foot");
+     *     METER.multiply(0.3048).alias("feet");
+     *     METER.alias("meter");
+     *     METER.alias("metre");
+     * </code></pre>
+     *
+     * @param  alias the alias being attached to this unit.
+     * @return this unit.
+     */
+    public Unit alias(String alias) {
+        synchronized (UnitFormat.class) {
+            UnitFormat.ALIAS_TO_UNIT.put(alias, this);
+        }
+        return this;
     }
 
     /**

@@ -19,9 +19,9 @@ import java.util.Set;
 import javolution.realtime.RealtimeObject;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 
 import org.jscience.mathematics.matrices.Operable;
 

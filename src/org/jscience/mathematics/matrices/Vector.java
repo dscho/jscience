@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import javolution.realtime.ArrayPool;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -258,4 +258,6 @@ public class Vector extends Matrix {
             ArrayPool.clear(V.o, 0, V.n);
         }
     }
+
+    private static final long serialVersionUID = 3257846584556729401L;
 }

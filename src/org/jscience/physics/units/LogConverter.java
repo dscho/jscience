@@ -9,6 +9,8 @@
  */
 package org.jscience.physics.units;
 
+import javolution.util.MathLib;
+
 /**
  * <p> This class represents a logarithmic converter. Such converter 
  *     is typically used to create logarithmic unit. For example:<pre>
@@ -49,7 +51,7 @@ public final class LogConverter extends Converter {
      */
     public LogConverter(double base) {
         _base = base;
-        _logBase = Math.log(base);
+        _logBase = MathLib.log(base);
         _invLogBase = 1.0 / _logBase;
     }
 
@@ -70,7 +72,7 @@ public final class LogConverter extends Converter {
 
     // Implements abstract method.
     public double convert(double x) {
-        return _invLogBase * Math.log(x);
+        return _invLogBase * MathLib.log(x);
     }
 
     // Implements abstract method.
@@ -109,12 +111,12 @@ public final class LogConverter extends Converter {
 
         // Implements abstract method.
         public double convert(double x) {
-            return Math.exp(_logBase * x);
+            return MathLib.exp(_logBase * x);
         }
 
         // Implements abstract method.
         public double derivative(double x) {
-            return _logBase * Math.exp(x);
+            return _logBase * MathLib.exp(x);
         }
 
         // Implements abstract method.

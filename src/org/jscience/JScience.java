@@ -226,7 +226,7 @@ public final class JScience {
                         Quantity.valueOf(3, NonSI.POUND) }, });
 
         // Writes Matrix.
-        ObjectWriter ow = new ObjectWriter();
+        ObjectWriter ow = ObjectWriter.newInstance();
         ow.setNamespace("", "org.jscience.physics.quantities");
         ow.setNamespace("money", "org.jscience.economics.money");
         ow.setNamespace("math", "org.jscience.mathematics.matrices");
@@ -237,7 +237,7 @@ public final class JScience {
 
         // Read Matrix.
         StringReader in = new StringReader(out.getBuffer().toString());
-        ObjectReader or = new ObjectReader();
+        ObjectReader or = ObjectReader.newInstance();
         Matrix R = (Matrix) or.read(in);
         //System.err.println(R); // For Debugging
 

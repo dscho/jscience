@@ -9,6 +9,8 @@
  */
 package org.jscience.physics.models;
 
+import javolution.util.MathLib;
+
 import org.jscience.physics.units.Converter;
 import org.jscience.physics.units.MultiplyConverter;
 import org.jscience.physics.units.NonSI;
@@ -71,7 +73,7 @@ public final class QuantumModel extends PhysicalModel {
 
         // MAGNETIC CONSTANT (NEWTON / AMPERE^2) = 1
         SI.AMPERE.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
-                new MultiplyConverter(1E-9 * Math.sqrt(µ0 * c * hBar) / ePlus));
+                new MultiplyConverter(1E-9 * MathLib.sqrt(µ0 * c * hBar) / ePlus));
 
         SI.MOLE.setDimension(SI.MOLE, Converter.IDENTITY);
         SI.CANDELA.setDimension(SI.CANDELA, Converter.IDENTITY);

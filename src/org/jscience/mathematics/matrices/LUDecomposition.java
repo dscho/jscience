@@ -17,7 +17,7 @@ import javolution.realtime.LocalContext;
 import javolution.realtime.ObjectPool;
 import javolution.realtime.PoolContext;
 import javolution.realtime.RealtimeObject;
-
+import javolution.util.MathLib;
 
 /**
  * <p> This class represents the decomposition of a {@link Matrix} into
@@ -49,7 +49,7 @@ public final class LUDecomposition extends RealtimeObject {
 
         public int compare(Object left, Object right) {
             if ((left instanceof Number) && (right instanceof Number)) {
-                return Math.abs(((Number) left).doubleValue()) > Math
+                return MathLib.abs(((Number) left).doubleValue()) > MathLib
                         .abs(((Number) right).doubleValue()) ? 1 : -1;
             } else {
                 return 0;
@@ -101,7 +101,7 @@ public final class LUDecomposition extends RealtimeObject {
      */
     private LUDecomposition(Operable[] lu) {
         _lu = lu;
-        _pivots = new int[(int) Math.round(Math.sqrt(lu.length))];
+        _pivots = new int[(int) MathLib.round(MathLib.sqrt(lu.length))];
     }
 
     /**

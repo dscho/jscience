@@ -12,8 +12,10 @@ package org.jscience.physics.quantities;
 import java.io.IOException;
 
 import javolution.realtime.LocalContext;
-import javolution.util.TextFormat;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.TextFormat;
+import javolution.lang.TypeFormat;
+import javolution.lang.Appendable;
 
 import org.jscience.economics.money.Currency;
 import org.jscience.economics.money.Money;
@@ -137,7 +139,7 @@ public abstract class QuantityFormat extends TextFormat {
                 max = cvtr.convert(q.getMaximum());
             }
             double value = (min + max) / 2.0;
-            double error = Math.max(Double.MIN_VALUE, Math.max(max - min, Math
+            double error = MathLib.max(Double.MIN_VALUE, MathLib.max(max - min, MathLib
                     .abs(value)
                     * Quantity.DOUBLE_RELATIVE_ERROR) * 10);
             TypeFormat.format(value, error, a);

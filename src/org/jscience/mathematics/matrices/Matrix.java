@@ -18,8 +18,9 @@ import javolution.realtime.ConcurrentContext;
 import javolution.realtime.PoolContext;
 import javolution.realtime.RealtimeObject;
 import javolution.realtime.ConcurrentContext.Logic;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -683,7 +684,7 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      */
     public Operable trace() {
         Operable sum = o[0];
-        for (int i = Math.min(n, m); i > 1;) {
+        for (int i = MathLib.min(n, m); i > 1;) {
             sum = sum.plus(o[--i * m + i]);
         }
         return sum;
@@ -789,4 +790,6 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
             ArrayPool.clear(M.o, 0, M.m * M.n);
         }
     }
+
+    private static final long serialVersionUID = 3257285837854291768L;
 }

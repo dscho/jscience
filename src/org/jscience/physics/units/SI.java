@@ -21,12 +21,13 @@ package org.jscience.physics.units;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
  */
-public final class SI  {
+public final class SI {
 
     /**
      * Default constructor (prevents this class from being instantiated).
      */
-    private SI() {}
+    private SI() {
+    }
 
     ////////////////
     // BASE UNITS //
@@ -134,16 +135,16 @@ public final class SI  {
      * of 1 metre per second per second. It is named after the English
      * mathematician and physicist Sir Isaac Newton (1642-1727).
      */
-    public static final Unit NEWTON
-        = METER.multiply(KILOGRAM).divide(SECOND.pow(2)).alternate("N");
+    public static final Unit NEWTON = METER.multiply(KILOGRAM).divide(
+            SECOND.pow(2)).alternate("N");
 
     /**
      * The derived unit for pressure, stress (<code>Pa</code>).
      * One pascal is equal to one newton per square meter. It is named after
      * the French philosopher and mathematician Blaise Pascal (1623-1662).
      */
-    public static final Unit PASCAL
-        = NEWTON.divide(METER.pow(2)).alternate("Pa");
+    public static final Unit PASCAL = NEWTON.divide(METER.pow(2)).alternate(
+            "Pa");
 
     /**
      * The derived unit for energy, work, quantity of heat (<code>J</code>).
@@ -242,15 +243,14 @@ public final class SI  {
      * One Lumen is equal to the amount of light given out through a solid angle
      * by a source of one candela intensity radiating equally in all directions.
      */
-    public static final Unit LUMEN
-        = CANDELA.multiply(STERADIAN).alternate("lm");
+    public static final Unit LUMEN = CANDELA.multiply(STERADIAN)
+            .alternate("lm");
 
     /**
      * The derived unit for illuminance (<code>lx</code>).
      * One Lux is equal to one lumen per square meter.
      */
-    public static final Unit LUX
-        = LUMEN.divide(METER.pow(2)).alternate("lx");
+    public static final Unit LUX = LUMEN.divide(METER.pow(2)).alternate("lx");
 
     /**
      * The derived unit for activity of a radionuclide (<code>Bq</code>).
@@ -258,8 +258,8 @@ public final class SI  {
      * It is named after the French physicist, Antoine-Henri Becquerel
      * (1852-1908).
      */
-    public static final Unit BECQUEREL
-        = Unit.ONE.divide(SECOND).alternate("Bq");
+    public static final Unit BECQUEREL = Unit.ONE.divide(SECOND)
+            .alternate("Bq");
 
     /**
      * The derived unit for absorbed dose, specific energy (imparted), kerma
@@ -353,6 +353,7 @@ public final class SI  {
     public static Unit GIGA(Unit unit) {
         return unit.multiply(1e9);
     }
+
     /**
      * Returns the specified unit multiplied by the factor
      * <code>10<sup>6</sup></code>
@@ -363,6 +364,7 @@ public final class SI  {
     public static Unit MEGA(Unit unit) {
         return unit.multiply(1e6);
     }
+
     /**
      * Returns the specified unit multiplied by the factor
      * <code>10<sup>3</sup></code>
@@ -373,6 +375,7 @@ public final class SI  {
     public static Unit KILO(Unit unit) {
         return unit.multiply(1e3);
     }
+
     /**
      * Returns the specified unit multiplied by the factor
      * <code>10<sup>2</sup></code>
@@ -383,6 +386,7 @@ public final class SI  {
     public static Unit HECTO(Unit unit) {
         return unit.multiply(1e2);
     }
+
     /**
      * Returns the specified unit multiplied by the factor
      * <code>10<sup>1</sup></code>
@@ -506,41 +510,42 @@ public final class SI  {
 
     ////////////////////////////////////////////////////////////////////////////
     // Initializes the unit database for SI units.
-    private static final Unit[] SI_UNITS
-        = { SI.AMPERE, SI.BECQUEREL, SI.CANDELA, SI.COULOMB, SI.FARAD,
-            SI.GRAY, SI.HENRY, SI.HERTZ, SI.JOULE, SI.KATAL, SI.KELVIN,
-            SI.LUMEN, SI.LUX, SI.METER, SI.MOLE, SI.NEWTON, SI.OHM, SI.PASCAL,
-            SI.RADIAN, SI.SECOND, SI.SIEMENS, SI.SIEVERT, SI.STERADIAN,
-            SI.TESLA, SI.VOLT, SI.WATT, SI.WEBER };
-    private static final String[] PREFIXES
-        = { "Y", "Z", "E", "P", "T", "G", "M", "k", "h", "da",
-            "d", "c", "m", "µ", "n", "p", "f", "a", "z", "y" };
-    private static final double[] FACTORS
-        = { 1e24, 1e21, 1e18, 1e15, 1e12, 1e9, 1e6, 1e3, 1e2, 1e1,
-            1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18, 1e-21, 1e-24 };
+    private static final Unit[] SI_UNITS = { SI.AMPERE, SI.BECQUEREL,
+            SI.CANDELA, SI.COULOMB, SI.FARAD, SI.GRAY, SI.HENRY, SI.HERTZ,
+            SI.JOULE, SI.KATAL, SI.KELVIN, SI.LUMEN, SI.LUX, SI.METER, SI.MOLE,
+            SI.NEWTON, SI.OHM, SI.PASCAL, SI.RADIAN, SI.SECOND, SI.SIEMENS,
+            SI.SIEVERT, SI.STERADIAN, SI.TESLA, SI.VOLT, SI.WATT, SI.WEBER };
+
+    private static final String[] PREFIXES = { "Y", "Z", "E", "P", "T", "G",
+            "M", "k", "h", "da", "d", "c", "m", "µ", "n", "p", "f", "a", "z",
+            "y" };
+
+    private static final double[] FACTORS = { 1e24, 1e21, 1e18, 1e15, 1e12,
+            1e9, 1e6, 1e3, 1e2, 1e1, 1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12,
+            1e-15, 1e-18, 1e-21, 1e-24 };
     static {
-        for (int i=0; i < SI_UNITS.length; i++) {
-            for (int j=0; j < PREFIXES.length; j++) {
+        for (int i = 0; i < SI_UNITS.length; i++) {
+            for (int j = 0; j < PREFIXES.length; j++) {
                 Unit u = SI_UNITS[i].multiply(FACTORS[j]);
-                UnitFormat.label(u, PREFIXES[j] + SI_UNITS[i]._symbol);
+                u.label(PREFIXES[j] + SI_UNITS[i]._symbol);
             }
         }
         // Special case for KILOGRAM.
-        UnitFormat.label(SI.GRAM, "g");
-        for (int i=0; i < PREFIXES.length; i++) {
+        SI.GRAM.label("g");
+        for (int i = 0; i < PREFIXES.length; i++) {
             if (FACTORS[i] != 1e3) { // kg is already defined.
-                UnitFormat.label(SI.KILOGRAM.multiply(FACTORS[i] * 1e-3),
-                                 PREFIXES[i] + "g");
+                SI.KILOGRAM.multiply(FACTORS[i] * 1e-3)
+                        .label(PREFIXES[i] + "g");
             }
         }
 
         // Special case for DEGREE_CElSIUS.
-        UnitFormat.label(SI.CELSIUS, "°C");
-        for (int i=0; i < PREFIXES.length; i++) {
-            UnitFormat.label(SI.CELSIUS.multiply(FACTORS[i]),
-                             PREFIXES[i] + "°C");
+        SI.CELSIUS.label("°C");
+        for (int i = 0; i < PREFIXES.length; i++) {
+            SI.CELSIUS.multiply(FACTORS[i]).label(PREFIXES[i] + "°C");
         }
     }
+
     ////////////////////////////////////////////////////////////////////////////
 
     /**

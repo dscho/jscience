@@ -13,9 +13,10 @@ package org.jscience.mathematics.numbers;
 import java.io.IOException;
 
 import javolution.realtime.LocalContext.Variable;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -185,7 +186,7 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
      */
     public Integer64 abs() {
         Integer64 r = (Integer64) FACTORY.object();
-        r._value = Math.abs(this._value);
+        r._value = MathLib.abs(this._value);
         return r;
     }
 
@@ -371,4 +372,5 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
         }
     }
 
+    private static final long serialVersionUID = 3834596525665040436L;
 }

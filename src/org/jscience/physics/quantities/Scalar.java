@@ -8,6 +8,8 @@
  * 2.1 of the License, or any later version.
  */
 package org.jscience.physics.quantities;
+import javolution.util.MathLib;
+
 import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
@@ -49,7 +51,7 @@ public class Scalar extends Quantity {
     /**
      * Holds the natural logarithmic base.
      */
-    public static final Scalar e = (Scalar) valueOf(Math.E, SYSTEM_UNIT);
+    public static final Scalar e = (Scalar) valueOf(MathLib.E, SYSTEM_UNIT);
 
     /**
      * Default constructor (allows for derivation).
@@ -111,7 +113,7 @@ public class Scalar extends Quantity {
      */
     public Scalar exp() {
         return (Scalar) FACTORY.rangeApprox(
-            Math.exp(getMinimum()), Math.exp(getMaximum()));
+            MathLib.exp(getMinimum()), MathLib.exp(getMaximum()));
     }
 
     /**
@@ -121,7 +123,7 @@ public class Scalar extends Quantity {
      */
     public Scalar log() {
         return (Scalar) FACTORY.rangeApprox(
-            Math.log(getMinimum()), Math.log(getMaximum()));
+            MathLib.log(getMinimum()), MathLib.log(getMaximum()));
     }
 
     /**
@@ -133,8 +135,8 @@ public class Scalar extends Quantity {
      */
     public Scalar pow(Scalar exp) {
         return (Scalar) FACTORY.rangeApprox(
-            Math.pow(getMinimum(), exp.getMinimum()),
-            Math.pow(getMaximum(), exp.getMaximum()));
+            MathLib.pow(getMinimum(), exp.getMinimum()),
+            MathLib.pow(getMaximum(), exp.getMaximum()));
     }
 
     /**
@@ -152,7 +154,7 @@ public class Scalar extends Quantity {
             max = 1;
         }
         return (Angle) Factory.getInstance(SI.RADIAN).rangeApprox(
-            Math.asin(min), Math.asin(max));
+            MathLib.asin(min), MathLib.asin(max));
     }
 
     /**
@@ -170,7 +172,7 @@ public class Scalar extends Quantity {
             max = 1;
         }
         return (Angle) Factory.getInstance(SI.RADIAN).rangeApprox(
-            Math.acos(max), Math.acos(min));
+            MathLib.acos(max), MathLib.acos(min));
     }
 
     /**

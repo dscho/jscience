@@ -9,13 +9,13 @@
  */
 package org.jscience.physics.units;
 
-
 import java.io.IOException;
 import java.util.HashMap;
 
 import javolution.realtime.LocalContext;
-import javolution.util.TextFormat;
-import javolution.util.TypeFormat;
+import javolution.lang.Appendable;
+import javolution.lang.TextFormat;
+import javolution.lang.TypeFormat;
 
 /**
  * <p> This is the abstract base class for all unit formats.</p>
@@ -63,17 +63,17 @@ public abstract class UnitFormat extends TextFormat {
     /**
      * Holds the system-wide label-unit mapping.
      */
-    private static final HashMap LABEL_UNIT = new HashMap();
+    static final HashMap LABEL_TO_UNIT = new HashMap();
 
     /**
      * Holds the system-wide unit-label mapping.
      */
-    private static final HashMap UNIT_LABEL = new HashMap();
+    static final HashMap UNIT_TO_LABEL = new HashMap();
 
     /**
      * Holds the system-wide alias-unit mapping.
      */
-    private static final HashMap ALIAS_UNIT = new HashMap();
+    static final HashMap ALIAS_TO_UNIT = new HashMap();
 
     /**
      * Base constructor.
@@ -104,14 +104,8 @@ public abstract class UnitFormat extends TextFormat {
     }
 
     /**
-     * Attaches a system-wide label to the specified unit. This method overrides
-     * the previous unit's label (e.g. label from unit database) as units may
-     * only have one label (but multiple aliases). For example:
-     * <pre><code>
-     *     UnitFormat.label(DAY.multiply(365), "year");
-     *     Unit FOOT = UnitFormat.label(METER.multiply(0.3048), "ft");
-     * </code></pre>
-     *
+     * Attaches a system-wide label to the specified unit.
+     * 
      * @param  unit the unit being associated to the specified label.
      * @param  label the new label for the specified unit or <code>null</code>
      *         to detache the previous label (if any).
@@ -119,60 +113,23 @@ public abstract class UnitFormat extends TextFormat {
      * @throws IllegalArgumentException if the specified label is a known symbol
      *         or if the specified label is already attached to a different
      *         unit (must be detached first).
-     * @see    #labelFor
-     * @see    #alias
+     * @deprecated Since 1.1 replaced by {@link Unit#label} 
      */
     public static Unit label(Unit unit, String label) {
-        // Checks label argument.
-        if (label != null) {
-            if (Unit.searchSymbol(label) != null) {
-                throw new IllegalArgumentException("Label: " + label
-                        + " is a known symbol");
-            } else {
-                Unit u = (Unit) LABEL_UNIT.get(label);
-                if ((u != null) && (u != unit)) {
-                    throw new IllegalArgumentException("Label: " + label
-                            + " is attached to a different unit"
-                            + " (must be detached first)");
-                }
-            }
-        }
-        // Updates unit database.
-        synchronized (UnitFormat.class) {
-            // Removes previous unit mapping.
-            String prevLabel = (String) UNIT_LABEL.remove(unit);
-            LABEL_UNIT.remove(prevLabel);
-
-            // Removes previous label mapping.
-            Unit prevUnit = (Unit) LABEL_UNIT.remove(label);
-            UNIT_LABEL.remove(prevUnit);
-
-            // Maps unit and label together.
-            LABEL_UNIT.put(label, unit);
-            UNIT_LABEL.put(unit, label);
-        }
-        return unit;
+        return unit.label(label);
     }
 
     /**
-     * Attaches a system-wide alias to the specified unit. Multiple aliases may
-     * be attached to the same unit. Aliases are used during parsing to
-     * recognize different variants of the same unit. For example:
-     * <pre><code>
-     *     UnitFormat.alias(METER.multiply(0.3048), "foot");
-     *     UnitFormat.alias(METER.multiply(0.3048), "feet");
-     *     UnitFormat.alias(METER, "meter");
-     *     UnitFormat.alias(METER, "metre");
-     * </code></pre>
-     *
+     * Attaches a system-wide alias to the specified unit. 
+     * 
      * @param  unit the unit being aliased.
      * @param  alias the alias being attached to the specified unit.
      * @return the specified unit.
-     * @see    #unitFor
+     * @deprecated Since 1.1 replaced by {@link Unit#alias} 
      */
     public static Unit alias(Unit unit, String alias) {
         synchronized (UnitFormat.class) {
-            ALIAS_UNIT.put(alias, unit);
+            ALIAS_TO_UNIT.put(alias, unit);
         }
         return unit;
     }
@@ -375,7 +332,7 @@ public abstract class UnitFormat extends TextFormat {
     public String labelFor(Unit unit) {
         // Label database.
         synchronized (UnitFormat.class) {
-            String label = (String) UNIT_LABEL.get(unit);
+            String label = (String) UNIT_TO_LABEL.get(unit);
             if (label != null) {
                 return label;
             }
@@ -415,12 +372,12 @@ public abstract class UnitFormat extends TextFormat {
     public Unit unitFor(CharSequence label) {
         synchronized (UnitFormat.class) {
             // Label database.
-            Unit unit = (Unit) LABEL_UNIT.get(label);
+            Unit unit = (Unit) LABEL_TO_UNIT.get(label);
             if (unit != null) {
                 return unit;
             }
             // Alias database.
-            unit = (Unit) ALIAS_UNIT.get(label);
+            unit = (Unit) ALIAS_TO_UNIT.get(label);
             if (unit != null) {
                 return unit;
             }

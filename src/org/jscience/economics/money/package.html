@@ -10,8 +10,8 @@
     ///////////////////////////////////////////////////////////////////////
 
     // Use currency symbols instead of ISO-4217 codes.
-    UnitFormat.label(Currency.USD, "$"); // Use "$" symbol instead of currency code ("USD")
-    UnitFormat.label(Currency.EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
+    Currency.USD.label("$"); // Use "$" symbol instead of currency code ("USD")
+    Currency.EUR.label("€"); // Use "€" symbol instead of currency code ("EUR")
 
     // Calculates trip cost.
     Quantity    carMileage   = Quantity.valueOf(20, NonSI.MILE.divide(NonSI.GALLON_LIQUID_US)); // 20 mi/gal.

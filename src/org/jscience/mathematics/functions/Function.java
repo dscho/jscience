@@ -17,8 +17,8 @@ import javolution.realtime.LocalContext;
 import javolution.realtime.RealtimeObject;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 
 import org.jscience.mathematics.matrices.Operable;
 

@@ -10,6 +10,8 @@
 package org.jscience.physics.units;
 import java.io.Serializable;
 
+import javolution.util.MathLib;
+
 /**
  * <p> This class represents a product unit. Product units are formed by
  *     the product of rational powers of existing units.</p>
@@ -78,7 +80,7 @@ public final class ProductUnit extends DerivedUnit {
             int pow = (p1 * r2) + (p2 * r1);
             int root = r1 * r2;
             if (pow != 0) {
-                int gcd = gcd(Math.abs(pow), root);
+                int gcd = gcd(MathLib.abs(pow), root);
                 result[resultIndex++] = new Element(unit, pow/gcd, root/gcd);
             }
         }
@@ -178,7 +180,7 @@ public final class ProductUnit extends DerivedUnit {
             Element[] elems = ((ProductUnit)unit)._elements;
             unitElems = new Element[elems.length];
             for (int i=0; i < elems.length; i++) {
-                int gcd = gcd(Math.abs(elems[i]._pow), elems[i]._root * n);
+                int gcd = gcd(MathLib.abs(elems[i]._pow), elems[i]._root * n);
                 unitElems[i] = new Element(
                     elems[i]._unit,
                     elems[i]._pow / gcd,
@@ -204,7 +206,7 @@ public final class ProductUnit extends DerivedUnit {
             Element[] elems = ((ProductUnit)unit)._elements;
             unitElems = new Element[elems.length];
             for (int i=0; i < elems.length; i++) {
-                int gcd = gcd(Math.abs(elems[i]._pow * n), elems[i]._root);
+                int gcd = gcd(MathLib.abs(elems[i]._pow * n), elems[i]._root);
                 unitElems[i] = new Element(
                     elems[i]._unit,
                     elems[i]._pow * n / gcd,
@@ -313,7 +315,7 @@ public final class ProductUnit extends DerivedUnit {
         for (int i=0; i < _elements.length; i++) {
             Converter toDimension = _elements[i]._unit.getCtxToDimension();
             if (toDimension.isLinear()) {
-                factor *= Math.pow(toDimension.derivative(0),
+                factor *= MathLib.pow(toDimension.derivative(0),
                                    ((double)_elements[i]._pow) /
                                    ((double)_elements[i]._root));
             } else {
@@ -322,7 +324,7 @@ public final class ProductUnit extends DerivedUnit {
                     _elements[i]._unit + " is non-linear, cannot convert");
             }
         }
-        if (Math.abs(factor - 1.0) < 1e-9) {
+        if (MathLib.abs(factor - 1.0) < 1e-9) {
             return Converter.IDENTITY;
         } else {
             return new MultiplyConverter(factor);

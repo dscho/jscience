@@ -12,9 +12,10 @@ package org.jscience.mathematics.numbers;
 
 import java.io.IOException;
 
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -306,7 +307,7 @@ public final class Complex extends RealtimeNumber {
      * @return the magnitude of this complex number.
      */
     public double magnitude() {
-        return Math.sqrt(_real * _real + _imaginary * _imaginary);
+        return MathLib.sqrt(_real * _real + _imaginary * _imaginary);
     }
 
     /**
@@ -316,7 +317,7 @@ public final class Complex extends RealtimeNumber {
      * @return argument of this complex number.
      */
     public double argument() {
-        return Math.atan2(_imaginary, _real);
+        return MathLib.atan2(_imaginary, _real);
     }
 
     /**
@@ -326,10 +327,10 @@ public final class Complex extends RealtimeNumber {
      */
     public Complex sqrt() {
         Complex c = (Complex) FACTORY.object();
-        double m = Math.sqrt(this.magnitude());
+        double m = MathLib.sqrt(this.magnitude());
         double a = this.argument() / 2.0;
-        c._real = m * Math.cos(a);
-        c._imaginary = m * Math.sin(a);
+        c._real = m * MathLib.cos(a);
+        c._imaginary = m * MathLib.sin(a);
         return c;
     }
 
@@ -343,9 +344,9 @@ public final class Complex extends RealtimeNumber {
      */
     public Complex exp() {
         Complex c = (Complex) FACTORY.object();
-        double m = Math.exp(this._real);
-        c._real = m * Math.cos(this._imaginary);
-        c._imaginary = m * Math.sin(this._imaginary);
+        double m = MathLib.exp(this._real);
+        c._real = m * MathLib.cos(this._imaginary);
+        c._imaginary = m * MathLib.sin(this._imaginary);
         return c;
     }
 
@@ -357,7 +358,7 @@ public final class Complex extends RealtimeNumber {
      */
     public Complex log() {
         Complex c = (Complex) FACTORY.object();
-        c._real = Math.log(this.magnitude());
+        c._real = MathLib.log(this.magnitude());
         c._imaginary = this.argument();
         return c;
     }
@@ -370,10 +371,10 @@ public final class Complex extends RealtimeNumber {
      */
     public Complex pow(double e) {
         Complex c = (Complex) FACTORY.object();
-        double m = Math.pow(this.magnitude(), e);
+        double m = MathLib.pow(this.magnitude(), e);
         double a = this.argument() * e;
-        c._real = m * Math.cos(a);
-        c._imaginary = m * Math.sin(a);
+        c._real = m * MathLib.cos(a);
+        c._imaginary = m * MathLib.sin(a);
         return c;
     }
 
@@ -386,13 +387,13 @@ public final class Complex extends RealtimeNumber {
      */
     public Complex pow(Complex that) {
         Complex c = (Complex) FACTORY.object();
-        double r1 = Math.log(this.magnitude());
+        double r1 = MathLib.log(this.magnitude());
         double i1 = this.argument();
         double r2 = (r1 * that._real) - (i1 * that._imaginary);
         double i2 = (r1 * that._imaginary) + (i1 * that._real);
-        double m = Math.exp(r2);
-        c._real = m * Math.cos(i2);
-        c._imaginary = m * Math.sin(i2);
+        double m = MathLib.exp(r2);
+        c._real = m * MathLib.cos(i2);
+        c._imaginary = m * MathLib.sin(i2);
         return c;
     }
 
@@ -407,7 +408,7 @@ public final class Complex extends RealtimeNumber {
      *         <code>false</code> otherwise.
      */
     public boolean equals(Complex that, double tolerance) {
-        return Math.abs(this.subtract(that).magnitude()) <= tolerance;
+        return MathLib.abs(this.subtract(that).magnitude()) <= tolerance;
     }
 
     /**
@@ -547,4 +548,6 @@ public final class Complex extends RealtimeNumber {
     public Operable reciprocal() {
         return this.inverse();
     }
+
+    private static final long serialVersionUID = 3977298824052355641L;
 }

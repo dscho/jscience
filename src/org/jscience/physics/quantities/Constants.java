@@ -8,6 +8,8 @@
  * 2.1 of the License, or any later version.
  */
 package org.jscience.physics.quantities;
+import javolution.util.MathLib;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -79,27 +81,27 @@ public abstract class Constants {
     /**
      * Holds the ratio of the circumference of a circle to its diameter.
      */
-    public final static Scalar π = Scalar.valueOf(Math.PI);
+    public final static Scalar π = Scalar.valueOf(MathLib.PI);
 
     /**
      * Holds {@link #π}/2.
      */
-    public final static Scalar half_π = Scalar.valueOf(Math.PI / 2);
+    public final static Scalar half_π = Scalar.valueOf(MathLib.PI / 2);
 
     /**
      * Holds 2·{@link #π}.
      */
-    public final static Scalar two_π = Scalar.valueOf(2 * Math.PI);
+    public final static Scalar two_π = Scalar.valueOf(2 * MathLib.PI);
 
     /**
      * Holds 4·{@link #π}.
      */
-    public final static Scalar four_π = Scalar.valueOf(4 * Math.PI);
+    public final static Scalar four_π = Scalar.valueOf(4 * MathLib.PI);
 
     /**
      * Holds {@link #π}².
      */
-    public final static Scalar π_square = Scalar.valueOf(Math.PI * Math.PI);
+    public final static Scalar π_square = Scalar.valueOf(MathLib.PI * MathLib.PI);
 
     /**
      * Holds the speed of light in vacuum.
@@ -141,7 +143,7 @@ public abstract class Constants {
      * Holds the permeability of vacuum or magnetic constant.
      */
     public final static Quantity µ0 = Quantity.valueOf(
-        4 * Math.PI * 1E-7,
+        4 * MathLib.PI * 1E-7,
         SI.NEWTON.divide(SI.AMPERE.pow(2)).getDimension()); // Exact.
 
     /**

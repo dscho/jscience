@@ -19,8 +19,9 @@ import javolution.realtime.PoolContext;
 import javolution.realtime.ConcurrentContext.Logic;
 import javolution.realtime.LocalContext.Variable;
 import javolution.util.FastMap;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -930,7 +931,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         }
     }
 
-    private static double DIGITS_TO_BITS = Math.log(10) / Math.log(2);
+    private static double DIGITS_TO_BITS = MathLib.LOG10 / MathLib.LOG2;
 
     private static int[] INT_POW_5 = new int[]{1, 5, 25, 125, 625, 3125, 15625,
             78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125};
@@ -1069,7 +1070,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
             return _isNegative ? -_words[0] : _words[0];
         } else { // size >= 2
             double absValue = ((_words[_size - 1] * TWO_POW63) + _words[_size - 2])
-                    * Math.pow(TWO_POW63, _size - 2);
+                    * MathLib.pow(TWO_POW63, _size - 2);
             return _isNegative ? -absValue : absValue;
         }
     }
@@ -1230,18 +1231,18 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
 
     /**
      * Appends the text representation of this large integer in
-     * the specified radix to the <code>Appendable</code> argument.
+     * the specified radix to the <code>TextBuilder</code> argument.
      *
-     * @param a the <code>Appendable</code> to append.
+     * @param tb the <code>Appendable</code> to append.
      * @param radix the radix of the representation.
      * @return the specified <code>Appendable</code>.
      * @throws IOException if an I/O exception occurs.
      */
-    Appendable appendTo(Appendable a, int radix) throws IOException {
+    TextBuilder appendTo(TextBuilder tb, int radix) throws IOException {
         if (this.isZero()) {
-            return a.append('0');
+            return tb.append("0");
         } else if (this.isNegative()) {
-            a.append('-');
+            tb.append('-');
         }
         PoolContext.enter();
         try {
@@ -1264,13 +1265,13 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
                 x = i;
             }
             for (int i = tmpIndex; i > 0;) {
-                a.append((Character.forDigit(tmp[--i], radix)));
+                tb.append((Character.forDigit(tmp[--i], radix)));
             }
             tmpPool.recycle(tmp);
         } finally {
             PoolContext.exit();
         }
-        return a;
+        return tb;
     }
 
     ///////////////
@@ -1483,4 +1484,6 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
             return new LargeInteger(new long[_size]);
         }
     }
+
+    private static final long serialVersionUID = 3761685706208391225L;
 }

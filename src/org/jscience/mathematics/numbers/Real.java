@@ -13,9 +13,10 @@ package org.jscience.mathematics.numbers;
 import java.io.IOException;
 
 import javolution.realtime.LocalContext;
-import javolution.util.Text;
-import javolution.util.TextBuilder;
-import javolution.util.TypeFormat;
+import javolution.util.MathLib;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
+import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -222,7 +223,7 @@ public final class Real extends RealtimeNumber implements Comparable {
                     LargeInteger.valueOf(mantissa), LargeInteger.ONE, 0);
             int pow2 = exponent - 1023 - 52;
             // Calculates the scale factor with at least 52 bits accuracy.
-            Real scale = valueOf(E18.shiftLeft(Math.abs(pow2)),
+            Real scale = valueOf(E18.shiftLeft(MathLib.abs(pow2)),
                     LargeInteger.ONE, -18);
             return (pow2 >= 0)
                     ? unscaledMantissa.multiply(scale).scale()
@@ -545,7 +546,7 @@ public final class Real extends RealtimeNumber implements Comparable {
         LargeInteger result = reciprocal.E(exp);
         return result.shiftRight(expBitLength + 1);
     }
-    private static final double BITS_TO_DIGITS = Math.log(2) / Math.log(10);
+    private static final double BITS_TO_DIGITS = MathLib.LOG2 / MathLib.LOG10;
     private static final double DIGITS_TO_BITS = 1.0 / BITS_TO_DIGITS;
 
     /**
@@ -574,14 +575,14 @@ public final class Real extends RealtimeNumber implements Comparable {
 
     /**
      * Appends the decimal text representation of this real number to the
-     * <code>Appendable</code> argument. Only digits guaranteed to be exact
+     * <code>TextBuilder</code> argument. Only digits guaranteed to be exact
      * are written.
      * 
-     * @param a the <code>Appendable</code> to append.
+     * @param tb the <code>TextBuilder</code> to append.
      * @return the specified <code>Appendable</code>.
      * @throws IOException if an I/O exception occurs.
      */
-    Appendable appendTo(Appendable a) throws IOException {
+    TextBuilder appendTo(TextBuilder a) throws IOException {
         if (this.isNaN()) {
             return a.append("NaN");
         }
@@ -677,7 +678,7 @@ public final class Real extends RealtimeNumber implements Comparable {
      *         to type <code>double</code>.
      */
     public double doubleValue() {
-        return _mantissa.doubleValue() * Math.pow(10, _exponent);
+        return _mantissa.doubleValue() * MathLib.pow(10, _exponent);
     }
 
     /**
@@ -760,4 +761,5 @@ public final class Real extends RealtimeNumber implements Comparable {
     private static final LargeInteger MAX_ERROR = (LargeInteger) LargeInteger.ONE
             .E(16).moveHeap();
 
+    private static final long serialVersionUID = 3833184726813784121L;
 }
