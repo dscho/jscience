@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -19,53 +18,43 @@ import org.jscience.physics.units.Unit;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
  */
-public class DataAmount extends Quantity {
+public class DataAmount extends Dimensionless {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.BIT;
+    private final static Unit<DataAmount> UNIT = SI.BIT;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new DataAmount();
+    private final static Factory<DataAmount> FACTORY = new Factory<DataAmount>(
+            UNIT) {
+        protected DataAmount create() {
+            return new DataAmount();
         }
     };
 
     /**
      * Represents a {@link DataAmount} amounting to nothing.
      */
-    public final static DataAmount ZERO = (DataAmount) valueOf(0, SYSTEM_UNIT);
+    public final static DataAmount ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected DataAmount() {}
-
-    /**
-     * Returns the {@link DataAmount} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link DataAmount}.
-     * @return the specified quantity or a new {@link DataAmount} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link DataAmount}.
-     */
-    public static DataAmount dataAmountOf(Quantity quantity) {
-        return (DataAmount) FACTORY.quantity(quantity);
+    protected DataAmount() {
     }
 
     /**
      * Shows {@link DataAmount} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link DataAmount} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link DataAmount} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(DataAmount.class, unit);
     }
 
-    private static final long serialVersionUID = -2210238987108900262L;
+    private static final long serialVersionUID = 1L;
+
 }

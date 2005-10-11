@@ -1,13 +1,14 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
+
+import org.jscience.physics.quantities.Quantity;
 
 /**
  * <p> This abstract class identifies derived units. These are units that are
@@ -18,16 +19,13 @@ package org.jscience.physics.units;
  *     for other derived units.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 1.1, May 24, 2005
  */
-public abstract class DerivedUnit extends Unit {
+public abstract class DerivedUnit<Q extends Quantity> extends Unit<Q> {
 
     /**
-     * Base constructor.
-     *
-     * @param  symbol the unit's symbol or <code>null</code> if none.
+     * Default constructor.
      */
-    DerivedUnit(String symbol) {
-        super(symbol);
+    protected DerivedUnit() {
     }
 }

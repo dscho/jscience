@@ -1,27 +1,18 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
 
-
-import java.io.IOException;
-
-import javolution.realtime.LocalContext;
-import javolution.util.MathLib;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
-import javolution.lang.TextBuilder;
 import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
-
-import org.jscience.mathematics.matrices.Matrix;
-import org.jscience.mathematics.matrices.Operable;
 
 /**
  * <p> This class represents a real number of arbitrary precision with 
@@ -34,8 +25,8 @@ import org.jscience.mathematics.matrices.Operable;
  *     their precision as only exact digits are written out.
  *     For example, the string <code>"2.000"</code> represents a real 
  *     value of <code>(2.0 ± 0.001)</code>. 
- *     The {@link #getPrecision precision} or {@link #getAccuracy accuracy}
- *     of any real number is available and <b>guaranteed</b> 
+ *     The {@link #getPrecision precision} and {@link #getAccuracy accuracy}
+ *     of any real number are available and <b>guaranteed</b> 
  *     (the true/exact value is always within the precision/accuracy range).</p>
  * 
  * <p> Operations on instances of this class are quite fast   
@@ -45,7 +36,8 @@ import org.jscience.mathematics.matrices.Operable;
  *     accelerate as more and more operations are performed.</p>
  * 
  * <p> Instances of this class can be utilized to find approximate 
- *     solutions to linear equations using the {@link Matrix} class for which
+ *     solutions to linear equations using the 
+ *     {@link org.jscience.mathematics.matrices.Matrix Matrix} class for which
  *     high-precision reals is often required, the primitive type
  *     <code>double</code> being not accurate enough to resolve equations 
  *     when the matrix's size exceeds 100x100. Furthermore, even for small 
@@ -53,24 +45,21 @@ import org.jscience.mathematics.matrices.Operable;
  *     singularities.</p>
  *  
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 6, 2004
  */
-public final class Real extends RealtimeNumber implements Comparable {
+public final class Real extends Number<Real> {
 
     /**
      * Holds the default XML representation for real numbers.
      * This representation consists of a simple <code>value</code> attribute
-     * holding its textual representation.
-     * 
-     * @see #valueOf(CharSequence)
-     * @see #toText
+     * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat REAL_XML = new XmlFormat(Real.class) {
-        public void format(Object obj, XmlElement xml) {
-            xml.setAttribute("value", ((Real) obj).toText());
+    protected static final XmlFormat<Real> XML = new XmlFormat<Real>(Real.class) {
+        public void format(Real r, XmlElement xml) {
+            xml.setAttribute("value", r.toText());
         }
 
-        public Object parse(XmlElement xml) {
+        public Real parse(XmlElement xml) {
             return Real.valueOf(xml.getAttribute("value"));
         }
     };
@@ -81,11 +70,11 @@ public final class Real extends RealtimeNumber implements Comparable {
     public static final Real NaN = new Real();
 
     /**
-     * Holds the factory constructing rational instances.
+     * Holds the factory constructing real instances.
      */
-    private static final Factory FACTORY = new Factory() {
+    private static final Factory<Real> FACTORY = new Factory<Real>() {
 
-        public Object create() {
+        public Real create() {
             return new Real();
         }
     };
@@ -136,7 +125,7 @@ public final class Real extends RealtimeNumber implements Comparable {
     public static Real valueOf(LargeInteger mantissa, LargeInteger error,
             int exponent) {
         if (error.isPositive()) {
-            Real real = (Real) FACTORY.object();
+            Real real = FACTORY.object();
             real._mantissa = mantissa;
             real._error = error;
             real._exponent = exponent;
@@ -172,7 +161,7 @@ public final class Real extends RealtimeNumber implements Comparable {
             r._exponent += exponent;
             return r.scale();
         }
-        Real real = (Real) FACTORY.object();
+        Real real = FACTORY.object();
         int errorIndex = TypeFormat.indexOf("±", chars, 0);
         if (errorIndex >= 0) {
             real._mantissa = LargeInteger.valueOf(chars.subSequence(0,
@@ -193,7 +182,7 @@ public final class Real extends RealtimeNumber implements Comparable {
             LargeInteger fraction = LargeInteger.valueOf(chars.subSequence(
                     decimalPointIndex + 1, chars.length()));
             int fractionDigits = chars.length() - decimalPointIndex - 1;
-            real._mantissa = integer.E(fractionDigits).add(fraction);
+            real._mantissa = integer.E(fractionDigits).plusBasic(fraction);
             real._error = LargeInteger.ONE;
             real._exponent = -fractionDigits;
             return real.scale();
@@ -208,7 +197,7 @@ public final class Real extends RealtimeNumber implements Comparable {
     /**
      * Converts a <code>double</code> value to a real instance.
      * The error is derived from the inexact representation of
-     * <code>double</code> values intrinsic to the 64 bits IEEE 754 format. 
+     * <code>double</code> values intrinsic to the 64 bits IEEE 754 format.
      * 
      * @param doubleValue the <code>double</code> value to convert.
      */
@@ -223,73 +212,45 @@ public final class Real extends RealtimeNumber implements Comparable {
                     LargeInteger.valueOf(mantissa), LargeInteger.ONE, 0);
             int pow2 = exponent - 1023 - 52;
             // Calculates the scale factor with at least 52 bits accuracy.
-            Real scale = valueOf(E18.shiftLeft(MathLib.abs(pow2)),
+            Real scale = Real.valueOf(E18.shiftLeft(MathLib.abs(pow2)),
                     LargeInteger.ONE, -18);
             return (pow2 >= 0)
-                    ? unscaledMantissa.multiply(scale).scale()
+                    ? unscaledMantissa.times(scale).scale()
                     : unscaledMantissa.divide(scale).scale();
         } else {
             return NaN;
         }
     }
-    private static final LargeInteger E18 // > 52 bits precision.
-    = LargeInteger.ONE.E(18);
+    private static final LargeInteger E18 
+    = LargeInteger.ONE.E(18); // > 52 bits precision.
 
     /**
      * Converts an integer value to a real instance. 
-     * The error is determined  by the local {@link #getIntegerAccuracy integer 
-     * accuracy} setting.
      * 
      * @param  integer the integer value to convert.
-     * @return a real number corresponding to the specified integer with an
-     *         an accuracy determined by the local integer accuracy setting.
+     * @param  accuracy the number of decimal zeros in the fraction part.
+     * @return the real number corresponding to the specified integer with
+     *         the specified number of decimal zero.
      */
-    public static Real valueOf(long integer) {
-        int accuracy = ((Number) INTEGER_ACCURACY.getValue()).intValue();
-        return valueOf(LargeInteger.valueOf(integer).E(accuracy),
+    public static Real valueOf(long integer, int accuracy) {
+        return Real.valueOf(LargeInteger.valueOf(integer).E(accuracy),
                 LargeInteger.ONE, -accuracy);
     }
 
     /**
-     * Converts an integer value to a real instance. 
-     * The error is determined  by the local {@link #getIntegerAccuracy integer 
-     * accuracy} setting.
+     * Converts an large integer value to a real instance. 
      * 
      * @param  integer the integer value to convert.
-     * @return a real number corresponding to the specified integer with an
-     *         an accuracy determined by the local integer accuracy setting.
+     * @param  accuracy the number of decimal zeros in the fraction part.
+     * @return the real number corresponding to the specified integer with
+     *         the specified number of decimal zero.
      */
-    public static Real valueOf(LargeInteger integer) {
-        int accuracy = ((Number) INTEGER_ACCURACY.getValue()).intValue();
+    public static Real valueOf(LargeInteger integer, int accuracy) {
         return valueOf(integer.E(accuracy), LargeInteger.ONE, -accuracy);
     }
 
     /**
-     * Returns the {@link LocalContext local} number of decimal zeros
-     * in the fraction part for reals created from integer values
-     * (default <code>18</code> zeros).
-     * 
-     * @return the accuracy of reals created from integer values.
-     * @see   #setIntegerAccuracy
-     */
-    public static int getIntegerAccuracy() {
-        return ((Number)INTEGER_ACCURACY.getValue()).intValue();
-    }
-    private static final LocalContext.Variable INTEGER_ACCURACY 
-        = new LocalContext.Variable(new Integer(18));
-
-    /**
-     * Sets the {@link LocalContext local} number of decimal zeros
-     * in the fraction part for reals created from integer values.
-     * 
-     * @param accuracy the accuracy of reals created from integer values.
-     */
-    public static void setIntegerAccuracy(int accuracy) {
-        INTEGER_ACCURACY.setValue(Integer32.valueOf(accuracy));
-    }
-
-    /**
-     * Returns this real's mantissa.
+     * Returns this real mantissa.
      * 
      * @return the mantissa.
      */
@@ -298,7 +259,7 @@ public final class Real extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the maximum error (positive) on this real's mantissa.
+     * Returns the maximum error (positive) on this real mantissa.
      * This methods returns <code>null</code> if this {@link #isNaN}.
      * 
      * @return the maximum error on the mantissa or <code>null</code> if 
@@ -387,7 +348,7 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @return <code>this &asymp; that</code>
      */
     public boolean approxEquals(Real that) {
-        Real diff = this.subtract(that);
+        Real diff = this.minus(that);
         if (diff._error != null) {
             return diff._error.isLargerThan(diff._mantissa);
         } else { // NaN
@@ -403,11 +364,9 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @throws ArithmeticException if <code>this.isNaN()</code>
      */
     public LargeInteger toLargeInteger() {
-        if (_error != null) {
-            return _mantissa.E(_exponent);
-        } else { // NaN
+        if (_error == null) 
             throw new ArithmeticException("Cannot convert NaN to integer value");
-        }
+        return _mantissa.E(_exponent);
     }
 
     /**
@@ -415,9 +374,9 @@ public final class Real extends RealtimeNumber implements Comparable {
      * 
      * @return <code>-this</code>.
      */
-    public Real negate() {
-        Real real = (Real) FACTORY.object();
-        real._mantissa = _mantissa.negate();
+    public Real opposite() {
+        Real real = FACTORY.object();
+        real._mantissa = _mantissa.oppositeBasic();
         real._exponent = _exponent;
         real._error = _error;
         return real;
@@ -429,19 +388,19 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @param that the real to be added.
      * @return <code>this + that</code>.
      */
-    public Real add(Real that) {
+    public Real plus(Real that) {
         if ((this._error == null) || (that._error == null)) {
             return NaN;
         } else if (this._exponent == that._exponent) {
             Real real = (Real) FACTORY.object();
             real._exponent = _exponent;
-            real._mantissa = this._mantissa.add(that._mantissa);
-            real._error = this._error.add(that._error).add(LargeInteger.ONE);
+            real._mantissa = this._mantissa.plusBasic(that._mantissa);
+            real._error = this._error.plusBasic(that._error).plusBasic(LargeInteger.ONE);
             return real.scale();
         } else if (this._exponent > that._exponent) {
-            return this.add(that.scale(this._exponent));
+            return this.plus(that.scale(this._exponent));
         } else {
-            return that.add(this.scale(that._exponent));
+            return that.plus(this.scale(that._exponent));
         }
     }
 
@@ -452,8 +411,38 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @param that the real to be subtracted.
      * @return <code>this - that</code>.
      */
-    public Real subtract(Real that) {
-        return this.add(that.negate());
+    public Real minus(Real that) {
+        if ((this._error == null) || (that._error == null)) {
+            return NaN;
+        } else if (this._exponent == that._exponent) {
+            Real real = (Real) FACTORY.object();
+            real._exponent = _exponent;
+            real._mantissa = this._mantissa.minusBasic(that._mantissa);
+            real._error = this._error.plusBasic(that._error).plusBasic(LargeInteger.ONE);
+            return real.scale();
+        } else if (this._exponent > that._exponent) {
+            return this.minus(that.scale(this._exponent));
+        } else {
+            return that.minus(this.scale(that._exponent));
+        }
+    }
+
+
+    /**
+     * Returns the product of this real number with the specified 
+     * <code>long</code> multiplier.
+     * 
+     * @param multiplier the <code>long</code> multiplier.
+     * @return <code>this * multiplier</code>.
+     */
+    public Real times(long multiplier) {
+        if (this._error == null) 
+            return NaN;
+        Real real = FACTORY.object();
+        real._exponent = this._exponent;
+        real._mantissa = this._mantissa.timesBasic(multiplier);
+        real._error = this._error.timesBasic(multiplier);
+        return real.scale();
     }
 
     /**
@@ -462,41 +451,58 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @param that the real multiplier.
      * @return <code>this * that</code>.
      */
-    public Real multiply(Real that) {
+    public Real times(Real that) {
         long exp = ((long) this._exponent) + that._exponent;
         if ((this._error == null) || (that._error == null)
                 || (exp > Integer.MAX_VALUE || (exp < Integer.MIN_VALUE))) {
             return NaN;
         }
-        LargeInteger thisMin = this._mantissa.subtract(this._error);
-        LargeInteger thisMax = this._mantissa.add(this._error);
-        LargeInteger thatMin = that._mantissa.subtract(that._error);
-        LargeInteger thatMax = that._mantissa.add(that._error);
+        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
+        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
+        LargeInteger thatMin = that._mantissa.minusBasic(that._error);
+        LargeInteger thatMax = that._mantissa.plusBasic(that._error);
         LargeInteger min, max;
-        if (thisMin.compareTo(thisMax.negate()) > 0) {
-            if (thatMin.compareTo(thatMax.negate()) > 0) {
-                min = thisMin.multiply(thatMin);
-                max = thisMax.multiply(thatMax);
+        if (thisMin.compareTo(thisMax.oppositeBasic()) > 0) {
+            if (thatMin.compareTo(thatMax.oppositeBasic()) > 0) {
+                min = thisMin.timesBasic(thatMin);
+                max = thisMax.timesBasic(thatMax);
             } else {
-                min = thisMax.multiply(thatMin);
-                max = thisMin.multiply(thatMax);
+                min = thisMax.timesBasic(thatMin);
+                max = thisMin.timesBasic(thatMax);
             }
         } else {
-            if (thatMin.compareTo(thatMax.negate()) > 0) {
-                min = thisMin.multiply(thatMax);
-                max = thisMax.multiply(thatMin);
+            if (thatMin.compareTo(thatMax.oppositeBasic()) > 0) {
+                min = thisMin.timesBasic(thatMax);
+                max = thisMax.timesBasic(thatMin);
             } else {
-                min = thisMax.multiply(thatMax);
-                max = thisMin.multiply(thatMin);
+                min = thisMax.timesBasic(thatMax);
+                max = thisMin.timesBasic(thatMin);
             }
         }
-        Real real = (Real) FACTORY.object();
+        Real real = FACTORY.object();
         real._exponent = (int) exp;
-        real._mantissa = min.add(max).shiftRight(1);
-        real._error = max.subtract(min).add(LargeInteger.ONE);
+        real._mantissa = min.plusBasic(max).shiftRight(1);
+        real._error = max.minusBasic(min).plusBasic(LargeInteger.ONE);
         return real.scale();
     }
-
+    
+    /**
+     * Returns this real number divided by the specified <code>int</code>
+     * divisor.  
+     * 
+     * @param divisor the <code>int</code> divisor.
+     * @return <code>this / divisor</code>
+     */
+    public Real divide(int divisor) {
+        if ((_error == null) || (divisor == 0)) return NaN;
+        Real real = FACTORY.object();
+        real._exponent = this._exponent - 18;
+        real._mantissa = this._mantissa.timesBasic(E18asLong).divide(divisor);
+        real._error = this._error.timesBasic(E18asLong).divide(divisor).plusBasic(LargeInteger.ONE);
+        return real.scale();
+    }
+    private static long E18asLong = 1000000000000000000L;
+    
     /**
      * Returns this real number divided by the one specified.
      * 
@@ -505,20 +511,20 @@ public final class Real extends RealtimeNumber implements Comparable {
      * @throws ArithmeticException if <code>that.equals(ZERO)</code>
      */
     public Real divide(Real that) {
-        return this.multiply(that.inverse());
+        return this.times(that.reciprocal());
     }
 
     /**
-     * Returns the inverse of this real number.
+     * Returns the reciprocal (or inverse) of this real number.
      *
      * @return <code>1 / this</code>.
      */
-    public final Real inverse() {
+    public final Real reciprocal() {
         if (this._error == null) {
             return NaN;
         }
-        LargeInteger thisMin = this._mantissa.subtract(this._error);
-        LargeInteger thisMax = this._mantissa.add(this._error);
+        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
+        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
         if (thisMin.isNegative() && thisMax.isPositive()) { // Encompasses 0
             return NaN;
         }
@@ -534,8 +540,8 @@ public final class Real extends RealtimeNumber implements Comparable {
         LargeInteger max = div(2 * digits, thisMin);
         Real real = (Real) FACTORY.object();
         real._exponent = (int) exp;
-        real._mantissa = min.add(max).shiftRight(1);
-        real._error = max.subtract(min).add(LargeInteger.ONE);
+        real._mantissa = min.plusBasic(max).shiftRight(1);
+        real._error = max.minusBasic(min).plusBasic(LargeInteger.ONE);
         return real.scale();
 
     }
@@ -550,65 +556,82 @@ public final class Real extends RealtimeNumber implements Comparable {
     private static final double DIGITS_TO_BITS = 1.0 / BITS_TO_DIGITS;
 
     /**
-     * Returns the absolute value of this real number.
+     * Returns the norm (or absolute value) of this real number.
      * 
-     * @return <code>abs(this)</code>.
+     * @return <code>|this}</code>.
      */
-    public Real abs() {
-        return _mantissa.isNegative() ? this.negate() : this;
+    public Real norm() {
+        return _mantissa.isNegative() ? this.opposite() : this;
     }
 
+    /**
+     * Compares the {@link #norm norm} of two real numbers.
+     *
+     * @param that the real number to be compared with.
+     * @return <code>|this| > |that|</code>
+     */
+    public boolean isLargerThan(Real that) {
+        if (this._exponent == that._exponent)
+            return this._mantissa.isLargerThan(that._mantissa);
+        if (this._exponent > that._exponent) {
+            return this._mantissa.isLargerThan(that._mantissa.E(this._exponent - that._exponent));
+        } else {
+            return this._mantissa.E(that._exponent - this._exponent).isLargerThan(that._mantissa);
+        }
+    }
+
+    /**
+     * Returns the square root of this real number, the more accurate is this 
+     * real number, the more accurate the square root. 
+     * 
+     * @return the positive square root of this real number.
+     */
+    public Real sqrt() {
+        if (this._error == null) return NaN;
+        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
+        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
+        if (thisMin.isNegative()) return NaN;
+        int exponent = _exponent >> 1;
+        if ((_exponent & 1) == 1) { // Odd exponent.
+            thisMin = thisMin.E(1);
+            thisMax = thisMax.E(1);
+        }
+        LargeInteger minSqrt = thisMin.sqrt();
+        LargeInteger maxSqrt = thisMax.sqrt().plusBasic(LargeInteger.ONE);
+        LargeInteger sqrt = minSqrt.plusBasic(maxSqrt).shiftRight(1);
+        Real z = FACTORY.object();
+        z._mantissa = sqrt;
+        z._error = maxSqrt.minusBasic(sqrt);
+        z._exponent = exponent;
+        return z;
+    }
+    
     /**
      * Returns the decimal text representation of this number.
      *
      * @return the text representation of this number.
      */
     public Text toText() {
-        try {
-            TextBuilder tb = TextBuilder.newInstance();
-            appendTo(tb);
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
-        }
-    }
-
-    /**
-     * Appends the decimal text representation of this real number to the
-     * <code>TextBuilder</code> argument. Only digits guaranteed to be exact
-     * are written.
-     * 
-     * @param tb the <code>TextBuilder</code> to append.
-     * @return the specified <code>Appendable</code>.
-     * @throws IOException if an I/O exception occurs.
-     */
-    TextBuilder appendTo(TextBuilder a) throws IOException {
-        if (this.isNaN()) {
-            return a.append("NaN");
-        }
+        if (this.isNaN()) return Text.valueOf("NaN");
         int errorDigits = (int) (_error.bitLength() * BITS_TO_DIGITS + 1);
-        LargeInteger m = (_mantissa.isPositive()) ? _mantissa.add(FIVE
-                .E(errorDigits - 1)) : _mantissa.add(MINUS_FIVE
+        LargeInteger m = (_mantissa.isPositive()) ? _mantissa.plusBasic(FIVE
+                .E(errorDigits - 1)) : _mantissa.plusBasic(MINUS_FIVE
                 .E(errorDigits - 1));
         m = m.E(-errorDigits);
         int exp = _exponent + errorDigits;
-        TextBuilder chars = TextBuilder.newInstance();
-        m.appendTo(chars, 10);
-        int digits = (m.isNegative()) ? chars.length() - 1 : chars.length();
+        Text txt = m.toText();
+        int digits = (m.isNegative()) ? txt.length() - 1 : txt.length();
         if (digits > 1) {
             if ((exp < 0) && (-exp < digits)) {
-                chars.insert(chars.length() + exp, '.');
+                txt = txt.insert(txt.length() + exp, Text.valueOf('.'));
             } else { // Scientific notation.
-                chars.insert(chars.length() - digits + 1, '.');
-                chars.append('E');
-                TypeFormat.format(exp + digits - 1, chars);
+                txt = txt.insert(txt.length() - digits + 1, Text.valueOf('.'));
+                txt = txt.concat(Text.valueOf('E')).concat(Text.valueOf(exp + digits - 1));
             }
         } else {
-            chars.append('E');
-            TypeFormat.format(exp, chars);
+            txt = txt.concat(Text.valueOf('E')).concat(Text.valueOf(exp));
         }
-        a.append(chars);
-        return a;
+        return txt;
     }
     private static final LargeInteger FIVE = (LargeInteger) LargeInteger
             .valueOf(5).moveHeap();
@@ -619,17 +642,15 @@ public final class Real extends RealtimeNumber implements Comparable {
      * Compares this real number against the specified object.
      * 
      * @param that the object to compare with.
-     * @return <code>true</code> if the objects are the same;
-     *         <code>false</code> otherwise.
+     * @return <code>true</code> if the objects are two reals with same 
+     *        mantissa and exponent;<code>false</code> otherwise.
      */
     public boolean equals(Object that) {
-        if (that instanceof Real) {
+        if (!(that instanceof Real)) 
+            return false;
             Real thatReal = (Real) that;
             return this._mantissa.equals(thatReal._mantissa)
                     && (this._exponent == thatReal._exponent);
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -642,16 +663,6 @@ public final class Real extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the value of this real number as an <code>int</code>.
-     * 
-     * @return the numeric value represented by this real after conversion
-     *         to type <code>int</code>.
-     */
-    public int intValue() {
-        return (int) doubleValue();
-    }
-
-    /**
      * Returns the value of this real number as a <code>long</code>.
      * 
      * @return the numeric value represented by this real after conversion
@@ -659,16 +670,6 @@ public final class Real extends RealtimeNumber implements Comparable {
      */
     public long longValue() {
         return (long) doubleValue();
-    }
-
-    /**
-     * Returns the value of this real number as a <code>float</code>.
-     * 
-     * @return the numeric value represented by this real after conversion
-     *         to type <code>float</code>.
-     */
-    public float floatValue() {
-        return (float) doubleValue();
     }
 
     /**
@@ -689,8 +690,8 @@ public final class Real extends RealtimeNumber implements Comparable {
      *         or greater than <code>that</code>.
      * @throws ClassCastException <code>that</code> is not a {@link Real}.
      */
-    public int compareTo(Object that) {
-        Real diff = this.subtract((Real) that);
+    public int compareTo(Real that) {
+        Real diff = this.minus(that);
         if (diff.isPositive()) {
             return 1;
         } else if (diff.isNegative()) {
@@ -700,34 +701,16 @@ public final class Real extends RealtimeNumber implements Comparable {
         }
     }
 
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        return this.add((Real) that);
-    }
-
-    // Implements Operable.
-    public Operable opposite() {
-        return this.negate();
-    }
-
-    // Implements Operable.
-    public Operable times(Operable that) {
-        return this.multiply((Real) that);
-    }
-
-    // Implements Operable.
-    public Operable reciprocal() {
-        return this.inverse();
-    }
-
-
     // Moves additional real-time members.
-    public void move(ContextSpace cs) {
-        super.move(cs);
-        _mantissa.move(cs);
-        if (_error != null) {
-            _error.move(cs);
+    public boolean move(ObjectSpace os) {
+        if (super.move(os)) {
+            _mantissa.move(os);
+            if (_error != null) {
+                _error.move(os);
+            }
+            return true;
         }
+        return false;
     }
 
     /**
@@ -738,9 +721,9 @@ public final class Real extends RealtimeNumber implements Comparable {
      */
     private Real scale(int exponent) {
         int e = this._exponent - exponent;
-        Real real = (Real) FACTORY.object();
+        Real real = FACTORY.object();
         real._mantissa = this._mantissa.E(e);
-        real._error = this._error.E(e).add(LargeInteger.ONE);
+        real._error = this._error.E(e).plusBasic(LargeInteger.ONE);
         real._exponent = exponent;
         return real;
     }
@@ -761,5 +744,6 @@ public final class Real extends RealtimeNumber implements Comparable {
     private static final LargeInteger MAX_ERROR = (LargeInteger) LargeInteger.ONE
             .E(16).moveHeap();
 
-    private static final long serialVersionUID = 3833184726813784121L;
+    private static final long serialVersionUID = 1L;
+
 }

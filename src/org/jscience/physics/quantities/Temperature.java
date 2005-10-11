@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,57 +22,46 @@ import org.jscience.physics.units.Unit;
 public class Temperature extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.KELVIN;
+    private final static Unit<Temperature> UNIT = SI.KELVIN;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Temperature();
+    private final static Factory<Temperature> FACTORY = new Factory<Temperature>(
+            UNIT) {
+        protected Temperature create() {
+            return new Temperature();
         }
     };
 
     /**
      * Represents a {@link Temperature} amounting to nothing.
      */
-    public final static Temperature ZERO
-        = (Temperature) valueOf(0, SYSTEM_UNIT);
+    public final static Temperature ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Holds the standard temperature (0°C).
      */
-    public final static Temperature STANDARD
-        = (Temperature) valueOf(273.15, SI.KELVIN);
+    public final static Temperature STANDARD = Quantity.valueOf(273.15,
+            SI.KELVIN);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Temperature() {}
-
-    /**
-     * Returns the {@link Temperature} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Temperature}.
-     * @return the specified quantity or a new {@link Temperature} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Temperature}.
-     */
-    public static Temperature temperatureOf(Quantity quantity) {
-        return (Temperature) FACTORY.quantity(quantity);
+    protected Temperature() {
     }
 
     /**
      * Shows {@link Temperature} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Temperature} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Temperature} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Temperature.class, unit);
     }
 
-    private static final long serialVersionUID = -2273050199169159604L;
+    private static final long serialVersionUID = 1L;
+
 }

@@ -1,21 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.models;
-
-import javolution.util.MathLib;
-
-import org.jscience.physics.units.Converter;
-import org.jscience.physics.units.MultiplyConverter;
-import org.jscience.physics.units.NonSI;
-import org.jscience.physics.units.SI;
-import org.jscience.physics.units.Unit;
 
 
 /**
@@ -54,28 +45,29 @@ public final class QuantumModel extends PhysicalModel {
      * @see     org.jscience.physics.units.BaseUnit#setDimension
      */
     protected final void setPhysicalDimensions() {
+        throw new UnsupportedOperationException("Not implemented");
 
         // ENERGY = m²·kg/s² = kg·c²
-        SI.KILOGRAM.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
-                new MultiplyConverter(1E-9 * c * c / ePlus));
-
-        // H_BAR (SECOND * JOULE = SECOND * (KILOGRAM / C^2 )) = 1
-        SI.SECOND.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
-                new MultiplyConverter(1E9 * ePlus / hBar));
-
-        // SPEED_OF_LIGHT (METER / SECOND) = 1
-        SI.METER.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
-                new MultiplyConverter(1E9 * ePlus / (c * hBar)));
-
-        // BOLTZMANN (JOULE / KELVIN = (KILOGRAM / C^2 ) / KELVIN) = 1
-        SI.KELVIN.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
-                new MultiplyConverter(1E-9 * k / ePlus));
-
-        // MAGNETIC CONSTANT (NEWTON / AMPERE^2) = 1
-        SI.AMPERE.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
-                new MultiplyConverter(1E-9 * MathLib.sqrt(µ0 * c * hBar) / ePlus));
-
-        SI.MOLE.setDimension(SI.MOLE, Converter.IDENTITY);
-        SI.CANDELA.setDimension(SI.CANDELA, Converter.IDENTITY);
+//        SI.KILOGRAM.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
+//                new MultiplyConverter(1E-9 * c * c / ePlus));
+//
+//        // H_BAR (SECOND * JOULE = SECOND * (KILOGRAM / C^2 )) = 1
+//        SI.SECOND.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
+//                new MultiplyConverter(1E9 * ePlus / hBar));
+//
+//        // SPEED_OF_LIGHT (METER / SECOND) = 1
+//        SI.METER.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
+//                new MultiplyConverter(1E9 * ePlus / (c * hBar)));
+//
+//        // BOLTZMANN (JOULE / KELVIN = (KILOGRAM / C^2 ) / KELVIN) = 1
+//        SI.KELVIN.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
+//                new MultiplyConverter(1E-9 * k / ePlus));
+//
+//        // MAGNETIC CONSTANT (NEWTON / AMPERE^2) = 1
+//        SI.AMPERE.setDimension(SI.GIGA(NonSI.ELECTRON_VOLT),
+//                new MultiplyConverter(1E-9 * MathLib.sqrt(µ0 * c * hBar) / ePlus));
+//
+//        SI.MOLE.setDimension(SI.MOLE, Converter.IDENTITY);
+//        SI.CANDELA.setDimension(SI.CANDELA, Converter.IDENTITY);
     }
 }

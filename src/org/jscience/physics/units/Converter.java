@@ -1,11 +1,10 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
 import java.io.Serializable;
@@ -97,12 +96,16 @@ public abstract class Converter implements Serializable {
      * @see    #equals
      */
     public int hashCode() {
-        return Float.floatToIntBits((float)derivative(0));
+        int h = Float.floatToIntBits((float)derivative(0));
+        h += ~(h << 9);
+        h ^= (h >>> 14);
+        h += (h << 4);
+        return h ^ (h >>> 10);
     }
 
     /**
      * Concatenates this converter with another converter. The resulting
-     * converter is equivalent to first converting by the other converter,
+     * converter is equivalent to first converting by the specified converter,
      * and then converting by this converter.
      *
      * @param  converter the other converter.
@@ -147,7 +150,7 @@ public abstract class Converter implements Serializable {
             return converter;
         }
 
-        private static final long serialVersionUID = 2139636750805197625L;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -205,6 +208,6 @@ public abstract class Converter implements Serializable {
                    ((Compound)obj)._second.equals(_second)  );
         }
 
-        private static final long serialVersionUID = -8643862591353934054L;
+        private static final long serialVersionUID = 1L;
     }
 }

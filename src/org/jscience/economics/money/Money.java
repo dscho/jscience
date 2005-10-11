@@ -1,22 +1,18 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.economics.money;
 
-import javolution.realtime.LocalContext;
+import javolution.lang.Text;
 
 import org.jscience.physics.quantities.Quantity;
-import org.jscience.physics.units.ConversionException;
+import org.jscience.physics.quantities.QuantityFormat;
 import org.jscience.physics.units.Unit;
-
-
-
 
 /**
  * This class represents something generally accepted as a medium of exchange,
@@ -24,31 +20,19 @@ import org.jscience.physics.units.Unit;
  * is a {@link Currency}.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 5.3, December 19, 2003
+ * @version 2.0, June 16, 2005
  * @see     Currency
  */
 public class Money extends Quantity {
 
     /**
-     * Creates the default factory for money quantities.
+     * Holds the money factory.
      */
-    static {
-        new Factory(Currency.SYSTEM) {
-            protected Quantity newQuantity() {
-                return new Money();
-            }
-        };
-    }
-
-    /**
-     * Represents a {@link Money} amounting to nothing.
-     */
-    public final static Money ZERO = (Money) valueOf(0, Currency.SYSTEM);
-
-    /**
-     * Holds the context key to the output currency.
-     */
-    private static final LocalContext.Variable OUT_CURRENCY = new LocalContext.Variable();
+    final static Factory<Money> FACTORY = new Factory<Money>() {
+        protected Money create() {
+            return new Money();
+        }
+    };
 
     /**
      * Default constructor (allows for derivation).
@@ -57,71 +41,48 @@ public class Money extends Quantity {
     }
 
     /**
-     * Returns the {@link Money} corresponding to the specified quantity.
+     * Returns the currency of this money quantity
      *
-     * @param  quantity a quantity compatible with {@link Money}.
-     * @return the specified quantity or a new {@link Money} instance stated in
-     *         the reference currency.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Money}.
-     * @see    Currency#getReferenceCurrency
+     * @return <code>(Currency) getUnit()</code>.
      */
-    public static Money moneyOf(Quantity quantity) {
-        if (quantity instanceof Money) {
-            return (Money) quantity;
-        } else {
-            Factory factory = Factory.getInstance(Currency
-                    .getReferenceCurrency());
-            return (Money) factory.quantity(quantity);
-        }
+    public Currency getCurrency() {
+        return (Currency) getUnit();
     }
 
     /**
-     * Returns the intrinsic {@link Currency} of this {@link Money} quantity
-     * (the original currency from which the money has been created from). 
+     * Returns the textual representation of this monetary quantity.
+     *  The default number of fraction digits depends on the currency.
      *
-     * @return <code>(Currency) getSystemUnit()</code>.
+     * @return the textual representation of this quantity.
+     * @see Currency#getDefaultFractionDigits(Currency)
      */
-    public Currency getCurrency() {
-        return (Currency) getSystemUnit();
+    public Text toText() {
+    	Money m = this.to((Currency)QuantityFormat.current().getOutputUnit(this));
+        int fraction = Currency.getDefaultFractionDigits(m.getCurrency());
+        if (fraction == 0) {
+            long amount = Math.round(getAmount());
+            return Text.valueOf(amount).concat(
+                    Text.valueOf(' ').concat(getUnit().toText()));
+        } else if (fraction == 2) {
+            long amount = Math.round(getAmount() * 100);
+            return Text.valueOf(amount / 100).concat(Text.valueOf('.')).concat(
+                    Text.valueOf((char) ('0' + (amount % 100) / 10)).concat(
+                            Text.valueOf((char) ('0' + amount % 10)).concat(
+                                    Text.valueOf(' ')).concat(
+                                    getUnit().toText())));
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
      * Shows {@link Money} instances in the specified currency.
      *
      * @param  currency the output currency for {@link Money} instances.
-     * @see    Quantity#getOutputUnit
      */
     public static void showAs(Currency currency) {
-        OUT_CURRENCY.setValue(currency);
+        QuantityFormat.show(Money.class, currency);
     }
 
-    /**
-     * Returns the {@link Currency} unit that this {@link Money} quantity is
-     * showed as.  The default is this {@link Money}'s system unit (the currency
-     * used to create this quantity). This default can be overriden using the
-     * context-local {@link #showAs} static method.
-     *
-     * @return the output currency.
-     */
-    public Unit getOutputUnit() {
-        Currency outCurrency = (Currency) OUT_CURRENCY.getValue();
-        return (outCurrency != null) ? outCurrency : getSystemUnit();
-    }
-
-    /**
-     * Ensures that quantities stated using the specified {@link Currency}
-     * are {@link Money} instances.
-     *
-     * @param  currency the currency to map to a {@link Money} factory.
-     */
-    static void useFor(Currency currency) {
-        new Factory(currency) {
-            protected Quantity newQuantity() {
-                return new Money();
-            }
-        };
-    }
-    
-    private static final long serialVersionUID = -444631427695979639L;
+    private static final long serialVersionUID = 1L;
 }

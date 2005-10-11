@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -28,47 +26,40 @@ public class LuminousIntensity extends Quantity {
     private final static Unit SYSTEM_UNIT = SI.CANDELA;
 
     /**
+     * Holds the associated unit.
+     */
+    private final static Unit<LuminousIntensity> UNIT = SI.CANDELA;
+
+    /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new LuminousIntensity();
+    private final static Factory<LuminousIntensity> FACTORY = new Factory<LuminousIntensity>(
+            UNIT) {
+        protected LuminousIntensity create() {
+            return new LuminousIntensity();
         }
     };
 
     /**
      * Represents a {@link LuminousIntensity} amounting to nothing.
      */
-    public final static LuminousIntensity ZERO
-        = (LuminousIntensity) valueOf(0, SYSTEM_UNIT);
+    public final static LuminousIntensity ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected LuminousIntensity() {}
-
-    /**
-     * Returns the {@link LuminousIntensity} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link LuminousIntensity}.
-     * @return the specified quantity or a new {@link LuminousIntensity} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link LuminousIntensity}.
-     */
-    public static LuminousIntensity luminousIntensityOf(Quantity quantity) {
-        return (LuminousIntensity) FACTORY.quantity(quantity);
+    protected LuminousIntensity() {
     }
 
     /**
      * Shows {@link LuminousIntensity} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link LuminousIntensity} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link LuminousIntensity} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(LuminousIntensity.class, unit);
     }
 
-    private static final long serialVersionUID = 7831921387754179888L;
+    private static final long serialVersionUID = 1L;
+
 }

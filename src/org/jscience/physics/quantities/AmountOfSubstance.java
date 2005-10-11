@@ -1,16 +1,15 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
-import org.jscience.physics.units.SI;
+
 import org.jscience.physics.units.Unit;
+import static org.jscience.physics.units.SI.*;
 
 /**
  * This class represents the number of elementary entities (molecules, for
@@ -18,57 +17,44 @@ import org.jscience.physics.units.Unit;
  * (Système International d'Unités).
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 12, 2005
  */
 public class AmountOfSubstance extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the acceleration unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.MOLE;
+    private final static Unit<AmountOfSubstance> UNIT = MOLE;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new AmountOfSubstance();
+    private final static Factory<AmountOfSubstance> FACTORY = new Factory<AmountOfSubstance>(
+            UNIT) {
+        protected AmountOfSubstance create() {
+            return new AmountOfSubstance();
         }
     };
 
     /**
      * Represents a {@link AmountOfSubstance} amounting to nothing.
      */
-    public final static AmountOfSubstance ZERO
-        = (AmountOfSubstance) valueOf(0, SYSTEM_UNIT);
+    public final static AmountOfSubstance ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected AmountOfSubstance() {}
-
-    /**
-     * Returns the {@link AmountOfSubstance} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link AmountOfSubstance}.
-     * @return the specified quantity or a new {@link AmountOfSubstance} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link AmountOfSubstance}.
-     */
-    public static AmountOfSubstance amountOfSubstanceOf(Quantity quantity) {
-        return (AmountOfSubstance) FACTORY.quantity(quantity);
+    protected AmountOfSubstance() {
     }
 
     /**
      * Shows {@link AmountOfSubstance} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link AmountOfSubstance} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link AmountOfSubstance} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(AmountOfSubstance.class, unit);
     }
 
-    private static final long serialVersionUID = -8526109440857450836L;
+    private static final long serialVersionUID = 1L;
 }

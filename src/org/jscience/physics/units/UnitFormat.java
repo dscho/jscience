@@ -1,21 +1,22 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
 
-import java.io.IOException;
-import java.util.HashMap;
+import javolution.util.FastComparator;
+import javolution.util.FastMap;
 
 import javolution.realtime.LocalContext;
-import javolution.lang.Appendable;
+import javolution.realtime.LocalReference;
+import javolution.lang.Text;
+import javolution.lang.TextBuilder;
 import javolution.lang.TextFormat;
-import javolution.lang.TypeFormat;
+import java.lang.CharSequence;
 
 /**
  * <p> This is the abstract base class for all unit formats.</p>
@@ -31,7 +32,7 @@ import javolution.lang.TypeFormat;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
  */
-public abstract class UnitFormat extends TextFormat {
+public abstract class UnitFormat extends TextFormat<Unit> {
 
     /**
      * Holds the standard unit format. This format is not locale sensitive
@@ -60,20 +61,24 @@ public abstract class UnitFormat extends TextFormat {
     ////////////////////////////////////////////////////////////////////////////
     // UNIT DATABASE OPERATIONS.
     //
+    
     /**
      * Holds the system-wide label-unit mapping.
      */
-    static final HashMap LABEL_TO_UNIT = new HashMap();
+    static final FastMap<String, Unit> LABEL_TO_UNIT
+        = new FastMap<String, Unit>().setKeyComparator(FastComparator.LEXICAL);
 
     /**
      * Holds the system-wide unit-label mapping.
      */
-    static final HashMap UNIT_TO_LABEL = new HashMap();
+    static final FastMap<Unit, String> UNIT_TO_LABEL
+        = new FastMap<Unit, String>();
 
     /**
      * Holds the system-wide alias-unit mapping.
      */
-    static final HashMap ALIAS_TO_UNIT = new HashMap();
+    static final FastMap<String, Unit> ALIAS_TO_UNIT
+        = new FastMap<String, Unit>().setKeyComparator(FastComparator.LEXICAL);
 
     /**
      * Base constructor.
@@ -88,11 +93,11 @@ public abstract class UnitFormat extends TextFormat {
      * @return the unit format for the current thread.
      */
     public static UnitFormat current() {
-        return (UnitFormat) FORMAT.getValue();
+        return (UnitFormat) FORMAT.get();
     }
 
-    private static final LocalContext.Variable FORMAT = new LocalContext.Variable(
-            STANDARD);
+    private static final LocalReference<UnitFormat> FORMAT
+        = new LocalReference<UnitFormat>(STANDARD);
 
     /**
      * Sets the {@link LocalContext local} unit format.
@@ -100,42 +105,8 @@ public abstract class UnitFormat extends TextFormat {
      * @param format the new local/global unit format.
      */
     public static void setCurrent(UnitFormat format) {
-        FORMAT.setValue(format);
+        FORMAT.set(format);
     }
-
-    /**
-     * Attaches a system-wide label to the specified unit.
-     * 
-     * @param  unit the unit being associated to the specified label.
-     * @param  label the new label for the specified unit or <code>null</code>
-     *         to detache the previous label (if any).
-     * @return the specified unit.
-     * @throws IllegalArgumentException if the specified label is a known symbol
-     *         or if the specified label is already attached to a different
-     *         unit (must be detached first).
-     * @deprecated Since 1.1 replaced by {@link Unit#label} 
-     */
-    public static Unit label(Unit unit, String label) {
-        return unit.label(label);
-    }
-
-    /**
-     * Attaches a system-wide alias to the specified unit. 
-     * 
-     * @param  unit the unit being aliased.
-     * @param  alias the alias being attached to the specified unit.
-     * @return the specified unit.
-     * @deprecated Since 1.1 replaced by {@link Unit#alias} 
-     */
-    public static Unit alias(Unit unit, String alias) {
-        synchronized (UnitFormat.class) {
-            ALIAS_TO_UNIT.put(alias, unit);
-        }
-        return unit;
-    }
-
-    //
-    ////////////////////////////////////////////////////////////////////////////
 
     /**
      * Determines if the specified character may be part of a unit
@@ -177,17 +148,20 @@ public abstract class UnitFormat extends TextFormat {
      *         an illegal syntax.
      * @see Character#isSpaceChar(char)
      */
-    public Object parse(CharSequence csq, ParsePosition pos) {
+    public Unit parse(CharSequence csq, 
+            TextFormat.Cursor pos) {
         Unit result = Unit.ONE;
         Unit unit = null;
+        int startIndex;
         boolean inverse = false;
         while (true) {
             int token = nextToken(csq, pos);
             switch (token) {
             case IDENTIFIER:
+            	startIndex = pos.getIndex();
                 CharSequence name = readIdentifier(csq, pos);
                 unit = unitFor(name);
-                check(unit != null, name + " not recognized", csq, pos);
+                check(unit != null, name + " not recognized", csq, startIndex);
                 token = nextToken(csq, pos);
                 if (token == NUMBER) {
                     int power = readNumber(csq, pos);
@@ -198,24 +172,25 @@ public abstract class UnitFormat extends TextFormat {
                         unit = unit.root(root);
                     }
                 }
-                result = inverse ? result.divide(unit) : result.multiply(unit);
+                result = inverse ? result.divide(unit) : result.times(unit);
                 inverse = false;
                 break;
             case NUMBER:
+            	startIndex = pos.getIndex();
                 int number = readNumber(csq, pos);
-                check(number == 1, "Invalid number", csq, pos);
+                check(number == 1, "Invalid number", csq, startIndex);
                 break;
             case OPEN_PARENTHESIS:
-                pos.index++;
+                pos.increment(1);
                 unit = (Unit) parse(csq, pos);
                 token = nextToken(csq, pos);
-                check(token == CLOSE_PARENTHESIS, "')' expected", csq, pos);
-                pos.index++;
-                result = inverse ? result.divide(unit) : result.multiply(unit);
+                check(token == CLOSE_PARENTHESIS, "')' expected", csq, pos.getIndex());
+                pos.increment(1);
+                result = inverse ? result.divide(unit) : result.times(unit);
                 inverse = false;
                 break;
             case DIVIDE:
-                pos.index++;
+                pos.increment(1);
                 inverse = true;
                 break;
             case END_SEQUENCE:
@@ -227,10 +202,10 @@ public abstract class UnitFormat extends TextFormat {
         }
     }
 
-    private int nextToken(CharSequence csq, ParsePosition pos) {
+    private int nextToken(CharSequence csq, Cursor pos) {
         final int length = csq.length();
-        while (pos.index < length) {
-            char c = csq.charAt(pos.index);
+        while (pos.getIndex() < length) {
+            char c = csq.charAt(pos.getIndex());
             if (isUnitIdentifierPart(c)) {
                 return IDENTIFIER;
             } else if (c == '(') {
@@ -240,21 +215,21 @@ public abstract class UnitFormat extends TextFormat {
             } else if ((c == '+') || (c == '-') || isDigit(c)) {
                 return NUMBER;
             } else if (c == '&') { // Ignores escape.
-                int i = pos.index;
+                int i = pos.getIndex();
                 while ((++i < length) && csq.charAt(i) != ';') {
                 }
-                check(i != length, "';' expected", csq, pos);
-                pos.index = i;
+                check(i != length, "';' expected", csq, pos.getIndex());
+                pos.setIndex(i);
             } else if (c == '<') { // Ignores markup.
-                int i = pos.index;
+                int i = pos.getIndex();
                 while ((++i < length) && csq.charAt(i) != '>') {
                 }
-                check(i != length, "';' expected", csq, pos);
-                pos.index = i;
+                check(i != length, "';' expected", csq, pos.getIndex());
+                pos.setIndex(i);
             } else if (c == '/') {
                 return DIVIDE;
             } // Else separator or space ignore.
-            pos.index++;
+            pos.increment(1);
         }
         return END_SEQUENCE;
     }
@@ -275,22 +250,22 @@ public abstract class UnitFormat extends TextFormat {
         return Character.isDigit(c) || (c == '¹') || (c == '²') || (c == '³');
     }
 
-    private CharSequence readIdentifier(CharSequence csq, ParsePosition pos) {
+    private CharSequence readIdentifier(CharSequence csq, Cursor pos) {
         final int length = csq.length();
-        int start = pos.index;
+        int start = pos.getIndex();
         int i = start;
         while ((++i < length) && isUnitIdentifierPart(csq.charAt(i))) {
         }
-        pos.index = i;
+        pos.setIndex(i);
         return csq.subSequence(start, i);
     }
 
-    private int readNumber(CharSequence seq, ParsePosition pos) {
+    private int readNumber(CharSequence seq, Cursor pos) {
         final int length = seq.length();
         int exp = 0;
         boolean isNegative = false;
-        while (pos.index < length) {
-            char c = seq.charAt(pos.index);
+        while (pos.getIndex() < length) {
+            char c = seq.charAt(pos.getIndex());
             if ((c == '-') || (c == '+')) {
                 isNegative = (c == '-');
             } else if (c == '¹') {
@@ -304,16 +279,16 @@ public abstract class UnitFormat extends TextFormat {
             } else {
                 break; // Done.
             }
-            pos.index++;
+            pos.increment(1);
         }
         return isNegative ? -exp : exp;
     }
 
     private void check(boolean expr, String message, CharSequence csq,
-            ParsePosition pos) {
+            int index) {
         if (!expr) {
             throw new IllegalArgumentException(message + " (in " + csq
-                    + " at index " + pos.index + ")");
+                    + " at index " + index + ")");
         }
     }
 
@@ -322,39 +297,46 @@ public abstract class UnitFormat extends TextFormat {
      * this method (which may be overridden) is first to search the label
      * database.
      *
-     * @param  unit the unit to format.
-     * @return the database label, the unit's symbol, some other representation
+     * @param  unit the unit for which the label is searched for.
+     * @return the database label, the unit symbol, some other representation
      *         of the specified unit (e.g. <code>[K+273.15], [m*0.01]</code>) or
-     *         <code>null</code> for units with custom converters or
-     *         {@link ProductUnit} with no label.
+     *         <code>null</code> if the unit has no intrinsic label (e.g. 
+     *         {@link ProductUnit}).
      * @see    #unitFor
      */
-    public String labelFor(Unit unit) {
-        // Label database.
-        synchronized (UnitFormat.class) {
-            String label = (String) UNIT_TO_LABEL.get(unit);
-            if (label != null) {
-                return label;
-            }
-        }
-        // Symbol.
-        if (unit._symbol != null) {
-            return unit._symbol;
-        }
+    public CharSequence labelFor(Unit unit) {
+        // Searches label database.
+        String label = UNIT_TO_LABEL.get(unit);
+        if (label != null) return label;
+            
+        // Look up symbol.
+        String symbol = unit._symbol;
+        if (symbol != null) return symbol;
+        
         // Transformed unit.
         if (unit instanceof TransformedUnit) {
             TransformedUnit tfmUnit = (TransformedUnit) unit;
-            Unit systemUnit = tfmUnit.getSystemUnit();
-            Converter cvtr = tfmUnit.getConverterTo(systemUnit);
+            Unit parentUnit = tfmUnit.getParentUnit();
+            Converter cvtr = tfmUnit.toParentUnit();
             if (cvtr instanceof AddConverter) {
-                return "[" + systemUnit + "+"
-                        + ((AddConverter) cvtr).getOffset() + "]";
+                return Text.valueOf('[').concat(parentUnit.toText()).concat(
+                        Text.valueOf('+')).concat(
+                                Text.valueOf(((AddConverter) cvtr).getOffset())).
+                                concat(Text.valueOf(']'));
             } else if (cvtr instanceof MultiplyConverter) {
-                return "[" + systemUnit + "*"
-                        + ((MultiplyConverter) cvtr).derivative(0) + "]";
+                return Text.valueOf('[').concat(parentUnit.toText()).concat(
+                        Text.valueOf('*')).concat(
+                                Text.valueOf(((MultiplyConverter) cvtr).derivative(0))).
+                                concat(Text.valueOf(']'));
             } else { // Custom converters.
-                return "[?" + systemUnit + "]";
+                return Text.valueOf('[').concat(parentUnit.toText()).concat(
+                        Text.valueOf("?]"));
             }
+        }
+        // Compound unit.
+        if (unit instanceof CompoundUnit) {
+            CompoundUnit cpdUnit = (CompoundUnit) unit;
+            return labelFor(cpdUnit.getMainUnit()); 
         }
         return null;
     }
@@ -370,24 +352,15 @@ public abstract class UnitFormat extends TextFormat {
      * @see    #labelFor
      */
     public Unit unitFor(CharSequence label) {
-        synchronized (UnitFormat.class) {
-            // Label database.
-            Unit unit = (Unit) LABEL_TO_UNIT.get(label);
-            if (unit != null) {
-                return unit;
-            }
-            // Alias database.
-            unit = (Unit) ALIAS_TO_UNIT.get(label);
-            if (unit != null) {
-                return unit;
-            }
-        }
+        // Label database.
+        Unit unit = LABEL_TO_UNIT.get(label);
+        if (unit != null) return unit;
+        // Alias database.
+        unit = ALIAS_TO_UNIT.get(label);
+        if (unit != null) return unit;
         // Symbol.
-        Unit unit = Unit.searchSymbol(label);
-        if (unit != null) {
-            return unit;
-        }
-        return null;
+        unit = Unit.SYMBOLS.get(label);
+        return unit;
     }
 
     /**
@@ -396,12 +369,12 @@ public abstract class UnitFormat extends TextFormat {
     private static final class Standard extends UnitFormat {
 
         // Implements abstract method.
-        public Appendable format(Object obj, Appendable a) throws IOException {
-            Unit unit = (Unit) obj;
-            String label = labelFor(unit);
+        public Text format(Unit unit) {
+            CharSequence label = labelFor(unit);
             if (label != null) {
-                return a.append(label);
+                return Text.valueOf(label);
             }
+            TextBuilder tb = TextBuilder.newInstance();
             if (unit instanceof ProductUnit) {
                 ProductUnit productUnit = (ProductUnit) unit;
                 int invNbr = 0;
@@ -414,9 +387,9 @@ public abstract class UnitFormat extends TextFormat {
                     int root = productUnit.get(i).getRoot();
                     if (pow >= 0) {
                         if (!start) {
-                            a.append('·'); // Separator.
+                            tb.append('·'); // Separator.
                         }
-                        append(a, label, pow, root);
+                        append(tb, label, pow, root);
                         start = false;
                     } else {
                         invNbr++;
@@ -426,11 +399,11 @@ public abstract class UnitFormat extends TextFormat {
                 // Write negative exponents.
                 if (invNbr != 0) {
                     if (start) {
-                        a.append('1'); // e.g. 1/s
+                        tb.append('1'); // e.g. 1/s
                     }
-                    a.append('/');
+                    tb.append('/');
                     if (invNbr > 1) {
-                        a.append('(');
+                        tb.append('(');
                     }
                     start = true;
                     for (int i = 0; i < productUnit.size(); i++) {
@@ -439,43 +412,43 @@ public abstract class UnitFormat extends TextFormat {
                         int root = productUnit.get(i).getRoot();
                         if (pow < 0) {
                             if (!start) {
-                                a.append('·'); // Separator.
+                                tb.append('·'); // Separator.
                             }
-                            append(a, label, -pow, root);
+                            append(tb, label, -pow, root);
                             start = false;
                         }
                     }
                     if (invNbr > 1) {
-                        a.append(')');
+                        tb.append(')');
                     }
                 }
             } else {
                 throw new IllegalArgumentException(
                         "Cannot format given Object as a Unit");
             }
-            return a;
+            return tb.toText();
         }
 
-        private static void append(Appendable a, String symbol, int pow,
-                int root) throws IOException {
-            a.append(symbol);
+        private static void append(TextBuilder tb, CharSequence symbol, int pow,
+                int root) {
+            tb.append(symbol);
             if ((pow != 1) || (root != 1)) {
                 // Write exponent.
                 if ((pow == 2) && (root == 1)) {
-                    a.append('²'); // Square
+                    tb.append('²'); // Square
                 } else if ((pow == 3) && (root == 1)) {
-                    a.append('³'); // Cubic
+                    tb.append('³'); // Cubic
                 } else {
                     // Use general exponent form.
-                    a.append("^" + String.valueOf(pow));
+                    tb.append('^').append(pow);
                     if (root != 1) {
-                        a.append(':' + String.valueOf(root));
+                        tb.append(':').append(root);
                     }
                 }
             }
         }
-
-        private static final long serialVersionUID = -8570194139663281656L;
+       
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -484,41 +457,39 @@ public abstract class UnitFormat extends TextFormat {
     private static final class Html extends UnitFormat {
 
         // Implements abstract method.
-        public Appendable format(Object obj, Appendable a) throws IOException {
-            Unit unit = (Unit) obj;
-            String label = labelFor(unit);
+        public Text format(Unit unit) {
+            CharSequence label = labelFor(unit);
             if (label != null) {
-                return a.append(label);
+                return Text.valueOf(label);
             }
+            TextBuilder tb = TextBuilder.newInstance();
             if (unit instanceof ProductUnit) {
                 ProductUnit productUnit = (ProductUnit) unit;
                 for (int i = 0; i < productUnit.size(); i++) {
                     if (i != 0) {
-                        a.append("&#183;"); // Separator.
+                        tb.append("&#183;"); // Separator.
                     }
                     label = labelFor(productUnit.get(i).getUnit());
                     int pow = productUnit.get(i).getPow();
                     int root = productUnit.get(i).getRoot();
-                    a.append(label);
+                    tb.append(label);
                     if ((pow != 1) || (root != 1)) {
                         // Write exponent.
-                        a.append("<sup>");
-                        TypeFormat.format(pow, a);
+                        tb.append("<sup>").append(pow);
                         if (root != 1) {
-                            a.append(':');
-                            TypeFormat.format(root, a);
+                            tb.append(':').append(root);
                         }
-                        a.append("</sup>");
+                        tb.append("</sup>");
                     }
                 }
             } else {
                 throw new IllegalArgumentException(
                         "Cannot format given Object as a Unit");
             }
-            return a;
+            return tb.toText();
         }
 
-        private static final long serialVersionUID = -2869136085290440811L;
+        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -527,29 +498,27 @@ public abstract class UnitFormat extends TextFormat {
     private static final class Ascii extends UnitFormat {
 
         // Implements abstract method.
-        public Appendable format(Object obj, Appendable a) throws IOException {
-            Unit unit = (Unit) obj;
-            String label = labelFor(unit);
+        public Text format(Unit unit) {
+            CharSequence label = labelFor(unit);
             if (label != null) {
-                return a.append(label);
+                return Text.valueOf(label);
             }
+            TextBuilder tb = TextBuilder.newInstance();
             if (unit instanceof ProductUnit) {
                 ProductUnit productUnit = (ProductUnit) unit;
                 for (int i = 0; i < productUnit.size(); i++) {
                     if (i != 0) {
-                        a.append(' '); // Separator.
+                        tb.append(' '); // Separator.
                     }
                     label = labelFor(productUnit.get(i).getUnit());
                     int pow = productUnit.get(i).getPow();
                     int root = productUnit.get(i).getRoot();
-                    a.append(label);
+                    tb.append(label);
                     if ((pow != 1) || (root != 1)) {
                         // Write exponent.
-                        a.append('^');
-                        TypeFormat.format(pow, a);
+                        tb.append('^').append(pow);
                         if (root != 1) {
-                            a.append(':');
-                            TypeFormat.format(root, a);
+                            tb.append(':').append(root);
                         }
                     }
                 }
@@ -557,10 +526,10 @@ public abstract class UnitFormat extends TextFormat {
                 throw new IllegalArgumentException(
                         "Cannot format given Object as a Unit");
             }
-            return a;
+            return tb.toText();
         }
 
-        private static final long serialVersionUID = 7123895449004145172L;
+        private static final long serialVersionUID = 1L;
     }
 
     // Forces SI/NonSI initialization (load unit database).

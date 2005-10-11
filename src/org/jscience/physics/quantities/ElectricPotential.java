@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,52 +22,40 @@ import org.jscience.physics.units.Unit;
 public class ElectricPotential extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.VOLT.getDimension();
+    private final static Unit<ElectricPotential> UNIT = SI.VOLT;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new ElectricPotential();
+    private final static Factory<ElectricPotential> FACTORY = new Factory<ElectricPotential>(
+            UNIT) {
+        protected ElectricPotential create() {
+            return new ElectricPotential();
         }
-    }.useFor(SI.VOLT);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
-     * Represents an {@link ElectricPotential} amounting to nothing.
+     * Represents a {@link ElectricPotential} amounting to nothing.
      */
-    public final static ElectricPotential ZERO
-        = (ElectricPotential) valueOf(0, SYSTEM_UNIT);
+    public final static ElectricPotential ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected ElectricPotential() {}
-
-    /**
-     * Returns the {@link ElectricPotential} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link ElectricPotential}.
-     * @return the specified quantity or a new {@link ElectricPotential} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link ElectricPotential}.
-     */
-    public static ElectricPotential electricPotentialOf(Quantity quantity) {
-        return (ElectricPotential) FACTORY.quantity(quantity);
+    protected ElectricPotential() {
     }
 
     /**
      * Shows {@link ElectricPotential} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link ElectricPotential} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link ElectricPotential} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(ElectricPotential.class, unit);
     }
 
-    private static final long serialVersionUID = -3351269391643146413L;
+    private static final long serialVersionUID = 1L;
+
 }

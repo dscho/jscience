@@ -4,13 +4,8 @@
     in consequence,the operations each permits. For example, the summation
     of a {@link org.jscience.physics.quantities.Length} and a {@link org.jscience.physics.quantities.Duration}
     is not allowed by the standard model, but is quite valid in a relativistic context.</p>
-<p> Also, the current model specifies the default output units for physical
-    quantities (Ref. {@link org.jscience.physics.quantities.Quantity#getOutputUnit}).</p>
-<p> <i> Note: These models are similar to the physical models from the
-    <a href="http://www.fnal.gov/docs/working-groups/fpcltf/Pkg/SIunits/doc/SIunits.html">
-    SIunit</a> C++ library, except that the current model is selected at run-time.
-    In addition, models are context-local, different models can be used concurrently
-    in {@link javolution.realtime.LocalContext}.</i></p>
+<p> The current model is {@link javolution.realtime.LocalContext context-local},
+    different models can be used concurrently within the same application.</p>
 <p> The names and characteristics of the models are presented in the following table:</p>
 
 <table border="1" cellspacing="1">

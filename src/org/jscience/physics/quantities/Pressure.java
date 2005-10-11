@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,56 +22,39 @@ import org.jscience.physics.units.Unit;
 public class Pressure extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.PASCAL.getDimension();
+    private final static Unit<Pressure> UNIT = SI.PASCAL;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Pressure();
+    private final static Factory<Pressure> FACTORY = new Factory<Pressure>(UNIT) {
+        protected Pressure create() {
+            return new Pressure();
         }
-    }.useFor(SI.PASCAL);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
      * Represents a {@link Pressure} amounting to nothing.
      */
-    public final static Pressure ZERO = (Pressure) valueOf(0, SYSTEM_UNIT);
-
-    /**
-     * Holds the standard atmosphere pressure (exact).
-     */
-    public final static Pressure STANDARD
-        = (Pressure) valueOf(101325, SYSTEM_UNIT);
+    public final static Pressure ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Pressure() {}
-
-    /**
-     * Returns the {@link Pressure} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Pressure}.
-     * @return the specified quantity or a new {@link Pressure} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Pressure}.
-     */
-    public static Pressure pressureOf(Quantity quantity) {
-        return (Pressure) FACTORY.quantity(quantity);
+    protected Pressure() {
     }
 
     /**
      * Shows {@link Pressure} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Pressure} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Pressure} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Pressure.class, unit);
     }
 
-    private static final long serialVersionUID = -4550646071797887005L;
+    private static final long serialVersionUID = 1L;
+
 }

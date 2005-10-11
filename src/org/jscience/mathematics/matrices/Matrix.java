@@ -1,11 +1,10 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.matrices;
 
@@ -13,26 +12,24 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javolution.realtime.ArrayPool;
+import org.jscience.mathematics.numbers.Float64;
+
 import javolution.realtime.ConcurrentContext;
 import javolution.realtime.PoolContext;
 import javolution.realtime.RealtimeObject;
-import javolution.realtime.ConcurrentContext.Logic;
-import javolution.util.MathLib;
+import javolution.util.FastTable;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
-import org.jscience.mathematics.numbers.Complex;
-import org.jscience.mathematics.numbers.Integer32;
-import org.jscience.mathematics.numbers.Real;
-
 /**
- * <p> This class represents a rectangular array of {@link Operable}
- *     objects. It may be used to resolve system of linear equations
- *     involving <i>any kind</i> of {@link Operable} elements
- *     (e.g. {@link Real}, {@link Complex}, 
+ * <p> This class represents an immutable matrix of {@link Operable} elements.
+ *     It may be used to resolve system of linear equations involving 
+ *     <i>any kind</i> of {@link Operable} elements
+ *     (e.g. {@link org.jscience.mathematics.numbers.Real Real}, 
+ *     {@link org.jscience.mathematics.numbers.Complex Complex}, 
  *     {@link org.jscience.physics.quantities.Quantity Quantity},
  *     {@link org.jscience.mathematics.functions.Function Function}, etc).</p>
  *
@@ -41,19 +38,21 @@ import org.jscience.mathematics.numbers.Real;
  *     be used to resolve system of linear equations involving matrices
  *     (for which the multiplication is not commutative).</p>
  *
- * <p> <b>Implementation Note:</b> This class uses {@link ConcurrentContext}
- *     to accelerate calculations on multi-processor systems.</p>
+ * <p> <b>Implementation Note:</b> This class uses {@link ConcurrentContext 
+ *     concurrent contexts} to accelerate calculations on multi-processor
+ *     systems.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 6, 2004
  * @see <a href="http://mathworld.wolfram.com/Matrix.html">
  *      Matrix -- from MathWorld</a> 
  */
-public class Matrix extends RealtimeObject implements Operable, Serializable {
+public class Matrix<O extends Operable<O>> extends RealtimeObject implements
+        Operable<Matrix<O>>, Serializable {
 
     /**
      * Holds the default XML representation for {@link Matrix} and its
-     * sub-classes.  This representation consists of the matrix's 
+     * sub-classes.  This representation consists of the matrix 
      * elements as nested XML elements and the matrix <code>row</code> and
      * <code>column</code> as attributes. For example: <pre>
      *    &lt;math:Matrix row="2" column="1"&gt;
@@ -61,108 +60,114 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      *      &lt;math:Complex real="0.0" imaginary="1.0"/&gt;
      *    &lt;/math:Matrix&gt;</pre>
      */
-    protected static final XmlFormat MATRIX_XML = new XmlFormat(Matrix.class) {
-        public void format(Object obj, XmlElement xml) {
-            Matrix matrix = (Matrix) obj;
-            xml.setAttribute("row", matrix.n);
-            xml.setAttribute("column", matrix.m);
-            final int nm = matrix.n * matrix.m;
+    protected static final XmlFormat<Matrix> XML = new XmlFormat<Matrix>(
+            Matrix.class) {
+        public void format(Matrix matrix, XmlElement xml) {
+            xml.setAttribute("rows", matrix.m);
+            xml.setAttribute("columns", matrix.n);
+            final int nm = matrix.m * matrix.n;
             for (int i = 0; i < nm; i++) {
                 xml.add(matrix.o[i]);
             }
         }
 
-        public Object parse(XmlElement xml) {
-            return valueOf(xml.getAttribute("row", 1), xml.getAttribute(
-                    "column", 1), xml);
+        public Matrix parse(XmlElement xml) {
+        	int rows = xml.getAttribute("rows", 1);
+        	int columns = xml.getAttribute("columns", 1);
+        	FastTable elements = FastTable.newInstance();
+        	while (xml.hasNext()) {
+        		elements.add(xml.getNext());
+        	}
+            return Matrix.valueOf(rows, columns, elements);
         }
     };
 
     /**
-     * Holds the matrix factories.
+     * The array of operable objects (M[i,j] = o[i*n+j], i < m, j < n).
      */
-    private static final MatrixFactory[] FACTORIES;
-    static {
-        FACTORIES = new MatrixFactory[28];
-        for (int i = 0; i < FACTORIES.length; i++) {
-            FACTORIES[i] = new MatrixFactory(ArrayPool.MIN_LENGTH << i);
-        }
-    }
-
-    /**
-     * The array of operable objects (M[i][j] = o[i*m+j], i < n, j < m).
-     */
-    final Operable[] o;
+    final O[] o;
 
     /**
      * Holds the number of rows.
      */
-    int n;
+    int m;
 
     /**
      * Holds the number of columns.
      */
-    int m;
+    int n;
 
     /**
      * Base constructor.
      * 
-     * @param  elements the element array.
+     * @param size the maximum number of elements.
      */
-    Matrix(Operable[] elements) {
-        o = elements;
+    Matrix(int size) {
+        this.o = (O[]) new Operable[size];
     }
 
     /**
-     * Creates a matrix of specified dimensions.
+     * Creates a matrix from the specified 2-dimensional array of 
+     * {@link Operable} objects.
+     * The first dimension being the row and the second being the column.
      * 
-     * @param  rows the number of rows.
-     * @param  columns the number of columns.
+     * <p>Note: It is safe to reuse the specified array as it is not internally
+     *          referenced by the matrix being returned.</p>
+     * @param elements the array of {@link Operable} elements.
+     * @throws IllegalArgumentException if rows have different length.
      */
-    public Matrix(int rows, int columns) {
-        this(new Operable[rows * columns]);
-        this.n = rows;
-        this.m = columns;
-    }
-
-    /**
-     * Returns a n-by-m matrix filled with <code>null</code> elements.
-     *
-     * @param  n the number of rows.
-     * @param  m the number of columns.
-     * @return a n-by-m matrix non-initialized (a {@link Vector} instance
-     *         if <code>m == 1</code>).
-     */
-    public static Matrix newInstance(int n, int m) {
-        if (m == 1) {
-            return Vector.newInstance(n);
-        } else {
-            final int size = n * m;
-            Matrix M = (Matrix) FACTORIES[ArrayPool.indexFor(size)].object();
-            M.n = n;
-            M.m = m;
-            return M;
+    public Matrix(O[][] elements) {
+        this.m = elements.length;
+        this.n = elements[0].length;
+        this.o = (O[]) new Operable[m * n];
+        for (int i = 0; i < m; i++) {
+            if (elements[i].length != n)
+                throw new IllegalArgumentException(
+                        "All rows must have the same length.");
+            System.arraycopy(elements[i], 0, o, i * n, n);
         }
     }
 
     /**
-     * Returns a n-by-m matrix filled with the specified diagonal element
+     * Returns a m-by-n matrix filled with the specified diagonal element
      * and the specified non-diagonal element.
      * This constructor may be used to create an identity matrix
-     * (e.g. <code>valueOf(n, n, ONE, ZERO)</code>).
+     * (e.g. <code>valueOf(m, m, ONE, ZERO)</code>).
      *
-     * @param  n the number of rows.
-     * @param  m the number of columns.
+     * @param  m the number of rows.
+     * @param  n the number of columns.
      * @param  diagonal the diagonal element.
      * @param  other the non-diagonal element.
-     * @return a n-by-m matrix with <code>d</code> on the diagonal and
+     * @return a m-by-n matrix with <code>d</code> on the diagonal and
      *         <code>o</code> elsewhere.
      */
-    public static Matrix valueOf(int n, int m, Operable diagonal, Operable other) {
-        Matrix M = newInstance(n, m);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                M.o[i * m + j] = (i != j) ? other : diagonal;
+    public static <O extends Operable<O>> Matrix<O> valueOf(int m, int n,
+            O diagonal, O other) {
+        Matrix<O> M = newInstance(m, n);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                M.o[i * n + j] = (i != j) ? other : diagonal;
+            }
+        }
+        return M;
+    }
+
+    /**
+     * Returns a matrix from a 2-dimensional array of <code>double</code>
+     * values (convenience method). The first dimension being the number
+     * of rows and the second being the number of columns ([m,n]).
+     *
+     * @param  values the array of <code>double</code> values.
+     * @return the corresponding matrix of {@link Float64} elements.
+     * @throws IllegalArgumentException if rows have different length.
+     */
+    public static Matrix<Float64> valueOf(double[][] values) {
+        int m = values.length;
+        int n = values[0].length;
+        Matrix<Float64> M = newInstance(m, n);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                M.set(i, j, Float64.valueOf(values[i][j]));
             }
         }
         return M;
@@ -170,120 +175,109 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
 
     /**
      * Returns a matrix from a 2-dimensional array of {@link Operable} objects.
-     * The first dimension being the row and the second being the column.
+     * The first dimension being the number of rows and the second being the
+     * number of columns ([m,n]).
      *
      * <p>Note: It is safe to reuse the specifed array as it is not internally
      *          referenced by the matrix being returned.</p>
      *
      * @param  elements the array of {@link Operable} objects.
      * @return the matrix having the specified components.
-     * @throws IllegalArgumentException all rows must have the same length.
+     * @throws IllegalArgumentException if rows have different length.
      */
-    public static Matrix valueOf(Operable[][] elements) {
-        int n = elements.length;
-        int m = elements[0].length;
-        Matrix M = newInstance(n, m);
-        for (int i = 0; i < n; i++) {
-            if (elements[i].length == m) {
-                System.arraycopy(elements[i], 0, M.o, i * m, m);
-            } else {
+    public static <O extends Operable<O>> Matrix<O> valueOf(O[][] elements) {
+        int m = elements.length;
+        int n = elements[0].length;
+        Matrix<O> M = newInstance(m, n);
+        for (int i = 0; i < m; i++) {
+            if (elements[i].length != n)
                 throw new IllegalArgumentException(
                         "All rows must have the same length.");
+            System.arraycopy(elements[i], 0, M.o, i * n, n);
+        }
+        return M;
+    }
+
+    /**
+     * Returns a m-by-n matrix populated from the specified collection of
+     * {@link Operable} objects (rows first).
+     *
+     * @param  m the number of rows.
+     * @param  n the number of columns.
+     * @param  elements the collection of {@link Operable} objects.
+     * @return the matrix having the specified size and elements.
+     * @throws MatrixException if <code>elements.size() != m * n</code>
+     * @throws ClassCastException if any of the element is not {@link Operable}.
+     */
+    public static <O extends Operable<O>> Matrix<O> valueOf(int m, int n,
+            Collection<O> elements) {
+        if (elements.size() != m * n)
+            throw new MatrixException(m * n + " elements expected but found "
+                    + elements.size());
+        Matrix<O> M = newInstance(m, n);
+        Iterator<O> iterator = elements.iterator();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                M.o[i * n + j] = iterator.next();
             }
         }
         return M;
     }
 
     /**
-     * Returns a n-by-m matrix populated from the specified collection of
-     * {@link Operable} objects (rows first).
+     * Returns the number of rows for this matrix.
      *
-     * @param  n the number of rows.
-     * @param  m the number of columns.
-     * @param  elements the collection of {@link Operable} objects.
-     * @return the matrix having the specified size and elements.
-     * @throws MatrixException if <code>elements.size() != n * m</code>
-     * @throws ClassCastException if any of the element is not {@link Operable}.
+     * @return m, the number of rows.
      */
-    public static Matrix valueOf(int n, int m, Collection elements) {
-        if (elements.size() == n * m) {
-            Matrix M = newInstance(n, m);
-            Iterator iterator = elements.iterator();
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < m; j++) {
-                    M.o[i * m + j] = (Operable) iterator.next();
-                }
-            }
-            return M;
-        } else {
-            throw new MatrixException(n * m
-                    + " elements expected but found " + elements.size());
-        }
-    }
-
-    /**
-     * Returns the row dimension of this matrix.
-     *
-     * @return n, the number of rows.
-     */
-    public final int getRowDimension() {
-        return n;
-    }
-
-    /**
-     * Returns the column dimension of this matrix.
-     *
-     * @return m, the number of columns.
-     */
-    public final int getColumnDimension() {
+    public final int getNumberOfRows() {
         return m;
+    }
+
+    /**
+     * Returns the number of columns for this matrix.
+     *
+     * @return n, the number of columns.
+     */
+    public final int getNumberOfColumns() {
+        return n;
     }
 
     /**
      * Indicates if this matrix is square.
      *
-     * @return <code>getRowDimension == getColumnDimension</code>
+     * @return <code>nbrOfRows() == nbrOfColumns()</code>
      */
     public final boolean isSquare() {
-        return n == m;
+        return m == n;
     }
 
     /**
      * Returns a single element from this matrix.
      *
-     * @param  i the row index (range [0..n[).
-     * @param  j the column index (range [0..m[).
+     * @param  i the row index (range [0..m[).
+     * @param  j the column index (range [0..n[).
      * @return the element read at [i,j].
-     * @throws IndexOutOfBoundsException <code>i &gt;= getRowDimension() |
-     *         j &gt;= getColumnDimension()</code>.
+     * @throws IndexOutOfBoundsException <code>
+     *         (i < 0) || (i >= m)) || (j < 0) || (j >= n))</code>
      */
-    public final Operable get(int i, int j) {
-        if ((i < n) && (j < m)) {
-            return o[i * m + j];
-        } else {
+    public final O get(int i, int j) {
+        if ((i < 0) || (i >= m) || (j < 0) || (j >= n))
             throw new IndexOutOfBoundsException("i: " + i + ", j: " + j
                     + " (matrix[" + m + "," + n + "])");
-        }
+        return o[i * n + j];
     }
 
     /**
-     * Sets a single element of this matrix.
+     * Sets a element from this matrix.
      *
-     * @param  i the row index (range [0..n[).
-     * @param  j the column index (range [0..m[).
-     * @param  element the element set at [i,j].
-     * @throws IndexOutOfBoundsException <code>i &gt;= getRowDimension() |
-     *         j &gt;= getColumnDimension()</code>.
+     * @param  i the row index (range [0..m[).
+     * @param  j the column index (range [0..n[).
+     * @param  element the element at [i,j].
      */
-    public final void set(int i, int j, Operable element) {
-        if ((i < n) && (j < m)) {
-            o[i * m + j] = element;
-        } else {
-            throw new IndexOutOfBoundsException("i: " + i + ", j: " + j
-                    + " (matrix[" + m + "," + n + "])");
-        }
+    final void set(int i, int j, O element) {
+    	o[i * n + j] = element;
     }
-
+    
     /**
      * Returns a sub-matrix of this matrix given the range of its rows and
      * columns indices.
@@ -294,13 +288,13 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @param  j1 the final column index.
      * @return <code>THIS(i0:i1, j0:j1)</code>
      */
-    public final Matrix getMatrix(int i0, int i1, int j0, int j1) {
-        int Mn = i1 - i0 + 1;
-        int Mm = j1 - j0 + 1;
-        Matrix M = newInstance(Mn, Mm);
-        for (int i = 0; i < Mn; i++) {
-            for (int j = 0; j < Mm; j++) {
-                M.o[i * Mm + j] = this.o[(i + i0) * m + j + j0];
+    public final Matrix<O> getMatrix(int i0, int i1, int j0, int j1) {
+        int Mm = i1 - i0 + 1;
+        int Mn = j1 - j0 + 1;
+        Matrix<O> M = newInstance(Mm, Mn);
+        for (int i = 0; i < Mm; i++) {
+            for (int j = 0; j < Mn; j++) {
+                M.o[i * Mn + j] = this.o[(i + i0) * n + j + j0];
             }
         }
         return M;
@@ -314,13 +308,13 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @param  columns the indices of the columns to return.
      * @return the sub-matrix from the specified rows and columns.
      */
-    public final Matrix getMatrix(int[] rows, int[] columns) {
-        int Mn = rows.length;
-        int Mm = columns.length;
-        Matrix M = newInstance(Mn, Mm);
-        for (int i = 0; i < Mn; i++) {
-            for (int j = 0; j < Mm; j++) {
-                M.o[i * Mm + j] = this.o[rows[i] * m + columns[j]];
+    public final Matrix<O> getMatrix(int[] rows, int[] columns) {
+        int Mn = columns.length;
+        int Mm = rows.length;
+        Matrix<O> M = newInstance(Mm, Mn);
+        for (int i = 0; i < Mm; i++) {
+            for (int j = 0; j < Mn; j++) {
+                M.o[i * Mn + j] = this.o[rows[i] * n + columns[j]];
             }
         }
         return M;
@@ -329,15 +323,15 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
     /**
      * Returns the {@link LUDecomposition} of this {@link Matrix}.
      * Numerical stability is guaranteed  (through pivoting) if the
-     * {@link Operable} elements of this matrix are derived
-     * from <code>java.lang.Number</code>. For others elements types,
-     * numerical stability can be ensured by setting the 
-     * {@link LUDecomposition#setPivotComparator local pivot comparator}.
+     * {@link Operable} elements of this matrix are derived from 
+     * {@link org.jscience.mathematics.numbers.Numeric Numeric}.
+     * For others elements types, numerical stability can be ensured by setting
+     * a local {@link LUDecomposition#setPivotComparator pivot comparator}.
      *
      * @return the decomposition of this matrix into a product of upper and
      *         lower triangular matrices.
      */
-    public final LUDecomposition lu() {
+    public final LUDecomposition<O> lu() {
         return LUDecomposition.valueOf(this);
     }
 
@@ -348,15 +342,15 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return <code>true</code> if this matrix and the specified object are
      *         considered equal; <code>false</code> otherwise.
      */
-    public final boolean equals(Object that) {
+    public boolean equals(Object that) {
         if (this == that) {
             return true;
         } else if (that instanceof Matrix) {
             Matrix M = (Matrix) that;
-            if (M.n != this.n || M.m != this.m) {
+            if (M.m != this.m || M.n != this.n) {
                 return false;
             } else {
-                for (int i = n * m; i > 0;) {
+                for (int i = m * n; i > 0;) {
                     if (!this.o[--i].equals(M.o[i])) {
                         return false;
                     }
@@ -375,9 +369,9 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return this matrix hash code value.
      * @see    #equals
      */
-    public final int hashCode() {
+    public int hashCode() {
         int code = 0;
-        for (int i = n * m; i > 0;) {
+        for (int i = m * n; i > 0;) {
             code += o[--i].hashCode();
         }
         return code;
@@ -388,9 +382,9 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      *
      * @return <code>-this</code>.
      */
-    public final Matrix negate() {
-        Matrix M = newInstance(n, m);
-        for (int i = n * m; i > 0;) {
+    public Matrix<O> opposite() {
+        Matrix<O> M = newInstance(m, n);
+        for (int i = m * n; i > 0;) {
             M.o[--i] = this.o[i].opposite();
         }
         return M;
@@ -403,10 +397,10 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return  <code>this + that</code>.
      * @throws  MatrixException matrices's dimensions are different.
      */
-    public final Matrix add(Matrix that) {
-        if ((this.n == that.n) && (this.m == that.m)) {
-            Matrix M = newInstance(n, m);
-            for (int i = n * m; i > 0;) {
+    public Matrix<O> plus(Matrix<O> that) {
+        if ((this.m == that.m) && (this.n == that.n)) {
+            Matrix<O> M = newInstance(m, n);
+            for (int i = m * n; i > 0;) {
                 M.o[--i] = this.o[i].plus(that.o[i]);
             }
             return M;
@@ -422,10 +416,10 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return <code>this - that</code>.
      * @throws MatrixException matrices's dimensions are different.
      */
-    public final Matrix subtract(Matrix that) {
-        if ((this.n == that.n) && (this.m == that.m)) {
-            Matrix M = newInstance(n, m);
-            for (int i = n * m; i > 0;) {
+    public Matrix<O> minus(Matrix<O> that) {
+        if ((this.m == that.m) && (this.n == that.n)) {
+            Matrix<O> M = newInstance(m, n);
+            for (int i = m * n; i > 0;) {
                 M.o[--i] = this.o[i].plus(that.o[i].opposite());
             }
             return M;
@@ -435,14 +429,14 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
     }
 
     /**
-     * Return the multiplication of this matrix with the specified factor.
+     * Return the product of this matrix with the specified factor.
      *
      * @param  k the coefficient multiplier.
      * @return <code>k * M</code>.
      */
-    public final Matrix multiply(Operable k) {
-        Matrix M = newInstance(n, m);
-        for (int i = n * m; i > 0;) {
+    public Matrix<O> times(O k) {
+        Matrix<O> M = newInstance(m, n);
+        for (int i = m * n; i > 0;) {
             M.o[--i] = k.times(this.o[i]);
         }
         return M;
@@ -450,111 +444,72 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
 
     /**
      * Returns the product of this matrix with the one specified.
-
-     * <p> Note: This method uses {@link ConcurrentContext} to reduce garbage 
-     *           and accelerate calculation on multi-processor systems.</p>  
      *
      * @param  that the matrix multiplier.
      * @return <code>this * that</code>.
      * @throws MatrixException <code>M.getRowDimension()
      *         != this.getColumnDimension()</code>.
      */
-    public Matrix multiply(Matrix that) {
-        if (this.m == that.n) {
-            if (m < 5) { // Sequential calculation.
-                Matrix M = newInstance(this.n, that.m);
-                for (int i = 0; i < this.n; i++) {
-                    final int i_m = i * m;
-                    for (int j = 0; j < that.m; j++) {
-                        Operable sum = this.o[i_m].times(that.o[j]);
-                        for (int k = 1; k < this.m; k++) {
-                            sum = sum.plus(this.o[i_m + k].times(that.o[k
-                                    * that.m + j]));
-                        }
-                        M.o[i * M.m + j] = sum;
+    public Matrix<O> times(Matrix<O> that) {
+        if (this.n == that.m) {
+            Matrix<O> M = newInstance(this.m, that.n);
+            for (int i = 0; i < this.m; i++) {
+                final int i_m = i * n;
+                for (int j = 0; j < that.n; j++) {
+                    O sum = this.o[i_m].times(that.o[j]);
+                    for (int k = 1; k < this.n; k++) {
+                        sum = sum.plus(this.o[i_m + k].times(that.o[k * that.n
+                                + j]));
                     }
+                    M.o[i * M.n + j] = sum;
                 }
-                return M;
-            } else { // Concurrent calculation.
-                return concurrentMultiply(that);
             }
+            return M;
         } else {
             throw new MatrixException();
         }
     }
 
-    private Matrix concurrentMultiply(Matrix that) {
-        ConcurrentContext.enter();
-        try {
-            Matrix M = newInstance(this.n, that.m);
-            for (int i = 0; i < this.n; i++) {
-                for (int j = 0; j < that.m; j++) {
-                    ConcurrentContext.execute(MULTIPLY_ROW_COLUMN, this, that,
-                            M, Integer32.valueOf(i), Integer32.valueOf(j));
-                }
-            }
-            return M; // No need to export result, only the concurrent
-        } finally { // logic is performed in a pool context.
-            ConcurrentContext.exit();
-        }
-    }
-
-    private static final Logic MULTIPLY_ROW_COLUMN = new Logic() {
-
-        public void run(Object[] args) {
-            Matrix left = (Matrix) args[0];
-            Matrix right = (Matrix) args[1];
-            Matrix result = (Matrix) args[2];
-            int i = ((Integer32) args[3]).intValue();
-            int j = ((Integer32) args[4]).intValue();
-            int i_m = i * left.m;
-            Operable sum = left.o[i_m].times(right.o[j]);
-            for (int k = 1; k < left.m; k++) {
-                sum = sum.plus(left.o[i_m + k].times(right.o[k * right.m + j]));
-            }
-            result.o[i * result.m + j] = sum;
-            sum.move(ContextSpace.OUTER);
-        }
-    };
-
     /**
      * Returns this matrix divided by the one specified.
      *
      * @param  that the matrix divisor.
-     * @return <code>this.multiply(that.inverse())</code>.
+     * @return <code>this / that</code>.
+     * @throws MatrixException if that matrix is not square or dimensions 
+     *         do not match.
      */
-    public Matrix divide(Matrix that) {
-        return this.multiply(that.inverse());
+    public Matrix<O> divide(Matrix<O> that) {
+        return this.times(that.reciprocal());
     }
 
     /**
-     * Returns the pseudo-inverse of this matrix. The matrix doesn't need
-     * to be square and can be ill-formed. Stability is guaranteed.
+     * Returns the reciprocal of this matrix (must be square).
      *
-     * @return the pseudo-inverse of this matrix.
+     * @return <code>1 / this</code>
+     * @throws MatrixException if this matrix is not square.
+     * @see     #lu
      */
-    public Matrix pseudoInverse() {
-        Matrix thisTranspose = this.transpose();
-        return (thisTranspose.multiply(this)).inverse().multiply(thisTranspose);
+    public Matrix<O> reciprocal() {
+        if (!isSquare())
+            throw new MatrixException("Matrix not square");
+        return lu().inverse();
     }
 
     /**
-     * Returns the inverse of this matrix.
+     * Returns the inverse or pseudo-inverse if this matrix if not square.
      *
      * <p> Note: To resolve the equation <code>A * X = B</code>,
      *           it is usually faster to calculate <code>A.lu().solve(B)</code>
      *           rather than <code>A.inverse().times(B)</code>.</p>
      *
-     * @return  the inverse or this matrix or its {@link #pseudoInverse} if 
-     *          the matrix is not square.
+     * @return  the inverse or pseudo-inverse of this matrix.
      * @see     #lu
      */
-    public Matrix inverse() {
-        if (isSquare()) {
+    public Matrix<O> inverse() {
+        if (isSquare())
             return lu().inverse();
-        } else {
-            return pseudoInverse();
-        }
+        Matrix<O> thisTranspose = this.transpose();
+        return (thisTranspose.times(this)).inverse().times(thisTranspose);
     }
 
     /**
@@ -566,26 +521,26 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      *         and <code>that</code>.
      * @since  January 2002, by Jonathan Grattage (jjg99c@cs.nott.ac.uk).
      */
-    public Matrix tensor(Matrix that) {
-        Matrix C = newInstance(this.n * that.n, this.m * that.m);
+    public Matrix<O> tensor(Matrix<O> that) {
+        Matrix<O> C = newInstance(this.m * that.m, this.n * that.n);
         boolean endCol = false;
         int cCount = 0, rCount = 0;
         int subMatrix = 0, iref = 0, jref = 0;
-        for (int j = 0; j < m; j++) {
-            for (int i = 0; i < n; i++) {
-                Matrix X = that.multiply(o[i * this.m + j]);
-                rCount = subMatrix % n;
+        for (int j = 0; j < n; j++) {
+            for (int i = 0; i < m; i++) {
+                Matrix<O> X = that.times(o[i * this.n + j]);
+                rCount = subMatrix % m;
                 if (rCount > 0) {
                     endCol = true;
                 }
                 if ((rCount == 0) && (endCol == true)) {
                     cCount++;
                 }
-                for (int y = 0; y < that.m; y++) {
-                    for (int x = 0; x < that.n; x++) {
-                        iref = x + (rCount * that.n);
-                        jref = y + (cCount * that.n);
-                        C.o[iref * C.m + jref] = X.get(x, y);
+                for (int y = 0; y < that.n; y++) {
+                    for (int x = 0; x < that.m; x++) {
+                        iref = x + (rCount * that.m);
+                        jref = y + (cCount * that.m);
+                        C.o[iref * C.n + jref] = X.get(x, y);
                     }
                 }
                 subMatrix++;
@@ -602,16 +557,16 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
     public Text toText() {
         TextBuilder cb = TextBuilder.newInstance();
         cb.append("{");
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < m; i++) {
             cb.append("{");
-            for (int j = 0; j < m; j++) {
-                cb.append(o[i * m + j]);
-                if (j != m - 1) {
+            for (int j = 0; j < n; j++) {
+                cb.append(o[i * n + j]);
+                if (j != n - 1) {
                     cb.append(", ");
                 }
             }
-            if (i != n - 1) {
-                cb.append("},\n ");
+            if (i != m - 1) {
+                cb.append("},\n");
             }
         }
         cb.append("}}");
@@ -623,11 +578,11 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      *
      * @return <code>A'</code>.
      */
-    public Matrix transpose() {
-        Matrix M = newInstance(m, n);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                M.o[j * n + i] = o[i * m + j];
+    public Matrix<O> transpose() {
+        Matrix<O> M = newInstance(n, m);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                M.o[j * m + i] = o[i * n + j];
             }
         }
         return M;
@@ -642,8 +597,8 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return <code>lu().determinant()</code>
      * @throws MatrixException matrix is not square.
      */
-    public Operable determinant() {
-        return lu().determinant();
+    public O determinant() {
+        return (O) lu().determinant();
     }
 
     /**
@@ -657,19 +612,19 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @throws MatrixException matrix is not square or its dimension
      *         is less than 2.
      */
-    public Operable cofactor(int i, int j) {
-        Matrix M = newInstance(n - 1, m - 1);
+    public O cofactor(int i, int j) {
+        Matrix<O> M = newInstance(m - 1, n - 1);
         int row = 0;
-        for (int k1 = 0; k1 < n; k1++) {
+        for (int k1 = 0; k1 < m; k1++) {
             if (k1 == i) {
                 continue;
             }
             int column = 0;
-            for (int k2 = 0; k2 < m; k2++) {
+            for (int k2 = 0; k2 < n; k2++) {
                 if (k2 == j) {
                     continue;
                 }
-                M.o[row * M.m + column] = o[k1 * m + k2];
+                M.o[row * M.n + column] = o[k1 * n + k2];
                 column++;
             }
             row++;
@@ -682,10 +637,10 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      *
      * @return the sum of the diagonal elements.
      */
-    public Operable trace() {
-        Operable sum = o[0];
-        for (int i = MathLib.min(n, m); i > 1;) {
-            sum = sum.plus(o[--i * m + i]);
+    public O trace() {
+        O sum = o[0];
+        for (int i = MathLib.min(m, n); i > 1;) {
+            sum = sum.plus(o[--i * n + i]);
         }
         return sum;
     }
@@ -700,11 +655,11 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @throws MatrixException if this matrix is not square or if
      *         its dimension is less than 2.
      */
-    public Matrix adjoint() {
-        Matrix M = newInstance(n, m);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                M.o[i * m + j] = ((i + j) % 2 == 0) ? this.cofactor(i, j)
+    public Matrix<O> adjoint() {
+        Matrix<O> M = newInstance(m, n);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                M.o[i * n + j] = ((i + j) % 2 == 0) ? this.cofactor(i, j)
                         : this.cofactor(i, j).opposite();
             }
         }
@@ -718,78 +673,146 @@ public class Matrix extends RealtimeObject implements Operable, Serializable {
      * @return <code>this<sup>exp</sup></code>
      * @throws MatrixException if this matrix is not square.
      */
-    public Matrix pow(int exp) {
+    public Matrix<O> pow(int exp) {
         if (exp > 0) {
             PoolContext.enter();
             try {
-                Matrix pow2 = this;
-                Matrix result = null;
+                Matrix<O> pow2 = this;
+                Matrix<O> result = null;
                 while (exp >= 1) { // Iteration.
                     if ((exp & 1) == 1) {
-                        result = (result == null) ? pow2 : result
-                                .multiply(pow2);
+                        result = (result == null) ? pow2 : result.times(pow2);
                     }
-                    pow2 = pow2.multiply(pow2);
+                    pow2 = pow2.times(pow2);
                     exp >>>= 1;
                 }
-                return (Matrix) result.export();
+                result.export();
+                return result;
             } finally {
                 PoolContext.exit();
             }
         } else if (exp == 0) {
-            return this.multiply(this.inverse()); // Identity.
+            return this.times(this.inverse()); // Identity.
         } else {
             return this.pow(-exp).inverse();
         }
     }
 
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        return add((Matrix) that);
-    }
-
-    // Implements Operable.
-    public Operable opposite() {
-        return this.negate();
-    }
-
-    // Implements Operable.
-    public Operable times(Operable that) {
-        return multiply((Matrix) that);
-    }
-
-    // Implements Operable.
-    public Operable reciprocal() {
-        return this.inverse();
-    }
-
     // Overrides.
-    public void move(ContextSpace cs) {
-        for (int i = n * m; i > 0;) {
-            o[--i].move(cs);
+    public boolean move(ObjectSpace os) {
+        if (super.move(os)) {
+            for (int i = m * n; i > 0;) {
+                o[--i].move(os);
+            }
+            return true;
         }
+        return false;
     }
 
     /**
-     * This inner class represents a factory producing {@link Matrix} instances.
+     * Returns a m-by-n matrix filled with <code>null</code> elements.
+     *
+     * @param  m the number of rows.
+     * @param  n the number of columns.
+     * @return a m-by-n matrix non-initialized (a {@link Vector} instance
+     *         if <code>n == 1</code>).
      */
-    private final static class MatrixFactory extends Factory {
-
-        private final int _size;
-
-        private MatrixFactory(int size) {
-            _size = size;
+    static <O extends Operable<O>> Matrix<O> newInstance(int m, int n) {
+        if (n == 1)
+            return Vector.newInstance(m);
+        Matrix M;
+        final int size = n * m;
+        if (size <= 1 << 3) {
+            M = FACTORY_3.object();
+        } else if (size <= 1 << 6) {
+            M = FACTORY_6.object();
+        } else if (size <= 1 << 9) {
+            M = FACTORY_9.object();
+        } else if (size <= 1 << 12) {
+            M = FACTORY_12.object();
+        } else if (size <= 1 << 15) {
+            M = FACTORY_15.object();
+        } else if (size <= 1 << 18) {
+            M = FACTORY_18.object();
+        } else if (size <= 1 << 21) {
+            M = FACTORY_21.object();
+        } else if (size <= 1 << 24) {
+            M = FACTORY_24.object();
+        } else if (size <= 1 << 27) {
+            M = FACTORY_27.object();
+        } else if (size <= 1 << 30) {
+            M = FACTORY_30.object();
+        } else {
+            throw new UnsupportedOperationException("Matrix too large");
         }
-
-        public Object create() {
-            return new Matrix(new Operable[_size]);
-        }
-
-        public void cleanup(Object obj) {
-            Matrix M = (Matrix) obj;
-            ArrayPool.clear(M.o, 0, M.m * M.n);
-        }
+        M.m = m;
+        M.n = n;
+        return M;
     }
 
-    private static final long serialVersionUID = 3257285837854291768L;
+    // TBD: Use recursive structures (North, East, South, West)
+    //      instead of large arrays.
+
+    private static final Factory<Matrix> FACTORY_3 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 3);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_6 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 6);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_9 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 9);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_12 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 12);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_15 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 15);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_18 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 18);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_21 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 21);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_24 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 24);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_27 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 27);
+        }
+    };
+
+    private static final Factory<Matrix> FACTORY_30 = new Factory<Matrix>() {
+        protected Matrix create() {
+            return new Matrix(1 << 30);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
+
 }

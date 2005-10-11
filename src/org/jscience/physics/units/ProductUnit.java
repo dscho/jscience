@@ -1,16 +1,17 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
-import java.io.Serializable;
 
-import javolution.util.MathLib;
+import java.io.Serializable;
+import org.jscience.physics.quantities.Quantity;
+
+import javolution.lang.MathLib;
 
 /**
  * <p> This class represents a product unit. Product units are formed by
@@ -21,13 +22,13 @@ import javolution.util.MathLib;
  *     <code>METER</code>.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
- * @see     Unit#multiply(Unit)
+ * @version 1.1, May 24, 2005
+ * @see     Unit#times(Unit)
  * @see     Unit#divide(Unit)
  * @see     Unit#pow(int)
  * @see     Unit#root(int)
  */
-public final class ProductUnit extends DerivedUnit {
+public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
 
     /**
      * Holds the units composing this product unit.
@@ -38,7 +39,6 @@ public final class ProductUnit extends DerivedUnit {
      * Default constructor (used solely to create <code>ONE</code> instance).
      */
     ProductUnit() {
-        super(null); // No symbol.
         _elements = new Element[0];
     }
 
@@ -48,7 +48,6 @@ public final class ProductUnit extends DerivedUnit {
      * @param  elements the product elements.
      */
     private ProductUnit(Element[] elements) {
-        super(null); // No symbol.
         _elements = elements;
     }
 
@@ -64,7 +63,7 @@ public final class ProductUnit extends DerivedUnit {
         // Merges left elements with right elements.
         Element[] result = new Element[leftElems.length + rightElems.length];
         int resultIndex = 0;
-        for (int i=0; i < leftElems.length; i++) {
+        for (int i = 0; i < leftElems.length; i++) {
             Unit unit = leftElems[i]._unit;
             int p1 = leftElems[i]._pow;
             int r1 = leftElems[i]._root;
@@ -81,12 +80,12 @@ public final class ProductUnit extends DerivedUnit {
             int root = r1 * r2;
             if (pow != 0) {
                 int gcd = gcd(MathLib.abs(pow), root);
-                result[resultIndex++] = new Element(unit, pow/gcd, root/gcd);
+                result[resultIndex++] = new Element(unit, pow / gcd, root / gcd);
             }
         }
 
         // Appends remaining right elements not merged.
-        for (int i=0; i < rightElems.length; i++) {
+        for (int i = 0; i < rightElems.length; i++) {
             Unit unit = rightElems[i]._unit;
             boolean hasBeenMerged = false;
             for (int j = 0; j < leftElems.length; j++) {
@@ -103,11 +102,11 @@ public final class ProductUnit extends DerivedUnit {
         // Returns or creates instance.
         if (resultIndex == 0) {
             return ONE;
-        } else if ( (resultIndex == 1) && (result[0]._pow == result[0]._root) ){
+        } else if ((resultIndex == 1) && (result[0]._pow == result[0]._root)) {
             return result[0]._unit;
         } else {
             Element[] elems = new Element[resultIndex];
-            for (int i=0; i < resultIndex; i++) {
+            for (int i = 0; i < resultIndex; i++) {
                 elems[i] = result[i];
             }
             return getInstance(new ProductUnit(elems));
@@ -124,13 +123,13 @@ public final class ProductUnit extends DerivedUnit {
     static Unit getProductInstance(Unit left, Unit right) {
         Element[] leftElems;
         if (left instanceof ProductUnit) {
-            leftElems = ((ProductUnit)left)._elements;
+            leftElems = ((ProductUnit) left)._elements;
         } else {
             leftElems = new Element[] { new Element(left, 1, 1) };
         }
         Element[] rightElems;
         if (right instanceof ProductUnit) {
-            rightElems = ((ProductUnit)right)._elements;
+            rightElems = ((ProductUnit) right)._elements;
         } else {
             rightElems = new Element[] { new Element(right, 1, 1) };
         }
@@ -147,17 +146,17 @@ public final class ProductUnit extends DerivedUnit {
     static Unit getQuotientInstance(Unit left, Unit right) {
         Element[] leftElems;
         if (left instanceof ProductUnit) {
-            leftElems = ((ProductUnit)left)._elements;
+            leftElems = ((ProductUnit) left)._elements;
         } else {
             leftElems = new Element[] { new Element(left, 1, 1) };
         }
         Element[] rightElems;
         if (right instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit)right)._elements;
+            Element[] elems = ((ProductUnit) right)._elements;
             rightElems = new Element[elems.length];
-            for (int i=0; i < elems.length; i++) {
-                rightElems[i] = new Element(
-                    elems[i]._unit, -elems[i]._pow, elems[i]._root);
+            for (int i = 0; i < elems.length; i++) {
+                rightElems[i] = new Element(elems[i]._unit, -elems[i]._pow,
+                        elems[i]._root);
             }
         } else {
             rightElems = new Element[] { new Element(right, -1, 1) };
@@ -171,20 +170,18 @@ public final class ProductUnit extends DerivedUnit {
      *
      * @param  unit the unit.
      * @param  n the root's order (n &gt; 0).
-     * @return <code>unit^(1/n)</code>
+     * @return <code>unit^(1/nn)</code>
      * @throws ArithmeticException if <code>n == 0</code>.
      */
     static Unit getRootInstance(Unit unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit)unit)._elements;
+            Element[] elems = ((ProductUnit) unit)._elements;
             unitElems = new Element[elems.length];
-            for (int i=0; i < elems.length; i++) {
+            for (int i = 0; i < elems.length; i++) {
                 int gcd = gcd(MathLib.abs(elems[i]._pow), elems[i]._root * n);
-                unitElems[i] = new Element(
-                    elems[i]._unit,
-                    elems[i]._pow / gcd,
-                    elems[i]._root * n / gcd);
+                unitElems[i] = new Element(elems[i]._unit, elems[i]._pow / gcd,
+                        elems[i]._root * n / gcd);
             }
         } else {
             unitElems = new Element[] { new Element(unit, 1, n) };
@@ -197,20 +194,18 @@ public final class ProductUnit extends DerivedUnit {
      * the specified exponent.
      *
      * @param  unit the unit.
-     * @param  n the exponent (n &gt; 0).
+     * @param  nn the exponent (nn &gt; 0).
      * @return <code>unit^n</code>
      */
     static Unit getPowInstance(Unit unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit)unit)._elements;
+            Element[] elems = ((ProductUnit) unit)._elements;
             unitElems = new Element[elems.length];
-            for (int i=0; i < elems.length; i++) {
+            for (int i = 0; i < elems.length; i++) {
                 int gcd = gcd(MathLib.abs(elems[i]._pow * n), elems[i]._root);
-                unitElems[i] = new Element(
-                    elems[i]._unit,
-                    elems[i]._pow * n / gcd,
-                    elems[i]._root / gcd);
+                unitElems[i] = new Element(elems[i]._unit, elems[i]._pow * n
+                        / gcd, elems[i]._root / gcd);
             }
         } else {
             unitElems = new Element[] { new Element(unit, n, 1) };
@@ -224,7 +219,7 @@ public final class ProductUnit extends DerivedUnit {
      * @return  the number of units being multiplied.
      */
     public int size() {
-	return _elements.length;
+        return _elements.length;
     }
 
     /**
@@ -236,40 +231,22 @@ public final class ProductUnit extends DerivedUnit {
      *         <code>(index &lt; 0 || index &gt;= size())</code>.
      */
     public Element get(int index) {
-	return _elements[index];
+        return _elements[index];
     }
 
     // Implements abstract method.
-    public Unit getSystemUnit() {
-        if (_systemUnitCache == null) {
-            Unit systemUnit = ONE;
-            for (int i=0; i < _elements.length; i++) {
-                Unit unit = _elements[i]._unit.getSystemUnit();
-                unit = unit.pow(_elements[i]._pow);
-                unit = unit.root(_elements[i]._root);
-                systemUnit = systemUnit.multiply(unit);
-            }
-            _systemUnitCache = systemUnit;
-        }
-        return _systemUnitCache;
-    }
-    private transient Unit _systemUnitCache;
-
-    // Implements abstract method.
-    public boolean equals(Object that) {
-        if (this == that) {
-            return true;
-        } else if (that instanceof ProductUnit) {
+    protected boolean equalsImpl(Object that) {
+        if (that instanceof ProductUnit) {
             // Two products are equals if they have the same elements
             // regardless of the elements' order.
-            Element[] elems = ((ProductUnit)that)._elements;
+            Element[] elems = ((ProductUnit) that)._elements;
             if (_elements.length == elems.length) {
-                for (int i=0; i < _elements.length; i++) {
+                for (int i = 0; i < _elements.length; i++) {
                     boolean unitFound = false;
-                    for (int j=0; j < elems.length; j++) {
+                    for (int j = 0; j < elems.length; j++) {
                         if (_elements[i]._unit == elems[j]._unit) {
-                            if (    (_elements[i]._pow != elems[j]._pow) ||
-                                    (_elements[i]._root != elems[j]._root) ) {
+                            if ((_elements[i]._pow != elems[j]._pow)
+                                    || (_elements[i]._root != elems[j]._root)) {
                                 return false;
                             } else {
                                 unitFound = true;
@@ -288,40 +265,42 @@ public final class ProductUnit extends DerivedUnit {
     }
 
     // Implements abstract method.
-    int calculateHashCode() {
+    protected int hashCodeImpl() {
         int code = 0;
-        for (int i=0; i < _elements.length; i++) {
-            code += _elements[i]._unit.hashCode() *
-                      (_elements[i]._pow * 3 - _elements[i]._root * 2);
+        for (int i = 0; i < _elements.length; i++) {
+            code += _elements[i]._unit.hashCode()
+                    * (_elements[i]._pow * 3 - _elements[i]._root * 2);
         }
         return code;
     }
 
     // Implements abstract method.
-    Unit getCtxDimension() {
-        Unit dimension = ONE;
-        for (int i=0; i < _elements.length; i++) {
-            Unit unit = _elements[i]._unit.getCtxDimension();
+    protected Unit<Q> getParentUnitImpl() {
+        if (isProductOfBaseUnits()) return this;
+        Unit parentUnit = ONE;
+        for (int i = 0; i < _elements.length; i++) {
+            Unit unit = _elements[i]._unit.getParentUnit();
             unit = unit.pow(_elements[i]._pow);
             unit = unit.root(_elements[i]._root);
-            dimension = dimension.multiply(unit);
+            parentUnit = parentUnit.times(unit);
         }
-        return dimension;
+        return parentUnit;
     }
 
     // Implements abstract method.
-    Converter getCtxToDimension() {
+    protected Converter toParentUnitImpl() {
+        if (isProductOfBaseUnits()) return Converter.IDENTITY; 
         double factor = 1.0;
-        for (int i=0; i < _elements.length; i++) {
-            Converter toDimension = _elements[i]._unit.getCtxToDimension();
-            if (toDimension.isLinear()) {
-                factor *= MathLib.pow(toDimension.derivative(0),
-                                   ((double)_elements[i]._pow) /
-                                   ((double)_elements[i]._root));
+        for (int i = 0; i < _elements.length; i++) {
+            Converter cvtr = _elements[i]._unit.toParentUnit();
+            if (cvtr.isLinear()) {
+                factor *= MathLib.pow(cvtr.derivative(0),
+                        ((double) _elements[i]._pow)
+                                / ((double) _elements[i]._root));
             } else {
                 // Non-linear, cannot convert.
-                throw new ConversionException(
-                    _elements[i]._unit + " is non-linear, cannot convert");
+                throw new ConversionException(_elements[i]._unit
+                        + " is non-linear, cannot convert");
             }
         }
         if (MathLib.abs(factor - 1.0) < 1e-9) {
@@ -330,12 +309,27 @@ public final class ProductUnit extends DerivedUnit {
             return new MultiplyConverter(factor);
         }
     }
+    
+    /**
+     * Indicates if this unit is a product of base units exclusively.
+     *
+     * @return <code>true</code> if all elements are base units;
+     *         <code>false</code> otherwise.
+     */
+    private boolean isProductOfBaseUnits() {
+        for (int i = 0; i < _elements.length; i++) {
+            if (!(_elements[i]._unit instanceof BaseUnit)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Returns the greatest common divisor (Euclid's algorithm).
      *
      * @param  m the first number.
-     * @param  n the second number.
+     * @param  nn the second number.
      * @return the greatest common divisor.
      */
     private static int gcd(int m, int n) {
@@ -408,8 +402,8 @@ public final class ProductUnit extends DerivedUnit {
             return _root;
         }
 
-        private static final long serialVersionUID = 5761755430101903883L;
+        private static final long serialVersionUID = 1L;
     }
 
-    private static final long serialVersionUID = -4587835394980457211L;
+    private static final long serialVersionUID = 1L;
 }

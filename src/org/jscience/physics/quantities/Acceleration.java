@@ -1,15 +1,14 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
-import org.jscience.physics.units.SI;
+
+import static org.jscience.physics.units.SI.*;
 import org.jscience.physics.units.Unit;
 
 /**
@@ -17,62 +16,49 @@ import org.jscience.physics.units.Unit;
  * The system unit for this quantity is "m/s²".
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 16, 2005
  */
 public class Acceleration extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the acceleration unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.METER.divide(SI.SECOND.pow(2));
+    private final static Unit<Acceleration> UNIT = METER.divide(SECOND.pow(2));
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Acceleration();
+    private final static Factory<Acceleration> FACTORY = new Factory<Acceleration>(
+            UNIT) {
+        protected Acceleration create() {
+            return new Acceleration();
         }
     };
 
     /**
      * Represents a {@link Acceleration} amounting to nothing.
      */
-    public final static Acceleration ZERO
-        = (Acceleration) valueOf(0, SYSTEM_UNIT);
+    public final static Acceleration ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Holds the standard acceleration of gravity (exact).
      */
-    public final static Acceleration GRAVITY
-        = (Acceleration) valueOf(9.80665, SYSTEM_UNIT);
+    public final static Acceleration GRAVITY = Quantity.valueOf(9.80665, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Acceleration() {}
-
-    /**
-     * Returns the {@link Acceleration} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Acceleration}.
-     * @return the specified quantity or a new {@link Acceleration} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Acceleration}.
-     */
-    public static Acceleration accelerationOf(Quantity quantity) {
-        return (Acceleration) FACTORY.quantity(quantity);
+    protected Acceleration() {
     }
 
     /**
      * Shows {@link Acceleration} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Acceleration} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Acceleration} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Acceleration.class, unit);
     }
 
-    private static final long serialVersionUID = -2680840200279798665L;
+    private static final long serialVersionUID = 1L;
 }

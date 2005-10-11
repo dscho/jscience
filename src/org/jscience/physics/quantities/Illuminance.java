@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,24 +21,24 @@ import org.jscience.physics.units.Unit;
 public class Illuminance extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.CANDELA.multiply(SI.STERADIAN)
-            .divide(SI.METER.pow(2));
+    private final static Unit<Illuminance> UNIT = SI.LUX;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
+    private final static Factory<Illuminance> FACTORY = new Factory<Illuminance>(
+            UNIT) {
+        protected Illuminance create() {
             return new Illuminance();
         }
-    }.useFor(SI.LUX);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
-     * Represents an {@link Illuminance} amounting to nothing.
+     * Represents a {@link Illuminance} amounting to nothing.
      */
-    public final static Illuminance ZERO = (Illuminance) valueOf(0, SYSTEM_UNIT);
+    public final static Illuminance ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
@@ -48,26 +47,14 @@ public class Illuminance extends Quantity {
     }
 
     /**
-     * Returns the {@link Illuminance} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Illuminance}.
-     * @return the specified quantity or a new {@link Illuminance} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Illuminance}.
-     */
-    public static Illuminance illuminanceOf(Quantity quantity) {
-        return (Illuminance) FACTORY.quantity(quantity);
-    }
-
-    /**
      * Shows {@link Illuminance} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Illuminance} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Illuminance} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Illuminance.class, unit);
     }
 
-    private static final long serialVersionUID = 3559730295234637650L;
+    private static final long serialVersionUID = 1L;
+
 }

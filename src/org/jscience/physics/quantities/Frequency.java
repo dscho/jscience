@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -24,50 +23,40 @@ import org.jscience.physics.units.Unit;
 public class Frequency extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.HERTZ.getDimension();
+    private final static Unit<Frequency> UNIT = SI.HERTZ;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Frequency();
+    private final static Factory<Frequency> FACTORY = new Factory<Frequency>(
+            UNIT) {
+        protected Frequency create() {
+            return new Frequency();
         }
-    }.useFor(SI.HERTZ);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
      * Represents a {@link Frequency} amounting to nothing.
      */
-    public final static Frequency ZERO = (Frequency) valueOf(0, SYSTEM_UNIT);
+    public final static Frequency ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Frequency() {}
-
-    /**
-     * Returns the {@link Frequency} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Frequency}.
-     * @return the specified quantity or a new {@link Frequency} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Frequency}.
-     */
-    public static Frequency frequencyOf(Quantity quantity) {
-        return (Frequency) FACTORY.quantity(quantity);
+    protected Frequency() {
     }
 
     /**
      * Shows {@link Frequency} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Frequency} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Frequency} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Frequency.class, unit);
     }
 
-    private static final long serialVersionUID = -3137044723817499548L;
+    private static final long serialVersionUID = 1L;
+
 }

@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,50 +20,40 @@ import org.jscience.physics.units.Unit;
 public class DataRate extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.BIT.divide(SI.SECOND);
+    private final static Unit<DataRate> UNIT = SI.BIT.divide(SI.SECOND);
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new DataRate();
+    private final static Factory<DataRate> FACTORY = new Factory<DataRate>(
+            UNIT) {
+        protected DataRate create() {
+            return new DataRate();
         }
     };
 
     /**
      * Represents a {@link DataRate} amounting to nothing.
      */
-    public final static DataRate ZERO = (DataRate) valueOf(0, SYSTEM_UNIT);
+    public final static DataRate ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected DataRate() {}
-
-    /**
-     * Returns the {@link DataRate} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link DataRate}.
-     * @return the specified quantity or a new {@link DataRate} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link DataRate}.
-     */
-    public static DataRate dataRateOf(Quantity quantity) {
-        return (DataRate) FACTORY.quantity(quantity);
+    protected DataRate() {
     }
 
     /**
      * Shows {@link DataRate} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link DataRate} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link DataRate} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(DataRate.class, unit);
     }
 
-    private static final long serialVersionUID = -516614320976377233L;
+    private static final long serialVersionUID = 1L;
+
 }

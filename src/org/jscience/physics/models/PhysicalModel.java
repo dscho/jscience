@@ -1,19 +1,16 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.models;
 
-import javolution.realtime.LocalContext;
+import javolution.realtime.LocalReference;
 
 import org.jscience.physics.quantities.Constants;
-import org.jscience.physics.quantities.Quantity;
-import org.jscience.physics.units.Unit;
 
 /**
  * <p> This abstract class represents a physical model. Instances of this
@@ -29,9 +26,8 @@ import org.jscience.physics.units.Unit;
  *     static method. For example:<pre>
  *          RelativisticModel.select();
  *     </pre>
- *     Selecting a predefined model automatically sets the {@link Quantity}
- *     current model, which specifies the default output units for quantities.
- *     </p>
+ *     Selecting a predefined model automatically sets the dimension of 
+ *     the {@link org.jscience.physics.units.BaseUnit base units}.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
@@ -41,8 +37,8 @@ public abstract class PhysicalModel {
     /**
      * Holds the context key to the current model.
      */
-    static final LocalContext.Variable CURRENT
-        = new LocalContext.Variable(StandardModel.INSTANCE);
+    static final LocalReference<PhysicalModel> CURRENT
+        = new LocalReference<PhysicalModel>(StandardModel.INSTANCE);
 
     /**
      * Holds fundamental constants (package private).
@@ -74,7 +70,7 @@ public abstract class PhysicalModel {
      * @return the context-local physical model.
      */
     public static final PhysicalModel current() {
-        return (PhysicalModel) CURRENT.getValue(); // Default standard.
+        return CURRENT.get(); // Default standard.
     }
 
     /**
@@ -85,20 +81,7 @@ public abstract class PhysicalModel {
      * @see    #current
      */
     protected static final void setCurrent(PhysicalModel model) {
-        CURRENT.setValue(model);
-    }
-
-    /**
-     * Returns the default output unit for the specified quantity.
-     * The default implementation of this method returns the dimensional
-     * unit of the specified quantity.
-     *
-     * @param  quantity the quantity for which the default output unit
-     *         is returned.
-     * @return <code>quantity.getSystemUnit().getDimension()</code>
-     */
-    public Unit unitFor(Quantity quantity) {
-        return quantity.getSystemUnit().getDimension();
+        CURRENT.set(model);
     }
 
     /**

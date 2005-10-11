@@ -1,35 +1,29 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
 
-
-import java.io.IOException;
-
-import javolution.realtime.ArrayPool;
 import javolution.realtime.ConcurrentContext;
-import javolution.realtime.ObjectPool;
+import javolution.realtime.LocalReference;
 import javolution.realtime.PoolContext;
+import javolution.realtime.StackReference;
 import javolution.realtime.ConcurrentContext.Logic;
-import javolution.realtime.LocalContext.Variable;
-import javolution.util.FastMap;
-import javolution.util.MathLib;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
-import org.jscience.mathematics.matrices.Matrix;
 import org.jscience.mathematics.matrices.Operable;
 
 /**
  * <p> This class represents an immutable integer number of arbitrary size.</p>
+ * 
  * <p> It has the following advantages over the 
  *     <code>java.math.BigInteger</code> class:
  * <ul>
@@ -38,62 +32,86 @@ import org.jscience.mathematics.matrices.Operable;
  *     <li> Real-time compliant for improved performance and predictability.
  *          No temporary object allocated on the heap and no garbage collection
  *          if executions are performed within a {@link PoolContext}
- *          (e.g. {@link #add add} operation <b>5x</b> faster).</li>
- *     <li> Implements the {@link Operable} interface for modular
- *          arithmetic and can be used in conjonction with the {@link Matrix}
+ *          (e.g. {@link #plus plus} operation <b>6x</b> faster).</li>
+ *     <li> Implements the {@link Operable} interface for {@link 
+ *          #setModulus modular arithmetic} and can be used in conjonction with
+ *          the {@link org.jscience.mathematics.matrices.Matrix Matrix}
  *          class to resolve modulo equations (ref. number theory).</li>
  *     <li> Improved algorithms (e.g. Concurrent Karabutsa multiplication in 
  *          O(n<sup>Log3</sup>) instead of O(n<sup>2</sup>).</li>
  * </ul></p>
  * 
+ * <p> <b>Implementation Note:</b> This class uses {@link ConcurrentContext 
+ *     concurrent contexts} to accelerate calculations on multi-processor
+ *     systems.</p>
+ *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
- * @see     #setModulus setModulus
+ * @version 2.0, September 24, 2005
  * @see     <a href="http://mathworld.wolfram.com/KaratsubaMultiplication.html">
  *          Karatsuba Multiplication -- from MathWorld</a>
  */
-public final class LargeInteger extends RealtimeNumber implements Comparable {
+public final class LargeInteger extends Number<LargeInteger> {
 
     /**
      * Holds the default XML representation for large integers.
      * This representation consists of a simple <code>value</code> attribute
-     * holding its textual representation.
-     * 
-     * @see #valueOf(CharSequence)
-     * @see #toText
+     * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat LARGE_INTEGER_XML = new XmlFormat(LargeInteger.class) {
-        public void format(Object obj, XmlElement xml) {
-            xml.setAttribute("value", ((LargeInteger) obj).toText());
+    protected static final XmlFormat<LargeInteger> XML = new XmlFormat<LargeInteger>(
+            LargeInteger.class) {
+        public void format(LargeInteger obj, XmlElement xml) {
+            xml.setAttribute("value", obj.toText());
         }
 
-        public Object parse(XmlElement xml) {
+        public LargeInteger parse(XmlElement xml) {
             return LargeInteger.valueOf(xml.getAttribute("value"));
         }
     };
 
     /**
-     * Holds the large integer factories.
-     */
-    private static final LargeIntegerFactory[] FACTORIES;
-    static {
-        FACTORIES = new LargeIntegerFactory[28];
-        for (int i = 0; i < FACTORIES.length; i++) {
-            FACTORIES[i] = new LargeIntegerFactory(ArrayPool.MIN_LENGTH << i);
-        }
-    }
-
-    /**
      * The large integer representing the additive identity.
      */
-    public static final LargeInteger ZERO = (LargeInteger) LargeInteger
-            .valueOf(0).moveHeap();
+    public static final LargeInteger ZERO = new LargeInteger(1);
 
     /**
      * The large integer representing the multiplicative identity.
      */
-    public static final LargeInteger ONE = (LargeInteger) LargeInteger.valueOf(
-            1).moveHeap();
+    public static final LargeInteger ONE = new LargeInteger(1);
+    static {
+        ONE._size = 1;
+        ONE._words[0] = 1;
+    }
+
+    /**
+     * The large integer representing the minimum value representable as int.
+     */
+    private static final LargeInteger INT_MIN_VALUE = new LargeInteger(1);
+    static {
+        INT_MIN_VALUE._size = 1;
+        INT_MIN_VALUE._isNegative = true;
+        INT_MIN_VALUE._words[0] = -((long) Integer.MIN_VALUE);
+    }
+
+    /**
+     * The large integer representing the minimum value representable as long.
+     */
+    private static final LargeInteger LONG_MIN_VALUE = new LargeInteger(2);
+    static {
+        LONG_MIN_VALUE._size = 2;
+        LONG_MIN_VALUE._isNegative = true;
+        LONG_MIN_VALUE._words[0] = 0;
+        LONG_MIN_VALUE._words[1] = 1;
+    }
+
+    /**
+     * Holds the local modulus (for modular arithmetic).
+     */
+    private static final LocalReference<LargeInteger> MODULUS = new LocalReference<LargeInteger>();
+
+    /**
+     * Holds the remainder after a {@link #divide} operation.
+     */
+    private LargeInteger _remainder;
 
     /**
      * Indicates if this large integer is negative.
@@ -110,23 +128,17 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * This large integer positive words (63 bits). 
      * Least significant word first (index 0).
      */
-    private long[] _words;
-
-    /**
-     * Holds the remainder after a {@link #divide} operation.
-     */
-    private LargeInteger _remainder;
+    private final long[] _words;
 
     /**
      * Base constructor.
      * 
-     * @param words the words buffer or <code>null</code> for external 
-     *        allocations.
+     * @param nbrWords the number of words (greater than 0).
      */
-    private LargeInteger(long[] words) {
-        _words = words;
+    private LargeInteger(int nbrWords) {
+        _words = new long[nbrWords];
     }
-    
+
     /**
      * Returns the large integer of specified <code>long</code> value.
      * 
@@ -134,28 +146,15 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * @return the corresponding large integernumber.
      */
     public static LargeInteger valueOf(long value) {
-        if (value >= 0) {
-            LargeInteger z = newInstance(1);
-            z._isNegative = false;
-            z._size = (value == 0) ? 0 : 1;
-            z._words[0] = value;
-            return z;
-        } else {
-            if (value != Long.MIN_VALUE) {
-                LargeInteger z = newInstance(1);
-                z._isNegative = true;
-                z._size = 1;
-                z._words[0] = -value;
-                return z;
-            } else { // Negative would overflow.
-                LargeInteger z = newInstance(2);
-                z._isNegative = true;
-                z._size = 2;
-                z._words[0] = 0;
-                z._words[1] = 1;
-                return z;
-            }
-        }
+        if (value == 0)
+            return ZERO;
+        if (value == Long.MIN_VALUE)
+            return LONG_MIN_VALUE;
+        LargeInteger z = newInstance(1);
+        boolean negative = z._isNegative = value < 0;
+        z._size = 1;
+        z._words[0] = negative ? -value : value;
+        return z;
     }
 
     /**
@@ -285,6 +284,31 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         return LargeInteger.valueOf(bytes, 0, bytes.length);
     }
 
+    /**
+     * Returns the {@link javolution.realtime.LocalContext local} modulus 
+     * for modular arithmetic or <code>null</code> if the arithmetic operations
+     * are non-modular (default). 
+     * 
+     * @return the local modulus or <code>null</code> if none.
+     * @see #setModulus
+     */
+    public static LargeInteger getModulus() {
+        return MODULUS.get();
+    }
+
+    /**
+     * Sets the {@link javolution.realtime.LocalContext local} modulus 
+     * for modular arithmetic.
+     * 
+     * @param modulus the new modulus or <code>null</code> to unset the modulus.
+     * @throws IllegalArgumentException if <code>modulus <= 0</code>
+     */
+    public static void setModulus(LargeInteger modulus) {
+        if ((modulus != null) && (!modulus.isPositive()))
+            throw new IllegalArgumentException("modulus: " + modulus
+                    + " has to be greater than 0");
+        MODULUS.set(modulus);
+    }
 
     /**
      * Indicates if this large integer is greater than {@link #ZERO}
@@ -312,6 +336,34 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      */
     public boolean isZero() {
         return _size == 0;
+    }
+
+    /**
+     * Returns the signum function of this large integer.
+     *
+     * @return -1, 0 or 1 as the value of this integer is negative, zero or
+     *         positive.
+     */
+    public int signum() {
+        return _isNegative ? -1 : (_size == 0) ? 0 : 1;
+    }
+
+    /**
+     * Indicates if this large integer is an even number.
+     * 
+     * @return <code>(this & 1) == ZERO</code>
+     */
+    public boolean isEven() {
+        return (_words[0] & 1) == 0;
+    }
+
+    /**
+     * Indicates if this large integer is an odd number.
+     * 
+     * @return <code>(this & 1) != ZERO</code>
+     */
+    public boolean isOdd() {
+        return (_words[0] & 1) != 0;
     }
 
     /**
@@ -372,8 +424,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
                     word >>= 8;
                 } else { // End of word reached.
                     byte bits = (byte) word;
-                    word = (++wordIndex < _size)
-                            ? _words[wordIndex] + borrow
+                    word = (++wordIndex < _size) ? _words[wordIndex] + borrow
                             : borrow;
                     borrow = word >> 63; // -1 if borrow
                     word = ~word & MASK_63;
@@ -448,27 +499,37 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         }
     }
 
-    private static final int BIT_LENGTH[] = new int[]{0, 1, 2, 2, 3, 3, 3, 3,
-            4, 4, 4, 4, 4, 4, 4, 4};
+    private static final int BIT_LENGTH[] = new int[] { 0, 1, 2, 2, 3, 3, 3, 3,
+            4, 4, 4, 4, 4, 4, 4, 4 };
 
     /**
-     * Returns the negation of this large integer.
+     * Returns the opposite of this large integer (modulo operation if a 
+     * {@link #setModulus modulus} has been set).
      * 
      * @return <code>-this</code>.
      */
-    public LargeInteger negate() {
+    public LargeInteger opposite() {
+        return modulo(oppositeBasic());
+    }
+
+    LargeInteger oppositeBasic() {
         LargeInteger z = copy();
         z._isNegative = (!_isNegative) && (_size != 0); // -0 = 0
         return z;
     }
 
     /**
-     * Returns the sum of this large integer with the one specified.
+     * Returns the sum of this large integer with the one specified
+     * (modulo operation if a {@link #setModulus modulus} has been set).
      * 
      * @param that the integer to be added.
      * @return <code>this + that</code>.
      */
-    public LargeInteger add(LargeInteger that) {
+    public LargeInteger plus(LargeInteger that) {
+        return modulo(plusBasic(that));
+    }
+
+    LargeInteger plusBasic(LargeInteger that) {
         if (this._isNegative == that._isNegative) {
             if (this._size >= that._size) {
                 LargeInteger z = newInstance(this._size + 1);
@@ -503,12 +564,17 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
 
     /**
      * Returns the difference between this large integer and the one
-     * specified.
+     * specified (modulo operation if a {@link #setModulus modulus} 
+     * has been set).
      * 
      * @param that the integer to be subtracted.
      * @return <code>this - that</code>.
      */
-    public LargeInteger subtract(LargeInteger that) {
+    public LargeInteger minus(LargeInteger that) {
+        return modulo(minusBasic(that));
+    }
+
+    LargeInteger minusBasic(LargeInteger that) {
         if (this._isNegative == that._isNegative) {
             // Subtracts smallest to largest (absolute value)
             if (this.isLargerThan(that)) { // this.abs() > that.abs()
@@ -543,25 +609,30 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
 
     /**
      * Returns the product of this large integer with the specified 
-     * <code>long</code>.
+     * <code>long</code> multiplier (modulo operation if a 
+     * {@link #setModulus modulus} has been set).
      * 
-     * @param l the <code>long</code> multiplier.
+     * @param multiplier the <code>long</code> multiplier.
      * @return <code>this * l</code>.
      */
-    public LargeInteger multiply(long l) {
+    public LargeInteger times(long multiplier) {
+        return modulo(timesBasic(multiplier));
+    }
+
+    LargeInteger timesBasic(long multiplier) {
         if (this._size != 0) {
-            if (l > 0) {
+            if (multiplier > 0) {
                 LargeInteger z = newInstance(_size + 1);
-                z._size = multiply(_words, _size, l, z._words, 0);
+                z._size = multiply(_words, _size, multiplier, z._words, 0);
                 z._isNegative = _isNegative;
                 return z;
-            } else if (l == Long.MIN_VALUE) { // Avoids -l overflow.
+            } else if (multiplier == Long.MIN_VALUE) { // Avoids -l overflow.
                 LargeInteger z = this.shiftLeft(63);
                 z._isNegative = !_isNegative;
                 return z;
-            } else if (l < 0) {
+            } else if (multiplier < 0) {
                 LargeInteger z = newInstance(_size + 1);
-                z._size = multiply(_words, _size, -l, z._words, 0);
+                z._size = multiply(_words, _size, -multiplier, z._words, 0);
                 z._isNegative = !_isNegative;
                 return z;
             }
@@ -570,20 +641,24 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the product of this large integer with the one specified.
+     * Returns the product of this large integer with the one specified
+     * (modulo operation if a {@link #setModulus modulus} has been set).
      * 
      * @param that the large integer multiplier.
      * @return <code>this * that</code>.
      */
-    public LargeInteger multiply(LargeInteger that) {
+    public LargeInteger times(LargeInteger that) {
+        return modulo(timesBasic(that));
+    }
+
+    LargeInteger timesBasic(LargeInteger that) {
         if (this._size >= that._size) {
             if (that._size <= 1) {
-                return multiply(that.longValue());
+                return timesBasic(that.longValue());
             } else if (that._size < 30) { // Conventional multiplication.
                 LargeInteger z = newInstance(this._size + that._size);
-                z._size = (this._size >= that._size)
-                        ? multiply(this._words, this._size, that._words,
-                                that._size, z._words)
+                z._size = (this._size >= that._size) ? multiply(this._words,
+                        this._size, that._words, that._size, z._words)
                         : multiply(that._words, that._size, this._words,
                                 this._size, z._words);
                 z._isNegative = this._isNegative != that._isNegative;
@@ -591,72 +666,72 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
             } else { // Concurrent Karatsuba multiplication.
                 int bitLength = this.bitLength();
                 int n = (bitLength >> 1) + (bitLength & 1);
-                FastMap results = FastMap.newInstance(3);
+                LargeInteger b = this.shiftRight(n);
+                LargeInteger a = this.minusBasic(b.shiftLeft(n));
+                LargeInteger d = that.shiftRight(n);
+                LargeInteger c = that.minusBasic(d.shiftLeft(n));
+                StackReference<LargeInteger> ac = StackReference.newInstance();
+                StackReference<LargeInteger> bd = StackReference.newInstance();
+                StackReference<LargeInteger> abcd = StackReference
+                        .newInstance();
                 ConcurrentContext.enter();
                 try { // this = a + 2^n b,   that = c + 2^n d
-                    LargeInteger b = this.shiftRight(n);
-                    LargeInteger a = this.subtract(b.shiftLeft(n));
-                    LargeInteger d = that.shiftRight(n);
-                    LargeInteger c = that.subtract(d.shiftLeft(n));
-                    ConcurrentContext.execute(MULTIPLY, a, c, "ac", results);
-                    ConcurrentContext.execute(MULTIPLY, b, d, "bd", results);
-                    ConcurrentContext.execute(MULTIPLY, a.add(b), c.add(d),
-                            "abcd", results);
+                    ConcurrentContext.execute(MULTIPLY, a, c, ac);
+                    ConcurrentContext.execute(MULTIPLY, b, d, bd);
+                    ConcurrentContext.execute(MULTIPLY, a.plusBasic(b), c
+                            .plusBasic(d), abcd);
                 } finally {
                     ConcurrentContext.exit();
                 }
-                LargeInteger ac = (LargeInteger) results.get("ac");
-                LargeInteger bd = (LargeInteger) results.get("bd");
-                LargeInteger abcd = (LargeInteger) results.get("abcd");
-                return ac.add(abcd.subtract(ac).subtract(bd).shiftLeft(n)).add(
-                        bd.shiftLeft(2 * n));
+                // z = a*c + ((a+b)*(c+d)-a*c-b*d) 2^n + b*d 2^2n 
+                LargeInteger z = ac.get().plusBasic(
+                        abcd.get().minusBasic(ac.get()).minusBasic(bd.get())
+                                .shiftLeft(n)).plusBasic(
+                        bd.get().shiftLeft(2 * n));
+                return z;
             }
         } else {
-            return that.multiply(this);
+            return that.timesBasic(this);
         }
     }
 
     private static final Logic MULTIPLY = new Logic() {
-
         public void run(Object[] args) {
             LargeInteger left = (LargeInteger) args[0];
             LargeInteger right = (LargeInteger) args[1];
-            FastMap results = (FastMap) args[3];
-            LargeInteger product = left.multiply(right); // Recursive.
-            synchronized (results) {
-                results.put(args[2], product.export());
-            }
+            StackReference result = (StackReference) args[2];
+            result.set(left.timesBasic(right).export());// Recursive.
         }
     };
 
     /**
-     * Returns this large integer divided by the specified <code>int</code>.
-     * The remainder of this division is accessible using {@link #getRemainder}. 
+     * Returns this large integer divided by the specified <code>int</code>
+     * divisor. The remainder of this division is accessible using 
+     * {@link #getRemainder}. 
      * 
-     * @param i the <code>int</code> divisor.
-     * @return <code>this / i</code> and <code>this % i</code>
+     * @param divisor the <code>int</code> divisor.
+     * @return <code>this / divisor</code> and <code>this % divisor</code>
      *        ({@link #getRemainder})
-     * @throws ArithmeticException if <code>i == 0</code>
+     * @throws ArithmeticException if <code>divisor == 0</code>
      */
-    public LargeInteger divide(int i) {
-        if (i != 0) {
+    public LargeInteger divide(int divisor) {
+        if (divisor != 0) {
             if (this._size != 0) {
-                if (i > 0) {
+                if (divisor > 0) {
                     LargeInteger z = newInstance(_size);
-                    long rem = divide(_words, _size, i, z._words);
+                    long rem = divide(_words, _size, divisor, z._words);
                     z._size = (z._words[_size - 1] == 0L) ? _size - 1 : _size;
                     z._isNegative = _isNegative && (z._size != 0);
                     z._remainder = valueOf(_isNegative ? -rem : rem);
                     return z;
-                } else if (i == Integer.MIN_VALUE) { // Negative would overflow.
+                } else if (divisor == Integer.MIN_VALUE) { // Negative would overflow.
                     LargeInteger z = this.abs().shiftRight(31);
                     z._isNegative = !_isNegative && (z._size != 0);
-                    z._remainder = _isNegative
-                            ? valueOf(-(_words[0] & MASK_31))
+                    z._remainder = _isNegative ? valueOf(-(_words[0] & MASK_31))
                             : valueOf(_words[0] & MASK_31);
                     return z;
                 } else { // i < 0
-                    LargeInteger z = this.divide(-i);
+                    LargeInteger z = this.divide(-divisor);
                     z._isNegative = !_isNegative && (z._size != 0);
                     return z;
                 }
@@ -693,21 +768,21 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
                 if (precision <= 0) {
                     LargeInteger result = LargeInteger.valueOf(0);
                     result._remainder = this;
-                    return (LargeInteger) result.export();
+                    return result.export();
                 }
                 LargeInteger thatReciprocal = thatAbs.inverseScaled(precision);
-                LargeInteger result = thisAbs.multiply(thatReciprocal);
+                LargeInteger result = thisAbs.timesBasic(thatReciprocal);
                 result = result.shiftRight(thisAbs.bitLength() + 1);
 
                 // Calculates remainder, corrects for result +/- 1 error. 
-                LargeInteger remainder = thisAbs.subtract(thatAbs
-                        .multiply(result));
+                LargeInteger remainder = thisAbs.minusBasic(thatAbs
+                        .timesBasic(result));
                 if (remainder.compareTo(thatAbs) >= 0) {
-                    remainder = remainder.subtract(thatAbs);
-                    result = result.add(ONE);
+                    remainder = remainder.minusBasic(thatAbs);
+                    result = result.plusBasic(ONE);
                 } else if (remainder.isNegative()) {
-                    remainder = remainder.add(thatAbs);
-                    result = result.subtract(ONE);
+                    remainder = remainder.plusBasic(thatAbs);
+                    result = result.minusBasic(ONE);
                 }
 
                 // Sets signs for result and remainder.
@@ -715,13 +790,28 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
                         && (remainder._size != 0);
                 result._isNegative = (this._isNegative != that._isNegative)
                         && (result._size != 0);
-                result._remainder = (LargeInteger) remainder.export();
-                return (LargeInteger) result.export();
+                result._remainder = remainder.export();
+                return result.export();
 
             } finally {
                 PoolContext.exit();
             }
         }
+    }
+
+    /**
+     * Returns the remainder of the division of this large integer with 
+     * the one specified (convenience method equivalent to 
+     * <code>this.divide(that).getRemainder()</code>).
+     *
+     * @param that the value by which this integer is to be divided, and the
+     *        remainder returned.
+     * @return <code>this % that</code>
+     * @throws ArithmeticException if <code>that.equals(ZERO)</code>
+     * @see #divide(LargeInteger)
+     */
+    public LargeInteger remainder(LargeInteger that) {
+        return this.divide(that).getRemainder();
     }
 
     /**
@@ -732,7 +822,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * @throws ArithmeticException if <code>this.isZero()</code>
      */
     public LargeInteger inverseScaled(int precision) {
-        // todo   Use faster square() method, shift on place.
+        // TODO: Use faster square() method, shift on place.
         if (precision <= 31) { // Straight calculation.
             long divisor = this.shiftRight(this.bitLength() - precision)._words[0];
             long dividend = 1L << precision * 2;
@@ -741,32 +831,109 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         } else { // Newton iteration (x = 2 * x - x^2 * this).
             LargeInteger x = inverseScaled(precision / 2 + 1); // Estimate.
             LargeInteger thisTrunc = shiftRight(bitLength() - (precision + 2));
-            LargeInteger prod = thisTrunc.multiply(x).multiply(x);
+            LargeInteger prod = thisTrunc.timesBasic(x).timesBasic(x);
             int diff = 2 * (precision / 2 + 2);
             LargeInteger prodTrunc = prod.shiftRight(diff);
             LargeInteger xPad = x.shiftLeft(precision - precision / 2 - 1);
-            return xPad.add(xPad.subtract(prodTrunc));
+            return xPad.plusBasic(xPad.minusBasic(prodTrunc));
         }
     }
 
     /**
      * Returns this large integer modulo the specified large integer. 
-     * This method always returns a positive number.
+     * 
+     * <p> Note: The result as the same sign as the divisor unlike the Java 
+     *     remainder (%) operator (which as the same sign as the dividend).</p> 
      * 
      * @param m the modulus.
      * @return <code>this mod m</code>
-     * @throws ArithmeticException if <code>!m.isPositive()</code>
+     * @see #getRemainder()
      */
     public LargeInteger mod(LargeInteger m) {
-        if (m.isPositive()) {
-            if (!this.isNegative() && (this.compareTo(m) < 0)) {
-                return this; // Shortcut.
-            } else {
-                LargeInteger result = this.divide(m).getRemainder();
-                return (result.isNegative()) ? result.add(m) : result;
+        final LargeInteger z = m.isLargerThan(this) ? this : this.divide(m)
+                .getRemainder();
+        return (this._isNegative == m._isNegative) ? z : z.plusBasic(m);
+    }
+
+    /**
+     * Returns the large integer whose value is <code>(this<sup>-1</sup> mod m)
+     * </code>.
+     *
+     * @param  m the modulus.
+     * @return <code>this<sup>-1</sup> mod m</code>.
+     * @throws ArithmeticException <code> m &lt;= 0</code>, or this integer
+     *         has no multiplicative inverse mod m (that is, this integer
+     *         is not <i>relatively prime</i> to m).
+     */
+    public LargeInteger modInverse(LargeInteger m) {
+        if (!m.isPositive())
+            throw new ArithmeticException("Modulus is not a positive number");
+        PoolContext.enter();
+        try {
+            // Extended Euclidian Algorithm
+            LargeInteger a = this;
+            LargeInteger b = m;
+            LargeInteger p = ONE;
+            LargeInteger q = ZERO;
+            LargeInteger r = ZERO;
+            LargeInteger s = ONE;
+            while (!b.isZero()) {
+                LargeInteger quot = a.divide(b);
+                LargeInteger c = quot.getRemainder();
+                a = b;
+                b = c;
+                LargeInteger new_r = p.minusBasic(quot.timesBasic(r));
+                LargeInteger new_s = q.minusBasic(quot.timesBasic(s));
+                p = r;
+                q = s;
+                r = new_r;
+                s = new_s;
             }
-        } else {
-            throw new ArithmeticException("Modulus: " + m + " is not positive");
+            if ((a._words[0] != 1L) || (a._size != 1)) // (a != 1) || (a != -1)
+                throw new ArithmeticException("GCD(" + this + ", " + m + ") = "
+                        + a);
+            if (a._isNegative)
+                return p.oppositeBasic().mod(m).export();
+            return p.mod(m).export();
+        } finally {
+            PoolContext.exit();
+        }
+    }
+
+    /**
+     * Returns this large integer raised at the specified exponent modulo 
+     * the specified modulus.
+     *
+     * @param  exp the exponent.
+     * @param  m the modulus.
+     * @return <code>this<sup>exp</sup> mod m</code>
+     * @throws ArithmeticException <code>m &lt;= 0</code>
+     * @see    #modInverse
+     */
+    public LargeInteger modPow(LargeInteger exp, LargeInteger m) {
+        if (!m.isPositive())
+            throw new ArithmeticException("Modulus is not a positive number");
+        if (exp.isPositive()) {
+            PoolContext.enter();
+            try {
+                LargeInteger pow2 = this.mod(m);
+                LargeInteger result = null;
+                while (exp.compareTo(ONE) >= 0) { // Iteration.
+                    if (exp.isOdd()) {
+                        result = (result == null) ? pow2 : result.times(pow2)
+                                .mod(m);
+                    }
+                    pow2 = pow2.times(pow2).mod(m);
+                    exp = exp.shiftRight(1);
+                }
+                return result.export();
+            } finally {
+                PoolContext.exit();
+            }
+        } else if (exp.isNegative()) {
+            return this.modPow(exp.oppositeBasic(), m).modInverse(m);
+        } else { // exp == 0
+            return ONE;
         }
     }
 
@@ -797,10 +964,10 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
     /**
      * Returns the absolute value of this large integer.
      * 
-     * @return <code>abs(this)</code>.
+     * @return <code>|this|</code>.
      */
-    public LargeInteger abs() {
-        return (isPositive() || isZero()) ? this : this.negate();
+    public LargeInteger norm() {
+        return (isPositive() || isZero()) ? this : this.oppositeBasic();
     }
 
     /**
@@ -915,13 +1082,11 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
             z._size = shiftRight(wordShift, bitShift, _words, _size, z._words);
             // Divides by 5^n
             divide(z._words, z._size, INT_POW_5[n % INT_MAX_E], z._words);
-            z._size = ((z._size > 0) && (z._words[z._size - 1] == 0L))
-                    ? z._size - 1
+            z._size = ((z._size > 0) && (z._words[z._size - 1] == 0L)) ? z._size - 1
                     : z._size;
             for (int i = n / INT_MAX_E; i > 0; i--) {
                 divide(z._words, z._size, INT_POW_5[INT_MAX_E], z._words);
-                z._size = ((z._size > 0) && (z._words[z._size - 1] == 0L))
-                        ? z._size - 1
+                z._size = ((z._size > 0) && (z._words[z._size - 1] == 0L)) ? z._size - 1
                         : z._size;
             }
             z._isNegative = _isNegative && (z._size != 0);
@@ -933,18 +1098,19 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
 
     private static double DIGITS_TO_BITS = MathLib.LOG10 / MathLib.LOG2;
 
-    private static int[] INT_POW_5 = new int[]{1, 5, 25, 125, 625, 3125, 15625,
-            78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125};
+    private static int[] INT_POW_5 = new int[] { 1, 5, 25, 125, 625, 3125,
+            15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625,
+            1220703125 };
 
     private static int INT_MAX_E = INT_POW_5.length - 1;
 
-    private static long[] LONG_POW_5 = new long[]{1L, 5L, 25L, 125L, 625L,
+    private static long[] LONG_POW_5 = new long[] { 1L, 5L, 25L, 125L, 625L,
             3125L, 15625L, 78125L, 390625L, 1953125L, 9765625L, 48828125L,
             244140625L, 1220703125L, 6103515625L, 30517578125L, 152587890625L,
             762939453125L, 3814697265625L, 19073486328125L, 95367431640625L,
             476837158203125L, 2384185791015625L, 11920928955078125L,
             59604644775390625L, 298023223876953125L, 1490116119384765625L,
-            7450580596923828125L};
+            7450580596923828125L };
 
     private static int LONG_MAX_E = LONG_POW_5.length - 1;
 
@@ -954,13 +1120,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * @return the text representation of this number.
      */
     public Text toText() {
-        try {
-            TextBuilder tb = TextBuilder.newInstance();
-            appendTo(tb, 10);
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
-        }
+        return toText(10);
     }
 
     /**
@@ -970,12 +1130,27 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * @return the text representation of this number.
      */
     public Text toText(int radix) {
+        if (this.isZero())
+            return Text.valueOf("0");
+        PoolContext.enter();
         try {
             TextBuilder tb = TextBuilder.newInstance();
-            appendTo(tb, radix);
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
+            LargeInteger x = this.abs();
+            while (!x.isZero()) {
+                LargeInteger divRadix = x.divide(radix);
+                LargeInteger remRadix = divRadix.getRemainder();
+                tb.append(Character.forDigit(remRadix.byteValue(), radix));
+                x.recycle();
+                remRadix.recycle();
+                x = divRadix;
+            }
+            if (this.isNegative()) {
+                tb.append('-');
+            }
+            tb.reverse();
+            return (Text) tb.toText().export();
+        } finally {
+            PoolContext.exit();
         }
     }
 
@@ -1010,18 +1185,38 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the low order bits of this large integer as 
-     * an <code>int</code>.
-     * 
-     * <p>Note: This conversion can lose information about the overall magnitude
-     *          of the integer value and may return a result with the opposite 
-     *          sign.</p>
+     * Converts this large integer to <code>int</code>; unlike 
+     * {@link #intValue} this method raises {@link ArithmeticException} if this 
+     * integer cannot be represented by an <code>int</code> type.
      * 
      * @return the numeric value represented by this integer after conversion
      *         to type <code>int</code>.
+     * @throws ArithmeticException if conversion to <code>int</code> is not 
+     *         possible.
      */
-    public int intValue() {
+    public int toInt() {
+        if (((_size > 1) || (_words[0] > Integer.MAX_VALUE))
+                && !this.equals(INT_MIN_VALUE))
+            throw new ArithmeticException(this
+                    + " cannot be represented as int");
         return (int) longValue();
+    }
+
+    /**
+     * Converts this large integer to <code>long</code>; unlike 
+     * {@link #longValue} this method raises {@link ArithmeticException} if this 
+     * integer cannot be represented by a <code>long</code> type.
+     * 
+     * @return the numeric value represented by this integer after conversion
+     *         to type <code>long</code>.
+     * @throws ArithmeticException if conversion to <code>long</code> is not 
+     *         possible.
+     */
+    public long toLong() {
+        if ((_size > 1) && !this.equals(LONG_MIN_VALUE))
+            throw new ArithmeticException(this
+                    + " cannot be represented as long");
+        return longValue();
     }
 
     /**
@@ -1041,20 +1236,9 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         } else if (_size == 1) {
             return _isNegative ? -_words[0] : _words[0];
         } else {
-            return _isNegative
-                    ? -((_words[1] << 63) | _words[0])
+            return _isNegative ? -((_words[1] << 63) | _words[0])
                     : (_words[1] << 63) | _words[0];
         }
-    }
-
-    /**
-     * Returns the value of this large integer as a <code>float</code>.
-     * 
-     * @return the numeric value represented by this integer after conversion
-     *         to type <code>float</code>.
-     */
-    public float floatValue() {
-        return (float) doubleValue();
     }
 
     /**
@@ -1078,7 +1262,7 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
     private static final double TWO_POW63 = 9223372036854775808.0;
 
     /**
-     * Compares two large integer numerically.
+     * Compares two large integers numerically.
      * 
      * @param  that the integer to compare with.
      * @return -1, 0 or 1 as this integer is numerically less than, equal to,
@@ -1086,33 +1270,32 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
      * @throws ClassCastException <code>that</code> is not a 
      *         large integer.
      */
-    public int compareTo(Object that) {
-        LargeInteger x = (LargeInteger) that;
+    public int compareTo(LargeInteger that) {
         // Compares sign.
-        if (_isNegative && !x._isNegative) {
+        if (_isNegative && !that._isNegative) {
             return -1;
-        } else if (!_isNegative && x._isNegative) {
+        } else if (!_isNegative && that._isNegative) {
             return 1;
         } else { // Same sign.
             // Compares size.
-            if (_size > x._size) {
+            if (_size > that._size) {
                 return _isNegative ? -1 : 1;
-            } else if (x._size > _size) {
+            } else if (that._size > _size) {
                 return _isNegative ? 1 : -1;
             } else { // Same size.
-                return _isNegative
-                        ? compare(x._words, _words, _size)
-                        : compare(_words, x._words, _size);
+                return _isNegative ? compare(that._words, _words, _size)
+                        : compare(_words, that._words, _size);
             }
         }
     }
 
     /**
-     * Returns a copy of this large integer allocated in the current context.
+     * Returns an exact copy of this large integer allocated on the 
+     * stack when executing in a {@link PoolContext}).
      *
-     * @return a copy of this large integer. 
+     * @return an exact copy of this large integer. 
      */
-    private LargeInteger copy() {
+    public LargeInteger copy() {
         LargeInteger x = newInstance(_size);
         x._isNegative = _isNegative;
         x._size = _size;
@@ -1121,157 +1304,41 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the {@link javolution.realtime.LocalContext local} modulus for modular
-     * arithmetic (used by {@link Operable} operations only). If the modulus is
-     * not set then the {@link #reciprocal} operation raises 
-     * <code>IllegalStateException</code>.
-     * 
-     * @return the local modulus or <code>null</code> if unset.
-     * @see #setModulus
-     */
-    public static LargeInteger getModulus() {
-        return (LargeInteger) MODULUS.getValue();
-    }
-    private static final Variable MODULUS = new Variable();
-
-    /**
-     * Sets the context local modulus for modular arithmetic (used by
-     * {@link Operable} operations only). If the modulus is not set 
-     * the {@link #reciprocal} operation raises 
-     * <code>IllegalStateException</code>.
-     * 
-     * @param modulus the new modulus or <code>null</code> to unset the modulus.
-     * @throws IllegalArgumentException if <code>modulus <= 0</code>
-     */
-    public static void setModulus(LargeInteger modulus) {
-        if ((modulus == null) || modulus.isPositive()) {
-            MODULUS.setValue(modulus);
-        } else {
-            throw new IllegalArgumentException("modulus: " + modulus
-                    + " is not greater than 0");
-        }
-    }
-
-
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        LargeInteger modulus = (LargeInteger) MODULUS.getValue();
-        if (modulus != null) {
-            LargeInteger result = this.mod(modulus).add(
-                    ((LargeInteger) that).mod(modulus));
-            return (result.compareTo(modulus) < 0) ? result : result
-                    .subtract(modulus);
-
-        } else {
-            return this.add((LargeInteger) that);
-        }
-    }
-
-    // Implements Operable.
-    public Operable opposite() {
-        LargeInteger modulus = (LargeInteger) MODULUS.getValue();
-        if (modulus != null) {
-            return modulus.subtract(this.mod(modulus));
-        } else {
-            return this.negate();
-        }
-    }
-
-    // Implements Operable.
-    public Operable times(Operable that) {
-        LargeInteger modulus = (LargeInteger) MODULUS.getValue();
-        if (modulus != null) {
-            return this.multiply((LargeInteger) that).mod(modulus);
-        } else {
-            return this.multiply((LargeInteger) that);
-        }
-    }
-
-    /**
      * Returns the modular inverse of this large integer.
      *
      * @return a large integer such as  
      *         <code>this.times(this.reciprocal()) modulo m = ONE</code> 
      *         m being the local modulus.
-     * @throws IllegalStateException if the modulus is not set.
-     * @see #setModulus
+     * @throws ArithmeticException if the modulus is not set or the 
+     *         modular inverse does not exist (that is, this large integer
+     *         is not <i>relatively prime</i> to the current modulus).
+     * @see #getModulus
      */
-    public Operable reciprocal() {
-        LargeInteger modulus = (LargeInteger) MODULUS.getValue();
-        if (modulus != null) {
-            PoolContext.enter();
-            try {
-                // Extended Euclidian Algorithm
-                LargeInteger a = this;
-                LargeInteger b = modulus;
-                LargeInteger p = ONE;
-                LargeInteger q = ZERO;
-                LargeInteger r = ZERO;
-                LargeInteger s = ONE;
-                while (!b.isZero()) {
-                    LargeInteger quot = a.divide(b);
-                    LargeInteger c = quot.getRemainder();
-                    a = b;
-                    b = c;
-                    LargeInteger new_r = p.subtract(quot.multiply(r));
-                    LargeInteger new_s = q.subtract(quot.multiply(s));
-                    p = r;
-                    q = s;
-                    r = new_r;
-                    s = new_s;
-                }
-                return (LargeInteger) p.mod(modulus).export();
-            } finally {
-                PoolContext.exit();
-            }
-        } else {
-            throw new IllegalStateException("Modulus is not set");
-        }
+    public LargeInteger reciprocal() {
+        LargeInteger modulus = MODULUS.get();
+        if (modulus == null)
+            throw new ArithmeticException("Modulus not set");
+        return modInverse(modulus);
     }
 
     /**
-     * Appends the text representation of this large integer in
-     * the specified radix to the <code>TextBuilder</code> argument.
-     *
-     * @param tb the <code>Appendable</code> to append.
-     * @param radix the radix of the representation.
-     * @return the specified <code>Appendable</code>.
-     * @throws IOException if an I/O exception occurs.
+     * Returns the integer square root of this integer.
+     * 
+     * @return <code>k<code> such as <code>k^2 <= this < (k + 1)^2</code>
+     * @throws ArithmeticException if this integer is negative.
      */
-    TextBuilder appendTo(TextBuilder tb, int radix) throws IOException {
-        if (this.isZero()) {
-            return tb.append("0");
-        } else if (this.isNegative()) {
-            tb.append('-');
+    public LargeInteger sqrt() {
+        if (this.isNegative())
+            throw new ArithmeticException("Square root of negative integer");
+        int bitLength = this.bitLength();
+        // First approximation.
+        LargeInteger k = this.shiftRight((bitLength >> 1) + (bitLength & 1));
+        while (true) {
+            LargeInteger newK = (k.plusBasic(this.divide(k))).shiftRight(1);
+            if (newK.equals(k))
+                return k;
+            k = newK;
         }
-        PoolContext.enter();
-        try {
-            int tmpSize = (radix < 8)
-                    ? this.bitLength()
-                    : (this.bitLength() / 3) + 1;
-            ObjectPool tmpPool = ArrayPool.byteArray(tmpSize);
-            byte[] tmp = (byte[]) tmpPool.next();
-            int tmpIndex = 0;
-            LargeInteger x = this.abs();
-            while (!x.isZero()) {
-                LargeInteger i = x.divide(radix);
-                LargeInteger j = i.multiply(radix);
-                LargeInteger k = x.subtract(j);
-                tmp[tmpIndex++] = k.byteValue();
-                // Recycles temporary objects.
-                k.recycle();
-                j.recycle();
-                x.recycle();
-                x = i;
-            }
-            for (int i = tmpIndex; i > 0;) {
-                tb.append((Character.forDigit(tmp[--i], radix)));
-            }
-            tmpPool.recycle(tmp);
-        } finally {
-            PoolContext.exit();
-        }
-        return tb;
     }
 
     ///////////////
@@ -1462,28 +1529,116 @@ public final class LargeInteger extends RealtimeNumber implements Comparable {
         }
     }
 
+    // Modular arithmetic.
+    private static LargeInteger modulo(LargeInteger z) {
+        LargeInteger modulus = MODULUS.get();
+        return (modulus == null) ? z : z.mod(modulus);
+    }
+
     /**
      * Returns a new instance of mimimum size.
      *
-     * @param  size the minimum length of the _words array.
+     * @param  nbrWords the minimum length of the _words array.
      * @return a new or recycled instance.
      */
-    private static LargeInteger newInstance(int size) {
-        return (LargeInteger) FACTORIES[ArrayPool.indexFor(size)].object();
+    private static LargeInteger newInstance(int nbrWords) {
+        if (nbrWords <= 1 << 3) {
+            return FACTORY_3.object();
+        } else if (nbrWords <= 1 << 6) {
+            return FACTORY_6.object();
+        } else if (nbrWords <= 1 << 9) {
+            return FACTORY_9.object();
+        } else if (nbrWords <= 1 << 12) {
+            return FACTORY_12.object();
+        } else if (nbrWords <= 1 << 15) {
+            return FACTORY_15.object();
+        } else if (nbrWords <= 1 << 18) {
+            return FACTORY_18.object();
+        } else if (nbrWords <= 1 << 21) {
+            return FACTORY_21.object();
+        } else if (nbrWords <= 1 << 24) {
+            return FACTORY_24.object();
+        } else if (nbrWords <= 1 << 27) {
+            return FACTORY_27.object();
+        } else if (nbrWords <= 1 << 30) {
+            return FACTORY_30.object();
+        }
+        throw new UnsupportedOperationException("Integer too large");
     }
 
-    private final static class LargeIntegerFactory extends Factory {
-
-        private final int _size;
-
-        private LargeIntegerFactory(int size) {
-            _size = size;
+    private static final Factory<LargeInteger> FACTORY_3 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 3);
         }
+    };
 
-        public Object create() {
-            return new LargeInteger(new long[_size]);
+    private static final Factory<LargeInteger> FACTORY_6 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 6);
         }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_9 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 9);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_12 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 12);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_15 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 15);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_18 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 18);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_21 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 21);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_24 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 24);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_27 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 27);
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_30 = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger(1 << 30);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * @deprecated Users should use {@link #divide(LargeInteger)} then 
+     * {@link #getRemainder()} on the division result to get the remainder.
+     * This function is provided only to facilitate the transition from 
+     * <code>BigInteger</code> to {@link LargeInteger}.
+     */
+    public LargeInteger[] divideAndRemainder(LargeInteger that) {
+        LargeInteger[] result = new LargeInteger[2];
+        result[0] = this.divide(that);
+        result[1] = result[0].getRemainder();
+        return result;
     }
 
-    private static final long serialVersionUID = 3761685706208391225L;
 }

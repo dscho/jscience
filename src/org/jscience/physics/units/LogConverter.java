@@ -1,21 +1,20 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
 
-import javolution.util.MathLib;
+import javolution.lang.MathLib;
 
 /**
  * <p> This class represents a logarithmic converter. Such converter 
  *     is typically used to create logarithmic unit. For example:<pre>
- *     Unit BEL = TransformedUnit.getInstance(
- *          Unit.ONE, new LogConverter(10).inverse());</pre></p>
+ *     Unit BEL = Unit.ONE.transform(new LogConverter(10).inverse());
+ *     </pre></p>
  * <p> Instances of this class are immutable.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
@@ -135,8 +134,8 @@ public final class LogConverter extends Converter {
             return LogConverter.this.hashCode() * 31;
         }
 
-        private static final long serialVersionUID = 4374630714303506966L;
+        private static final long serialVersionUID = 1L;
     }
 
-    private static final long serialVersionUID = -6047186182914075578L;
+    private static final long serialVersionUID = 1L;
 }

@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -26,50 +25,39 @@ import org.jscience.physics.units.Unit;
 public class Torque extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.NEWTON.multiply(SI.METER);
+    private final static Unit<Torque> UNIT = SI.NEWTON.times(SI.METER);
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Torque();
+    private final static Factory<Torque> FACTORY = new Factory<Torque>(UNIT) {
+        protected Torque create() {
+            return new Torque();
         }
     };
 
     /**
      * Represents a {@link Torque} amounting to nothing.
      */
-    public final static Torque ZERO = (Torque) valueOf(0, SYSTEM_UNIT);
+    public final static Torque ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Torque() {}
-
-    /**
-     * Returns the {@link Torque} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Torque}.
-     * @return the specified quantity or a new {@link Torque} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Torque}.
-     */
-    public static Torque torqueOf(Quantity quantity) {
-        return (Torque) FACTORY.quantity(quantity);
+    protected Torque() {
     }
 
     /**
      * Shows {@link Torque} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Torque} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Torque} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Torque.class, unit);
     }
 
-    private static final long serialVersionUID = -2265853161174238042L;
+    private static final long serialVersionUID = 1L;
+
 }

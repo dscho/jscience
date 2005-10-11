@@ -22,9 +22,11 @@
 <p> Let's say you have a simple electric circuit composed of 2 resistors in series
     with a battery. You want to know the voltage (U1, U2) at the nodes of the
     resistors and the current (I) traversing the circuit.<pre>
-        ElectricResistance R1 = (ElectricResistance) Quantity.valueOf(100, 0.1, SI.OHM); // 0.1% error.
-        ElectricResistance R2 = (ElectricResistance) Quantity.valueOf(300, 0.3, SI.OHM); // 0.1% error.
-        ElectricPotential U0 = (ElectricPotential) Quantity.valueOf(28, 0.1, SI.VOLT); // 0.1 V fluctuation.
+    import static org.jscience.physics.units.SI.*;
+    
+        ElectricResistance R1 = ElectricResistance.valueOf(100, 0.1, OHM); // 0.1% error.
+        ElectricResistance R2 = ElectricResistance.valueOf(300, 0.3, OHM); // 0.1% error.
+        ElectricPotential U0 = ElectricPotential.valueOf(28, 0.1, VOLT); // 0.1 V fluctuation.
 
         // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
         //             U1 = R1 * I    =&gt;  |-1 0  R1| * |U2| = |0 |
@@ -32,17 +34,16 @@
         //
         //                                    A      *  X   =  B
         //
-        Matrix A = Matrix.valueOf(new Quantity[][]{
-                {Scalar.ONE,          Scalar.ONE,          ElectricResistance.ZERO},
-                {Scalar.ONE.negate(), Scalar.ZERO,         R1},
-                {Scalar.ZERO,         Scalar.ONE.negate(), R2}});
-        Vector B = Vector.valueOf(new Quantity[]{
-                U0, ElectricPotential.ZERO, ElectricPotential.ZERO});
-        Vector X = (Vector) A.lu().solve(B);
-        ElectricCurrent.showAs(SI.MILLI(SI.AMPERE));
+        Matrix&lt;Quantity&gt; A = Matrix.valueOf(new Quantity[][]{
+                {Dimensionless.ONE,          Dimensionless.ONE,          ElectricResistance.ZERO},
+                {Dimensionless.ONE.negate(), Dimensionless.ZERO,         R1},
+                {Dimensionless.ZERO,         Dimensionless.ONE.negate(), R2}});
+        Vector&lt;Quantity&gt; B = Vector.valueOf(U0, ElectricPotential.ZERO, ElectricPotential.ZERO);
+        Vector&lt;Quantity&gt; X = A.lu().solve(B);
+        ElectricCurrent.showAs(MILLI(AMPERE));
         System.out.println(X);
-        System.out.println("Estimated current = " + ((Quantity) X.get(2)).doubleValue());
-        System.out.println("Absolute error  = " + ((Quantity) X.get(2)).getAbsoluteError());
+        System.out.println("Estimated current = " + X.get(2).doubleValue());
+        System.out.println("Absolute error  = " + X.get(2).getAbsoluteError());
 
         &gt; {7 V, 21 V, 70 mA}
         &gt; Estimated current = 0.070000320000327

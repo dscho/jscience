@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,52 +21,40 @@ import org.jscience.physics.units.Unit;
 public class ElectricConductance extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.SIEMENS.getDimension();
+    private final static Unit<ElectricConductance> UNIT = SI.SIEMENS;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new ElectricConductance();
+    private final static Factory<ElectricConductance> FACTORY = new Factory<ElectricConductance>(
+            UNIT) {
+        protected ElectricConductance create() {
+            return new ElectricConductance();
         }
-    }.useFor(SI.SIEMENS);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
-     * Represents an {@link ElectricConductance} amounting to nothing.
+     * Represents a {@link ElectricConductance} amounting to nothing.
      */
-    public final static ElectricConductance ZERO
-        = (ElectricConductance) valueOf(0, SYSTEM_UNIT);
+    public final static ElectricConductance ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected ElectricConductance() {}
-
-    /**
-     * Returns the {@link ElectricConductance} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link ElectricConductance}.
-     * @return the specified quantity or a new {@link ElectricConductance} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link ElectricConductance}.
-     */
-    public static ElectricConductance electricConductanceOf(Quantity quantity) {
-        return (ElectricConductance) FACTORY.quantity(quantity);
+    protected ElectricConductance() {
     }
 
     /**
      * Shows {@link ElectricConductance} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link ElectricConductance} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link ElectricConductance} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(ElectricConductance.class, unit);
     }
 
-    private static final long serialVersionUID = -2673341111574457500L;
+    private static final long serialVersionUID = 1L;
+
 }

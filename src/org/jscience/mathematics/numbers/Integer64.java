@@ -1,57 +1,53 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
 
-
-import java.io.IOException;
-
-import javolution.realtime.LocalContext.Variable;
-import javolution.util.MathLib;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
-import javolution.lang.TextBuilder;
 import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
-import org.jscience.mathematics.matrices.Operable;
-
 /**
- * <p> This class represents a 64 bits signed integer.</p>
- * <p> This class implements the {@link Operable} interface for modular
- *     arithmetic (ref. {@link #setModulus}).</p>
+ * <p> This class represents a 64 bits integer number.</p>
+ * 
+ * <p><i> Note: Arithmetic operation are non-modular (e.g. {@link #reciprocal}
+ *        throws {@link ArithmeticException}), for modular arithmetic the 
+ *        {@link LargeInteger} class should be used.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 6, 2004
  */
-public final class Integer64 extends RealtimeNumber implements Comparable {
+public final class Integer64 extends Number<Integer64> {
 
     /**
-     * Holds the default XML representation for 64 bits integers.
-     * This representation consists of a simple <code>value</code> attribute.
+     * Holds the default XML representation for 64 bits integer numbers.
+     * This representation consists of a simple <code>value</code> attribute
+     * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat INTEGER64_XML = new XmlFormat(Integer64.class) {
-        public void format(Object obj, XmlElement xml) {
-            xml.setAttribute("value", ((Integer64) obj)._value);
+    protected static final XmlFormat<Integer64> XML = new XmlFormat<Integer64>(
+            Integer64.class) {
+        public void format(Integer64 obj, XmlElement xml) {
+            xml.setAttribute("value", obj._value);
         }
 
-        public Object parse(XmlElement xml) {
+        public Integer64 parse(XmlElement xml) {
             return Integer64.valueOf(xml.getAttribute("value", 0L));
         }
     };
 
     /**
-     * Holds the factory used to produce 32 bits integer instances.
+     * Holds the factory used to produce 64 bits integer instances.
      */
-    private static final Factory FACTORY = new Factory() {
+    private static final Factory<Integer64> FACTORY = new Factory<Integer64>() {
 
-        public Object create() {
+        public Integer64 create() {
             return new Integer64();
         }
     };
@@ -59,12 +55,12 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
     /**
      * The 64 bits integer representing zero.
      */
-    public static final Integer64 ZERO = (Integer64) valueOf(0).moveHeap();
+    public static final Integer64 ZERO = valueOf(0).moveHeap();
 
     /**
-     * The 64 bits integer one.
+     * The 64 bits integer representing one.
      */
-    public static final Integer64 ONE = (Integer64) valueOf(1).moveHeap();
+    public static final Integer64 ONE = valueOf(1).moveHeap();
 
     /**
      * The associated long value.
@@ -78,62 +74,60 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the 64 bits integer of specified <code>long</code> value.
+     * Returns the 64 bits integer for the specified <code>long</code> value.
      *
      * @param  longValue the <code>long</code> value for this number.
      * @return the corresponding number.
-     * @see    #intValue()
+     * @see    #longValue()
      */
     public static Integer64 valueOf(long longValue) {
-        Integer64 r = (Integer64) FACTORY.object();
+        Integer64 r = FACTORY.object();
         r._value = longValue;
         return r;
     }
 
     /**
-     * Returns the 64 bits integer for the specified character sequence.
+     * Returns the  64 bits integer number for the specified character sequence.
      *
      * @param  chars the character sequence.
      * @return the corresponding number.
      */
     public static Integer64 valueOf(CharSequence chars) {
-        Integer64 r = (Integer64) FACTORY.object();
-        r._value = TypeFormat.parseInt(chars);
+        Integer64 r = FACTORY.object();
+        r._value = TypeFormat.parseLong(chars);
         return r;
     }
 
     /**
-     * Returns the negation of this number.
+     * Returns the opposite of this number.
      *
      * @return <code>-this</code>.
      */
-    public Integer64 negate() {
-        Integer64 r = (Integer64) FACTORY.object();
+    public Integer64 opposite() {
+        Integer64 r = FACTORY.object();
         r._value = -this._value;
         return r;
     }
-
+    
     /**
      * Returns the sum of this number with the one specified.
      *
      * @param  that the number to be added.
      * @return <code>this + that</code>.
      */
-    public Integer64 add(Integer64 that) {
-        Integer64 r = (Integer64) FACTORY.object();
+    public Integer64 plus(Integer64 that) {
+        Integer64 r = FACTORY.object();
         r._value = this._value + that._value;
         return r;
     }
-
     /**
-     * Returns the difference between this number and the one
-     * specified.
+     * Returns the difference between this number and the one specified.
      *
      * @param  that the number to be subtracted.
      * @return <code>this - that</code>.
      */
-    public Integer64 subtract(Integer64 that) {
-        Integer64 r = (Integer64) FACTORY.object();
+    public Integer64 minus(Integer64 that) {
+        Integer64 r = FACTORY.object();
         r._value = this._value - that._value;
         return r;
     }
@@ -141,52 +135,76 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
     /**
      * Returns the product of this number with the one specified.
      *
-     * @param  that the multiplier.
+     * @param  that the number multiplier.
      * @return <code>this * that</code>.
      */
-    public Integer64 multiply(Integer64 that) {
-        Integer64 r = (Integer64) FACTORY.object();
+    public Integer64 times(Integer64 that) {
+        Integer64 r = FACTORY.object();
         r._value = this._value * that._value;
         return r;
     }
 
     /**
-     * Returns this number divided by the one specified.
+     * Throws {@link ArithmeticException}.
+     */
+    public Integer64 reciprocal() {
+        throw new ArithmeticException("Non-modular arithmetic");
+    }
+
+    /**
+     * Returns this number divided by the one specified (integer division).
      *
-     * @param  that the divisor.
+     * @param  that the number divisor.
      * @return <code>this / that</code>.
      */
     public Integer64 divide(Integer64 that) {
-        Integer64 r = (Integer64) FACTORY.object();
+        Integer64 r = FACTORY.object();
         r._value = this._value / that._value;
         return r;
     }
 
     /**
      * Returns this number modulo the specified number. 
-     * This method always returns a positive number.
      * 
      * @param m the modulus.
-     * @return <code>this mod m</code>
-     * @throws ArithmeticException if <code>!m.isPositive()</code>
+     * @return <code>this % m</code>
      */
     public Integer64 mod(Integer64 m) {
-        if (m._value > 0) {
-            long l = this._value % m._value;
-            return l >= 0 ? valueOf(l) : valueOf(l + m._value);
-        } else {
-            throw new ArithmeticException("Modulus: " + m + " is not positive");
-        }
+        Integer64 r = FACTORY.object();
+        r._value = this._value % m._value;
+        return r;
     }
 
     /**
-     * Returns the absolute value of this number.
+     * Compares the {@link #norm norm} of this number with that number.
+     *
+     * @return <code>|this| > |that|</code>
+     */
+    public boolean isLargerThan(Integer64 that) {
+        return MathLib.abs(this._value) > MathLib.abs(that._value);
+    }
+
+    /**
+     * Returns the norm of this number.
      *
      * @return <code>abs(this)</code>.
      */
-    public Integer64 abs() {
-        Integer64 r = (Integer64) FACTORY.object();
+    public Integer64 norm() {
+        Integer64 r = FACTORY.object();
         r._value = MathLib.abs(this._value);
+        return r;
+    }
+
+    /**
+     * Returns the positive square root of this number (rounding to the 
+     * nearest integer value).
+     *
+     * @return <code>sqrt(this)</code>.
+     * @throws UnsupportedOperationException
+     */
+    public Integer64 sqrt() {
+        Integer64 r = FACTORY.object();
+        r._value = (long) MathLib.sqrt(this._value);
         return r;
     }
 
@@ -196,13 +214,7 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
      * @return the text representation of this number.
      */
     public Text toText() {
-        try {
-            TextBuilder tb = TextBuilder.newInstance();
-            TypeFormat.format(_value, tb);
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
-        }
+        return Text.valueOf(_value);
     }
 
     /**
@@ -219,56 +231,28 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
 
     /**
      * Returns the hash code for this number.
-     *
+     * 
      * @return the hash code value.
      */
     public int hashCode() {
-        return (int) _value;
+        int h = (int)(_value ^ (_value >>> 32));
+        h += ~(h << 9);
+        h ^= (h >>> 14);
+        h += (h << 4);
+        return h ^ (h >>> 10);
     }
 
-    /**
-     * Returns the value of this number as an <code>int</code>.
-     *
-     * @return the <code>int</code> value.
-     */
-    public int intValue() {
-        return (int) _value;
-    }
-
-    /**
-     * Returns the value of this number as a <code>long</code>.
-     *
-     * @return the <code>long</code> value.
-     */
+    // Implements abstract method.
     public long longValue() {
         return _value;
     }
 
-    /**
-     * Returns the value of this number as a <code>float</code>.
-     *
-     * @return the <code>float</code> value.
-     */
-    public float floatValue() {
-        return _value;
-    }
-
-    /**
-     * Returns the value of this number as a <code>double</code>.
-     *
-     * @return the <code>double</code> value.
-     */
+    // Implements abstract method.
     public double doubleValue() {
         return _value;
     }
 
-    /**
-     * Compares two 64 bits integer numerically.
-     *
-     * @param  that the number to compare with.
-     * @return -1, 0 or 1 as this number is numerically less than,
-     *         equal to, or greater than <code>that</code>.
-     */
+    // Implements Comparable.
     public int compareTo(Integer64 that) {
         if (this._value < that._value) {
             return -1;
@@ -279,98 +263,5 @@ public final class Integer64 extends RealtimeNumber implements Comparable {
         }
     }
 
-    // Implements Comparable
-    public int compareTo(Object that) {
-        return this.compareTo((Integer64) that);
-    }
-
-    /**
-     * Sets the context local modulus for modular arithmetic (used by
-     * {@link Operable} operations only). If the modulus is not set 
-     * the {@link #reciprocal} operation raises 
-     * <code>IllegalStateException</code>.
-     * 
-     * @param modulus the new modulus or <code>null</code> to unset the modulus.
-     * @throws IllegalArgumentException if <code>modulus <= 0</code>
-     * @see javolution.realtime.LocalContext
-     * @see #plus plus
-     * @see #opposite opposite
-     * @see #times times
-     * @see #reciprocal reciprocal
-     */
-    public static void setModulus(Integer64 modulus) {
-        if ((modulus == null) || (modulus._value > 0)) {
-            MODULUS.setValue(modulus);
-        } else {
-            throw new IllegalArgumentException("modulus: " + modulus
-                    + " is not greater than 0");
-        }
-    }
-
-    private static final Variable MODULUS = new Variable();
-
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        Integer64 modulus = (Integer64) MODULUS.getValue();
-        if (modulus != null) {
-            Integer64 result = this.mod(modulus).add(
-                    ((Integer64) that).mod(modulus));
-            return (result.compareTo(modulus) < 0) ? result : result
-                    .subtract(modulus);
-
-        } else {
-            return this.add((Integer64) that);
-        }
-    }
-
-    // Implements Operable.
-    public Operable opposite() {
-        Integer64 modulus = (Integer64) MODULUS.getValue();
-        if (modulus != null) {
-            return modulus.subtract(this.mod(modulus));
-        } else {
-            return this.negate();
-        }
-    }
-
-    // Implements Operable.
-    public Operable times(Operable that) {
-        Integer64 modulus = (Integer64) MODULUS.getValue();
-        if (modulus != null) {
-            return this.multiply((Integer64) that).mod(modulus);
-        } else {
-            return this.multiply((Integer64) that);
-        }
-    }
-
-    // Implements Operable.
-    public Operable reciprocal() {
-        Integer64 modulus = (Integer64) MODULUS.getValue();
-        if (modulus != null) {
-            // Extended Euclidian Algorithm
-            long a = this._value;
-            long b = modulus._value;
-            long p = 1;
-            long q = 0;
-            long r = 0;
-            long s = 1;
-            while (!(b == 0)) {
-                long quot = a / b;
-                long c = a % b;
-                a = b;
-                b = c;
-                long new_r = p - (quot * r);
-                long new_s = q - (quot * s);
-                p = r;
-                q = s;
-                r = new_r;
-                s = new_s;
-            }
-            return valueOf(p % modulus._value);
-        } else {
-            throw new IllegalStateException("Modulus is not set");
-        }
-    }
-
-    private static final long serialVersionUID = 3834596525665040436L;
+    private static final long serialVersionUID = 1L;
 }

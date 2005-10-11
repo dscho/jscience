@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,24 +22,24 @@ import org.jscience.physics.units.Unit;
 public class ElectricCapacitance extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.FARAD.getDimension();
+    private final static Unit<ElectricCapacitance> UNIT = SI.FARAD;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
+    private final static Factory<ElectricCapacitance> FACTORY = new Factory<ElectricCapacitance>(
+            UNIT) {
+        protected ElectricCapacitance create() {
             return new ElectricCapacitance();
         }
-    }.useFor(SI.FARAD);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
-     * Represents an {@link ElectricCapacitance} amounting to nothing.
+     * Represents a {@link ElectricCapacitance} amounting to nothing.
      */
-    public final static ElectricCapacitance ZERO = (ElectricCapacitance) valueOf(
-            0, SYSTEM_UNIT);
+    public final static ElectricCapacitance ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
@@ -49,27 +48,14 @@ public class ElectricCapacitance extends Quantity {
     }
 
     /**
-     * Returns the {@link ElectricCapacitance} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link ElectricCapacitance}.
-     * @return the specified quantity or a new {@link ElectricCapacitance} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link ElectricCapacitance}.
-     */
-    public static ElectricCapacitance electricCapacitanceOf(Quantity quantity) {
-        return (ElectricCapacitance) FACTORY.quantity(quantity);
-    }
-
-    /**
      * Shows {@link ElectricCapacitance} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link ElectricCapacitance} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link ElectricCapacitance} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(ElectricCapacitance.class, unit);
     }
 
-    private static final long serialVersionUID = 2225191356834086422L;
+    private static final long serialVersionUID = 1L;
+
 }

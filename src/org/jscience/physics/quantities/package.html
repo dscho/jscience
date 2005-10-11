@@ -4,7 +4,7 @@
     <ol>
     <li><b>Physical quantities:</b>
     <p> This package contains more than 40 predefined quantities with
-        specific methods (e.g. <code>Angle.sin(), Scalar.log()</code>)
+        specific methods (e.g. <code>Angle.sin(), Dimensionless.log()</code>)
         and constants (e.g. <code>Velocity.SPEED_OF_LIGHT, Mass.PROTON, Constants.µ0</code>).
         The appropriate quantity sub-class is automatically instantiated when needed.</p>
     <p> Quantity classes support derivation, making the framework easily extendable.
@@ -12,17 +12,17 @@
 
         // Derives from top Quantity class.
         public class MagneticDipoleMoment extends Quantity {
-            private final static Factory FACTORY = new Factory(SI.AMPERE.multiply(SI.METER.pow(2))) {
-                protected Quantity create() {
+            private final static Factory&lt;MagneticDipoleMoment> FACTORY = new Factory&lt;MagneticDipoleMoment>(SI.AMPERE.multiply(SI.METER.pow(2))) {
+                protected MagneticDipoleMoment create() {
                    return new MagneticDipoleMoment();
                 }
             };
         }
 
         // Derives from quantities other than the Quantity class.
-        public class Altitude extends Length {
-            private final static Factory FACTORY = new Factory(SI.METER.alternate("meter_height")) {
-                protected Quantity create() {
+        public class Altitude extends Length { 
+            private final static Factory&lt;Altitude> FACTORY = new Factory&lt;Altitude>(NonSI.FOOT)) {
+                protected Altitude create() {
                    return new Altitude();
                 }
             };
@@ -36,15 +36,17 @@
     <p> Quantities take into account measurement errors as well as numeric
         errors. The default {@link org.jscience.physics.quantities.QuantityFormat QuantityFormat} outputs only the decimal
         digits being exact. For example:<pre>
-          Length   x = (Length)   Quantity.valueOf(1, SI.METER);
-          Velocity v = (Velocity) Quantity.valueOf(0.01, SI.METER.divide(SI.SECOND));
-          Duration t = (Duration) Quantity.valueOf(1, SI.MICRO(SI.SECOND));
-          for (int i=0; i < 10000000; i++) {
-              x = (Length) x.add(v.multiply(t));
-          }
-          System.out.println(x);
+        import static org.jscience.physics.units.SI.*;
+        ...
+        Length   x = Quantity.valueOf(1, METER);
+        Velocity v = Quantity.valueOf(0.01, METER_PER_SECOND);
+        Duration t = Quantity.valueOf(1, MICRO(SECOND));
+        for (int i=0; i < 10000000; i++) {
+            x = x.plus(v.times(t)).to(METER);
+        }
+        System.out.println(x);
 
-          > 1.10000000 m</pre>
+        > 1.10000000 m</pre>
         The exact value is <b>guaranteed</b> to be in the range:
         <code>]1.09999999 m, 1.10000001 m[</code>.
         The same calculation using <code>double</code> would have printed<pre>
@@ -56,29 +58,34 @@
         For example, <code>Quantity.valueOf("1 µm")</code> and <code>Quantity.valueOf("1.2 ft")</code>
         return a <code>Length</code> instance (both <code>"µm"</code> and <code>"ft"</code> units
         are derived from <code>SI.METER</code>).</p>
+        
     <p> Multiple physical models are supported (e.g. <code>Standard</code>,
         <code>Relativistic</code>, <code>High-Energy</code>, <code>Quantum</code>
-        and <code>Natural</code>). The current model defines the conversions being allowed
-        as well as the default units to output quantities. For example:<pre>
-        final Quantity x = Length.valueOf(1, NonSI.INCH);
-        System.out.println(x); // Default standard model, length are stated in meters.
+        and <code>Natural</code>). The current model defines the conversions being allowed.
+        For example:<pre>
+        Length x = Length.valueOf(100, NonSI.INCH);
+        System.out.println(x); 
         LocalContext.enter();
         try {
             RelativisticModel.select(); // Selects the relativistic model.
-            System.out.println(x); // Lengths are stated in second.
-            Quantity y = x.add(Duration.valueOf("2.3 µs")); // Length and Duration can be added.
-            Mass m = Mass.massOf(Quantity.valueOf("12 GeV")); // Energy is compatible with mass (E=mc2)
+            x = x.plus(Quantity.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
+            System.out.println(x); 
+            Mass m = Quantity.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
+            System.out.println(m); 
         } finally {
            LocalContext.exit();
         }
-        > 0.02540000000000000 m
-        > 8.47252801803306E-11 s</pre></p>
+        
+        > 100.000000000000 in
+        > 692.062653400000 m
+        > 2.13919407630251E-26 kg</pre></p>
+        
     <p> Custom units for quantity output is allowed. For example:<pre>
-        Length x = (Length) Quantity.valueOf(123, SI.CENTI(SI.METER));
+        Length x = Quantity.valueOf(123, CENTI(METER));
         Length.showAs(NonSI.INCH); // Context-local.
         System.out.println(x);
 
-        > 48.42519685039370 in</pre>
+        > 48.4251968503937 in</pre>
         </p></li>
     </ol></p>
 </body>

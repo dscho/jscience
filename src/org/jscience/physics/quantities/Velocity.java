@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,56 +20,45 @@ import org.jscience.physics.units.Unit;
 public class Velocity extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.METER.divide(SI.SECOND);
+    private final static Unit<Velocity> UNIT = SI.METER_PER_SECOND;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Velocity();
+    private final static Factory<Velocity> FACTORY = new Factory<Velocity>(
+            UNIT) {
+        protected Velocity create() {
+            return new Velocity();
         }
     };
 
     /**
      * Represents a {@link Velocity} amounting to nothing.
      */
-    public final static Velocity ZERO = (Velocity) valueOf(0, SYSTEM_UNIT);
+    public final static Velocity ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Holds the speed of light in vacuum (exact).
      */
-    public final static Velocity SPEED_OF_LIGHT
-        = (Velocity) valueOf(299792458, SYSTEM_UNIT);
+    public final static Velocity SPEED_OF_LIGHT = Quantity.valueOf(299792458, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Velocity() {}
-
-    /**
-     * Returns the {@link Velocity} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Velocity}.
-     * @return the specified quantity or a new {@link Velocity} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Velocity}.
-     */
-    public static Velocity velocityOf(Quantity quantity) {
-        return (Velocity) FACTORY.quantity(quantity);
+    protected Velocity() {
     }
 
     /**
      * Shows {@link Velocity} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Velocity} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Velocity} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Velocity.class, unit);
     }
 
-    private static final long serialVersionUID = 2182679747189334410L;
+    private static final long serialVersionUID = 1L;
+
 }

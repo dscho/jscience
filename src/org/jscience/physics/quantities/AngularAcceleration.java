@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,53 +20,45 @@ import org.jscience.physics.units.Unit;
 public class AngularAcceleration extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.RADIAN.divide(SI.SECOND.pow(2));
+    private final static Unit<AngularAcceleration> 
+         SYSTEM_UNIT = SI.RADIAN.divide(SI.SECOND.pow(2));
+
+    /**
+     * Holds the associated unit.
+     */
+    private final static Unit<AngularAcceleration> UNIT = SI.RADIAN.divide(SI.SECOND.pow(2));
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new AngularAcceleration();
+    private final static Factory<AngularAcceleration> FACTORY = new Factory<AngularAcceleration>(
+            UNIT) {
+        protected AngularAcceleration create() {
+            return new AngularAcceleration();
         }
     };
 
     /**
      * Represents a {@link AngularAcceleration} amounting to nothing.
      */
-    public final static AngularAcceleration ZERO
-        = (AngularAcceleration) valueOf(0, SYSTEM_UNIT);
+    public final static AngularAcceleration ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected AngularAcceleration() {}
-
-    /**
-     * Returns the {@link AngularAcceleration} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link AngularAcceleration}.
-     * @return the specified quantity or a new {@link AngularAcceleration} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to
-     *         {@link AngularAcceleration}.
-     */
-    public static AngularAcceleration angularAccelerationOf(Quantity quantity) {
-        return (AngularAcceleration) FACTORY.quantity(quantity);
+    protected AngularAcceleration() {
     }
 
     /**
      * Shows {@link AngularAcceleration} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link AngularAcceleration} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link AngularAcceleration} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(AngularAcceleration.class, unit);
     }
 
-    private static final long serialVersionUID = 6528155107447300697L;
+    private static final long serialVersionUID = 1L;
 }

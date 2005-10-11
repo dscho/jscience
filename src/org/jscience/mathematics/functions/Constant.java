@@ -1,11 +1,10 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.functions;
 
@@ -19,13 +18,13 @@ import org.jscience.mathematics.matrices.Operable;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
  */
-public final class Constant extends Polynomial {
+public final class Constant<O extends Operable<O>>  extends Polynomial<O> {
 
     /**
      * Holds the factory constructing constant instances.
      */
-    private static final Factory FACTORY = new Factory() {
-        public Object create() {
+    private static final Factory<Constant> FACTORY = new Factory<Constant>() {
+        protected Constant create() {
             return new Constant();
         }
     };
@@ -41,9 +40,9 @@ public final class Constant extends Polynomial {
      * @param value the value returned by this function.
      * @return the corresponding constant function.
      */
-    public static Constant valueOf(Operable value) {
-        Constant cst = (Constant) FACTORY.object();
-        cst._terms = FastMap.newInstance(1);
+    public static <O extends Operable<O>> Constant<O> valueOf(O value) {
+        Constant<O> cst = FACTORY.object();
+        cst._terms = FastMap.newInstance();
         cst._terms.put(Term.CONSTANT, value);
         return cst;
     }
@@ -53,7 +52,7 @@ public final class Constant extends Polynomial {
      *
      * @return <code>getCoefficient(Term.CONSTANT)</code>
      */
-    public Operable getValue() {
+    public O getValue() {
         return getCoefficient(Term.CONSTANT);
     }
 

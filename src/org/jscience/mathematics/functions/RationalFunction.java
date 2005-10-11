@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.functions;
-
 import java.util.Set;
 
 import javolution.util.FastSet;
@@ -25,14 +23,14 @@ import org.jscience.mathematics.matrices.Operable;
  * @see     <a href="http://mathworld.wolfram.com/RationalFunction.html">
  *          Rational Function -- from MathWorld</a>
  */
-public class RationalFunction extends Function {
+public class RationalFunction<O extends Operable<O>> extends Function<O> {
 
     /**
      * Holds the factory for rational functions.
      */
-    private static final Factory FACTORY = new Factory() {
+    private static final Factory<RationalFunction> FACTORY = new Factory<RationalFunction>() {
 
-        public Object create() {
+        protected RationalFunction create() {
             return new RationalFunction();
         }
     };
@@ -40,12 +38,12 @@ public class RationalFunction extends Function {
     /**
      * Holds the dividend.
      */
-    private Polynomial _dividend;
+    private Polynomial<O> _dividend;
 
     /**
      * Holds the divisor.
      */
-    private Polynomial _divisor;
+    private Polynomial<O> _divisor;
 
     /**
      * Default constructor.
@@ -56,18 +54,18 @@ public class RationalFunction extends Function {
     /**
      * Returns the dividend of this rational function.
      * 
-     * @return this rational function's dividend. 
+     * @return this rational function dividend. 
      */
-    public Polynomial getDividend() {
+    public Polynomial<O> getDividend() {
         return _dividend;
     }
 
     /**
      * Returns the divisor of this rational function.
      * 
-     * @return this rational function's divisor.
+     * @return this rational function divisor.
      */
-    public Polynomial getDivisor() {
+    public Polynomial<O> getDivisor() {
         return _divisor;
     }
 
@@ -78,11 +76,12 @@ public class RationalFunction extends Function {
      * @param divisor the divisor value.
      * @return <code>dividend / divisor</code>
      */
-    public static RationalFunction valueOf(Polynomial dividend, Polynomial divisor) {
-            RationalFunction rf = (RationalFunction) FACTORY.object();
-            rf._dividend = dividend;
-            rf._divisor = divisor;
-            return rf;
+    public static <O extends Operable<O>> RationalFunction<O> valueOf(
+            Polynomial<O> dividend, Polynomial<O> divisor) {
+        RationalFunction<O> rf = FACTORY.object();
+        rf._dividend = dividend;
+        rf._divisor = divisor;
+        return rf;
     }
 
     /**
@@ -101,7 +100,6 @@ public class RationalFunction extends Function {
             return false;
         }
     }
-   
 
     /**
      * Returns the hash code for this rational function.
@@ -113,21 +111,21 @@ public class RationalFunction extends Function {
     }
 
     // Implements abstract method.
-    public Set getVariables() {
-        FastSet variables = FastSet.newInstance(16);
-        variables.add(_dividend.getVariables());
-        variables.add(_divisor.getVariables());
+    public Set<Variable> getVariables() {
+        FastSet<Variable> variables = FastSet.newInstance();
+        variables.addAll(_dividend.getVariables());
+        variables.addAll(_divisor.getVariables());
         return variables;
     }
 
     // Implements abstract method.
-    public Operable evaluate() {
-            return _dividend.evaluate().times(_divisor.evaluate().reciprocal());
+    public O evaluate() {
+        return _dividend.evaluate().times(_divisor.evaluate().reciprocal());
     }
 
     // Implements interface.
     public Text toText() {
-        TextBuilder tb = TextBuilder.newInstance(); 
+        TextBuilder tb = TextBuilder.newInstance();
         tb.append('(');
         tb.append(_dividend);
         tb.append(")/(");
@@ -137,65 +135,56 @@ public class RationalFunction extends Function {
     }
 
     // Overrides.
-    public void move(ContextSpace cs) {
-        super.move(cs);
-        _dividend.move(cs);
-        _divisor.move(cs);
+    public boolean move(ObjectSpace os) {
+        if (super.move(os)) {
+            _dividend.move(os);
+            _divisor.move(os);
+            return true;
+        }
+        return false;
     }
 
     // Implements Operable.
-    public Operable plus(Operable o) {
-        if (o instanceof RationalFunction) {
-            RationalFunction that = (RationalFunction) o;
-            return valueOf((Polynomial) this._dividend.times(that._divisor)
-                    .plus(this._divisor.times(that._dividend)),
-                    (Polynomial) this._divisor.times(that._divisor));
-        } else {
-            return super.plus(o);
-        }
-    }
-    
-    // Overrides.
-    public Operable opposite() {
-        return valueOf((Polynomial) _dividend.opposite(), _divisor);
+    public RationalFunction<O> plus(RationalFunction<O> that) {
+        return valueOf(this._dividend.times(that._divisor).plus(
+                this._divisor.times(that._dividend)),
+                this._divisor.times(that._divisor));
     }
 
     // Overrides.
-    public Operable times(Operable o) {
-        if (o instanceof RationalFunction) {
-            RationalFunction that = (RationalFunction) o;
-            return valueOf((Polynomial) this._dividend.times(that._dividend),
-                    (Polynomial) this._divisor.times(that._divisor));
-        } else {
-            return super.times(o);
-        }
+    public RationalFunction<O>  opposite() {
+        return valueOf(_dividend.opposite(), _divisor);
+    }
+
+    // Overrides.
+    public RationalFunction<O> times(RationalFunction<O> that) {
+            return valueOf(this._dividend.times(that._dividend),
+                    this._divisor.times(that._divisor));
     }
 
     // Implements Operable.
-    public Operable reciprocal() {
+    public RationalFunction<O> reciprocal() {
         return valueOf(_divisor, _dividend);
     }
 
     // Overrides.
-    public Function compose(Function f) {
+    public Function<O> compose(Function<O> f) {
         if (_dividend instanceof Constant) {
-            return (Function) _dividend.times(
-                    _divisor.compose(f).reciprocal());
+            return _dividend.times(_divisor.compose(f).reciprocal());
         } else if (_divisor instanceof Constant) {
-            return (Function) _dividend.compose(f).times(
-                    _divisor.reciprocal());
+            return _dividend.compose(f).times(_divisor.reciprocal());
         } else {
-            return (Function) _dividend.compose(f).times(
-                _divisor.compose(f).reciprocal());
+            return _dividend.compose(f).times(
+                    _divisor.compose(f).reciprocal());
         }
     }
 
     // Overrides.
-    public Function differentiate(Variable v) {
-        return valueOf((Polynomial) _divisor.times(_dividend.differentiate(v))
+    public RationalFunction<O> differentiate(Variable v) {
+        return valueOf(_divisor.times(_dividend.differentiate(v))
                 .plus(_dividend.times(_divisor.differentiate(v)).opposite()),
-                (Polynomial) _dividend.pow(2));
+                _dividend.pow(2));
     }
 
-    private static final long serialVersionUID = 4515664495869116697L;
+    private static final long serialVersionUID = 1L;
 }

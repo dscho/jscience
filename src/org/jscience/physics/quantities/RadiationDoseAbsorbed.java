@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,55 +21,40 @@ import org.jscience.physics.units.Unit;
 public class RadiationDoseAbsorbed extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.GRAY;
+    private final static Unit<RadiationDoseAbsorbed> UNIT = SI.GRAY;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new RadiationDoseAbsorbed();
+    private final static Factory<RadiationDoseAbsorbed> FACTORY = new Factory<RadiationDoseAbsorbed>(
+            UNIT) {
+        protected RadiationDoseAbsorbed create() {
+            return new RadiationDoseAbsorbed();
         }
     };
 
     /**
      * Represents a {@link RadiationDoseAbsorbed} amounting to nothing.
      */
-    public final static RadiationDoseAbsorbed ZERO
-        = (RadiationDoseAbsorbed) valueOf(0, SYSTEM_UNIT);
+    public final static RadiationDoseAbsorbed ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected RadiationDoseAbsorbed() {}
-
-    /**
-     * Returns the {@link RadiationDoseAbsorbed} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with
-     *         {@link RadiationDoseAbsorbed}.
-     * @return the specified quantity or a new {@link RadiationDoseAbsorbed} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to
-     *         {@link RadiationDoseAbsorbed}.
-     */
-    public static RadiationDoseAbsorbed radiationDoseAbsorbedOf(
-            Quantity quantity) {
-        return (RadiationDoseAbsorbed) FACTORY.quantity(quantity);
+    protected RadiationDoseAbsorbed() {
     }
 
     /**
      * Shows {@link RadiationDoseAbsorbed} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link RadiationDoseAbsorbed} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link RadiationDoseAbsorbed} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(RadiationDoseAbsorbed.class, unit);
     }
 
-    private static final long serialVersionUID = 6833294413629008983L;
+    private static final long serialVersionUID = 1L;
+
 }

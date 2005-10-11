@@ -1,47 +1,43 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
 
-
-import java.io.IOException;
-
-import javolution.realtime.LocalContext.Variable;
-import javolution.util.MathLib;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
-import javolution.lang.TextBuilder;
 import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
-import org.jscience.mathematics.matrices.Operable;
-
 /**
- * <p> This class represents a 32 bits signed integer.</p>
- * <p> This class implements the {@link Operable} interface for modular
- *     arithmetic (ref. {@link #setModulus}).</p>
+ * <p> This class represents a 32 bits integer number.</p>
+ * 
+ * <p><i> Note: Arithmetic operation are non-modular (e.g. {@link #reciprocal}
+ *        throws {@link ArithmeticException}), for modular arithmetic the 
+ *        {@link LargeInteger} class should be used.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 6, 2004
  */
-public final class Integer32 extends RealtimeNumber implements Comparable {
+public final class Integer32 extends Number<Integer32> {
 
     /**
-     * Holds the default XML representation for 32 bits integers.
-     * This representation consists of a simple <code>value</code> attribute.
+     * Holds the default XML representation for 32 bits integer numbers.
+     * This representation consists of a simple <code>value</code> attribute
+     * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat INTEGER32_XML = new XmlFormat(Integer32.class) {
-        public void format(Object obj, XmlElement xml) {
-            xml.setAttribute("value", ((Integer32) obj)._value);
+    protected static final XmlFormat<Integer32> XML = new XmlFormat<Integer32>(
+            Integer32.class) {
+        public void format(Integer32 obj, XmlElement xml) {
+            xml.setAttribute("value", obj._value);
         }
 
-        public Object parse(XmlElement xml) {
+        public Integer32 parse(XmlElement xml) {
             return Integer32.valueOf(xml.getAttribute("value", 0));
         }
     };
@@ -49,9 +45,9 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
     /**
      * Holds the factory used to produce 32 bits integer instances.
      */
-    private static final Factory FACTORY = new Factory() {
+    private static final Factory<Integer32> FACTORY = new Factory<Integer32>() {
 
-        public Object create() {
+        public Integer32 create() {
             return new Integer32();
         }
     };
@@ -59,17 +55,12 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
     /**
      * The 32 bits integer representing zero.
      */
-    public static final Integer32 ZERO = (Integer32) valueOf(0).moveHeap();
+    public static final Integer32 ZERO = valueOf(0).moveHeap();
 
     /**
-     * The 32 bits integer one.
+     * The 32 bits integer representing one.
      */
-    public static final Integer32 ONE = (Integer32) valueOf(1).moveHeap();
-
-    /**
-     * The 32 bits integer representing zero.
-     */
-    public static final Integer32 MAX_PRIME = (Integer32) valueOf(0).moveHeap();
+    public static final Integer32 ONE = valueOf(1).moveHeap();
 
     /**
      * The associated int value.
@@ -83,62 +74,60 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
     }
 
     /**
-     * Returns the 32 bits integer of specified <code>int</code> value.
+     * Returns the 32 bits integer for the specified <code>int</code> value.
      *
-     * @param  intValue the <code>int</code> value for this 32 bits integer.
+     * @param  intValue the <code>int</code> value for this number.
      * @return the corresponding number.
      * @see    #intValue()
      */
     public static Integer32 valueOf(int intValue) {
-        Integer32 r = (Integer32) FACTORY.object();
+        Integer32 r = FACTORY.object();
         r._value = intValue;
         return r;
     }
 
     /**
-     * Returns the 32 bits integer for the specified character sequence.
+     * Returns the 32 bits integer number for the specified character sequence.
      *
      * @param  chars the character sequence.
      * @return the corresponding number.
      */
     public static Integer32 valueOf(CharSequence chars) {
-        Integer32 r = (Integer32) FACTORY.object();
+        Integer32 r = FACTORY.object();
         r._value = TypeFormat.parseInt(chars);
         return r;
     }
 
     /**
-     * Returns the negation of this number.
+     * Returns the opposite of this number.
      *
      * @return <code>-this</code>.
      */
-    public Integer32 negate() {
-        Integer32 r = (Integer32) FACTORY.object();
+    public Integer32 opposite() {
+        Integer32 r = FACTORY.object();
         r._value = -this._value;
         return r;
     }
-
+    
     /**
      * Returns the sum of this number with the one specified.
      *
      * @param  that the number to be added.
      * @return <code>this + that</code>.
      */
-    public Integer32 add(Integer32 that) {
-        Integer32 r = (Integer32) FACTORY.object();
+    public Integer32 plus(Integer32 that) {
+        Integer32 r = FACTORY.object();
         r._value = this._value + that._value;
         return r;
     }
-
     /**
-     * Returns the difference between this number and the one
-     * specified.
+     * Returns the difference between this number and the one specified.
      *
      * @param  that the number to be subtracted.
      * @return <code>this - that</code>.
      */
-    public Integer32 subtract(Integer32 that) {
-        Integer32 r = (Integer32) FACTORY.object();
+    public Integer32 minus(Integer32 that) {
+        Integer32 r = FACTORY.object();
         r._value = this._value - that._value;
         return r;
     }
@@ -146,52 +135,76 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
     /**
      * Returns the product of this number with the one specified.
      *
-     * @param  that the multiplier.
+     * @param  that the number multiplier.
      * @return <code>this * that</code>.
      */
-    public Integer32 multiply(Integer32 that) {
-        Integer32 r = (Integer32) FACTORY.object();
+    public Integer32 times(Integer32 that) {
+        Integer32 r = FACTORY.object();
         r._value = this._value * that._value;
         return r;
     }
 
     /**
-     * Returns this number divided by the one specified.
+     * Throws {@link ArithmeticException}.
+     */
+    public Integer32 reciprocal() {
+        throw new ArithmeticException("Non-modular arithmetic");
+    }
+
+    /**
+     * Returns this number divided by the one specified (integer division).
      *
-     * @param  that the divisor.
+     * @param  that the number divisor.
      * @return <code>this / that</code>.
      */
     public Integer32 divide(Integer32 that) {
-        Integer32 r = (Integer32) FACTORY.object();
+        Integer32 r = FACTORY.object();
         r._value = this._value / that._value;
         return r;
     }
 
     /**
      * Returns this number modulo the specified number. 
-     * This method always returns a positive number.
      * 
      * @param m the modulus.
-     * @return <code>this mod m</code>
-     * @throws ArithmeticException if <code>!m.isPositive()</code>
+     * @return <code>this % m</code>
      */
     public Integer32 mod(Integer32 m) {
-        if (m._value > 0) {
-            int i = this._value % m._value;
-            return i >= 0 ? valueOf(i) : valueOf(i + m._value);
-        } else {
-            throw new ArithmeticException("Modulus: " + m + " is not positive");
-        }
+        Integer32 r = FACTORY.object();
+        r._value = this._value % m._value;
+        return r;
     }
 
     /**
-     * Returns the absolute value of this number.
+     * Compares the {@link #norm norm} of this number with that number.
+     *
+     * @return <code>|this| > |that|</code>
+     */
+    public boolean isLargerThan(Integer32 that) {
+        return MathLib.abs(this._value) > MathLib.abs(that._value);
+    }
+
+    /**
+     * Returns the norm of this number.
      *
      * @return <code>abs(this)</code>.
      */
-    public Integer32 abs() {
-        Integer32 r = (Integer32) FACTORY.object();
+    public Integer32 norm() {
+        Integer32 r = FACTORY.object();
         r._value = MathLib.abs(this._value);
+        return r;
+    }
+
+    /**
+     * Returns the positive square root of this number (rounding to the 
+     * nearest integer value).
+     *
+     * @return <code>sqrt(this)</code>.
+     * @throws UnsupportedOperationException
+     */
+    public Integer32 sqrt() {
+        Integer32 r = FACTORY.object();
+        r._value = (int) MathLib.sqrt(this._value);
         return r;
     }
 
@@ -201,13 +214,7 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
      * @return the text representation of this number.
      */
     public Text toText() {
-        try {
-            TextBuilder tb = TextBuilder.newInstance();
-            TypeFormat.format(_value, tb);
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
-        }
+        return Text.valueOf(_value);
     }
 
     /**
@@ -224,56 +231,28 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
 
     /**
      * Returns the hash code for this number.
-     *
+     * 
      * @return the hash code value.
      */
     public int hashCode() {
-        return _value;
+        int h = _value;
+        h += ~(h << 9);
+        h ^= (h >>> 14);
+        h += (h << 4);
+        return h ^ (h >>> 10);
     }
 
-    /**
-     * Returns the value of this number as an <code>int</code>.
-     *
-     * @return the <code>int</code> value.
-     */
-    public int intValue() {
-        return _value;
-    }
-
-    /**
-     * Returns the value of this number as a <code>long</code>.
-     *
-     * @return the <code>long</code> value.
-     */
+    // Implements abstract method.
     public long longValue() {
         return _value;
     }
 
-    /**
-     * Returns the value of this number as a <code>float</code>.
-     *
-     * @return the <code>float</code> value.
-     */
-    public float floatValue() {
-        return _value;
-    }
-
-    /**
-     * Returns the value of this number as a <code>double</code>.
-     *
-     * @return the <code>double</code> value.
-     */
+    // Implements abstract method.
     public double doubleValue() {
         return _value;
     }
 
-    /**
-     * Compares two 32 bits integer numerically.
-     *
-     * @param  that the number to compare with.
-     * @return -1, 0 or 1 as this numberis numerically less than,
-     *         equal to, or greater than <code>that</code>.
-     */
+    // Implements Comparable.
     public int compareTo(Integer32 that) {
         if (this._value < that._value) {
             return -1;
@@ -284,98 +263,5 @@ public final class Integer32 extends RealtimeNumber implements Comparable {
         }
     }
 
-    // Implements Comparable
-    public int compareTo(Object that) {
-        return this.compareTo((Integer32) that);
-    }
-
-    /**
-     * Sets the context local modulus for modular arithmetic (used by
-     * {@link Operable} operations only). If the modulus is not set 
-     * the {@link #reciprocal} operation raises 
-     * <code>IllegalStateException</code>.
-     * 
-     * @param modulus the new modulus or <code>null</code> to unset the modulus.
-     * @throws IllegalArgumentException if <code>modulus <= 0</code>
-     * @see javolution.realtime.LocalContext
-     * @see #plus plus
-     * @see #opposite opposite
-     * @see #times times
-     * @see #reciprocal reciprocal
-     */
-    public static void setModulus(Integer32 modulus) {
-        if ((modulus == null) || (modulus._value > 0)) {
-            MODULUS.setValue(modulus);
-        } else {
-            throw new IllegalArgumentException("modulus: " + modulus
-                    + " is not greater than 0");
-        }
-    }
-
-    private static final Variable MODULUS = new Variable();
-
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        Integer32 modulus = (Integer32) MODULUS.getValue();
-        if (modulus != null) {
-            Integer32 result = this.mod(modulus).add(
-                    ((Integer32) that).mod(modulus));
-            return (result.compareTo(modulus) < 0) ? result : result
-                    .subtract(modulus);
-
-        } else {
-            return this.add((Integer32) that);
-        }
-    }
-
-    // Implements Operable.
-    public Operable opposite() {
-        Integer32 modulus = (Integer32) MODULUS.getValue();
-        if (modulus != null) {
-            return modulus.subtract(this.mod(modulus));
-        } else {
-            return this.negate();
-        }
-    }
-
-    // Implements Operable.
-    public Operable times(Operable that) {
-        Integer32 modulus = (Integer32) MODULUS.getValue();
-        if (modulus != null) {
-            return this.multiply((Integer32) that).mod(modulus);
-        } else {
-            return this.multiply((Integer32) that);
-        }
-    }
-
-    // Implements Operable.
-    public Operable reciprocal() {
-        Integer32 modulus = (Integer32) MODULUS.getValue();
-        if (modulus != null) {
-            // Extended Euclidian Algorithm
-            int a = this._value;
-            int b = modulus._value;
-            int p = 1;
-            int q = 0;
-            int r = 0;
-            int s = 1;
-            while (!(b == 0)) {
-                int quot = a / b;
-                int c = a % b;
-                a = b;
-                b = c;
-                int new_r = p - (quot * r);
-                int new_s = q - (quot * s);
-                p = r;
-                q = s;
-                r = new_r;
-                s = new_s;
-            }
-            return valueOf(p % modulus._value);
-        } else {
-            throw new IllegalStateException("Modulus is not set");
-        }
-    }
-
-    private static final long serialVersionUID = 3763095280064411193L;
+    private static final long serialVersionUID = 1L;
 }

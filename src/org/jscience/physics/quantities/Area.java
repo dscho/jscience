@@ -1,14 +1,12 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,49 +21,38 @@ import org.jscience.physics.units.Unit;
 public class Area extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.METER.pow(2);
+    private final static Unit<Area> UNIT = SI.SQUARE_METER;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Area();
+    private final static Factory<Area> FACTORY = new Factory<Area>(
+            UNIT) {
+        protected Area create() {
+            return new Area();
         }
     };
 
     /**
-     * Represents an {@link Area} amounting to nothing.
+     * Represents a {@link Area} amounting to nothing.
      */
-    public final static Area ZERO = (Area) valueOf(0, SYSTEM_UNIT);
+    public final static Area ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Area() {}
-
-    /**
-     * Returns the {@link Area} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Area}.
-     * @return the specified quantity or a new {@link Area} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Area}.
-     */
-    public static Area areaOf(Quantity quantity) {
-        return (Area) FACTORY.quantity(quantity);
+    protected Area() {
     }
 
     /**
      * Shows {@link Area} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Area} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Area} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Area.class, unit);
     }
 
     ///////////////////
@@ -79,10 +66,11 @@ public class Area extends Quantity {
      * @param  theta the central angle.
      * @return the area of the specified circle sector.
      */
-    public static Area circleOf(Length radius, Angle theta) {
+    public static Area valueOf(Length radius, Angle theta) {
         // Returns (theta / 2.0) * radius^2
-        return areaOf(theta.multiply(radius.pow(2.0)).divide(2.0));
+        return theta.times(radius.times(radius)).times(0.5).to(UNIT);
     }
 
-    private static final long serialVersionUID = 3375073435913259804L;
+    private static final long serialVersionUID = 1L;
+
 }

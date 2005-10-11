@@ -1,13 +1,14 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
+
+import org.jscience.physics.quantities.Quantity;
 
 /**
  * <p> This class represents a unit derived from another unit using
@@ -32,79 +33,51 @@ package org.jscience.physics.units;
  *     </code></pre>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
- * @see     Unit#add(double)
- * @see     Unit#multiply(double)
+ * @version 1.1, May  24, 2004
+ * @see     Unit#plus(double)
+ * @see     Unit#times(double)
+ * @see     Unit#transform(Converter)
  * @see     UnitFormat
  */
-public class TransformedUnit extends DerivedUnit {
-
-    /**
-     * Holds the system unit.
-     */
-    private final Unit _systemUnit;
-
-    /**
-     * Holds the converter to the system unit.
-     */
-    private final Converter _toSystem;
+class TransformedUnit<Q extends Quantity> extends DerivedUnit<Q> {
 
     /**
      * Creates a transformed unit derived from the specified unit using
      * the specified converter.
      *
-     * @param  systemUnit the system unit from which this unit is transformed.
-     * @param  toSystem the converter to the system unit.
+     * @param  sourceUnit the units from which this unit is derived.
+     * @param  toParentUnit the converter to the parent unit.
      */
-    private TransformedUnit(Unit systemUnit, Converter toSystem) {
-        super(null);
-        _systemUnit = systemUnit;
-        _toSystem = toSystem;
-    }
-
-    /**
-     * Returns the unit derived from the specified unit using the specified
-     * converter.
-     *
-     * @param  parent the unit from which this unit is derived.
-     * @param  toParent the converter to the parent unit.
-     * @return the corresponding derived unit.
-     */
-    public static Unit getInstance(Unit parent, Converter toParent) {
-        Unit systemUnit = parent.getSystemUnit();
-        TransformedUnit newUnit = new TransformedUnit(
-            systemUnit,
-            parent.getConverterTo(systemUnit).concatenate(toParent));
-        return (TransformedUnit) getInstance(newUnit); // Ensures unicity.
+    protected TransformedUnit(Unit<? super Q> parentUnit, Converter toParentUnit) {
+        while (parentUnit instanceof TransformedUnit) {
+            toParentUnit = parentUnit._toParentUnit.concatenate(toParentUnit);
+            parentUnit = parentUnit._parentUnit;
+        }
+        _parentUnit = parentUnit;
+        _toParentUnit = toParentUnit;
     }
 
     // Implements abstract method.
-    public Unit getSystemUnit() {
-        return _systemUnit;
+    protected boolean equalsImpl(Object that) {
+        return (that instanceof TransformedUnit)
+                && (((TransformedUnit) that)._parentUnit == _parentUnit)
+                && ((TransformedUnit) that)._toParentUnit.equals(_toParentUnit);
     }
 
     // Implements abstract method.
-    public boolean equals(Object that) {
-        return (this == that) || (
-            (that instanceof TransformedUnit) &&
-            (((TransformedUnit)that)._systemUnit == _systemUnit) &&
-            ((TransformedUnit)that)._toSystem.equals(_toSystem));
+    protected int hashCodeImpl() {
+        return _parentUnit.hashCode() + _toParentUnit.hashCode();
     }
 
     // Implements abstract method.
-    int calculateHashCode() {
-        return _systemUnit.hashCode() + _toSystem.hashCode();
+    protected final Unit<? super Q> getParentUnitImpl() {
+        return _parentUnit;
     }
 
     // Implements abstract method.
-    Unit getCtxDimension() {
-        return _systemUnit.getCtxDimension();
+    protected final Converter toParentUnitImpl() {
+        return _toParentUnit;
     }
 
-    // Implements abstract method.
-    Converter getCtxToDimension() {
-        return _systemUnit.getCtxToDimension().concatenate(_toSystem);
-    }
-
-    private static final long serialVersionUID = 3137995610399363562L;
+    private static final long serialVersionUID = 1L;
 }

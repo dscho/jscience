@@ -1,31 +1,40 @@
 <body>
 <p> Provides support for monetary quantities and their currencies.</p>
+<p> For equality comparison between money quantities (regardless of their
+    currency), it is recommended to use the {@link org.jscience.physics.quantities.Quantity#approxEquals 
+    approxEquals} method. Two money are then equivalent when their error intervals overlap.</p>
+<p> Errors on money quantities are typically very small (numeric errors).
+    Nevertheless, applications may detect accuracy overflow at anytime 
+    (e.g. {@link org.jscience.physics.quantities.Quantity#getAbsoluteError() accuracy} > 0.5 cents).</p> 
 <p> Conversions between quantities stated in different currencies is possible
     if the exchange rates for the currencies have been set (otherwise
     <code>ConversionException</code> is thrown).
 <p> Monetary quantities support the dynamic changes of the currencies exchange
     rates as illustrated in the following example:<pre>
+    import static org.jscience.economics.money.Currency.*;
+    import static org.jscience.physics.units.SI.*;
+    import static org.jscience.physics.units.NonSI.*;
+    
     ///////////////////////////////////////////////////////////////////////
     // Calculates the cost of a car trip in Europe for an American tourist.
     ///////////////////////////////////////////////////////////////////////
 
     // Use currency symbols instead of ISO-4217 codes.
-    Currency.USD.label("$"); // Use "$" symbol instead of currency code ("USD")
-    Currency.EUR.label("€"); // Use "€" symbol instead of currency code ("EUR")
+    USD.label("$"); // Use "$" symbol instead of currency code ("USD")
+    EUR.label("€"); // Use "€" symbol instead of currency code ("EUR")
 
-    // Calculates trip cost.
-    Quantity    carMileage   = Quantity.valueOf(20, NonSI.MILE.divide(NonSI.GALLON_LIQUID_US)); // 20 mi/gal.
-    Quantity    gazPrice     = Quantity.valueOf(1.2, Currency.EUR.divide(NonSI.LITER)); // 1.2 €/L
-    Length      tripDistance = (Length) Quantity.valueOf(400, SI.KILO(SI.METER)); // 400 km
-    Money       tripCost     = (Money) tripDistance.divide(carMileage).multiply(gazPrice);
+	// Calculates trip cost.
+	Quantity    carMileage   = Quantity.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
+	Quantity    gazPrice     = Quantity.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+	Length      tripDistance = Length.valueOf(400, KILO(SI.METER)); // 400 km
+	Money       tripCost     = (Money) tripDistance.divide(carMileage).times(gazPrice);
 
-    // Sets exchange rates.
-    Currency.setReferenceCurrency(Currency.USD);
-    Currency.EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
+	// Sets exchange rates.
+	Currency.setReferenceCurrency(USD);
+	EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
 
-    // Displays cost.
-    Money.showAs(Currency.USD);
-    System.out.println("Trip cost = " + tripCost + " (" + tripCost.toString(Currency.EUR) + ")");
+	// Displays cost.
+	System.out.println("Trip cost = " + tripCost.to(USD) + " (" + tripCost.to(EUR) + ")");
 
     > Trip cost = 66.05 $ (56.45 €)</pre></p>
 </body>

@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,50 +22,39 @@ import org.jscience.physics.units.Unit;
 public class Volume extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.METER.pow(3);
+    private final static Unit<Volume> UNIT = SI.CUBIC_METER;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Volume();
+    private final static Factory<Volume> FACTORY = new Factory<Volume>(UNIT) {
+        protected Volume create() {
+            return new Volume();
         }
     };
 
     /**
      * Represents a {@link Volume} amounting to nothing.
      */
-    public final static Volume ZERO = (Volume) valueOf(0, SYSTEM_UNIT);
+    public final static Volume ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Volume() {}
-
-    /**
-     * Returns the {@link Volume} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Volume}.
-     * @return the specified quantity or a new {@link Volume} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Volume}.
-     */
-    public static Volume volumeOf(Quantity quantity) {
-        return (Volume) FACTORY.quantity(quantity);
+    protected Volume() {
     }
 
     /**
      * Shows {@link Volume} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Volume} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Volume} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Volume.class, unit);
     }
 
-    private static final long serialVersionUID = -3214708048595119919L;
+    private static final long serialVersionUID = 1L;
+
 }

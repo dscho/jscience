@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,52 +22,40 @@ import org.jscience.physics.units.Unit;
 public class ElectricCurrent extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.AMPERE;
+    private final static Unit<ElectricCurrent> UNIT = SI.AMPERE;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new ElectricCurrent();
+    private final static Factory<ElectricCurrent> FACTORY = new Factory<ElectricCurrent>(
+            UNIT) {
+        protected ElectricCurrent create() {
+            return new ElectricCurrent();
         }
     };
 
     /**
-     * Represents an {@link ElectricCurrent} amounting to nothing.
+     * Represents a {@link ElectricCurrent} amounting to nothing.
      */
-    public final static ElectricCurrent ZERO
-        = (ElectricCurrent) valueOf(0, SYSTEM_UNIT);
+    public final static ElectricCurrent ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected ElectricCurrent() {}
-
-    /**
-     * Returns the {@link ElectricCurrent} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link ElectricCurrent}.
-     * @return the specified quantity or a new {@link ElectricCurrent} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link ElectricCurrent}.
-     */
-    public static ElectricCurrent electricCurrentOf(Quantity quantity) {
-        return (ElectricCurrent) FACTORY.quantity(quantity);
+    protected ElectricCurrent() {
     }
 
     /**
      * Shows {@link ElectricCurrent} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link ElectricCurrent} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link ElectricCurrent} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(ElectricCurrent.class, unit);
     }
 
-    private static final long serialVersionUID = -2397763283425463302L;
+    private static final long serialVersionUID = 1L;
+
 }

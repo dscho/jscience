@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,49 +22,37 @@ import org.jscience.physics.units.Unit;
 public class Length extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.METER;
+    private final static Unit<Length> UNIT = SI.METER;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new Length();
+    private final static Factory<Length> FACTORY = new Factory<Length>(UNIT) {
+        protected Length create() {
+            return new Length();
         }
     };
 
     /**
      * Represents a {@link Length} amounting to nothing.
      */
-    public final static Length ZERO = (Length) valueOf(0, SYSTEM_UNIT);
+    public final static Length ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected Length() {}
-
-    /**
-     * Returns the {@link Length} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link Length}.
-     * @return the specified quantity or a new {@link Length} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link Length}.
-     */
-    public static Length lengthOf(Quantity quantity) {
-        return (Length) FACTORY.quantity(quantity);
+    protected Length() {
     }
 
     /**
      * Shows {@link Length} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link Length} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link Length} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(Length.class, unit);
     }
 
     /////////////////////
@@ -79,10 +66,9 @@ public class Length extends Quantity {
      * @param  theta the central angle.
      * @return the length of the specified circular arc.
      */
-    public static Length arcOf(Length radius, Angle theta) {
-        // Returns theta * radius
-        return lengthOf(theta.multiply(radius));
+    public static Length valueOf(Length radius, Angle theta) {
+        return theta.times(radius).to(UNIT);
     }
 
-    private static final long serialVersionUID = 2110601334827305173L;
+    private static final long serialVersionUID = 1L;
 }

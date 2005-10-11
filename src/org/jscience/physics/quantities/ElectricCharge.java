@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -23,59 +22,46 @@ import org.jscience.physics.units.Unit;
 public class ElectricCharge extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.COULOMB.getDimension();
+    private final static Unit<ElectricCharge> UNIT = SI.COULOMB;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new ElectricCharge();
+    private final static Factory<ElectricCharge> FACTORY = new Factory<ElectricCharge>(
+            UNIT) {
+        protected ElectricCharge create() {
+            return new ElectricCharge();
         }
-    }.useFor(SI.COULOMB);
+    }.useFor(UNIT.getBaseUnits());
 
     /**
-     * Represents an {@link ElectricCharge} amounting to nothing.
+     * Represents a {@link ElectricCharge} amounting to nothing.
      */
-    public final static ElectricCharge ZERO
-        = (ElectricCharge) valueOf(0, SYSTEM_UNIT);
+    public final static ElectricCharge ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Holds the elementary charge (positron charge).
      */
-    public final static ElectricCharge ELEMENTARY
-        = (ElectricCharge) valueOf(1.602176462e-19, 0.000000063e-19,
-                                   SYSTEM_UNIT);
+    public final static ElectricCharge ELEMENTARY = Quantity.valueOf(
+            1.602176462e-19, 0.000000063e-19, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected ElectricCharge() {}
-
-    /**
-     * Returns the {@link ElectricCharge} corresponding to the specified
-     * quantity.
-     *
-     * @param  quantity a quantity compatible with {@link ElectricCharge}.
-     * @return the specified quantity or a new {@link ElectricCharge} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link ElectricCharge}.
-     */
-    public static ElectricCharge electricChargeOf(Quantity quantity) {
-        return (ElectricCharge) FACTORY.quantity(quantity);
+    protected ElectricCharge() {
     }
 
     /**
      * Shows {@link ElectricCharge} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link ElectricCharge} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link ElectricCharge} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(ElectricCharge.class, unit);
     }
 
-    private static final long serialVersionUID = -4126331108929046917L;
+    private static final long serialVersionUID = 1L;
+
 }

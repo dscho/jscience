@@ -1,17 +1,17 @@
 <!-- ANT BUILD FILE (Ref. http://jakarta.apache.org/ant ) -->
-<project name="jScience" default="distribution" basedir=".">
+<project name="JScience" default="distribution" basedir=".">
     <description>
-    	jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+    	JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
     </description>
     
     <target name="info">
-    	<echo>This software requires the Javolution Library (http://javolution.org) to build and run</echo>
+    	<echo>This software includes the Javolution Library (http://javolution.org)</echo>
     </target>	
     <target name="init">
     	<tstamp/>
         <property name="library"   value="jscience" />
-        <property name="version"   value="1.0" />
-        <property name="release"   value="2" />
+        <property name="version"   value="2.0" />
+        <property name="release"   value="0" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />
@@ -25,7 +25,7 @@
         <mkdir dir="${bin}" />
 
 		<!-- Compile -->
-        <javac srcdir="${src}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
+        <javac srcdir="${src}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.5" source="1.5"
                debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
 
 		<!-- Updates version information (Javolution class) -->
@@ -33,7 +33,7 @@
         <filter token="VERSION" value="${version}.${release} ${TODAY}"/>
         <copy file="src/org/jscience/JScience.java"
               todir="${bin}/org/jscience" filtering="true"/>
-        <javac srcdir="${bin}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.1" source="1.3"
+        <javac srcdir="${bin}" destdir="${bin}" classpath="${bin};${lib}/javolution.jar" target="1.5" source="1.5"
                debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
 
 		<!-- Copies resources if any -->
@@ -43,12 +43,12 @@
 		    </fileset>
 		</copy>
     </target>
-	
-    <target name="javadoc" depends="init">
+
+	<target name="javadoc" depends="init">
         <mkdir dir="${api}" />
         <javadoc sourcepath="${src}"
                  destdir="${api}"
-                 windowtitle="jScience v${version} API"
+                 windowtitle="JScience v${version} API"
                  overview="src/overview.html"
                  author="true"
                  version="true"
@@ -56,12 +56,15 @@
                  charset="${encoding}"
                  encoding="${encoding}"
                  docencoding="${encoding}"
+        	     stylesheetfile="doc/javadoc.css"
+        	     link="http://javolution.org/api/"
                  splitindex="true">
             <header>
-                <![CDATA[<b><a href="http://jScience.org">jScience v${version}</a></b>]]>
+                <![CDATA[<A HREF="http://jscience.org">
+            	<SPAN CLASS="style0">J</SPAN><SPAN CLASS="style1">Science v${version}</SPAN></A>]]>
             </header>
             <bottom>
-               <![CDATA[<i>Copyright &#169; 2004 jScience Consortium.</i>]]>
+               <![CDATA[<i>Copyright &#169; 2005 <b>J<b>Science.</i>]]>
             </bottom>
             <packageset dir="${src}" defaultexcludes="yes">
                 <include name="org/jscience/**/*" />
@@ -69,19 +72,26 @@
                 <exclude name="**/res-files/**"/>
             </packageset>
         </javadoc>
+    	<!-- Sets background color -->
+    	
+    	
     </target>
 
     <target name="jarfile" depends="compile">
+    	<unzip src="${lib}/javolution.jar"
+    	       dest="${bin}">
+    	    <patternset>
+    	        <include name="**/*.class"/>
+    	    </patternset>
+    	</unzip> 
         <jar jarfile="${library}.jar"
              basedir="${bin}"
              update="false">
              <manifest>
                  <attribute name="Main-Class"
                            value="org.jscience.JScience"/>
-                <attribute name="Class-Path"
-                          value="lib/javolution.jar"/>
                  <attribute name="Specification-Title"
-                            value="jScience - Core"/>
+                            value="JScience - Core"/>
                  <attribute name="Specification-Version"
                             value="${version}"/>
                  <attribute name="Specification-Vendor"
@@ -91,7 +101,7 @@
                  <attribute name="Implementation-URL"
                             value="http://jscience.org"/>
                  <attribute name="Implementation-Vendor"
-                            value="Free Software Foundation"/>
+                            value="JScience"/>
                  <attribute name="Implementation-Version"
                             value="${version}.${release} ${TODAY}"/>
              </manifest>
@@ -114,7 +124,7 @@
         </zip>
         <zip destfile="${library}-${version}.${release}-bin.zip" update="false">
             <zipfileset dir="." prefix="${library}-${version}"
-                        includes="doc/**/*, ${api}/**/*, ${lib}/javolution.jar,
+                        includes="doc/**/*, ${api}/**/*,
                                   index.html, ${library}.jar" />
         </zip>
     </target>

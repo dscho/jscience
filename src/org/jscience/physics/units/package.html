@@ -1,4 +1,69 @@
 <body>
 <p> Provides support for programatic unit handling.</p>
-<IMG alt="UML Diagram" src="doc-files/units.gif">
+<h3> Standart/NonStandard Units</h3>
+     Standard units and prefixes are provided by the 
+     {@link org.jscience.physics.units.SI SI} class (Système International d'Unités) and
+     about 80 non-standard units are available through the 
+     {@link org.jscience.physics.units.NonSI NonSI} class.
+
+<h3>Usage examples:</h3>
+<pre>    
+import static org.jscience.physics.units.SI.*;
+import static org.jscience.physics.units.NonSI.*;
+import static org.jscience.physics.units.Dimension.*;
+import org.jscience.physics.quantities.Length;
+...    
+        System.out.println(KILO(METER).getConverterTo(MILE).convert(10));
+
+        > 6.2137119223733395
+        
+        System.out.println(VOLT.times(AMPERE));
+        
+        > V·A
+        
+        System.out.println(VOLT.times(AMPERE).getBaseUnits());
+        
+        > m²·kg/s³
+        
+        System.out.println(WATT.isCompatible(Unit.valueOf("V·A"));
+        
+        > true
+
+        System.out.println(WATT.getDimension());
+        
+        > [L]²·[M]/[T]³
+        
+        
+        // Set relativistic context.
+        METER.setDimension(TIME, new MultiplyConverter(1 / 299792458.0)); // 1 / c
+  
+        System.out.println(WATT.getDimension());
+        
+        > [M]/[T]
+        
+        // Lenth and Time are convertible.
+        System.out.println(INCH.getConverterTo(MICRO(SECOND)).convert(1.0));
+        
+        > 8.472528018033061E-5</pre>
+        
+<h3>Unit Parameterization</h3>
+
+    Units are parameterized (&lt;Q extends {@link 
+    org.jscience.physics.quantities.Quantity Quantity}>) to
+    enforce compile-time checks of units/quantities consistency, for example:<pre>
+
+    Unit&lt;Duration> MINUTE = SECONDS.times(60); // Ok.
+    Unit&lt;Duration> MINUTE = METER.times(60); // Compile error.
+    
+    Unit&lt;Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
+    Unit&lt;Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
+    
+    Length x = Quantity.valueOf(2, FOOT);// Ok FOOT instance of Unit&lt;Length>
+    Length x = Quantity.valueOf(2, POUND); // Compile error.
+    </pre>
+
+   See also {@link org.jscience.physics.quantities quantities} package.</p>
+   
+<h3>UML Diagram</h3>
+        <IMG alt="UML Diagram" src="doc-files/units.gif">
 </body>

@@ -1,59 +1,52 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
 
-
-import java.io.IOException;
-
-import javolution.util.MathLib;
+import org.jscience.mathematics.matrices.Matrix;
+import javolution.lang.MathLib;
 import javolution.lang.Text;
-import javolution.lang.TextBuilder;
 import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
-
-import org.jscience.mathematics.matrices.Matrix;
-import org.jscience.mathematics.matrices.Operable;
 
 /**
  * <p> This class represents an immutable complex number.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 2.0, June 6, 2004
  */
-public final class Complex extends RealtimeNumber {
+public final class Complex extends Number<Complex> {
 
     /**
      * Holds the default XML representation for complex numbers.
-     * This representation consists of a <code>real</code> and 
-     * <code>imaginary</code> attribute.
+     * This representation consists of <code>real</code> and  
+     * <code>imaginary</code> attributes (e.g. 
+     * <code>&lt;Complex real="2.34" imaginary="-0.4"/&gt;</code>).
      */
-    protected static final XmlFormat COMPLEX_XML = new XmlFormat(Complex.class) {
-        public void format(Object obj, XmlElement xml) {
-            Complex complex = (Complex) obj;
+    protected static final XmlFormat<Complex> XML = new XmlFormat<Complex>(
+            Complex.class) {
+        public void format(Complex complex, XmlElement xml) {
             xml.setAttribute("real", complex._real);
             xml.setAttribute("imaginary", complex._imaginary);
         }
 
-        public Object parse(XmlElement xml) {
-            return Complex.valueOf(
-                    xml.getAttribute("real", 0.0),
-                    xml.getAttribute("imaginary", 0.0));
+        public Complex parse(XmlElement xml) {
+            return Complex.valueOf(xml.getAttribute("real", 0.0), xml
+                    .getAttribute("imaginary", 0.0));
         }
     };
-    
+
     /**
      * Holds the factory constructing complex instances.
      */
-    private static final Factory FACTORY = new Factory() {
-        public Object create() {
+    private static final Factory<Complex> FACTORY = new Factory<Complex>() {
+        public Complex create() {
             return new Complex();
         }
     };
@@ -61,17 +54,17 @@ public final class Complex extends RealtimeNumber {
     /**
      * The complex number zero.
      */
-    public static final Complex ZERO = (Complex) valueOf(0.0, 0.0).moveHeap();
+    public static final Complex ZERO = valueOf(0.0, 0.0).moveHeap();
 
     /**
      * The complex number one.
      */
-    public static final Complex ONE = (Complex) valueOf(1.0, 0.0).moveHeap();
+    public static final Complex ONE = valueOf(1.0, 0.0).moveHeap();
 
     /**
      * The imaginary unit <i><b>i</b></i>.
      */
-    public static final Complex I = (Complex) valueOf(0.0, 1.0).moveHeap();
+    public static final Complex I = valueOf(0.0, 1.0).moveHeap();
 
     /**
      * Holds the real component.
@@ -100,7 +93,7 @@ public final class Complex extends RealtimeNumber {
      * @see    #getImaginary
      */
     public static Complex valueOf(double real, double imaginary) {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         c._real = real;
         c._imaginary = imaginary;
         return c;
@@ -118,7 +111,7 @@ public final class Complex extends RealtimeNumber {
      *         a parsable complex number.
      */
     public static Complex valueOf(CharSequence chars) {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         try {
             // Reads real part.
             int realEnd = TypeFormat.indexOf(" ", chars, 1);
@@ -191,8 +184,8 @@ public final class Complex extends RealtimeNumber {
      *
      * @return <code>-this</code>.
      */
-    public Complex negate() {
-        Complex c = (Complex) FACTORY.object();
+    public Complex opposite() {
+        Complex c = FACTORY.object();
         c._real = -this._real;
         c._imaginary = -this._imaginary;
         return c;
@@ -204,8 +197,8 @@ public final class Complex extends RealtimeNumber {
      * @param  that the complex to be added.
      * @return <code>this + that</code>.
      */
-    public Complex add(Complex that) {
-        Complex c = (Complex) FACTORY.object();
+    public Complex plus(Complex that) {
+        Complex c = FACTORY.object();
         c._real = this._real + that._real;
         c._imaginary = this._imaginary + that._imaginary;
         return c;
@@ -217,8 +210,8 @@ public final class Complex extends RealtimeNumber {
      * @param  that the complex to be subtracted.
      * @return <code>this - that</code>.
      */
-    public Complex subtract(Complex that) {
-        Complex c = (Complex) FACTORY.object();
+    public Complex minus(Complex that) {
+        Complex c = FACTORY.object();
         c._real = this._real - that._real;
         c._imaginary = this._imaginary - that._imaginary;
         return c;
@@ -230,8 +223,8 @@ public final class Complex extends RealtimeNumber {
      * @param  k the factor multiplier.
      * @return <code>this * k</code>.
      */
-    public Complex multiply(double k) {
-        Complex c = (Complex) FACTORY.object();
+    public Complex times(double k) {
+        Complex c = FACTORY.object();
         c._real = this._real * k;
         c._imaginary = this._imaginary * k;
         return c;
@@ -243,8 +236,8 @@ public final class Complex extends RealtimeNumber {
      * @param  that the complex multiplier.
      * @return <code>this * that</code>.
      */
-    public Complex multiply(Complex that) {
-        Complex c = (Complex) FACTORY.object();
+    public Complex times(Complex that) {
+        Complex c = FACTORY.object();
         c._real = this._real * that._real - this._imaginary * that._imaginary;
         c._imaginary = this._real * that._imaginary + this._imaginary
                 * that._real;
@@ -252,12 +245,12 @@ public final class Complex extends RealtimeNumber {
     }
 
     /**
-     * Returns the inverse of this complex.
+     * Returns the reciprocal of this complex.
      *
      * @return <code>1 / this</code>.
      */
-    public Complex inverse() {
-        Complex c = (Complex) FACTORY.object();
+    public Complex reciprocal() {
+        Complex c = FACTORY.object();
         double tmp = (this._real * this._real)
                 + (this._imaginary * this._imaginary);
         c._real = this._real / tmp;
@@ -272,7 +265,7 @@ public final class Complex extends RealtimeNumber {
      * @return <code>this / k</code>.
      */
     public Complex divide(double k) {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         c._real = this._real / k;
         c._imaginary = this._imaginary / k;
         return c;
@@ -285,7 +278,28 @@ public final class Complex extends RealtimeNumber {
      * @return <code>this / that</code>.
      */
     public Complex divide(Complex that) {
-        return this.multiply(that.inverse());
+        double tmp = (that._real * that._real)
+                + (that._imaginary * that._imaginary);
+        double thatInvReal = this._real / tmp;
+        double thatInvImaginary = -this._imaginary / tmp;
+        Complex c = FACTORY.object();
+        c._real = this._real * thatInvReal - this._imaginary * thatInvImaginary;
+        c._imaginary = this._real * thatInvImaginary + this._imaginary
+                * thatInvReal;
+        return c;
+    }
+
+    /**
+     * Returns the norm of this number (its {@link #magnitude magnitude} 
+     * represented by a complex number with no imaginary component).
+     *
+     * @return <code>|this|</code>.
+     */
+    public Complex norm() {
+        Complex c = FACTORY.object();
+        c._real = this.magnitude();
+        c._imaginary = 0.0;
+        return c;
     }
 
     /**
@@ -294,7 +308,7 @@ public final class Complex extends RealtimeNumber {
      * @return <code>(this.real(), - this.imaginary())</code>.
      */
     public Complex conjugate() {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         c._real = this._real;
         c._imaginary = -this._imaginary;
         return c;
@@ -326,7 +340,7 @@ public final class Complex extends RealtimeNumber {
      * @return <code>sqrt(this)</code>.
      */
     public Complex sqrt() {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         double m = MathLib.sqrt(this.magnitude());
         double a = this.argument() / 2.0;
         c._real = m * MathLib.cos(a);
@@ -343,7 +357,7 @@ public final class Complex extends RealtimeNumber {
      * @return  <code>exp(this)</code>.
      */
     public Complex exp() {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         double m = MathLib.exp(this._real);
         c._real = m * MathLib.cos(this._imaginary);
         c._imaginary = m * MathLib.sin(this._imaginary);
@@ -357,7 +371,7 @@ public final class Complex extends RealtimeNumber {
      * @return  <code>log(this)</code>.
      */
     public Complex log() {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         c._real = MathLib.log(this.magnitude());
         c._imaginary = this.argument();
         return c;
@@ -370,7 +384,7 @@ public final class Complex extends RealtimeNumber {
      * @return  <code>this**e</code>.
      */
     public Complex pow(double e) {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         double m = MathLib.pow(this.magnitude(), e);
         double a = this.argument() * e;
         c._real = m * MathLib.cos(a);
@@ -386,7 +400,7 @@ public final class Complex extends RealtimeNumber {
      * @return  <code>this**that</code>.
      */
     public Complex pow(Complex that) {
-        Complex c = (Complex) FACTORY.object();
+        Complex c = FACTORY.object();
         double r1 = MathLib.log(this.magnitude());
         double i1 = this.argument();
         double r2 = (r1 * that._real) - (i1 * that._imaginary);
@@ -408,7 +422,7 @@ public final class Complex extends RealtimeNumber {
      *         <code>false</code> otherwise.
      */
     public boolean equals(Complex that, double tolerance) {
-        return MathLib.abs(this.subtract(that).magnitude()) <= tolerance;
+        return MathLib.abs(this.minus(that).magnitude()) <= tolerance;
     }
 
     /**
@@ -425,14 +439,15 @@ public final class Complex extends RealtimeNumber {
      *         exclusively composed of complex numbers.
      * @see    #equals(Complex, double)
      */
-    public static boolean equals(Matrix A, Matrix B, double tolerance) {
-        int m = A.getRowDimension();
-        int n = B.getColumnDimension();
-        if ((B.getRowDimension() == m) && (B.getColumnDimension() == n)) {
+    public static boolean equals(Matrix<Complex> A, Matrix<Complex> B,
+            double tolerance) {
+        int m = A.getNumberOfRows();
+        int n = B.getNumberOfColumns();
+        if ((B.getNumberOfRows() == m) && (B.getNumberOfColumns() == n)) {
             for (int i = 0; i < m; i++) {
                 for (int j = 0; j < n; j++) {
-                    Complex a = (Complex) A.get(i, j);
-                    Complex b = (Complex) B.get(i, j);
+                    Complex a = A.get(i, j);
+                    Complex b = B.get(i, j);
                     if (!a.equals(b, tolerance)) {
                         return false;
                     }
@@ -463,9 +478,12 @@ public final class Complex extends RealtimeNumber {
      * @return the hash code value.
      */
     public int hashCode() {
-        long bits = Double.doubleToLongBits(_real);
-        bits ^= Double.doubleToLongBits(_imaginary) * 31;
-        return (((int) bits) ^ ((int) (bits >> 32)));
+        int h = Float.floatToIntBits((float) _real)
+                ^ Float.floatToIntBits((float) (_imaginary * MathLib.PI));
+        h += ~(h << 9);
+        h ^= (h >>> 14);
+        h += (h << 4);
+        return h ^ (h >>> 10);
     }
 
     /**
@@ -476,78 +494,81 @@ public final class Complex extends RealtimeNumber {
      * @return the text representation of this complex number.
      */
     public Text toText() {
-        try {
-            TextBuilder tb = TextBuilder.newInstance();
-            TypeFormat.format(_real, tb);
-            if (_imaginary >= 0) {
-                tb.append(" + ");
-                TypeFormat.format(_imaginary, tb);
-            } else {
-                tb.append(" - ");
-                TypeFormat.format(-_imaginary, tb);
-            }
-            tb.append('i');
-            return tb.toText();
-        } catch (IOException ioError) {
-            throw new InternalError(); // Should never get there.
+        Text txt = Text.valueOf(_real);
+        if (_imaginary >= 0) {
+            txt = txt.concat(PLUS).concat(Text.valueOf(_imaginary));
+        } else {
+            txt = txt.concat(MINUS).concat(Text.valueOf(-_imaginary));
         }
+        return txt.concat(Text.valueOf('i'));
     }
 
-    /**
-     * Returns the magnitude of this {@link Complex} as an <code>int</code>.
-     *
-     * @return <code>(int) magnitude()</code>
-     */
-    public int intValue() {
-        return (int) magnitude();
-    }
+    private static final Text PLUS = Text.valueOf(" + ").intern();
+
+    private static final Text MINUS = Text.valueOf(" - ").intern();
 
     /**
-     * Returns the magnitude of this {@link Complex} as a <code>long</code>.
+     * Returns the {@link #getReal real} component of this {@link Complex}
+     * number as a <code>long</code>.
      *
-     * @return <code>(long) magnitude()</code>
+     * @return <code>(long) this.getReal()</code>
      */
     public long longValue() {
-        return (long) magnitude();
+        return (long) _real;
     }
 
     /**
-     * Returns the magnitude of this {@link Complex} as a <code>float</code>.
+     * Returns the {@link #getReal real} component of this {@link Complex}
+     * number as a <code>double</code>.
      *
-     * @return <code>(float) magnitude()</code>
-     */
-    public float floatValue() {
-        return (float) magnitude();
-    }
-
-    /**
-     * Returns the magnitude of this {@link Complex} as a <code>double</code>.
-     *
-     * @return <code>magnitude()</code>
+     * @return <code>(double) this.getReal()</code>
      */
     public double doubleValue() {
-        return magnitude();
+        return _real;
     }
 
-    // Implements Operable.
-    public Operable plus(Operable that) {
-        return this.add((Complex) that);
+    /**
+     * Compares two complex numbers, the real components are compared first,
+     * then if equal, the imaginary components.
+     *
+     * @param that the complex number to be compared with.
+     * @return -1, 0, 1 based upon the ordering. 
+     */
+    public int compareTo(Complex that) {
+        if (this._real < that._real)
+            return -1;
+        if (this._real > that._real)
+            return 1;
+        long l1 = Double.doubleToLongBits(this._real);
+        long l2 = Double.doubleToLongBits(that._real);
+        if (l1 < l2)
+            return -1;
+        if (l2 > l1)
+            return 1;
+        if (this._imaginary < that._imaginary)
+            return -1;
+        if (this._imaginary > that._imaginary)
+            return 1;
+        l1 = Double.doubleToLongBits(this._imaginary);
+        l2 = Double.doubleToLongBits(that._imaginary);
+        if (l1 < l2)
+            return -1;
+        if (l2 > l1)
+            return 1;
+        return 0;
     }
 
-    // Implements Operable.
-    public Operable opposite() {
-        return this.negate();
+    /**
+     * Compares the {@link #magnitude() magnitude} of this complex number
+     * with the magnitude of the complex number specified.
+     *
+     * @param that the complex number to be compared with.
+     * @return <code>|this| > |that|</code>
+     */
+    public boolean isLargerThan(Complex that) {
+        return this.magnitude() > that.magnitude();
     }
 
-    // Implements Operable.
-    public Operable times(Operable that) {
-        return this.multiply((Complex) that);
-    }
+    private static final long serialVersionUID = 1L;
 
-    // Implements Operable.
-    public Operable reciprocal() {
-        return this.inverse();
-    }
-
-    private static final long serialVersionUID = 3977298824052355641L;
 }

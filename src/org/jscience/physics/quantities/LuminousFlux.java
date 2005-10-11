@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -22,51 +21,41 @@ import org.jscience.physics.units.Unit;
 public class LuminousFlux extends Quantity {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.CANDELA.multiply(SI.STERADIAN);
+    private final static Unit<LuminousFlux> UNIT = SI.CANDELA
+            .times(SI.STERADIAN);
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new LuminousFlux();
+    private final static Factory<LuminousFlux> FACTORY = new Factory<LuminousFlux>(
+            UNIT) {
+        protected LuminousFlux create() {
+            return new LuminousFlux();
         }
-    }.useFor(SI.LUMEN);
+    };
 
     /**
      * Represents a {@link LuminousFlux} amounting to nothing.
      */
-    public final static LuminousFlux ZERO
-        = (LuminousFlux) valueOf(0, SYSTEM_UNIT);
+    public final static LuminousFlux ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected LuminousFlux() {}
-
-    /**
-     * Returns the {@link LuminousFlux} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link LuminousFlux}.
-     * @return the specified quantity or a new {@link LuminousFlux} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link LuminousFlux}.
-     */
-    public static LuminousFlux luminousFluxOf(Quantity quantity) {
-        return (LuminousFlux) FACTORY.quantity(quantity);
+    protected LuminousFlux() {
     }
 
     /**
      * Shows {@link LuminousFlux} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link LuminousFlux} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link LuminousFlux} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(LuminousFlux.class, unit);
     }
 
-    private static final long serialVersionUID = 1730594342943094243L;
+    private static final long serialVersionUID = 1L;
+
 }

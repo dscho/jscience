@@ -1,28 +1,25 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience;
-import java.io.IOException;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.util.Random;
 
 import javolution.realtime.PoolContext;
-import javolution.util.Reflection;
+import javolution.lang.TextBuilder;
 import javolution.xml.ObjectReader;
 import javolution.xml.ObjectWriter;
 
 import org.jscience.economics.money.Currency;
-import org.jscience.economics.money.Money;
 import org.jscience.mathematics.matrices.Matrix;
-import org.jscience.mathematics.matrices.Operable;
 import org.jscience.mathematics.numbers.Complex;
 import org.jscience.mathematics.numbers.Float64;
 import org.jscience.mathematics.numbers.LargeInteger;
@@ -59,7 +56,7 @@ import org.jscience.physics.quantities.Quantity;
 import org.jscience.physics.quantities.RadiationDoseAbsorbed;
 import org.jscience.physics.quantities.RadiationDoseEffective;
 import org.jscience.physics.quantities.RadioactiveActivity;
-import org.jscience.physics.quantities.Scalar;
+import org.jscience.physics.quantities.Dimensionless;
 import org.jscience.physics.quantities.SolidAngle;
 import org.jscience.physics.quantities.Temperature;
 import org.jscience.physics.quantities.Torque;
@@ -69,10 +66,11 @@ import org.jscience.physics.quantities.VolumetricDensity;
 import org.jscience.physics.units.NonSI;
 import org.jscience.physics.units.SI;
 
+
 /**
- * <p> This class represents the jScience library; it contains the library
- *     optional {@link #initialize} method as well as a {@link #main} method for
- *     versionning, self-tests, and performance analysis.</p>
+ * <p> This class represents the <b>J</b>Science library; it contains the 
+ *     library optional {@link #initialize} method as well as a {@link #main}
+ *     method for versionning, self-tests, and performance analysis.</p>
  * <p> Initialization is performed automatically when quantities classes are
  *     used for the first time or explicitely by calling the 
  *     {@link #initialize} static method.</p>
@@ -91,7 +89,7 @@ public final class JScience {
      * Indicates if this library has been initialized.
      */
     private static boolean IsInitialized;
-
+    
     /**
      * Default constructor.
      */
@@ -102,11 +100,11 @@ public final class JScience {
      * The library {@link #main} method.
      * The archive <codejscience.jar</code> is auto-executable.
      * <ul>
-     * <li><code>java -Xbootclasspath/a:javolution.jar -jar jscience.jar version</code> 
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar version</code> 
      *     to output version information.</li>
-     * <li><code>java -Xbootclasspath/a:javolution.jar -jar jscience.jar test</code> 
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar test</code> 
      *     to perform self-tests.</li>
-     * <li><code>java -Xbootclasspath/a:javolution.jar -jar jscience.jar perf</code> 
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar perf</code> 
      *     for performance analysis.</li>
      * </ul>
      *
@@ -114,9 +112,9 @@ public final class JScience {
      * @throws Exception if a problem occurs.
      */
     public static void main(String[] args) throws Exception {
-        System.out.println(
-                "jScience - Java(TM) Tools and Libraries for the Advancement of Sciences "
-                + "(http://jscience.org/)");
+        System.out.println("JScience - Java(TM) Tools and Libraries for the Advancement of Sciences");
+        System.out.println("Version " + VERSION + " (http://jscience.org)");
+        System.out.println("");
         if (args.length > 0) {
             if (args[0].equals("version")) {
                 System.out.println("Version " + VERSION);
@@ -129,7 +127,7 @@ public final class JScience {
                 return;
             }
         }
-        System.out.println("Usage: java -Xbootclasspath/a:javolution.jar -jar jscience.jar [arg]");
+        System.out.println("Usage: java [-cp javolution.jar] -jar jscience.jar [arg]");
         System.out.println("where arg is one of:");
         System.out.println("    version (to show version information)");
         System.out.println("    test    (to perform self-tests)");
@@ -194,7 +192,7 @@ public final class JScience {
             JScience.Volatile = RadiationDoseAbsorbed.ZERO;
             JScience.Volatile = RadiationDoseEffective.ZERO;
             JScience.Volatile = RadioactiveActivity.ZERO;
-            JScience.Volatile = Scalar.ZERO;
+            JScience.Volatile = Dimensionless.ZERO;
             JScience.Volatile = SolidAngle.ZERO;
             JScience.Volatile = Temperature.ZERO;
             JScience.Volatile = Torque.ZERO;
@@ -203,7 +201,7 @@ public final class JScience {
             JScience.Volatile = VolumetricDensity.ZERO;
 
             // Initializes money package.
-            JScience.Volatile = Money.ZERO;
+            JScience.Volatile = Currency.USD;
         }
     }
 
@@ -216,38 +214,33 @@ public final class JScience {
      */
     private static void testing() throws Exception {
         System.out.println();
-        System.out.print("Testing...");
-        Matrix M = Matrix.valueOf(new Operable[][] {
-                { Scalar.ZERO, Scalar.ONE },
-                { Quantity.valueOf(2, NonSI.BAR), Scalar.valueOf(1.234) },
+        System.out.println("Testing...");
+        Matrix<Quantity> M = Matrix.valueOf(new Quantity[][] {
+                { Dimensionless.valueOf("33"), Dimensionless.ZERO },
+                { Quantity.valueOf(2, NonSI.BAR), Dimensionless.valueOf(1.234) },
                 { Quantity.valueOf(22.336, Currency.EUR),
                         Quantity.valueOf(2, Currency.USD) },
                 { Quantity.valueOf(1, NonSI.FOOT),
                         Quantity.valueOf(3, NonSI.POUND) }, });
 
         // Writes Matrix.
-        ObjectWriter ow = ObjectWriter.newInstance();
-        ow.setNamespace("", "org.jscience.physics.quantities");
-        ow.setNamespace("money", "org.jscience.economics.money");
-        ow.setNamespace("math", "org.jscience.mathematics.matrices");
+        ObjectWriter ow = new ObjectWriter();
+        ow.setPackagePrefix("", "org.jscience.physics.quantities");
+        ow.setPackagePrefix("money", "org.jscience.economics.money");
+        ow.setPackagePrefix("math", "org.jscience.mathematics.matrices");
 
         StringWriter out = new StringWriter();
         ow.write(M, out);
-        //System.err.println(out.getBuffer().toString()); // For Debugging
+        System.err.println(out.getBuffer().toString()); // For Debugging
 
         // Read Matrix.
         StringReader in = new StringReader(out.getBuffer().toString());
-        ObjectReader or = ObjectReader.newInstance();
+        ObjectReader or = new ObjectReader();
         Matrix R = (Matrix) or.read(in);
         //System.err.println(R); // For Debugging
 
-        if (Quantity.approxEquals(M, R)) {
-            System.out.println("Success");
-            System.exit(0);
-        } else {
-            System.out.println("Failed");
-            System.exit(-1);
-        }
+        System.out.println(M);
+        System.out.println(R);
     }
 
     /**
@@ -273,7 +266,7 @@ public final class JScience {
             PoolContext.enter();
             Float64 x = Float64.ONE;
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.add(x);
+                results[j] = x.plus(x);
             }
             PoolContext.exit();
         }
@@ -285,7 +278,7 @@ public final class JScience {
             PoolContext.enter();
             Complex x = Complex.valueOf(1.0, 2.0);
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.add(x);
+                results[j] = x.plus(x);
             }
             PoolContext.exit();
         }
@@ -297,7 +290,7 @@ public final class JScience {
             PoolContext.enter();
             Quantity x = Quantity.valueOf(1, SI.KILOGRAM);
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.add(x);
+                results[j] = x.plus(x);
             }
             PoolContext.exit();
         }
@@ -309,7 +302,7 @@ public final class JScience {
             PoolContext.enter();
             Float64 x = Float64.valueOf(1.0);
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.multiply(x);
+                results[j] = x.times(x);
             }
             PoolContext.exit();
         }
@@ -321,7 +314,7 @@ public final class JScience {
             PoolContext.enter();
             Complex x = Complex.valueOf(1.0, 2.0);
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.multiply(x);
+                results[j] = x.times(x);
             }
             PoolContext.exit();
         }
@@ -333,7 +326,7 @@ public final class JScience {
             PoolContext.enter();
             Quantity x = Quantity.valueOf(1, SI.KILOGRAM);
             for (int j = 0; j < results.length; j++) {
-                results[j] = x.multiply(x);
+                results[j] = x.times(x);
             }
             PoolContext.exit();
         }
@@ -359,7 +352,7 @@ public final class JScience {
         for (int i = 0; i < 100; i++) {
             PoolContext.enter();
             for (int j = 0; j < results.length; j++) {
-                results[j] = large.add(large);
+                results[j] = large.plus(large);
             }
             PoolContext.exit();
         }
@@ -370,26 +363,42 @@ public final class JScience {
     }
 
     private static void startTime() {
-        _time = microTime();
+        _time = System.nanoTime();
     }
-
-    private static void endTime(int iterations) throws IOException {
-        Quantity duration = Quantity.valueOf(microTime() - _time, 500,
-                SI.MICRO(SI.SECOND)).divide(iterations);
-        System.out.println(duration);
+    /**
+     * Ends measuring time and display the execution time per iteration.
+     * 
+     * @param iterations the number iterations performed since 
+     *        {@link #startTime}.
+     */
+    public static void endTime(int iterations) {
+        long nanoSeconds = System.nanoTime() - _time;
+        long picoDuration = nanoSeconds * 1000 / iterations;
+        long divisor;
+        String unit;
+        if (picoDuration > 1000 * 1000 * 1000 * 1000L) { // 1 s
+            unit = " s";
+            divisor = 1000 * 1000 * 1000 * 1000L;
+        } else if (picoDuration > 1000 * 1000 * 1000L) {
+            unit = " ms";
+            divisor = 1000 * 1000 * 1000L;
+        } else if (picoDuration > 1000 * 1000L) {
+            unit = " us";
+            divisor = 1000 * 1000L;
+        } else {
+            unit = " ns";
+            divisor = 1000L;
+        }
+        TextBuilder tb = TextBuilder.newInstance();
+        tb.append(picoDuration / divisor);
+        int fracDigits = 4 - tb.length(); // 4 digits precision.
+        tb.append(".");
+        for (int i=0, j=10; i < fracDigits; i++, j *= 10) {
+            tb.append((picoDuration * j / divisor) % 10);
+        }
+        System.out.println(tb.append(unit));
     }
 
     private static long _time;
 
-    public static long microTime() {
-        if (NANO_TIME_METHOD != null) { // JRE 1.5+
-            Number time = (Number) NANO_TIME_METHOD.invoke(null);
-            return time.longValue() / 1000;
-        } else { // Use the less accurate time in milliseconds.
-            return System.currentTimeMillis() * 1000;
-        }
-    }
-
-    private static final Reflection.Method NANO_TIME_METHOD = Reflection
-            .getMethod("java.lang.System.nanoTime()");
 }

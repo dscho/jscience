@@ -1,131 +1,424 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Java(TM) Tools and Libraries for the Advancement of Sciences.</title>
-<meta content="text/html; charset=utf-8" http-equiv=Content-Type>
-<meta content="Java optional library" name=description>
-<meta content="java, science, scientific, math, physics, astronomy,
-               biology, medecine, sociology, astronomy " name=keywords>
-<body aLink=#c19d69 bgColor=#445a45 link=#c19d69 text=#aecaae
-      vLink=#c19d69>
-<font face=Verdana><basefont size=2>
-<h1 align=center>jScience - Java<sup>TM</sup> Tools and Libraries for the Advancement of Sciences.</h1>
-<blockquote><pre>
-Just as the constant increase of entropy is the basic law of the universe,
-so it is the basic law of life to be ever more highly structured and to
-struggle against entropy!          <b>Vaclav Havel</b></pre></blockquote>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+   <TITLE>JScience</TITLE>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+   <META NAME="description" CONTENT="The most comprehensive Java library for the scientific community.">
+   <META NAME="keywords" CONTENT="java, science, sciences, scientific, library, open-source, module, plugin">
+   <LINK HREF="doc/index.css" TYPE="text/css" REL="stylesheet">
+</HEAD>
+<BODY>
+<TABLE HEIGHT="189" BORDER="0" CELLSPACING="0"
+       BACKGROUND="doc/img/topbar_bg.gif" CELLPADDING="0" WIDTH="100%">
+   <TR>
+   <TD VALIGN="middle" ALIGN="center">
+   <TABLE HEIGHT="189" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+          WIDTH="719">
+      <TR>
+      <TD WIDTH="32">
+      <IMG HEIGHT="189" SRC="doc/img/header_leftbar.gif" WIDTH="32"></TD>
+      <TD BGCOLOR="#FFFFFF" VALIGN="top" WIDTH="650">
+      <TABLE CLASS="smalltext" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+             WIDTH="100%">
+         <TR>
+         <TD HEIGHT="17">
+         <IMG HEIGHT="17" SRC="doc/img/header_topslab.gif" WIDTH="651"></TD>
+         </TR>
+         <TR>
+         <TD VALIGN="bottom" HEIGHT="99">
+         <IMG HEIGHT="99" SRC="doc/img/main_header.jpg" WIDTH="651"></TD>
+         </TR>
+         <TR>
+         <TD VALIGN="top" HEIGHT="60" BACKGROUND="doc/img/quotebg.gif">
+         <TABLE HEIGHT="59" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="top" HEIGHT="46">
+            <TABLE ALIGN="center" HEIGHT="52" BORDER="0" CELLSPACING="0"
+                   CELLPADDING="4" WIDTH="89%">
+               <TR>
+               <TD HEIGHT="40"><SPAN CLASS="lineheight1 style3"> 
+               <I>The hardest thing in the world to understand is the income tax</I> 
+               (Albert Einstein)</SPAN></TD>
+               </TR>
+            </TABLE></TD>
+            </TR>
+         </TABLE></TD>
+         </TR>
+      </TABLE></TD>
+      <TD WIDTH="37">
+      <DIV ALIGN="right"><IMG HEIGHT="189" SRC="doc/img/header_rightbar.gif"
+                              WIDTH="36"></DIV></TD>
+      </TR>
+   </TABLE></TD>
+   </TR>
+</TABLE>
+<TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="0" WIDTH="719">
+   <TR>
+   <TD VALIGN="top" HEIGHT="379" BACKGROUND="doc/img/body_bgleft.gif"
+       WIDTH="10">
+   <IMG HEIGHT="2" SRC="doc/img/body_bgleft.gif" WIDTH="10"></TD>
+   <TD BGCOLOR="#FFFFFF" VALIGN="top" WIDTH="698">
+   <TABLE HEIGHT="358" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+          WIDTH="103%">
+      <TR>
+      <TD BACKGROUND="doc/img/whitelineleft.gif" WIDTH="22">
+      <IMG HEIGHT="1" SRC="doc/img/whitelineleft.gif" WIDTH="22"></TD>
+      <TD VALIGN="top" WIDTH="651">
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Our Vision 
+            </SPAN></TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
+      
+<!-- Our Vision -->      
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="93%">
+         <TR>
+         <TD>
+         <UL>
+            <LI CLASS="lineheight1 style5">To provide the most
+            comprehensive Java<SUP>TM</SUP> library for the scientific
+            community.</LI><BR>
+            <LI CLASS="lineheight1 style5">To create synergy between all
+            sciences (e.g. math, physics, sociology, biology, astronomy,
+            economics, etc.) by integrating them into a single architecture. 
+            </LI><BR>
+            <LI CLASS="lineheight1 style5">To provide the best on-line
+            services (webstart) for scientific calculations and
+            visualizations.</LI><BR>
+         </UL></TD>
+         </TR>
+      </TABLE>
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Current
+            Library Modules </SPAN></TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
+      
+<!-- Modules -->      
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="93%">
+         <TR>
+         <TD CLASS="lineheight1 style5">
+         <UL>
+            <LI>A 
+            <A
+             HREF="api/org/jscience/mathematics/matrices/package-summary.html">
+            linear algebra</A> module, which includes a first <I>(and I
+            believe unique) </I>  
+            <A HREF="api/org/jscience/mathematics/matrices/Matrix.html">matrix</A>
+            class capable of resolving linear system of equations involving
+            any kind of elements (e.g. <SPAN CLASS="style6">Real, Complex,
+            Quantity, Function, Vector</SPAN>, etc. ).</LI>
+            <LI>
+            <A
+             HREF="api/org/jscience/mathematics/functions/package-summary.html">Functions</A>
+            module for symbolic calculations and analysis.</LI>
+            <LI>All different types of 
+            <A
+             HREF="api/org/jscience/mathematics/numbers/package-summary.html">numbers</A>
+            such as <A HREF="api/org/jscience/mathematics/numbers/Real.html">real</A>
+            numbers of arbitrary and guaranteed precision, or the always
+            exact 
+            <A HREF="api/org/jscience/mathematics/numbers/Rational.html">rational</A>
+            numbers.</LI>
+            <LI>
+            <A HREF="api/org/jscience/physics/units/package-summary.html">Units</A>
+            module (e.g. SI units) developped in collaboration with the 
+            <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
+            experts group. </LI>
+            <LI>Strongly typed 
+            <A
+             HREF="api/org/jscience/physics/quantities/package-summary.html">quantities</A>
+            classes with dimension-checking done in the form of class-type
+            checking (e.g. the division of a <SPAN CLASS="style6">Length</SPAN>
+            by a <SPAN CLASS="style6">Duration</SPAN> returns a Velocity
+            instance).</LI>
+            <LI>Support for <SPAN CLASS="style6">Standard , Relativistic ,
+            High-Energy , Quantum and Natural </SPAN>physical 
+            <A HREF="api/org/jscience/physics/models/package-summary.html">models</A>.
+            </LI>
+            <LI> Safe <A HREF="api/org/jscience/economics/money/package-summary.html">monetary</A>
+            calculations with currencies conversions.</LI>
+         </UL></TD>
+         </TR>
+      </TABLE>
+      
+<!-- Version -->      
+      <TABLE CLASS="border1" ALIGN="center" HEIGHT="24" BORDER="0"
+             CELLSPACING="0" CELLPADDING="8" WIDTH="86%">
+         <TR>
+         <TD BACKGROUND="doc/img/quotebg.gif">
+         <DIV ALIGN="center"><SPAN CLASS="style7"> <B>J</B>Science version
+            2.0.0 - October 11, 2005</SPAN></DIV></TD>
+         </TR>
+         <TR>
+         <TD>
+         <TABLE BGCOLOR="#FFFFFF" BORDER="0" CELLSPACING="4" CELLPADDING="4"
+                WIDTH="100%">
+            <TR BACKGROUND="doc/img/bar_center.jpg">
+            <TD BGCOLOR="#F3F5F8" WIDTH="33%">
+            <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
+            </TD>
+            <TD BGCOLOR="#F3F5F8" WIDTH="33%">
+            <DIV ALIGN="center"> <A HREF="jscience-2.0.0-src.zip">Get Source 
+               </A></DIV></TD>
+            <TD BGCOLOR="#F3F5F8" WIDTH="34%">
+            <DIV ALIGN="center"> <A HREF="jscience-2.0.0-bin.zip">Get
+               Library </A></DIV></TD>
+            </TR>
+         </TABLE></TD>
+         </TR>
+      </TABLE>
+      <BR> 
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Usage</SPAN>
+            </TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
 
-<h3><a name="VISION">Our Vision</a></h3>
-<ul>
-<li> To provide the most comprehensive Java<sup>TM</sup> library for the
-     scientific community. </li>
-<li> To create synergy between all sciences (e.g. math, physics, sociology, biology, astronomy, 
-     economics, etc.) by integrating them into a single architecture.</li>
-<li> To provide the best on-line services (webstart) for scientific calculations and visualizations.</li>
-</ul>
-</p>
+<!-- Usage -->      
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="85%">
+         <TR>
+         <TD CLASS="lineheight1 style5">
+         <P><B>J</B>Science is <A HREF="http://javolution.org"><IMG
+            HEIGHT="32" SRC="doc/img/javolution.png" WIDTH="144"></A> for: 
+         </P>
+         <UL>
+            <LI><B>High-Performance</B> (e.g. quantities objects almost as fast as primitive types) </LI>
+            <LI><B>Real-Time Behavior</B> (safety critical or control systems). </LI>
+            <LI><B>Low-Level Concurrency</B> on multi-processor systems.</LI>
+            <LI><B>Persistence</B> (XML object serialization). </LI>
+         </UL><B>J</B>Science binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
+         </TR>
+         <TR>
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>J</B>Science core library (<B>jscience.jar</B>)
+         ) is self-executable for versioning, testing and benchmark purpose. 
+         <H4 CLASS="lineheight1 style10">java -jar jscience.jar version (shows version
+         information) 
+         <BR> java -jar jscience.jar test (performs self-tests) 
+         <BR> java -jar jscience.jar perf (runs benchmark)</H4><I><A
+            HREF="doc/benchmark.html">Here </A> are the benchmark results
+         on a Single-CPU Intel Pentium 5 2.20GHz running Windows 2000. </I> 
+         </TD>
+         </TR>
+         <TR>
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>J</B>Science core modules are 
+         <A HREF="doc/license.txt">free</A>; permission to use, copy,
+         modify, and distribute these modules is freely granted, provided
+         that copyright notices are preserved.<BR> Optional modules (none
+         currently) may be covered by different licencing agreements.</TD>
+         </TR>
+      </TABLE>
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Coming in
+            2005: </SPAN></TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
+      
+<!-- Coming 2005 -->      
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="85%">
+         <TR>
+         <TD CLASS="lineheight1 style5">
+         <P><B>J</B>Science on-line calculator with 
+         <A HREF="http://beanshell.org/">BeanShell </A></P>
 
-<h3><a name="FEATURES">Current Library Features:</a></h3>
-<ul>
-  <li> A mathematics package, which includes a first <i>(and I believe unique)</i> generic 
-       <a href="api/org/jscience/mathematics/matrices/Matrix.html">Matrix</a> class capable of resolving
-       linear system of equations involving any kind of elements  (e.g. 
-       <code>Real, Complex, Quantity, Function, Vector, etc.</code>).</li>
+         <P>Additional core modules for 2005: </P>
+         <UL>
+            <LI>org.jscience.physics.nuclear </LI>
+            <LI>org.jscience.mathematics.integration </LI>
+            <LI>org.jscience.mathematics.transforms (FFT) </LI>
+            <LI>org.jscience.computing.geneticAlgorithms </LI>
+            <LI>org.jscience.cognitive.neural-networks </LI>
+            <LI>org.jscience.statistics.randomizers </LI>
+            <LI>org.jscience.astronomy.ephemeris </LI>
+            <LI>org.jscience.sociology.persons </LI>
+            <LI>org.jscience.history.calendars </LI>
+            <LI>org.jscience.geography.coordinates (Lat/Long, UTM, GDC) </LI>
+            <LI>org.jscience.chemistry.elements </LI>
+            <LI>org.jscience.biology.molecules </LI>
+            <LI>and more... </LI>
+         </UL>
 
-  <li> <a href="api/org/jscience/mathematics/functions/package-summary.html">Functions</a>
-       package for symbolic calculations and analysis.</li>
+         <P>Feel free to let us know if you are interested in
+         participating. There are very few rules: </P>
+         <UL>
+            <LI>Document well </LI>
+            <LI>Integrate with others modules (e.g. physical quantities,
+            math classes, etc..) </LI>
+            <LI>Respect module ownership (changes to others packages than
+            yours must be approved). </LI>
+         </UL>To participate: First register as "Observer" to 
+         <A HREF="http://jscience.dev.java.net">
+         http://jscience.dev.java.net </A>, then send an e-mail with your
+         proposal to <A HREF="mailto:dev@jscience.dev.java.net">dev@jscience.dev.java.net
+         </A> upon acceptance you are granted a "Developer" role. You might
+         also want to subscribe to the DEV mailing list in order to comment
+         on others proposals (even if you are not a developer). </TD>
+         </TR>
+      </TABLE>
+      
+<!-- Links -->            
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Links</SPAN>
+            </TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="93%">
+         <TR>
+         <TD>
+         <UL>
+            <LI CLASS="lineheight1 style5">
+            <A href="http://www.matheclipse.org">MathEclipse On-Line Calculator</A>
+            powered by <B>J</B>Science and <I><B>J</B>avolution</I></LI>
+         </UL></TD>
+         </TR>
+      </TABLE>
 
-  <li> All different types of <a href="api/org/jscience/mathematics/numbers/package-summary.html">numbers</a>
-       such as <a href="api/org/jscience/mathematics/numbers/Real.html">real</a> numbers of
-       arbitrary and guaranteed precision, or the always exact 
-       <a href="api/org/jscience/mathematics/numbers/Rational.html">rational</a> numbers.</li>
+<!-- History -->            
+      <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
+             BACKGROUND="doc/img/bar_center.jpg" CELLPADDING="0" WIDTH="96%">
+         <TR>
+         <TD WIDTH="6%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_left.jpg" WIDTH="37"></TD>
+         <TD VALIGN="top" WIDTH="92%">
+         <TABLE HEIGHT="27" BORDER="0" CELLSPACING="0" CELLPADDING="0"
+                WIDTH="100%">
+            <TR>
+            <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">History</SPAN>
+            </TD>
+            </TR>
+         </TABLE></TD>
+         <TD BGCOLOR="#FFFFFF" WIDTH="2%">
+         <IMG HEIGHT="46" SRC="doc/img/bar_right.jpg" WIDTH="11"></TD>
+         </TR>
+      </TABLE>
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="93%">
+         <TR>
+         <TD>
+         <UL>
+            <LI CLASS="lineheight1 style5"><B><I>October 11, 2005 : JScience 2.0</I></B><BR> 
+            Official 2.0 release (all current issues fixed).<BR> 
+            Javolution classes included into the JScience binary (.jar)<BR> 
+            </LI>
 
-  <li> <a href="api/org/jscience/physics/units/package-summary.html">Units</a> package (e.g. SI units)
-       developped in collaboration with the <a href="http://www.jcp.org/jsr/detail/108.jsp">JSR-108</a>
-       experts group. </li>
-
-  <li> Strongly typed quantities classes (<a href="api/org/jscience/physics/quantities/package-summary.html">
-       physics</a> package) with dimension-checking done in the form of class-type checking
-       (e.g. the  division of a <code>Length</code> by a <code>Duration</code> returns a
-       <code>Velocity</code> instance). 
-       <a href="api/org/jscience/physics/quantities/Quantity.html">Quantities</a> also take
-       into account measurement errors as well as numeric errors (interval arithmetic).</li>
-
-  <li> Support for <code>Standard</code>, <code>Relativistic</code>, <code>High-Energy</code>, 
-       <code>Quantum</code> and <code>Natural</code> physical
-       <a href="api/org/jscience/physics/models/package-summary.html">models</a>.</li>
-
-</ul>
-
-<center>
-<h2><a name="LATEST">jScience Version 1.0.2</a></h2>
-<a href="api/index.html"><img alt=Browse src="doc/img/browse.jpg"></a> 
-<a href="jscience-1.0.2-src.zip"><img alt=Source src="doc/img/source.jpg"></a> 
-<a href="jscience-1.0.2-bin.zip"><img alt=Library src="doc/img/library.jpg"></a>  
-</center>
-<p> This library is free software; you can redistribute it and/or modify it
-    under the terms of the <a href="http://jade.dautelle.com/doc/license.txt">
-    GNU Lesser General Public License</a> (LGPL).</p>
-
-<h3><a name="USAGE">Usage</a></h3>
-
-<h4><pre>      java -cp javolution.jar;jscience.jar ... (JRE1.4, JRE1.5+)</pre></h4>
-<h4><pre>      java -Xbootclasspath/a:javolution.jar -cp jscience.jar ... (J2ME, JRE1.1 .. JRE1.3)</pre></h4>
-<p>
-   <i><b>jScience</b></i> is <a href="http://javolution.org/" alt="Javolution">
-        <img src="doc/img/javolution.png"></a> for:<ul>
-    <li> High-Performance (e.g. operations on quantities almost as fast as by using primitive types)</li>
-    <li> Real-Time behavior (safety critical or control systems).</li>
-    <li> Multi-Platform support from the J2ME-CLDC (embedded) to the J2EE 1.5 (server)</li>
-    <li> Transparent low-level concurrency on multi-processor systems.</li>
-    <li> XML object serialization.</li>
-    <li> Distribution for massively parrallel calculations (coming soon)</li>
-   </ul> 
-   
-</p>     
-
-<h3><a name="FUTURE">Coming in 2005:</a></h3>
-<p><i><b>jScience</b></i> on-line calculator with <a href="http://beanshell.org/">BeanShell</a></p>
-<p>Additional packages/plugins:<ul>
-   <li>org.jscience.physics.nuclear</li>
-   <li>org.jscience.mathematics.integration</li>
-   <li>org.jscience.mathematics.transforms (FFT)</li>
-   <li>org.jscience.computing.geneticAlgorithms</li>
-   <li>org.jscience.cognitive.neural-networks</li>
-   <li>org.jscience.statistics.randomizers</li>
-   <li>org.jscience.astronomy.ephemeris</li>
-   <li>org.jscience.sociology.persons</li>
-   <li>org.jscience.history.calendars</li>
-   <li>org.jscience.geography.coordinates (Lat/Long, UTM, GDC)</li>
-   <li>org.jscience.chemistry.elements</li>
-   <li>org.jscience.biology.molecules</li>
-   <li>and more...</li>
-</ul></p>   
-<p> Feel free to let us know if you are interested in participating. There are very few rules:<ul>
-   <li>Document well</li>
-   <li>Integrate with others packages (e.g. make use of physical quantities, math functions etc..)</li>
-   <li>Respect package ownership (changes to others packages than yours must be approved).</li>
-</ul>
-To participate: First register as "Observer" to <a href="http://jscience.dev.java.net">
-http://jscience.dev.java.net</a>,  then send an e-mail with your proposal to 
-<a href="mailto:dev@jscience.dev.java.net">dev@jscience.dev.java.net</a>
-upon acceptance you are granted a "Developer" role. You might also want to subscribe
-to the DEV mailing list in order to comment on others proposals (even if you are not a developer).
-   
-<h3><a name="HISTORY">History</a></h3>
-<ul>
-  <li><b> December 7, 2004:  jScience 1.0.2</b><br>
-       Upgrade to Javolution 2.0 [1.0.2]<BR>
-       Upgrade to Javolution 1.1  [1.0.1]<BR>
-       Spin-off of <a href="http://jade.dautelle.com">Java(TM) Addition to Default Environment</a> [1.0.0]<BR>
-  </li>
-</ul><br>
-
-<a href="http://www.opensource.org/" alt="OSI Certified">
-<img align=left hspace=4 src="doc/img/osi-certified-72x60.gif" vspace=4> </a>
-<a href="http://javolution.dev.java.net/" alt="java.net">
-<img align=left hspace=4 src="doc/img/javanet.gif" vspace=4> </a>
-<address>Comments To: <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
-<br>Revision: December 7, 2004
-<br><a href="http://java.sun.com/" target=_blank>Java<sup>TM</sup></a> is a trademark of 
-    <a href="http://www.sun.com/" target=_blank>Sun Microsystems, Inc</a>
-
-<h5><u>Copyright&copy; 2004 The jScience Consortium</u></h5></font></body></html>
+            <LI CLASS="lineheight1 style5"><B> January 26, 2005: JScience 1.0.4 </B> <BR> 
+            Custom interpolators for 
+            <A HREF="api/org/jscience/mathematics/functions/DiscreteFunction.html">DiscreteFunction</A> [1.0.4] <BR> 
+            Upgrade to Javolution 2.2 [1.0.3] <BR> 
+            Upgrade to Javolution 2.0 [1.0.2] <BR> 
+            Upgrade to Javolution 1.1 [1.0.1] <BR> 
+            Spin-off of <A HREF="http://jade.dautelle.com">Java(TM)
+            Addition to Default Environment </A> [1.0.0]
+            </LI>
+         </UL></TD>
+         </TR>
+      </TABLE>
+      <BR> 
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="92%">
+         <TR>
+         <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="14%">
+         <DIV ALIGN="center"><A HREF="http://www.opensource.org/"><IMG
+               HEIGHT="60" BORDER="0" SRC="doc/img/osi-certified-72x60.gif"
+               WIDTH="72"></A></DIV></TD>
+         <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="31%">
+         <DIV ALIGN="center"><A HREF="http://jscience.dev.java.net/"><IMG
+               HEIGHT="47" BORDER="0" SRC="doc/img/javanet.gif" WIDTH="170"></A></DIV>
+         </TD>
+         <TD CLASS="lineheight1 style5" WIDTH="55%">
+          Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
+          Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
+          Revision      : October 11, 2005<BR>
+         </TD>
+         </TR>
+         <TR>
+         </TR>
+      </TABLE>
+      <HL>
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+             WIDTH="92%">
+         <TR>
+         <TD><A HREF="http://java.sun.com/">Java</A> is a trademark of 
+         <A HREF="http://www.sun.com/">Sun Microsystems, Inc </A><BR>
+         Designed by <A HREF="http://members.shaw.ca/ventro2/design/">Ventro</A>
+         </TD>
+         </TR>
+      </TABLE>
+      </TD>
+      <TD BACKGROUND="doc/img/whitelineright.gif" WIDTH="25">
+      <IMG HEIGHT="1" SRC="doc/img/whitelineright.gif" WIDTH="25"></TD>
+      </TR>
+   </TABLE></TD>
+   <TD BACKGROUND="doc/img/body_bgright.gif" WIDTH="11">
+   <IMG HEIGHT="1" SRC="doc/img/body_bgright.gif" WIDTH="11"></TD>
+   </TR>
+</TABLE>
+</BODY>
+</HTML>

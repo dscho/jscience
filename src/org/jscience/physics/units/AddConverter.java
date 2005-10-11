@@ -1,11 +1,10 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.units;
 
@@ -84,8 +83,12 @@ public final class AddConverter extends Converter {
 
     // Overrides.
     public int hashCode() {
-	return Float.floatToIntBits((float)_offset);
+        int h = Float.floatToIntBits((float)_offset);
+        h += ~(h << 9);
+        h ^= (h >>> 14);
+        h += (h << 4);
+        return h ^ (h >>> 10);
     }
 
-    private static final long serialVersionUID = 6002090310665218885L;
+    private static final long serialVersionUID = 1L;
 }

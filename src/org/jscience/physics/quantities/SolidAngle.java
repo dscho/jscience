@@ -1,14 +1,13 @@
 /*
- * jScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2004 - The jScience Consortium (http://jscience.org/)
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation (http://www.gnu.org/copyleft/lesser.html); either version
- * 2.1 of the License, or any later version.
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * All rights reserved.
+ * 
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 package org.jscience.physics.quantities;
-import org.jscience.physics.units.ConversionException;
+
 import org.jscience.physics.units.SI;
 import org.jscience.physics.units.Unit;
 
@@ -20,53 +19,43 @@ import org.jscience.physics.units.Unit;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 1.0, October 24, 2004
  */
-public class SolidAngle extends Quantity {
+public class SolidAngle extends Dimensionless {
 
     /**
-     * Holds the system unit.
+     * Holds the associated unit.
      */
-    private final static Unit SYSTEM_UNIT = SI.STERADIAN;
+    private final static Unit<SolidAngle> UNIT = SI.STERADIAN;
 
     /**
      * Holds the factory for this class.
      */
-    private final static Factory FACTORY = new Factory(SYSTEM_UNIT) {
-        protected Quantity newQuantity() {
-             return new SolidAngle();
+    private final static Factory<SolidAngle> FACTORY = new Factory<SolidAngle>(
+            UNIT) {
+        protected SolidAngle create() {
+            return new SolidAngle();
         }
     };
 
     /**
      * Represents a {@link SolidAngle} amounting to nothing.
      */
-    public final static SolidAngle ZERO = (SolidAngle) valueOf(0, SYSTEM_UNIT);
+    public final static SolidAngle ZERO = Quantity.valueOf(0, UNIT);
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected SolidAngle() {}
-
-    /**
-     * Returns the {@link SolidAngle} corresponding to the specified quantity.
-     *
-     * @param  quantity a quantity compatible with {@link SolidAngle}.
-     * @return the specified quantity or a new {@link SolidAngle} instance.
-     * @throws ConversionException if the current model does not allow the
-     *         specified quantity to be converted to {@link SolidAngle}.
-     */
-    public static SolidAngle solidAngleOf(Quantity quantity) {
-        return (SolidAngle) FACTORY.quantity(quantity);
+    protected SolidAngle() {
     }
 
     /**
      * Shows {@link SolidAngle} instances in the specified unit.
      *
-     * @param  unit the output unit for {@link SolidAngle} instances.
-     * @see    Quantity#getOutputUnit
+     * @param unit the display unit for {@link SolidAngle} instances.
      */
     public static void showAs(Unit unit) {
-        FACTORY.showInstancesAs(unit);
+        QuantityFormat.show(SolidAngle.class, unit);
     }
 
-    private static final long serialVersionUID = -8484596247656862314L;
+    private static final long serialVersionUID = 1L;
+
 }
