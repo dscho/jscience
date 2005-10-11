@@ -537,7 +537,7 @@ public class Quantity extends Number<Quantity> {
      * @see QuantityFormat
      */
     public Text toText() {
-        return QuantityFormat.current().format(this);
+        return QuantityFormat.getInstance().format(this);
     }
 
     /**

@@ -12,7 +12,6 @@ import javolution.lang.Text;
 
 import org.jscience.physics.quantities.Quantity;
 import org.jscience.physics.quantities.QuantityFormat;
-import org.jscience.physics.units.Unit;
 
 /**
  * This class represents something generally accepted as a medium of exchange,
@@ -57,7 +56,7 @@ public class Money extends Quantity {
      * @see Currency#getDefaultFractionDigits(Currency)
      */
     public Text toText() {
-    	Money m = this.to((Currency)QuantityFormat.current().getOutputUnit(this));
+    	Money m = this.to((Currency)QuantityFormat.getInstance().getOutputUnit(this));
         int fraction = Currency.getDefaultFractionDigits(m.getCurrency());
         if (fraction == 0) {
             long amount = Math.round(getAmount());

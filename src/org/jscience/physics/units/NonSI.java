@@ -9,6 +9,7 @@
 package org.jscience.physics.units;
 
 import org.jscience.physics.quantities.*;
+
 import static org.jscience.physics.units.SI.*;
 import static javolution.lang.MathLib.*;
 
@@ -872,6 +873,112 @@ public final class NonSI {
 	public static final Unit ROENTGEN = COULOMB.divide(KILOGRAM).times(2.58e-4)
 			.label("Roentgen");
 
+	//////////////////////
+	// BINARY MULTIPLES //
+	//////////////////////
+
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Ki").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> KIBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0);
+		u.label("Ki" + unit);
+		return u;
+	}
+
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024 * 1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Mi").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024 * 1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> MEBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0 * 1024.0);
+		u.label("Mi" + unit);
+		return u;
+	}
+
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024 * 1024 * 1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Gi").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024 * 1024 * 1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> GIBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0 * 1024.0 * 1024.0);
+		u.label("Gi" + unit);
+		return u;
+	}
+
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024 * 1024 * 1024 * 1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Ti").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024 * 1024 * 1024 * 1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> TEBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0 * 1024.0 * 1024.0 * 1024.0);
+		u.label("Ti" + unit);
+		return u;
+	}
+	
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024 * 1024 * 1024 * 1024 * 1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Pi").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024 * 1024 * 1024 * 1024 * 1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> PEBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0 * 1024.0 * 1024.0 * 1024.0 * 1024.0);
+		u.label("Pi" + unit);
+		return u;
+	}
+	
+	/**
+	 * Returns the specified unit multiplied by the factor
+	 * <code>1024 * 1024 * 1024 * 1024 * 1024 * 1024</code> (binary multiple).
+	 * This method sets the label of the unit being returned 
+	 * (using the prefix "Ei").
+	 * See <a href="http://physics.nist.gov/cuu/Units/binary.html">
+	 * Prefix for binary multiples</a>.
+	 *
+	 * @param  unit any unit.
+	 * @return <code>unit.multiply(1024 * 1024 * 1024 * 1024 * 1024 * 1024)</code>.
+	 */
+	public static <Q extends Quantity> Unit<Q> EXBI(Unit<Q> unit) {
+		Unit<Q> u = unit.times(1024.0 * 1024.0 * 1024.0 * 1024.0 * 1024.0 * 1024.0);
+		u.label("Ei" + unit);
+		return u;
+	}
+	
 	/**
 	 * Static method to force class initialization.
 	 */
