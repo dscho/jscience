@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,18 +8,18 @@
  */
 package org.jscience.physics.models;
 
-import org.jscience.physics.units.Converter;
-import static org.jscience.physics.units.Dimension.*;
-import org.jscience.physics.units.SI;
+import static javax.units.Dimension.LENGTH;
+import static javax.units.Dimension.TIME;
+
+import javax.units.converters.UnitConverter;
 
 /**
  * This class represents the standard model. 
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
- * @see     SI
+ * @version 3.0, February 13, 2006
  */
-public final class StandardModel extends PhysicalModel {
+public class StandardModel extends PhysicalModel {
 
     /**
      * Holds the single instance of this class.
@@ -36,32 +36,13 @@ public final class StandardModel extends PhysicalModel {
      * Selects the standard model as the current model.
      */
     public static void select() {
-        INSTANCE.setPhysicalDimensions();
+        INSTANCE.setDimensions();
         PhysicalModel.setCurrent(INSTANCE);
     }
 
-    /**
-     * Sets the dimensional units of the seven base quantities as follow:
-     * <ul>
-     * <li>{@link org.jscience.physics.quantities.Length Length} : <code>"m"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Mass Mass} : <code>"kg"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Duration Duration} : <code>"s"</code></li>
-     * <li>{@link org.jscience.physics.quantities.ElectricCurrent ElectricCurrent} : <code>"A"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Temperature Temperature} : <code>"K"</code></li>
-     * <li>{@link org.jscience.physics.quantities.AmountOfSubstance AmountOfSubstance} : <code>"mol"</code></li>
-     * <li>{@link org.jscience.physics.quantities.LuminousIntensity LuminousIntensity} : <code>"cd"</code></li>
-     * </ul>
-     *
-     * @see     org.jscience.physics.units.BaseUnit#setDimension
-     */
-    protected final void setPhysicalDimensions() {
-        SI.SECOND.setDimension(TIME, Converter.IDENTITY);
-        SI.METER.setDimension(LENGTH, Converter.IDENTITY);
-        SI.KILOGRAM.setDimension(MASS, Converter.IDENTITY);
-        SI.KELVIN.setDimension(TEMPERATURE, Converter.IDENTITY);
-        SI.AMPERE.setDimension(ELECTRIC_CURRENT, Converter.IDENTITY);
-        SI.MOLE.setDimension(AMOUNT_OF_SUBSTANCE, Converter.IDENTITY);
-        SI.CANDELA.setDimension(LUMINOUS_INTENSITY, Converter.IDENTITY);
+    @Override
+    protected void setDimensions() {
+        LENGTH.setEquivalentTo(LENGTH, UnitConverter.IDENTITY); // Resets.
     }
 
 }

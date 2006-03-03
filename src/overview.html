@@ -1,6 +1,279 @@
 <body>
 <H2><SPAN CLASS="style0">J</SPAN><SPAN CLASS="style1">Science</SPAN> - Java<SUP>TM</SUP>Tools and Libraries for the Advancement of Sciences.</H2>
 
+<a name="TUTORIAL"></a>
+<h3><b>Tutorial and Code Examples:</b></h3>
+These examples can be executed through the command: <code>"java -jar jscience.jar test"</code>
+(the code is located in <code>src/org/jscience/JScience.java</code>).
+
+<h4>Physics and measurements (org.jscience.physics.measures)</h4>
+[code]
+    // Exact Measurements.
+    Measure<Mass> m0 = Measure.valueOf(100, POUND); // Integer representation.
+    Measure<Mass> m1 = m0.times(33).divide(2); // Still an integer.
+    Measure<ElectricCurrent> m2 = Measure.valueOf("234 mA").to(MILLI(AMPERE)); // Still exact, no conversion.
+
+    > m0 = 100 lb
+    > m1 = 1650 lb
+    > m2 = 234 mA
+
+    // Inexact Measurements.
+    Measure<Mass> m3 = Measure.valueOf(100.0, POUND); // IEEE 754 64-bits float accuracy. 
+    Measure<Mass> m4 = m0.divide(3); // No exact integer representation.
+    Measure<ElectricCurrent> m5 = Measure.valueOf("234 mA").to(AMPERE); // Conversion introduces errors.
+    Measure<Temperature> t0 = Measure.valueOf(-7.3, 0.5, DEGREE_CELSIUS); // Error explicit.
+
+    > m3 = (100.0 ± 2.1E-14) lb
+    > m4 = (33.333333333333336 ± 7.1E-15) lb
+    > m5 = (2.3400000000000004E-1 ± 4.2E-17) A
+    > t0 = (-7.30 ± 5.0E-1) °C
+
+    // Interval measurements
+    Measure<Volume> m6 = Measure.valueOf(20, 0.1, LITER);
+    Measure<Frequency> m7 = Measure.rangeOf(10, 11, KILO(HERTZ));
+
+    > m6 = (20.00 ± 1.0E-1) L
+    > m7 = (10.5 ± 5.0E-1) kHz
+
+    // Equals (identical) / Distinct (no interval overlap)
+    Measure<Frequency> m8 = Measure.valueOf(9000, HERTZ);
+    Measure<Frequency> m9 = Measure.valueOf(9, KILO(HERTZ));
+    Measure<Frequency> m10 = m8.plus(Measure.valueOf(0, HERTZ));
+
+    > m8 = 9000 Hz
+    > m9 = 9 kHz
+    > m10 = 9000 Hz
+    > m9.equals(m8) = false
+    > m9.isDistinctFrom(m8) = false
+    > m10.equals(m8) = true
+    > m10.isDistinctFrom(m8) = false
+
+    // MeasureFormat - Plus/Minus Error (4 digits error)
+    MeasureFormat.setInstance(MeasureFormat.getPlusMinusError(4));
+
+    > m3 = (100.0 ± 2.132E-14) lb
+    > m4 = (33.33333333333333504 ± 7.105E-15) lb
+    > m5 = (2.340000000000000512E-1 ± 4.163E-17) A
+
+    // MeasureFormat - Bracket Error (2 digits error)
+    MeasureFormat.setInstance(MeasureFormat.getBracketErrorInstance(2));
+
+    > m3 = 100.000000000000[00] lb
+    > m4 = 33.3333333333333[36] lb
+    > m5 = 2.34000000000000[04]E-1 A
+
+    // MeasureFormat - Exact Digits Only
+    MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
+
+    > m3 = 100.000000000000 lb
+    > m4 = 33.3333333333333 lb
+    > m5 = 2.34000000000000E-1 A
+
+    // Numeric Errors
+    Measure<Length> x = Measure.valueOf(1.0, METER);
+    Measure<Velocity> v = Measure.valueOf(0.01, METER_PER_SECOND);
+    Measure<Duration> t = Measure.valueOf(1.0, MICRO(SECOND));
+    for (int i = 0; i < 10000000; i++) {
+          x = x.plus(v.times(t));
+    }
+    MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
+
+     > x = 1.1000000 m   (guaranteed in the interval [1.0999999, 1.1000001])
+
+    // Primitive double type (no idea on result accuracy).
+     double x = 1.0; // m
+     double v = 0.01; // m/s
+     double t = 1E-6; // s
+     for (int i = 0; i < 10000000; i++) {
+          x += v * t;
+     }
+
+     > x = 1.099999999392253 (no idea on the precision) 
+[/code]
+
+<h4>Physical Models  (org.jscience.physics.models)</h4>
+
+[code]
+     Measure<Length> x = Measure.valueOf(100, NonSI.INCH);
+     LocalContext.enter(); // To avoid impacting other threads.
+     try { 
+        RelativisticModel.select(); // Selects the relativistic model.
+        x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
+        System.out.println(x); 
+
+    > (692.06265340000008 ± 5.1E-13) m
+        
+        Measure<Mass> m = Measure.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
+        System.out.println(m); 
+        
+    > (2.1391940763025056E-26 ± 4.3E-42) kg
+
+    } finally {
+        LocalContext.exit();
+    }    
+[/code]
+    
+<h4>Money/Currencies (org.jscience.economics.money)</h4>
+
+[code]
+     ///////////////////////////////////////////////////////////////////////
+     // Calculates the cost of a car trip in Europe for an American tourist.
+     ///////////////////////////////////////////////////////////////////////
+
+     // Use currency symbols instead of ISO-4217 codes.
+     UnitFormat.getStandardInstance().label(USD, "$"); // Use "$" symbol instead of currency code ("USD")
+     UnitFormat.getStandardInstance().label(EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
+
+     // Sets exchange rates.
+     Currency.setReferenceCurrency(USD);
+     EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
+            
+     // Calculates trip cost.
+     Measure<?> carMileage = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
+     Measure<?> gazPrice = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+     Measure<Length> tripDistance = Measure.valueOf(400, KILO(SI.METER)); // 400 km
+     Measure<Money> tripCost = tripDistance.divide(carMileage).times(gazPrice).to(USD);
+
+     // Displays cost.
+     System.out.println("Trip cost = " + tripCost + " (" + tripCost.to(EUR) + ")");
+
+     > Trip cost = 66.05 $ (56.45 €)
+[/code]
+
+<h4>Matrices/Vectors (org.jscience.mathematics.vectors)</h4>
+
+[code]
+     Measure<ElectricResistance> R1 = Measure.valueOf(100, 1, OHM); // 1% precision. 
+     Measure<ElectricResistance> R2 = Measure.valueOf(300, 3, OHM); // 1% precision.
+     Measure<ElectricPotential> U0 = Measure.valueOf(28, 0.01, VOLT); // ±0.01 V fluctuation.
+
+     // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
+     //             U1 = R1 * I    =>  |-1 0  R1| * |U2| = |0 |
+     //             U2 = R2 * I        |0 -1  R2|   |I |   |0 |
+     //
+     //                                    A      *  X   =  B
+     //
+     Matrix<Measure> A = Matrix.valueOf(new Measure[][] {
+         { Measure.ONE, Measure.ONE, Measure.valueOf(0, OHM) },
+         { Measure.ONE.opposite(), Measure.ZERO, R1 },
+         { Measure.ZERO, Measure.ONE.opposite(), R2 } });
+     Vector<Measure> B = Vector.valueOf((Measure) U0, Measure.valueOf(0, VOLT), Measure.valueOf(0, VOLT));
+     Vector<Measure> X = A.solve(B);
+     System.out.println(X);
+     System.out.println(X.get(2).to(MILLI(AMPERE)));
+
+     > {(7.0 ± 1.6E-1) V, (21.0 ± 1.5E-1) V, (7.0E-2 ± 7.3E-4) V/Ω}
+     > (70.0 ± 7.3E-1) mA
+[/code]
+
+<h4>Functions Symbolic Calculations (org.jscience.mathematics.functions)</h4>
+
+[code]
+     // Defines two local variables (x, y).
+     Variable<Complex> varX = new Variable.Local<Complex>("x");
+     Variable<Complex> varY = new Variable.Local<Complex>("y");
+
+     // f(x) = 1 + 2x + ix²
+     Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, varX);
+     Polynomial<Complex> fx = x.pow(2).times(Complex.I).plus(
+     x.times(Complex.valueOf(2, 0)).plus(Complex.ONE));
+     System.out.println(fx);
+     System.out.println(fx.pow(2));
+     System.out.println(fx.differentiate(varX));
+     System.out.println(fx.integrate(varY));
+     System.out.println(fx.compose(fx));
+
+     // Calculates expression.
+     varX.set(Complex.valueOf(2, 3));
+     System.out.println(fx.evaluate());
+
+     > [0.0 + 1.0i]x² + [2.0 + 0.0i]x + [1.0 + 0.0i]
+     > [-1.0 + 0.0i]x4 + [0.0 + 4.0i]x³ + [4.0 + 2.0i]x² + [4.0 + 0.0i]x + [1.0 + 0.0i]
+     > [0.0 + 2.0i]x + [2.0 + 0.0i]
+     > [0.0 + 1.0i]x²y + [2.0 + 0.0i]xy + [1.0 + 0.0i]y
+     > [0.0 - 1.0i]x4 + [-4.0 + 0.0i]x³ + [-2.0 + 6.0i]x² + [4.0 + 4.0i]x + [3.0 + 1.0i]
+     > -7.0 + 1.0i
+[/code]        
+
+<h4>Coordinates Conversions (org.jscience.geography.coordinates)</h4>
+[code]
+     // Simple Lat/Long to UTM conversion.
+     CoordinatesConverter<LatLong, UTM> latLongToUTM = LatLong.CRS.getConverterTo(UTM.CRS);
+     LatLong latLong = LatLong.valueOf(34.34, 23.56, DEGREE_ANGLE);
+     UTM utm = latLongToUTM.convert(latLong);
+     System.out.println(utm);
+     
+     > [735493.10596316272 m, 3802824.4520701632 m]
+
+     // Converts any projected coordinates to Latitude/Longitude.
+     Coordinates<ProjectedCRS> coord2d = utm;
+     ProjectedCRS crs = coord2d.getCoordinateReferenceSystem();
+     CoordinatesConverter<Coordinates, LatLong> cvtr = crs.getConverterTo(LatLong.CRS);
+     latLong = cvtr.convert(coord2d);
+     System.out.println(latLong);
+     
+     > [34.340000000327748 °, 23.559999984340976 °]
+     
+     // Compound coordinates.
+     Altitude alt = Altitude.valueOf(2000, FOOT);
+     CompoundCoordinates<LatLong, Altitude> latLongAlt = new CompoundCoordinates<LatLong, Altitude>(latLong, alt);
+     System.out.println(latLongAlt);
+     
+     > [34.340000000327748 °, 23.559999984340976 °, 609.6 m]
+
+     // Converts compound coordinates (3-D) to XYZ (GPS).
+     XYZ xyz = latLongAlt.getCoordinateReferenceSystem().getConverterTo(XYZ.CRS).convert(latLongAlt);
+     System.out.println(xyz);
+     
+     > [4833067.6201224736 m, 2107498.4040940592 m, 3577994.5499035148 m]
+
+     // Even more compounding...
+     Time time = Time.valueOf(DateFormat.getDateTimeInstance().parse("Mar 1, 2006 2:36:10 AM"));
+     CompoundCoordinates<CompoundCoordinates, Time> latLongAltTime = new CompoundCoordinates<CompoundCoordinates, Time>(latLongAlt, time);
+     System.out.println(latLongAltTime);
+     
+     > [34.340000000327748 °, 23.559999984340976 °, 609.6 m, 1.14119857E9 s]       
+[/code]        
+     
+<h4>Number types (org.jscience.mathematics.numbers)</h4>
+
+[code]
+     Real two = Real.valueOf(2, 100); // 2.0000..00 (100 zeros after decimal point).
+     Real sqrt2 = two.sqrt();
+     System.out.println("sqrt(2)   = " + sqrt2);
+     System.out.println("Precision = " + sqrt2.getPrecision() + " digits.");
+
+     > sqrt(2)   = 1.414213562373095048801688724209698078569671875376948
+     > Precision = 53 digits.
+
+     LargeInteger dividend = LargeInteger.valueOf("3133861182986538201");
+     LargeInteger divisor = LargeInteger.valueOf("25147325102501733369");
+     Rational rational = Rational.valueOf(dividend, divisor);
+     System.out.println("rational  = " + rational);
+       
+     > rational  = 41/329
+            
+     ModuloInteger m = ModuloInteger.valueOf("233424242346");
+     LocalContext.enter(); // Avoids impacting others threads when setting the modulo.
+     try {
+         ModuloInteger.setModulus(LargeInteger.valueOf("31225208137"));
+         ModuloInteger inv = m.inverse();
+         System.out.println("inverse modulo = " + inv);
+                
+         ModuloInteger one = inv.times(m);
+         System.out.println("verification: one = " + one);
+
+     } finally {
+         LocalContext.exit();
+     }
+
+     > inverse modulo = 14099421625
+     > verification: one = 1
+[/code]
+
+<i>Additional examples can be find in the packages descriptions...</i><br>
+<i>Benchmark data available <a href="../doc/benchmark.html">here</a></i>
+
 <a name="license"></a>
 <h3><b>License:</b></h3>
 <p> Permission to use, copy, modify, and distribute this software is freely granted, 

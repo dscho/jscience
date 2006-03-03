@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,8 +8,9 @@
  */
 package org.jscience.mathematics.numbers;
 
+import org.jscience.mathematics.structures.Field;
+
 import javolution.lang.Text;
-import javolution.lang.TypeFormat;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -18,12 +19,12 @@ import javolution.xml.XmlFormat;
  * 
  * <p> Instances of this class are immutable and can be used to find exact 
  *     solutions to linear equations with the {@link 
- *     org.jscience.mathematics.matrices.Matrix Matrix} class.</p>
+ *     org.jscience.mathematics.vectors.Matrix Matrix} class.</p>
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2005
+ * @version 3.0, February 13, 2006
  */
-public final class Rational extends Number<Rational> {
+public final class Rational extends Number<Rational> implements Field<Rational>{
 
     /**
      * Holds the default XML representation for rational numbers.
@@ -54,14 +55,14 @@ public final class Rational extends Number<Rational> {
     /**
      * The {@link Rational} representing the additive identity.
      */
-    public static final Rational ZERO = Rational.valueOf(LargeInteger.ZERO,
-            LargeInteger.ONE).moveHeap();
+    public static final Rational ZERO = new Rational(LargeInteger.ZERO,
+            LargeInteger.ONE);
 
     /**
      * The {@link Rational} representing the multiplicative identity.
      */
-    public static final Rational ONE = Rational.valueOf(LargeInteger.ONE,
-            LargeInteger.ONE).moveHeap();
+    public static final Rational ONE = new Rational(LargeInteger.ONE,
+            LargeInteger.ONE);
 
     /**
      * Holds the dividend.
@@ -77,6 +78,19 @@ public final class Rational extends Number<Rational> {
      * Default constructor. 
      */
     private Rational() {
+    }
+
+    /**
+     * Creates a rational number for the specified integer dividend and 
+     * divisor. 
+     * 
+     * @param dividend the dividend value.
+     * @param divisor the divisor value.
+     * @throws ArithmeticException if <code>divisor == 0</code>
+     */
+    public Rational(LargeInteger dividend, LargeInteger divisor) {
+        _dividend = dividend;
+        _divisor = divisor;
     }
 
     /**
@@ -118,15 +132,15 @@ public final class Rational extends Number<Rational> {
      * @return the corresponding rational number.
      */
     public static Rational valueOf(CharSequence chars) {
-        int sep = TypeFormat.indexOf("/", chars, 0);
+        Text txt = Text.valueOf(chars); // TODO Use TextFormat...
+        int sep = txt.indexOf("/");
         if (sep >= 0) {
-            LargeInteger dividend = LargeInteger.valueOf(chars.subSequence(0,
-                    sep));
-            LargeInteger divisor = LargeInteger.valueOf(chars.subSequence(
+            LargeInteger dividend = LargeInteger.valueOf(txt.subtext(0, sep));
+            LargeInteger divisor = LargeInteger.valueOf(txt.subtext(
                     sep + 1, chars.length()));
             return valueOf(dividend, divisor);
         } else { // No divisor.
-            return valueOf(LargeInteger.valueOf(chars.subSequence(0, sep)),
+            return valueOf(LargeInteger.valueOf(txt.subtext(0, sep)),
                     LargeInteger.ONE);
         }
     }
@@ -166,7 +180,7 @@ public final class Rational extends Number<Rational> {
      * @return <code>-this</code>.
      */
     public Rational opposite() {
-        return Rational.valueOf(_dividend.oppositeBasic(), _divisor);
+        return Rational.valueOf(_dividend.opposite(), _divisor);
     }
 
     /**
@@ -177,9 +191,9 @@ public final class Rational extends Number<Rational> {
      */
     public Rational plus(Rational that) {
         return Rational.valueOf(
-                this._dividend.timesBasic(that._divisor).plusBasic(
-                        this._divisor.timesBasic(that._dividend)),
-                this._divisor.timesBasic(that._divisor)).normalize();
+                this._dividend.times(that._divisor).plus(
+                        this._divisor.times(that._dividend)),
+                this._divisor.times(that._divisor)).normalize();
     }
 
     /**
@@ -191,33 +205,34 @@ public final class Rational extends Number<Rational> {
      */
     public Rational minus(Rational that) {
         return Rational.valueOf(
-                this._dividend.timesBasic(that._divisor).minusBasic(
-                        this._divisor.timesBasic(that._dividend)),
-                this._divisor.timesBasic(that._divisor)).normalize();
+                this._dividend.times(that._divisor).minus(
+                        this._divisor.times(that._dividend)),
+                this._divisor.times(that._divisor)).normalize();
     }
 
     /**
      * Returns the product of this rational number with the one specified.
      * 
      * @param that the rational number multiplier.
-     * @return <code>this * that</code>.
+     * @return <code>this · that</code>.
      */
     public Rational times(Rational that) {
-        return Rational.valueOf(this._dividend.timesBasic(that._dividend),
-                this._divisor.timesBasic(that._divisor)).normalize();
+        Rational r = Rational.valueOf(this._dividend.times(that._dividend),
+                this._divisor.times(that._divisor)).normalize();
+        return r;
     }
 
     /**
-     * Returns the reciprocal (or inverse) of this rational number.
+     * Returns the inverse of this rational number.
      * 
      * @return <code>1 / this</code>.
      * @throws ArithmeticException if <code>dividend.isZero()</code>
      */
-    public Rational reciprocal() {
+    public Rational inverse() {
         if (_dividend.isZero())
             throw new ArithmeticException("Dividend is zero");
-        return _dividend.isNegative() ? Rational.valueOf(_divisor.oppositeBasic(),
-                _dividend.oppositeBasic()) : Rational.valueOf(_divisor, _dividend);
+        return _dividend.isNegative() ? Rational.valueOf(_divisor.opposite(),
+                _dividend.opposite()) : Rational.valueOf(_divisor, _dividend);
     }
 
     /**
@@ -228,40 +243,28 @@ public final class Rational extends Number<Rational> {
      * @throws ArithmeticException if <code>that.equals(ZERO)</code>
      */
     public Rational divide(Rational that) {
-        return Rational.valueOf(this._dividend.timesBasic(that._divisor),
-                this._divisor.timesBasic(that._dividend)).normalize();
+        return Rational.valueOf(this._dividend.times(that._divisor),
+                this._divisor.times(that._dividend)).normalize();
     }
 
     /**
-     * Returns the norm (absolute value) of this rational number.
+     * Returns the absolute value of this rational number.
      * 
      * @return <code>|this|</code>.
      */
-    public Rational norm() {
-        return Rational.valueOf(_dividend.norm(), _divisor);
+    public Rational abs() {
+        return Rational.valueOf(_dividend.abs(), _divisor);
     }
 
     /**
-     * Compares the {@link #norm norm} of two rational numbers.
+     * Compares the absolute value of two rational numbers.
      *
      * @param that the rational number to be compared with.
      * @return <code>|this| > |that|</code>
      */
     public boolean isLargerThan(Rational that) {
-        return this._dividend.timesBasic(that._divisor).isLargerThan(
-                that._dividend.timesBasic(this._divisor));
-    }
-
-    /**
-     * Throws {@link ArithmeticException}, the square root is not a rational 
-     * number in the general case.
-     * 
-     * @throws ArithmeticException 
-     */
-    public Rational sqrt() {
-        throw new ArithmeticException(
-                "Square Root of a rational number is not a rational number"
-                        + " in the general case");
+        return this._dividend.times(that._divisor).isLargerThan(
+                that._dividend.times(this._divisor));
     }
 
     /**
@@ -327,7 +330,22 @@ public final class Rational extends Number<Rational> {
      *         to type <code>double</code>.
      */
     public double doubleValue() {
-        return _dividend.doubleValue() / _divisor.doubleValue();
+        // Normalize to 63 bits (minimum).
+        int dividendBitLength = _dividend.bitLength();
+        int divisorBitLength = _divisor.bitLength();
+        if (dividendBitLength > divisorBitLength) {
+            // Normalizes the divisor to 63 bits.
+            int shift = divisorBitLength - 63;;
+            long divisor = _divisor.shiftRight(shift).longValue();
+            LargeInteger dividend = _dividend.shiftRight(shift);
+            return dividend.doubleValue() / divisor;
+        } else {
+            // Normalizes the dividend to 63 bits.
+            int shift = dividendBitLength - 63;;
+            long dividend = _dividend.shiftRight(shift).longValue();
+            LargeInteger divisor = _divisor.shiftRight(shift);
+            return dividend / divisor.doubleValue();
+        }
     }
 
     /**
@@ -338,8 +356,8 @@ public final class Rational extends Number<Rational> {
      *         equal to, or greater than <code>that</code>.
      */
     public int compareTo(Rational that) {
-        return this._dividend.timesBasic(that._divisor).compareTo(
-                that._dividend.timesBasic(this._divisor));
+        return this._dividend.times(that._divisor).compareTo(
+                that._dividend.times(this._divisor));
     }
 
     /**
@@ -358,8 +376,8 @@ public final class Rational extends Number<Rational> {
                 }
                 return this;
             } else {
-                _dividend = _dividend.oppositeBasic();
-                _divisor = _divisor.oppositeBasic();
+                _dividend = _dividend.opposite();
+                _divisor = _divisor.opposite();
                 return normalize();
             }
         } else {

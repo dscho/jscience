@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -9,7 +9,6 @@
 package org.jscience.mathematics.numbers;
 
 import javolution.realtime.ConcurrentContext;
-import javolution.realtime.LocalReference;
 import javolution.realtime.PoolContext;
 import javolution.realtime.StackReference;
 import javolution.realtime.ConcurrentContext.Logic;
@@ -18,8 +17,6 @@ import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
-
-import org.jscience.mathematics.matrices.Operable;
 
 /**
  * <p> This class represents an immutable integer number of arbitrary size.</p>
@@ -31,24 +28,19 @@ import org.jscience.mathematics.matrices.Operable;
  *          faster on 32 bits processors.</li>
  *     <li> Real-time compliant for improved performance and predictability.
  *          No temporary object allocated on the heap and no garbage collection
- *          if executions are performed within a {@link PoolContext}
- *          (e.g. {@link #plus plus} operation <b>6x</b> faster).</li>
- *     <li> Implements the {@link Operable} interface for {@link 
- *          #setModulus modular arithmetic} and can be used in conjonction with
- *          the {@link org.jscience.mathematics.matrices.Matrix Matrix}
- *          class to resolve modulo equations (ref. number theory).</li>
+ *          if executions are performed within a {@link PoolContext}.</li>
  *     <li> Improved algorithms (e.g. Concurrent Karabutsa multiplication in 
  *          O(n<sup>Log3</sup>) instead of O(n<sup>2</sup>).</li>
  * </ul></p>
  * 
  * <p> <b>Implementation Note:</b> This class uses {@link ConcurrentContext 
- *     concurrent contexts} to accelerate calculations on multi-processor
+ *     concurrent contexts} to accelerate calculations on multi-processors
  *     systems.</p>
  *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, September 24, 2005
- * @see     <a href="http://mathworld.wolfram.com/KaratsubaMultiplication.html">
- *          Karatsuba Multiplication -- from MathWorld</a>
+ * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Integer">
+ *      Wikipedia: Integer</a>
  */
 public final class LargeInteger extends Number<LargeInteger> {
 
@@ -104,11 +96,6 @@ public final class LargeInteger extends Number<LargeInteger> {
     }
 
     /**
-     * Holds the local modulus (for modular arithmetic).
-     */
-    private static final LocalReference<LargeInteger> MODULUS = new LocalReference<LargeInteger>();
-
-    /**
      * Holds the remainder after a {@link #divide} operation.
      */
     private LargeInteger _remainder;
@@ -128,7 +115,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * This large integer positive words (63 bits). 
      * Least significant word first (index 0).
      */
-    private final long[] _words;
+    private long[] _words;
 
     /**
      * Base constructor.
@@ -282,32 +269,6 @@ public final class LargeInteger extends Number<LargeInteger> {
     public static LargeInteger valueOf(java.math.BigInteger bigInteger) {
         byte[] bytes = bigInteger.toByteArray();
         return LargeInteger.valueOf(bytes, 0, bytes.length);
-    }
-
-    /**
-     * Returns the {@link javolution.realtime.LocalContext local} modulus 
-     * for modular arithmetic or <code>null</code> if the arithmetic operations
-     * are non-modular (default). 
-     * 
-     * @return the local modulus or <code>null</code> if none.
-     * @see #setModulus
-     */
-    public static LargeInteger getModulus() {
-        return MODULUS.get();
-    }
-
-    /**
-     * Sets the {@link javolution.realtime.LocalContext local} modulus 
-     * for modular arithmetic.
-     * 
-     * @param modulus the new modulus or <code>null</code> to unset the modulus.
-     * @throws IllegalArgumentException if <code>modulus <= 0</code>
-     */
-    public static void setModulus(LargeInteger modulus) {
-        if ((modulus != null) && (!modulus.isPositive()))
-            throw new IllegalArgumentException("modulus: " + modulus
-                    + " has to be greater than 0");
-        MODULUS.set(modulus);
     }
 
     /**
@@ -503,33 +464,23 @@ public final class LargeInteger extends Number<LargeInteger> {
             4, 4, 4, 4, 4, 4, 4, 4 };
 
     /**
-     * Returns the opposite of this large integer (modulo operation if a 
-     * {@link #setModulus modulus} has been set).
+     * Returns the opposite of this large integer.
      * 
      * @return <code>-this</code>.
      */
     public LargeInteger opposite() {
-        return modulo(oppositeBasic());
-    }
-
-    LargeInteger oppositeBasic() {
         LargeInteger z = copy();
         z._isNegative = (!_isNegative) && (_size != 0); // -0 = 0
         return z;
     }
 
     /**
-     * Returns the sum of this large integer with the one specified
-     * (modulo operation if a {@link #setModulus modulus} has been set).
+     * Returns the sum of this large integer with the one specified.
      * 
      * @param that the integer to be added.
      * @return <code>this + that</code>.
      */
     public LargeInteger plus(LargeInteger that) {
-        return modulo(plusBasic(that));
-    }
-
-    LargeInteger plusBasic(LargeInteger that) {
         if (this._isNegative == that._isNegative) {
             if (this._size >= that._size) {
                 LargeInteger z = newInstance(this._size + 1);
@@ -564,17 +515,12 @@ public final class LargeInteger extends Number<LargeInteger> {
 
     /**
      * Returns the difference between this large integer and the one
-     * specified (modulo operation if a {@link #setModulus modulus} 
-     * has been set).
+     * specified.
      * 
      * @param that the integer to be subtracted.
      * @return <code>this - that</code>.
      */
     public LargeInteger minus(LargeInteger that) {
-        return modulo(minusBasic(that));
-    }
-
-    LargeInteger minusBasic(LargeInteger that) {
         if (this._isNegative == that._isNegative) {
             // Subtracts smallest to largest (absolute value)
             if (this.isLargerThan(that)) { // this.abs() > that.abs()
@@ -609,17 +555,12 @@ public final class LargeInteger extends Number<LargeInteger> {
 
     /**
      * Returns the product of this large integer with the specified 
-     * <code>long</code> multiplier (modulo operation if a 
-     * {@link #setModulus modulus} has been set).
+     * <code>long</code> multiplier.
      * 
      * @param multiplier the <code>long</code> multiplier.
-     * @return <code>this * l</code>.
+     * @return <code>this · multiplier</code>.
      */
     public LargeInteger times(long multiplier) {
-        return modulo(timesBasic(multiplier));
-    }
-
-    LargeInteger timesBasic(long multiplier) {
         if (this._size != 0) {
             if (multiplier > 0) {
                 LargeInteger z = newInstance(_size + 1);
@@ -641,20 +582,15 @@ public final class LargeInteger extends Number<LargeInteger> {
     }
 
     /**
-     * Returns the product of this large integer with the one specified
-     * (modulo operation if a {@link #setModulus modulus} has been set).
+     * Returns the product of this large integer with the one specified.
      * 
      * @param that the large integer multiplier.
-     * @return <code>this * that</code>.
+     * @return <code>this · that</code>.
      */
     public LargeInteger times(LargeInteger that) {
-        return modulo(timesBasic(that));
-    }
-
-    LargeInteger timesBasic(LargeInteger that) {
         if (this._size >= that._size) {
             if (that._size <= 1) {
-                return timesBasic(that.longValue());
+                return times(that.longValue());
             } else if (that._size < 30) { // Conventional multiplication.
                 LargeInteger z = newInstance(this._size + that._size);
                 z._size = (this._size >= that._size) ? multiply(this._words,
@@ -667,9 +603,9 @@ public final class LargeInteger extends Number<LargeInteger> {
                 int bitLength = this.bitLength();
                 int n = (bitLength >> 1) + (bitLength & 1);
                 LargeInteger b = this.shiftRight(n);
-                LargeInteger a = this.minusBasic(b.shiftLeft(n));
+                LargeInteger a = this.minus(b.shiftLeft(n));
                 LargeInteger d = that.shiftRight(n);
-                LargeInteger c = that.minusBasic(d.shiftLeft(n));
+                LargeInteger c = that.minus(d.shiftLeft(n));
                 StackReference<LargeInteger> ac = StackReference.newInstance();
                 StackReference<LargeInteger> bd = StackReference.newInstance();
                 StackReference<LargeInteger> abcd = StackReference
@@ -678,29 +614,30 @@ public final class LargeInteger extends Number<LargeInteger> {
                 try { // this = a + 2^n b,   that = c + 2^n d
                     ConcurrentContext.execute(MULTIPLY, a, c, ac);
                     ConcurrentContext.execute(MULTIPLY, b, d, bd);
-                    ConcurrentContext.execute(MULTIPLY, a.plusBasic(b), c
-                            .plusBasic(d), abcd);
+                    ConcurrentContext.execute(MULTIPLY, a.plus(b), c
+                            .plus(d), abcd);
                 } finally {
                     ConcurrentContext.exit();
                 }
                 // z = a*c + ((a+b)*(c+d)-a*c-b*d) 2^n + b*d 2^2n 
-                LargeInteger z = ac.get().plusBasic(
-                        abcd.get().minusBasic(ac.get()).minusBasic(bd.get())
-                                .shiftLeft(n)).plusBasic(
+                LargeInteger z = ac.get().plus(
+                        abcd.get().minus(ac.get()).minus(bd.get())
+                                .shiftLeft(n)).plus(
                         bd.get().shiftLeft(2 * n));
                 return z;
             }
         } else {
-            return that.timesBasic(this);
+            return that.times(this);
         }
     }
 
     private static final Logic MULTIPLY = new Logic() {
+        @SuppressWarnings("unchecked")
         public void run(Object[] args) {
             LargeInteger left = (LargeInteger) args[0];
             LargeInteger right = (LargeInteger) args[1];
             StackReference result = (StackReference) args[2];
-            result.set(left.timesBasic(right).export());// Recursive.
+            result.set(left.times(right).export());// Recursive.
         }
     };
 
@@ -747,9 +684,8 @@ public final class LargeInteger extends Number<LargeInteger> {
 
     /**
      * Returns this large integer divided by the one specified (integer
-     * division). This operation is independant from the current modulo (unlike
-     * {@link #reciprocal}).
-     * The remainder of this division is accessible using {@link #getRemainder}. 
+     * division). The remainder of this division is accessible using 
+     * {@link #getRemainder}. 
      * 
      * @param that the integer divisor.
      * @return <code>this / that</code> and <code>this % that</code> 
@@ -766,23 +702,23 @@ public final class LargeInteger extends Number<LargeInteger> {
                 LargeInteger thatAbs = that.abs();
                 int precision = thisAbs.bitLength() - thatAbs.bitLength() + 1;
                 if (precision <= 0) {
-                    LargeInteger result = LargeInteger.valueOf(0);
+                    LargeInteger result = ZERO.copy();
                     result._remainder = this;
                     return result.export();
                 }
                 LargeInteger thatReciprocal = thatAbs.inverseScaled(precision);
-                LargeInteger result = thisAbs.timesBasic(thatReciprocal);
+                LargeInteger result = thisAbs.times(thatReciprocal);
                 result = result.shiftRight(thisAbs.bitLength() + 1);
 
                 // Calculates remainder, corrects for result +/- 1 error. 
-                LargeInteger remainder = thisAbs.minusBasic(thatAbs
-                        .timesBasic(result));
+                LargeInteger remainder = thisAbs.minus(thatAbs
+                        .times(result));
                 if (remainder.compareTo(thatAbs) >= 0) {
-                    remainder = remainder.minusBasic(thatAbs);
-                    result = result.plusBasic(ONE);
+                    remainder = remainder.minus(thatAbs);
+                    result = result.plus(ONE);
                 } else if (remainder.isNegative()) {
-                    remainder = remainder.plusBasic(thatAbs);
-                    result = result.minusBasic(ONE);
+                    remainder = remainder.plus(thatAbs);
+                    result = result.minus(ONE);
                 }
 
                 // Sets signs for result and remainder.
@@ -831,11 +767,11 @@ public final class LargeInteger extends Number<LargeInteger> {
         } else { // Newton iteration (x = 2 * x - x^2 * this).
             LargeInteger x = inverseScaled(precision / 2 + 1); // Estimate.
             LargeInteger thisTrunc = shiftRight(bitLength() - (precision + 2));
-            LargeInteger prod = thisTrunc.timesBasic(x).timesBasic(x);
+            LargeInteger prod = thisTrunc.times(x).times(x);
             int diff = 2 * (precision / 2 + 2);
             LargeInteger prodTrunc = prod.shiftRight(diff);
             LargeInteger xPad = x.shiftLeft(precision - precision / 2 - 1);
-            return xPad.plusBasic(xPad.minusBasic(prodTrunc));
+            return xPad.plus(xPad.minus(prodTrunc));
         }
     }
 
@@ -852,7 +788,7 @@ public final class LargeInteger extends Number<LargeInteger> {
     public LargeInteger mod(LargeInteger m) {
         final LargeInteger z = m.isLargerThan(this) ? this : this.divide(m)
                 .getRemainder();
-        return (this._isNegative == m._isNegative) ? z : z.plusBasic(m);
+        return (this._isNegative == m._isNegative) ? z : z.plus(m);
     }
 
     /**
@@ -882,8 +818,8 @@ public final class LargeInteger extends Number<LargeInteger> {
                 LargeInteger c = quot.getRemainder();
                 a = b;
                 b = c;
-                LargeInteger new_r = p.minusBasic(quot.timesBasic(r));
-                LargeInteger new_s = q.minusBasic(quot.timesBasic(s));
+                LargeInteger new_r = p.minus(quot.times(r));
+                LargeInteger new_s = q.minus(quot.times(s));
                 p = r;
                 q = s;
                 r = new_r;
@@ -893,7 +829,7 @@ public final class LargeInteger extends Number<LargeInteger> {
                 throw new ArithmeticException("GCD(" + this + ", " + m + ") = "
                         + a);
             if (a._isNegative)
-                return p.oppositeBasic().mod(m).export();
+                return p.opposite().mod(m).export();
             return p.mod(m).export();
         } finally {
             PoolContext.exit();
@@ -931,7 +867,7 @@ public final class LargeInteger extends Number<LargeInteger> {
                 PoolContext.exit();
             }
         } else if (exp.isNegative()) {
-            return this.modPow(exp.oppositeBasic(), m).modInverse(m);
+            return this.modPow(exp.opposite(), m).modInverse(m);
         } else { // exp == 0
             return ONE;
         }
@@ -953,8 +889,10 @@ public final class LargeInteger extends Number<LargeInteger> {
         while (!b.isZero()) {
             LargeInteger tmp = a.divide(b);
             LargeInteger c = tmp.getRemainder();
-            tmp.recycle();
-            a.recycle();
+            tmp.recycle(); // tmp is always a new object (safe to recycle).
+            if ((a != this) && (a != that) && // a is not a current input,
+                    (a != b) && (a != c)) // nor a persistent object,
+                a.recycle(); // it is then safe to recycle.
             a = b;
             b = c;
         }
@@ -966,8 +904,8 @@ public final class LargeInteger extends Number<LargeInteger> {
      * 
      * @return <code>|this|</code>.
      */
-    public LargeInteger norm() {
-        return (isPositive() || isZero()) ? this : this.oppositeBasic();
+    public LargeInteger abs() {
+        return (isPositive() || isZero()) ? this : this.opposite();
     }
 
     /**
@@ -1034,7 +972,7 @@ public final class LargeInteger extends Number<LargeInteger> {
                 }
                 return z;
             } else { // All bits have been shifted.
-                return _isNegative ? valueOf(-1) : valueOf(0);
+                return _isNegative ? valueOf(-1) : ZERO;
             }
         } else {
             return shiftLeft(-n);
@@ -1257,6 +1195,8 @@ public final class LargeInteger extends Number<LargeInteger> {
                     * MathLib.pow(TWO_POW63, _size - 2);
             return _isNegative ? -absValue : absValue;
         }
+        // TODO Javolution should provide utilities in MathLib
+        //      to perform sudh conversion efficiently (no Math.pow) 
     }
 
     private static final double TWO_POW63 = 9223372036854775808.0;
@@ -1304,24 +1244,6 @@ public final class LargeInteger extends Number<LargeInteger> {
     }
 
     /**
-     * Returns the modular inverse of this large integer.
-     *
-     * @return a large integer such as  
-     *         <code>this.times(this.reciprocal()) modulo m = ONE</code> 
-     *         m being the local modulus.
-     * @throws ArithmeticException if the modulus is not set or the 
-     *         modular inverse does not exist (that is, this large integer
-     *         is not <i>relatively prime</i> to the current modulus).
-     * @see #getModulus
-     */
-    public LargeInteger reciprocal() {
-        LargeInteger modulus = MODULUS.get();
-        if (modulus == null)
-            throw new ArithmeticException("Modulus not set");
-        return modInverse(modulus);
-    }
-
-    /**
      * Returns the integer square root of this integer.
      * 
      * @return <code>k<code> such as <code>k^2 <= this < (k + 1)^2</code>
@@ -1334,7 +1256,7 @@ public final class LargeInteger extends Number<LargeInteger> {
         // First approximation.
         LargeInteger k = this.shiftRight((bitLength >> 1) + (bitLength & 1));
         while (true) {
-            LargeInteger newK = (k.plusBasic(this.divide(k))).shiftRight(1);
+            LargeInteger newK = (k.plus(this.divide(k))).shiftRight(1);
             if (newK.equals(k))
                 return k;
             k = newK;
@@ -1529,116 +1451,28 @@ public final class LargeInteger extends Number<LargeInteger> {
         }
     }
 
-    // Modular arithmetic.
-    private static LargeInteger modulo(LargeInteger z) {
-        LargeInteger modulus = MODULUS.get();
-        return (modulus == null) ? z : z.mod(modulus);
-    }
-
-    /**
-     * Returns a new instance of mimimum size.
-     *
-     * @param  nbrWords the minimum length of the _words array.
-     * @return a new or recycled instance.
-     */
+    ///////////////////////
+    // Factory creation. //
+    ///////////////////////
+    
     private static LargeInteger newInstance(int nbrWords) {
-        if (nbrWords <= 1 << 3) {
-            return FACTORY_3.object();
-        } else if (nbrWords <= 1 << 6) {
-            return FACTORY_6.object();
-        } else if (nbrWords <= 1 << 9) {
-            return FACTORY_9.object();
-        } else if (nbrWords <= 1 << 12) {
-            return FACTORY_12.object();
-        } else if (nbrWords <= 1 << 15) {
-            return FACTORY_15.object();
-        } else if (nbrWords <= 1 << 18) {
-            return FACTORY_18.object();
-        } else if (nbrWords <= 1 << 21) {
-            return FACTORY_21.object();
-        } else if (nbrWords <= 1 << 24) {
-            return FACTORY_24.object();
-        } else if (nbrWords <= 1 << 27) {
-            return FACTORY_27.object();
-        } else if (nbrWords <= 1 << 30) {
-            return FACTORY_30.object();
+        LargeInteger z = FACTORY.object();
+        if ((z._words == null) || (z._words.length < nbrWords)) {
+            z._words = new long[nbrWords + 4]; 
         }
-        throw new UnsupportedOperationException("Integer too large");
+        return z;
+    }
+    
+    // TODO Use different factories for very large integers.
+    private static final Factory<LargeInteger> FACTORY = new Factory<LargeInteger>() {
+        protected LargeInteger create() {
+            return new LargeInteger();
+        }
+    };
+    
+    private LargeInteger() {
     }
 
-    private static final Factory<LargeInteger> FACTORY_3 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 3);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_6 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 6);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_9 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 9);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_12 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 12);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_15 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 15);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_18 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 18);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_21 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 21);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_24 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 24);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_27 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 27);
-        }
-    };
-
-    private static final Factory<LargeInteger> FACTORY_30 = new Factory<LargeInteger>() {
-        protected LargeInteger create() {
-            return new LargeInteger(1 << 30);
-        }
-    };
-
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * @deprecated Users should use {@link #divide(LargeInteger)} then 
-     * {@link #getRemainder()} on the division result to get the remainder.
-     * This function is provided only to facilitate the transition from 
-     * <code>BigInteger</code> to {@link LargeInteger}.
-     */
-    public LargeInteger[] divideAndRemainder(LargeInteger that) {
-        LargeInteger[] result = new LargeInteger[2];
-        result[0] = this.divide(that);
-        result[1] = result[0].getRemainder();
-        return result;
-    }
+    private static final long serialVersionUID = 8312831557338659864L;
 
 }

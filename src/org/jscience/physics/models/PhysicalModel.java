@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,53 +8,52 @@
  */
 package org.jscience.physics.models;
 
-import javolution.realtime.LocalReference;
+import javax.units.Unit;
 
-import org.jscience.physics.quantities.Constants;
+import org.jscience.physics.measures.Measure;
 
 /**
  * <p> This abstract class represents a physical model. Instances of this
  *     class determinate the dimensional units of the seven base quantities:
- *     {@link org.jscience.physics.quantities.Length Length}, 
- *     {@link org.jscience.physics.quantities.Mass Mass}, 
- *     {@link org.jscience.physics.quantities.Duration Duration},
- *     {@link org.jscience.physics.quantities.ElectricCurrent ElectricCurrent},
- *     {@link org.jscience.physics.quantities.Temperature Temperature} (thermodynamic),
- *     {@link org.jscience.physics.quantities.AmountOfSubstance AmountOfSubstance} and
- *     {@link org.jscience.physics.quantities.LuminousIntensity LuminousIntensity}.</p>
+ *     {@link javax.quantities.Length Length}, 
+ *     {@link javax.quantities.Mass Mass}, 
+ *     {@link javax.quantities.Duration Duration},
+ *     {@link javax.quantities.ElectricCurrent ElectricCurrent},
+ *     {@link javax.quantities.Temperature Temperature} (thermodynamic),
+ *     {@link javax.quantities.AmountOfSubstance AmountOfSubstance} and
+ *     {@link javax.quantities.LuminousIntensity LuminousIntensity}.</p>
+ *     
  * <p> To select a model, one needs only to call the model <code>select</code>
- *     static method. For example:<pre>
+ *     static method. For example:[code]
  *          RelativisticModel.select();
- *     </pre>
- *     Selecting a predefined model automatically sets the dimension of 
- *     the {@link org.jscience.physics.units.BaseUnit base units}.</p>
+ *     [/code]</p>
+ *     
+ * <p> Selecting a predefined model automatically sets the dimension of 
+ *     the {@link javax.units.BaseUnit base units} and the default display
+ *     units for {@link Measure measurements}.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 3.0, February 13, 2006
  */
 public abstract class PhysicalModel {
 
-    /**
-     * Holds the context key to the current model.
-     */
-    static final LocalReference<PhysicalModel> CURRENT
-        = new LocalReference<PhysicalModel>(StandardModel.INSTANCE);
-
-    /**
-     * Holds fundamental constants (package private).
-     */
-    final static double ePlus = Constants.ePlus.doubleValue();
-
-    final static double hBar = Constants.hBar.doubleValue();
-
-    final static double c = Constants.c.doubleValue();
-
-    final static double k = Constants.k.doubleValue();
-
-    final static double µ0 = Constants.µ0.doubleValue();
-
-    final static double G = Constants.G.doubleValue();
-
+//    /**
+//     * Holds fundamental constants (package private).
+//     */
+//    final static double ePlus = Constants.ePlus.doubleValue();
+//
+//    final static double hBar = Constants.hBar.doubleValue();
+//
+//    final static double c = Constants.c.doubleValue();
+//
+//    final static double k = Constants.k.doubleValue();
+//
+//    final static double µ0 = Constants.µ0.doubleValue();
+//
+//    final static double G = Constants.G.doubleValue();
+//
+    
+    private static PhysicalModel Current = StandardModel.INSTANCE;
     /**
      * Default constructor (allows for derivation).
      */
@@ -63,14 +62,12 @@ public abstract class PhysicalModel {
 
     /**
      * Returns the current physical model (default: instance of 
-     * {@link org.jscience.physics.models.StandardModel StandardModel}).
-     * The current model specifies the default output units of physical
-     * quantities.
+     * {@link StandardModel}).
      *
      * @return the context-local physical model.
      */
     public static final PhysicalModel current() {
-        return CURRENT.get(); // Default standard.
+        return PhysicalModel.Current;
     }
 
     /**
@@ -81,21 +78,33 @@ public abstract class PhysicalModel {
      * @see    #current
      */
     protected static final void setCurrent(PhysicalModel model) {
-        CURRENT.set(model);
+        PhysicalModel.Current = model;
+    }
+
+    /**
+     * Returns the preferred display unit for the specified measurement
+     * (default <code>measure.getUnit()</code>).
+     * 
+     * @param measure the measurement for which the display unit is returned.
+     * @return  the model preferred unit for the specified measurement. 
+     * @see  javax.units.Dimension
+     */
+    public Unit getDisplayUnitFor(Measure measure) {
+        return measure.getUnit();
     }
 
     /**
      * Sets the dimensional units of the seven base quantities:
-     * {@link org.jscience.physics.quantities.Length Length}, 
-     * {@link org.jscience.physics.quantities.Mass Mass}, 
-     * {@link org.jscience.physics.quantities.Duration Duration},
-     * {@link org.jscience.physics.quantities.ElectricCurrent ElectricCurrent},
-     * {@link org.jscience.physics.quantities.Temperature Temperature} (thermodynamic),
-     * {@link org.jscience.physics.quantities.AmountOfSubstance AmountOfSubstance} and
-     * {@link org.jscience.physics.quantities.LuminousIntensity LuminousIntensity}. 
+     *     {@link javax.quantities.Length Length}, 
+     *     {@link javax.quantities.Mass Mass}, 
+     *     {@link javax.quantities.Duration Duration},
+     *     {@link javax.quantities.ElectricCurrent ElectricCurrent},
+     *     {@link javax.quantities.Temperature Temperature} (thermodynamic),
+     *     {@link javax.quantities.AmountOfSubstance AmountOfSubstance} and
+     *     {@link javax.quantities.LuminousIntensity LuminousIntensity}.</p>
      *
-     * @see     org.jscience.physics.units.BaseUnit#setDimension
+     * @see  javax.units.Dimension
      */
-    protected abstract void setPhysicalDimensions();
+    protected abstract void setDimensions();
 
 }

@@ -1,0 +1,83 @@
+<body>
+<p> Provides support for programatic unit handling.</p>
+<h3> Standart/NonStandard Units</h3>
+     Standard units and prefixes are provided by the 
+     {@link javax.units.SI SI} class (Système International d'Unités) and
+     about 50 non-standard units are available through the 
+     {@link javax.units.NonSI NonSI} class.
+
+<h3>Usage examples:</h3>
+[code]    
+import javax.units.*;
+import javax.quantities.*;
+import static javax.units.SI.*;
+import static javax.units.NonSI.*;
+import static javax.units.Dimension.*;
+...
+
+    // Conversion between units.
+    System.out.println(KILO(METER).getConverterTo(MILE).convert(10));
+
+    > 6.2137119223733395
+        
+    // Formating.    
+    System.out.println(VOLT.times(AMPERE));
+        
+    > V·A
+        
+    // Retrieval of base units.    
+    System.out.println(VOLT.times(AMPERE).getBaseUnits());
+        
+    > m²·kg/s³
+        
+    // Dimension checking.    
+    System.out.println(WATT.isCompatible(Unit.valueOf("V·A")));
+        
+    > true
+
+    // Retrieval of unit dimension.
+    System.out.println(WATT.getDimension());
+        
+    > [L]²·[M]/[T]³
+                
+    // Sets relativistic model.
+    LENGTH.setEquivalentTo(TIME, new MultiplyConverter(1 / 299792458.0)); // 1 / c
+  
+    // Retrieves the new relativistic dimension.
+    System.out.println(WATT.getDimension());
+        
+    > [M]/[T]
+        
+    // Lenth and time are now convertible.
+    System.out.println(INCH.getConverterTo(MICRO(SECOND)).convert(1.0));
+        
+    > 8.472528018033061E-5
+
+    // Energy is now compatible with mass (E = mc²)
+    System.out.println(GIGA(ELECTRON_VOLT).getConverterTo(KILOGRAM).convert(12.0));
+    
+    > 2.1391940763025056E-26
+    [/code]
+
+        
+<h3>Unit Parameterization</h3>
+
+    Units are parameterized (&lt;Q extends {@link javax.quantities.Quantity Quantity}>) to
+    enforce compile-time checks of units/quantities consistency, for example:[code]
+
+    Unit<Duration> MINUTE = SECONDS.times(60); // Ok.
+    Unit<Duration> MINUTE = METER.times(60); // Compile error.
+    
+    Unit<Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
+    Unit<Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
+    
+    Quantity<Duration> duration = new Scalar<Duration>(2, MINUTE); // Ok.
+    Quantity<Duration> duration = new Scalar<Duration>(2, CELSIUS); // Compile error.
+    
+    long milliseconds = duration.longValue(MILLI(SECOND)); // Ok.
+    long milliseconds = duration.longValue(POUND); // Compile error.
+    [/code]</p>
+   
+<h3>UML Diagram</h3>
+        <IMG alt="UML Diagram" src="doc-files/units.gif">
+</body>

@@ -1,0 +1,90 @@
+<body>
+<p> Provides support for exact or arbitrary precision measurements.</p>
+
+<h4>Measures as {@link javax.quantities quantities}:</h4>
+
+The {@link org.jscience.physics.measures.Measure Measure}
+       base class is parameterized with the quantity onto which the measure applies 
+ (<code>Measure&lt;Q extends Quantity&gt;). If the quantity is not known then
+  &lt;?&gt; can be used. For example:[code]
+    Measure<?> carMileage = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US));
+    Measure<?> gazPrice   = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+[/code]
+
+If the expected quantity result for a measure is known but has been lost
+due to the  calculations performed; better than using &lt;?&gt;, the measure can
+be stated in a known unit for this quantity. It ensures dynamic check of
+the measure dimension/unit and avoid compiler warnings. For example:[code]
+    // No problem here as the measure type is infered from the unit.
+    Measure<Length> tripDistance = Measure.valueOf(400, KILO(SI.METER));
+
+    // Warning as the measure type is lost during calculation.
+    Measure<Money> tripCost = tripDistance.divide(carMileage).times(gazPrice);
+
+    // Better: Dimension check and no warning (USD is a Currency (Unit<Money>))
+    Measure<Money> tripCost = tripDistance.divide(carMileage).times(gazPrice).to(USD);
+[/code]
+It should be noted that this conversion is immediate if the specified 
+unit is the actual unit for the measure (which is then returned unchanged).
+
+<h4> Error calculations:</h4>
+
+ Measures take into account measurement and calculation errors. For example:[code]
+    import static org.jscience.physics.units.SI.*;
+    ...
+    Measure<Length> x = Measure.valueOf(1.0, METER);
+    Measure<Velocity> v = Measure.valueOf(0.01, METER_PER_SECOND);
+    Measure<Duration> t = Measure.valueOf(1.0, MICRO(SECOND));
+    for (int i = 0; i < 10000000; i++) {
+        x = x.plus(v.times(t));
+    }
+    MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
+    System.out.println(x);
+
+    > 1.10000000 m
+    The exact value is guaranteed to be in the range: ]1.09999999 m, 1.10000001 m[
+        
+    The same calculation using primitive double type would have display:
+    > 1.099999999392253
+    with no idea on the accuracy of the result.[/code]
+        
+    
+<h4> Dimension checking.</h4>
+
+The  {@link org.jscience.physics.measures.Measure Measure}
+class is parameterized with the quantity onto which the measure applies 
+(<code>Measure&lt;Q extends Quantity&gt;). If the quantity is not known then
+      &lt;?&gt; can be used. For example:[code]
+       Measure<?> carMileage = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US));
+       Measure<?> gazPrice   = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+     [/code]
+     
+The unit of a measure determinates its type.
+For example, <code>Measure.valueOf("1 µm")</code> and <code>Measure.valueOf("1.2 ft")</code>
+are <code>Length</code> measures (both <code>"µm"</code> and <code>"ft"</code> units
+are derived from <code>SI.METER</code>).  Multiple physical models are supported (e.g. <code>Standard</code>,
+<code>Relativistic</code>, <code>High-Energy</code>, <code>Quantum</code>
+and <code>Natural</code>). The current model defines the conversions being allowed.
+For example:[code]
+        Measure<Length> x = Length.valueOf(100, NonSI.INCH);
+        LocalContext.enter();
+        try {
+            RelativisticModel.select(); // Selects the relativistic model.
+            x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
+            System.out.println(x); 
+            Measure<Mass> m = Quantity.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
+            System.out.println(m); 
+        } finally {
+           LocalContext.exit();
+        }
+        
+        > (692.06265340000008 ± 5.1E-13) m
+        > (2.1391940763025056E-26 ± 4.3E-42) kg[/code]</p>
+
+<h4> Physical Constants</h4>
+
+This package provides the latest physical {@link org.jscience.physics.measures.Constants constants} measurements
+with the best known accuracy (the more accurate the constant, the higher the precision of the calculations
+making use of these constants). 
+        
+</body>

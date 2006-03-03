@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -11,19 +11,19 @@ package org.jscience.mathematics.functions;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.jscience.mathematics.structures.Ring;
+
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 import javolution.realtime.RealtimeObject;
 import javolution.util.FastSet;
 
-import org.jscience.mathematics.matrices.Operable;
-
 /**
  * This class represents the term of a {@link Polynomial polynomial} 
  * such as <code>x·y²</code>. 
  * 
- * @see <a href="http://mathworld.wolfram.com/Term.html">
- *      Term -- from MathWorld</a> 
+ * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
+ * @version 3.0, February 13, 2006
  */
 public final class Term extends RealtimeObject implements Comparable<Term>,
         Serializable {
@@ -128,7 +128,7 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
                 result._power = left._power + right._power;
                 result._next = multiply(left._next, right._next);
                 return result;
-            } else if (left._variable.compareTo(right._variable) > 0) {
+            } else if (left._variable.getSymbol().compareTo(right._variable.getSymbol()) > 0) {
                 return multiply(right, left); //Swaps.
             } else {
                 Term result = (Term) TERM_FACTORY.object();
@@ -181,7 +181,7 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
                     throw new UnsupportedOperationException("Cannot divide "
                             + left + " by " + right);
                 }
-            } else if (left._variable.compareTo(right._variable) < 0) {
+            } else if (left._variable.getSymbol().compareTo(right._variable.getSymbol()) < 0) {
                 Term result = (Term) TERM_FACTORY.object();
                 result._variable = left._variable;
                 result._power = left._power;
@@ -202,14 +202,14 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
      *         term.
      * @throws FunctionException if any of this term's variable is not set.
      */
-    public Operable evaluate() {
+    public Ring evaluate() {
         if (this == CONSTANT) {
             return null;
         } else {
-            Operable value = _variable.get();
+            Ring<Ring> value = (Ring) _variable.get();
             if (value != null) {
-                Operable pow2 = value;
-                Operable result = null;
+                Ring<Ring> pow2 = value;
+                Ring<Ring> result = null;
                 int n = _power;
                 while (n >= 1) { // Iteration.
                     if ((n & 1) == 1) {
@@ -305,7 +305,7 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
                     return this._power - that._power;
                 }
             } else { // Different variables.
-                return this._variable.compareTo(that._variable);
+                return this._variable.getSymbol().compareTo(that._variable.getSymbol());
             }
         }
     }

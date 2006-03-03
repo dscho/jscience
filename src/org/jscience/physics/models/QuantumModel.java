@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,12 +8,11 @@
  */
 package org.jscience.physics.models;
 
-
 /**
  * This class represents the quantum model.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 3.0, February 13, 2006
  */
 public final class QuantumModel extends PhysicalModel {
 
@@ -26,25 +25,11 @@ public final class QuantumModel extends PhysicalModel {
      * Selects the quantum model as the current model.
      */
     public static void select() {
-        INSTANCE.setPhysicalDimensions();
+        INSTANCE.setDimensions();
         PhysicalModel.setCurrent(INSTANCE);
     }
 
-    /**
-     * Sets the dimensional units of the seven base quantities as follow:
-     * <ul>
-     * <li>{@link org.jscience.physics.quantities.Length Length} : <code>"1/GeV"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Mass Mass} : <code>"GeV"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Duration Duration} : <code>"1/GeV"</code></li>
-     * <li>{@link org.jscience.physics.quantities.ElectricCurrent ElectricCurrent} : <code>"GeV"</code></li>
-     * <li>{@link org.jscience.physics.quantities.Temperature Temperature} : <code>"GeV"</code></li>
-     * <li>{@link org.jscience.physics.quantities.AmountOfSubstance AmountOfSubstance} : <code>"mol"</code></li>
-     * <li>{@link org.jscience.physics.quantities.LuminousIntensity LuminousIntensity} : <code>"cd"</code></li>
-     * </ul>
-     *
-     * @see     org.jscience.physics.units.BaseUnit#setDimension
-     */
-    protected final void setPhysicalDimensions() {
+    protected void setDimensions() {
         throw new UnsupportedOperationException("Not implemented");
 
         // ENERGY = m²·kg/s² = kg·c²

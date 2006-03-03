@@ -1,5 +1,7 @@
 <body>
-<p> Provides common types of {@link org.jscience.mathematics.matrices.Operable operable} numbers.</p>
+<p> Provides common types of numbers most of them implementing the 
+    {@link org.jscience.mathematics.structures.Field field} interface.</p>
+    
 <p> Although numbers defined in this package are not as fast as primitives types
     (e.g. <code>int</code> or <code>double</code>). They have many
     advantages (such as arbitrary size for {@link org.jscience.mathematics.numbers.LargeInteger LargeInteger}
@@ -30,7 +32,7 @@
     Real two = Real.valueOf(2, 100); // 2.0000..00 (100 zeros after decimal point).
     Real sqrt2 = two.sqrt();
     System.out.println("sqrt(2)   = " + sqrt2);
-    System.out.println("Precision = " + sqrt2.precision() + " digits.");
+    System.out.println("Precision = " + sqrt2.getPrecision() + " digits.");
     
     > sqrt(2)   = 1.414213562373095048801688724209698078569671875376948
     > Precision = 53 digits.</pre></p>

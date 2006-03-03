@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -10,57 +10,33 @@ package org.jscience.mathematics.functions;
 
 import java.io.Serializable;
 import java.util.SortedMap;
-import org.jscience.mathematics.matrices.Operable;
+
+import javolution.lang.Immutable;
+
+import org.jscience.mathematics.structures.Field;
 
 /**
- * <p> This class represents an estimator of the values at a certain point using
- *     surrounding points and values.
- * </p>
+ * <p> This interface represents an estimator of the values at a certain point 
+ *     using surrounding points and values. Interpolators are typically used 
+ *     with {@link DiscreteFunction discrete functions}.</p>
  * 
+ * <p> As a convenience {@link Interpolator.Linear linear} interpolator class
+ *     for point-values of the same {@link Field field} is provided.</p>
+ *     
+ * <p> Custom interpolators can be used between Java objects of different kind.
+ *     For example:[code]
+ *     // Creates a linear interpolator between the java.util.Date and Measure<Mass> types.
+ *     dateMassLinear = new Interpolator<Date, Measure<Mass>>() { ... }
+ *
+ *     // Weight as a function of time. 
+ *     DiscreteFunction<Date, Measure<Mass>> dateToWeight 
+ *         = new DiscreteFunction<Date, Measure<Mass>>(samples, dateMassLinear, Variable.T);
+ *     [/code]</p>
+ *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </a>
- * @version 1.0, January 24, 2004
+ * @version 3.0, February 13, 2006
  */
-public abstract class Interpolator<P, O extends Operable<O>> implements Serializable {
-
-    /**
-     * Default constructor.
-     */
-    protected Interpolator() {
-    }
-
-    /**
-     * Holds a simple linear interpolator upon
-     * {@link org.jscience.mathematics.matrices.Operable Operable}
-     * points and values.
-     */
-    public final static Interpolator LINEAR = new Interpolator() {
-
-		// Implements Interpolator.
-        public Operable interpolate(Object point, SortedMap pointValues) {
-            
-            // Searches exact.
-            Operable y = (Operable) pointValues.get(point);
-            if (y != null)
-                return y;
-
-            // Searches surrounding points/values.
-            SortedMap<Operable, Operable> headMap = pointValues.headMap(point);
-            Operable x1 = headMap.lastKey();
-            Operable y1 = headMap.get(x1);
-            SortedMap<Operable, Operable> tailMap = pointValues.tailMap(point);
-            Operable x2 = tailMap.firstKey();
-            Operable y2 = tailMap.get(x2);
-
-            // Interpolates.
-            final Operable x = (Operable) point;
-            Operable deltaInv = x2.plus(x1.opposite()).reciprocal();
-            Operable k1 = ((Operable)x2.plus(x.opposite())).times(deltaInv);
-            Operable k2 = ((Operable)x.plus(x1.opposite())).times(deltaInv);
-            return (((Operable)y1.times(k1))).plus(y2.times(k2));
-        }
-
-        private static final long serialVersionUID = 1L;
-    };
+public interface Interpolator<P, V> extends Immutable, Serializable {
 
     /**
      * Estimates the value at the specified point.
@@ -69,5 +45,41 @@ public abstract class Interpolator<P, O extends Operable<O>> implements Serializ
      * @param pointValues the point-value entries.
      * @return the estimated value at the specified point.
      */
-    public abstract O interpolate(P point, SortedMap<P, O> pointValues);
+    V interpolate(P point, SortedMap<P, V> pointValues);
+    
+    
+    /**
+     * <p> This class represents a linear interpolator for {@link Field field}
+     *     instances (point and values from the same field).</p>
+     * 
+     * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </a>
+     * @version 3.0, February 13, 2006
+     */
+    public static class Linear<F extends Field<F>> implements Interpolator<F, F> {
+
+        public F interpolate(F point, SortedMap<F, F> pointValues) {
+            // Searches exact.
+            F y = pointValues.get(point);
+            if (y != null)
+                return y;
+
+            // Searches surrounding points/values.
+            SortedMap<F, F> headMap = pointValues.headMap(point);
+            F x1 = headMap.lastKey();
+            F y1 = headMap.get(x1);
+            SortedMap<F, F> tailMap = pointValues.tailMap(point);
+            F x2 = tailMap.firstKey();
+            F y2 = tailMap.get(x2);
+
+            // Interpolates.
+            final F x = point;
+            F deltaInv = (x2.plus(x1.opposite())).inverse();
+            F k1 = (x2.plus(x.opposite())).times(deltaInv);
+            F k2 = (x.plus(x1.opposite())).times(deltaInv);
+            return ((y1.times(k1))).plus(y2.times(k2));
+        }        
+
+        private static final long serialVersionUID = 4043178066620269565L;
+    }
+
 }

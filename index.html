@@ -127,45 +127,47 @@
          <TR>
          <TD CLASS="lineheight1 style5">
          <UL>
-            <LI>A 
-            <A
-             HREF="api/org/jscience/mathematics/matrices/package-summary.html">
-            linear algebra</A> module, which includes a first <I>(and I
-            believe unique) </I>  
-            <A HREF="api/org/jscience/mathematics/matrices/Matrix.html">matrix</A>
+            <LI> <A HREF="api/javax/units/package-summary.html#package_description">Units</A> and 
+             <A HREF="api/javax/quantities/package-summary.html#package_description">quantities</A>    
+            modules proposed as basis for the <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
+            reference implementation.</LI>
+            
+            <LI> A<A HREF="api/org/jscience/geography/coordinates/package-summary.html#package_description">
+            coordinates</A> module compliant with 
+            <a href="http://www.opengeospatial.org/">OGC</a>/<a href="http://www.isotc211.org/">ISO</a> 
+	        specifications for the development and deployment of geographic applications.</LI>
+
+            <LI>A rigourous mapping of mathematical 
+            <A HREF="api/org/jscience/mathematics/structures/package-summary.html#package_description">structures</A>
+            (e.g. <SPAN CLASS="style6">Group, Ring, Field, VectorSpace </SPAN>) to Java interfaces.</LI>
+            
+            <LI>A <A HREF="api/org/jscience/mathematics/vectors/package-summary.html#package_description">
+            linear algebra</A> module, which includes a first <I>(and I believe unique) </I>  
+            parameterized <A HREF="api/org/jscience/mathematics/vectors/Matrix.html">matrix</A>
             class capable of resolving linear system of equations involving
-            any kind of elements (e.g. <SPAN CLASS="style6">Real, Complex,
-            Quantity, Function, Vector</SPAN>, etc. ).</LI>
-            <LI>
-            <A
-             HREF="api/org/jscience/mathematics/functions/package-summary.html">Functions</A>
+            any kind of elements (e.g. <SPAN CLASS="style6">Complex, ModuloInteger, RationalFunctions</SPAN>)</LI>
+            
+            <LI> A <A HREF="api/org/jscience/mathematics/functions/package-summary.html#package_description">functions</A>
             module for symbolic calculations and analysis.</LI>
-            <LI>All different types of 
-            <A
-             HREF="api/org/jscience/mathematics/numbers/package-summary.html">numbers</A>
+            
+            <LI> Different types of  <A HREF="api/org/jscience/mathematics/numbers/package-summary.html#package_description">numbers</A>
             such as <A HREF="api/org/jscience/mathematics/numbers/Real.html">real</A>
             numbers of arbitrary and guaranteed precision, or the always
-            exact 
-            <A HREF="api/org/jscience/mathematics/numbers/Rational.html">rational</A>
+            exact <A HREF="api/org/jscience/mathematics/numbers/Rational.html">rational</A>
             numbers.</LI>
-            <LI>
-            <A HREF="api/org/jscience/physics/units/package-summary.html">Units</A>
-            module (e.g. SI units) developped in collaboration with the 
-            <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
-            experts group. </LI>
-            <LI>Strongly typed 
-            <A
-             HREF="api/org/jscience/physics/quantities/package-summary.html">quantities</A>
-            classes with dimension-checking done in the form of class-type
-            checking (e.g. the division of a <SPAN CLASS="style6">Length</SPAN>
-            by a <SPAN CLASS="style6">Duration</SPAN> returns a Velocity
-            instance).</LI>
-            <LI>Support for <SPAN CLASS="style6">Standard , Relativistic ,
+            
+            <LI> Support for exact or arbitrary precision 
+            <A HREF="api/org/jscience/physics/measures/package-summary.html#package_description">measurements</A>
+            (also strongly typed).</LI>
+
+            <LI> Support for <SPAN CLASS="style6">Standard , Relativistic ,
             High-Energy , Quantum and Natural </SPAN>physical 
-            <A HREF="api/org/jscience/physics/models/package-summary.html">models</A>.
+            <A HREF="api/org/jscience/physics/models/package-summary.html#package_description">models</A>.
             </LI>
-            <LI> Safe <A HREF="api/org/jscience/economics/money/package-summary.html">monetary</A>
-            calculations with currencies conversions.</LI>
+            
+            <LI> A <A HREF="api/org/jscience/economics/money/package-summary.html#package_description">monetary</A> module
+             for precision-guaranteed calculations and currencies conversions.</LI>
+             
          </UL></TD>
          </TR>
       </TABLE>
@@ -175,8 +177,8 @@
              CELLSPACING="0" CELLPADDING="8" WIDTH="86%">
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
-         <DIV ALIGN="center"><SPAN CLASS="style7"> <B>J</B>Science version
-            2.0.0 - October 11, 2005</SPAN></DIV></TD>
+         <DIV ALIGN="center"><SPAN CLASS="style7"><B>J</B>Science version
+            3.0.1 - March 3, 2006</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -187,10 +189,10 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-2.0.0-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-3.0.1-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-2.0.0-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-3.0.1-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
@@ -219,15 +221,22 @@
       <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
              WIDTH="85%">
          <TR>
+         
          <TD CLASS="lineheight1 style5">
-         <P><B>J</B>Science is <A HREF="http://javolution.org"><IMG
+       <P><IMG SRC="doc/img/new.gif"><A HREF="api/overview-summary.html#TUTORIAL">Tutorial and Code Examples</A></P>
+       <P><B>J</B>Science is <A HREF="http://javolution.org"><IMG
             HEIGHT="32" SRC="doc/img/javolution.png" WIDTH="144"></A> for: 
          </P>
          <UL>
-            <LI><B>High-Performance</B> (e.g. quantities objects almost as fast as primitive types) </LI>
-            <LI><B>Real-Time Behavior</B> (safety critical or control systems). </LI>
-            <LI><B>Low-Level Concurrency</B> on multi-processor systems.</LI>
-            <LI><B>Persistence</B> (XML object serialization). </LI>
+            <LI><B>Transparent Object Recycling</B> For example, our <A HREF="doc/benchmark.html">benchmark</A> 
+            indicates that adding immutable
+            <A HREF="api/org/jscience/mathematics/numbers/LargeInteger.html">LargeInteger</A> 
+            is up to <b>8-10x</b> faster than adding <code><b>java.math.BigInteger</b></code></LI>
+            <LI><B>Real-Time Behavior and Compliance</B> The library can safely be used with  
+            <A HREF="http://rtsj.org">RTSJ</A> VMs without resulting into memory clashes or illegal access exceptions.</LI>
+            <LI><B>Low-Level Concurrency</B> Most of our concurrent algorithms are able to
+            take advantage of multi-processors automatically.</LI>
+            <LI><B>Persistency</B> The fastest XML marshalling/unmarshalling around!</LI>
          </UL><B>J</B>Science binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
          </TR>
          <TR>
@@ -238,7 +247,7 @@
          <BR> java -jar jscience.jar test (performs self-tests) 
          <BR> java -jar jscience.jar perf (runs benchmark)</H4><I><A
             HREF="doc/benchmark.html">Here </A> are the benchmark results
-         on a Single-CPU Intel Pentium 5 2.20GHz running Windows 2000. </I> 
+         on a Single-CPU Intel Pentium 4 3.4GHz running Windows XP. </I> 
          </TD>
          </TR>
          <TR>
@@ -267,37 +276,32 @@
          </TR>
       </TABLE>
       
-<!-- Coming 2005 -->      
+<!-- Coming 2006 -->      
       <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
              WIDTH="85%">
          <TR>
          <TD CLASS="lineheight1 style5">
-         <P><B>J</B>Science on-line calculator with 
-         <A HREF="http://beanshell.org/">BeanShell </A></P>
-
-         <P>Additional core modules for 2005: </P>
+         <P>Additional core modules for 2006: </P>
          <UL>
+            <LI>org.jscience.mathematics.transforms (FFT) </LI>
             <LI>org.jscience.physics.nuclear </LI>
             <LI>org.jscience.mathematics.integration </LI>
-            <LI>org.jscience.mathematics.transforms (FFT) </LI>
             <LI>org.jscience.computing.geneticAlgorithms </LI>
             <LI>org.jscience.cognitive.neural-networks </LI>
             <LI>org.jscience.statistics.randomizers </LI>
             <LI>org.jscience.astronomy.ephemeris </LI>
-            <LI>org.jscience.sociology.persons </LI>
             <LI>org.jscience.history.calendars </LI>
-            <LI>org.jscience.geography.coordinates (Lat/Long, UTM, GDC) </LI>
             <LI>org.jscience.chemistry.elements </LI>
             <LI>org.jscience.biology.molecules </LI>
             <LI>and more... </LI>
          </UL>
 
-         <P>Feel free to let us know if you are interested in
-         participating. There are very few rules: </P>
+         <P>Feel free to let us know if you are interested in developping 
+            new modules. There are very few rules: </P>
          <UL>
             <LI>Document well </LI>
-            <LI>Integrate with others modules (e.g. physical quantities,
-            math classes, etc..) </LI>
+            <LI>Integrate with others modules (e.g. physical measures, 
+            mathematics numbers, functions etc..) </LI>
             <LI>Respect module ownership (changes to others packages than
             yours must be approved). </LI>
          </UL>To participate: First register as "Observer" to 
@@ -334,8 +338,17 @@
          <TD>
          <UL>
             <LI CLASS="lineheight1 style5">
-            <A href="http://www.matheclipse.org">MathEclipse On-Line Calculator</A>
-            powered by <B>J</B>Science and <I><B>J</B>avolution</I></LI>
+            <A href="http://www.matheclipse.org"><IMG SRC="doc/img/calculator.png"></A>
+            MathEclipse On-Line Calculator powered by <B>J</B>Science</LI>
+            
+            <LI CLASS="lineheight1 style5">
+            <A href="http://geoapi.sourceforge.net/">GeoAPI</A>
+            Provides neutral, interface-only APIs derived from OGC/ISO Standards.</LI>
+
+            <LI CLASS="lineheight1 style5">
+            <A href="https://jscience.dev.java.net/files/documents/2263/10335/JSciencepackages.zip">JScience Experimental Packages</A>
+            and <A href="https://jscience.dev.java.net/files/documents/2263/22082/Datafilesonly.zip">Data Files</A>
+            maintained by <A HREF="mailto:silvere@digitalbiosphere.com">Silvère Martin-Michiellot</A>.</LI>
          </UL></TD>
          </TR>
       </TABLE>
@@ -363,7 +376,24 @@
          <TR>
          <TD>
          <UL>
-            <LI CLASS="lineheight1 style5"><B><I>October 11, 2005 : JScience 2.0</I></B><BR> 
+            <LI CLASS="lineheight1 style5"><B><I>March 2, 2006 : JScience 3.0</I></B><BR> 
+            Major upgrade of the library to leverage JDK 1.5 class paramaterization capabilities.<BR>
+            Rigourous mapping of mathematical structures (e.g. Group, Ring, Field, etc.)<BR>
+            A new measure module integrated with the units/quantities and the numbers modules
+            (replace <code>org.jscience.physics.quantities</code> classes).<BR>
+            Optimized implementation for vector/matrices of <code>double</code> type (VectorFloat64, MatrixFloat64).<BR>
+            Added new quantities for flow rate and viscosity [3.0.1] <BR> 
+            </LI>
+
+            <LI CLASS="lineheight1 style5"><B><I>January 22, 2006 : JSR-275 (v1.2) Prerelease</I></B><BR> 
+            Standalone quantities/units packages has been submitted to 
+            the JSR-275 for review. The new API can be browsed
+            <a href="http://jscience.org/jsr-275/api/">here</a>.<BR>
+            Standalone packages <a href="http://jscience.org/jsr-275/jsr-275-1.2.0-src.zip">source</a> and
+            <a href="http://jscience.org/jsr-275/jsr-275-1.2.0-bin.zip">binary</a> are also available.<BR> 
+            </LI>
+
+            <LI CLASS="lineheight1 style5"><B>October 11, 2005 : JScience 2.0</B><BR> 
             Official 2.0 release (all current issues fixed).<BR> 
             Javolution classes included into the JScience binary (.jar)<BR> 
             </LI>
@@ -395,7 +425,7 @@
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : October 11, 2005<BR>
+          Revision      : March 3, 2006<BR>
          </TD>
          </TR>
          <TR>

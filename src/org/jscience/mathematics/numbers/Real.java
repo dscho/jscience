@@ -1,12 +1,14 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
+
+import org.jscience.mathematics.structures.Field;
 
 import javolution.lang.MathLib;
 import javolution.lang.Text;
@@ -37,7 +39,7 @@ import javolution.xml.XmlFormat;
  * 
  * <p> Instances of this class can be utilized to find approximate 
  *     solutions to linear equations using the 
- *     {@link org.jscience.mathematics.matrices.Matrix Matrix} class for which
+ *     {@link org.jscience.mathematics.vectors.Matrix Matrix} class for which
  *     high-precision reals is often required, the primitive type
  *     <code>double</code> being not accurate enough to resolve equations 
  *     when the matrix's size exceeds 100x100. Furthermore, even for small 
@@ -45,9 +47,9 @@ import javolution.xml.XmlFormat;
  *     singularities.</p>
  *  
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2004
+ * @version 3.0, February 13, 2006
  */
-public final class Real extends Number<Real> {
+public final class Real extends Number<Real> implements Field<Real> {
 
     /**
      * Holds the default XML representation for real numbers.
@@ -150,24 +152,25 @@ public final class Real extends Number<Real> {
      *         a parsable real.
      */
     public static Real valueOf(CharSequence chars) throws NumberFormatException {
-        if ((chars.length() == 3) && (TypeFormat.indexOf("NaN", chars, 0) == 0)) {
+        Text txt = Text.valueOf(chars); // TODO Use TextFormat...
+        if ((txt.length() == 3) && (txt.indexOf("NaN", 0) == 0)) {
             return NaN;
         }
-        int exponentIndex = TypeFormat.indexOf("E", chars, 0);
+        int exponentIndex = txt.indexOf("E",  0);
         if (exponentIndex >= 0) {
-            Real r = valueOf(chars.subSequence(0, exponentIndex));
-            int exponent = TypeFormat.parseInt(chars.subSequence(
-                    exponentIndex + 1, chars.length()));
+            Real r = valueOf(txt.subtext(0, exponentIndex));
+            int exponent = TypeFormat.parseInt(txt.subtext(
+                    exponentIndex + 1, txt.length()));
             r._exponent += exponent;
             return r.scale();
         }
         Real real = FACTORY.object();
-        int errorIndex = TypeFormat.indexOf("±", chars, 0);
+        int errorIndex = txt.indexOf("±", 0);
         if (errorIndex >= 0) {
-            real._mantissa = LargeInteger.valueOf(chars.subSequence(0,
+            real._mantissa = LargeInteger.valueOf(txt.subtext(0,
                     errorIndex));
-            real._error = LargeInteger.valueOf(chars.subSequence(
-                    exponentIndex + 1, chars.length()));
+            real._error = LargeInteger.valueOf(txt.subtext(
+                    exponentIndex + 1, txt.length()));
             if (!real._error.isPositive()) {
                 throw new NumberFormatException(chars
                         + " not parsable (error must be greater than 0)");
@@ -175,14 +178,14 @@ public final class Real extends Number<Real> {
             real._exponent = 0;
             return real.scale();
         }
-        int decimalPointIndex = TypeFormat.indexOf(".", chars, 0);
+        int decimalPointIndex = txt.indexOf(".", 0);
         if (decimalPointIndex >= 0) {
-            LargeInteger integer = LargeInteger.valueOf(chars.subSequence(0,
+            LargeInteger integer = LargeInteger.valueOf(txt.subtext(0,
                     decimalPointIndex));
-            LargeInteger fraction = LargeInteger.valueOf(chars.subSequence(
-                    decimalPointIndex + 1, chars.length()));
+            LargeInteger fraction = LargeInteger.valueOf(txt.subtext(
+                    decimalPointIndex + 1, txt.length()));
             int fractionDigits = chars.length() - decimalPointIndex - 1;
-            real._mantissa = integer.E(fractionDigits).plusBasic(fraction);
+            real._mantissa = integer.E(fractionDigits).plus(fraction);
             real._error = LargeInteger.ONE;
             real._exponent = -fractionDigits;
             return real.scale();
@@ -193,6 +196,7 @@ public final class Real extends Number<Real> {
             return real.scale();
         }
     }
+    
 
     /**
      * Converts a <code>double</code> value to a real instance.
@@ -376,7 +380,7 @@ public final class Real extends Number<Real> {
      */
     public Real opposite() {
         Real real = FACTORY.object();
-        real._mantissa = _mantissa.oppositeBasic();
+        real._mantissa = _mantissa.opposite();
         real._exponent = _exponent;
         real._error = _error;
         return real;
@@ -394,8 +398,8 @@ public final class Real extends Number<Real> {
         } else if (this._exponent == that._exponent) {
             Real real = (Real) FACTORY.object();
             real._exponent = _exponent;
-            real._mantissa = this._mantissa.plusBasic(that._mantissa);
-            real._error = this._error.plusBasic(that._error).plusBasic(LargeInteger.ONE);
+            real._mantissa = this._mantissa.plus(that._mantissa);
+            real._error = this._error.plus(that._error).plus(LargeInteger.ONE);
             return real.scale();
         } else if (this._exponent > that._exponent) {
             return this.plus(that.scale(this._exponent));
@@ -417,8 +421,8 @@ public final class Real extends Number<Real> {
         } else if (this._exponent == that._exponent) {
             Real real = (Real) FACTORY.object();
             real._exponent = _exponent;
-            real._mantissa = this._mantissa.minusBasic(that._mantissa);
-            real._error = this._error.plusBasic(that._error).plusBasic(LargeInteger.ONE);
+            real._mantissa = this._mantissa.minus(that._mantissa);
+            real._error = this._error.plus(that._error).plus(LargeInteger.ONE);
             return real.scale();
         } else if (this._exponent > that._exponent) {
             return this.minus(that.scale(this._exponent));
@@ -440,8 +444,8 @@ public final class Real extends Number<Real> {
             return NaN;
         Real real = FACTORY.object();
         real._exponent = this._exponent;
-        real._mantissa = this._mantissa.timesBasic(multiplier);
-        real._error = this._error.timesBasic(multiplier);
+        real._mantissa = this._mantissa.times(multiplier);
+        real._error = this._error.times(multiplier);
         return real.scale();
     }
 
@@ -457,32 +461,32 @@ public final class Real extends Number<Real> {
                 || (exp > Integer.MAX_VALUE || (exp < Integer.MIN_VALUE))) {
             return NaN;
         }
-        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
-        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
-        LargeInteger thatMin = that._mantissa.minusBasic(that._error);
-        LargeInteger thatMax = that._mantissa.plusBasic(that._error);
+        LargeInteger thisMin = this._mantissa.minus(this._error);
+        LargeInteger thisMax = this._mantissa.plus(this._error);
+        LargeInteger thatMin = that._mantissa.minus(that._error);
+        LargeInteger thatMax = that._mantissa.plus(that._error);
         LargeInteger min, max;
-        if (thisMin.compareTo(thisMax.oppositeBasic()) > 0) {
-            if (thatMin.compareTo(thatMax.oppositeBasic()) > 0) {
-                min = thisMin.timesBasic(thatMin);
-                max = thisMax.timesBasic(thatMax);
+        if (thisMin.compareTo(thisMax.opposite()) > 0) {
+            if (thatMin.compareTo(thatMax.opposite()) > 0) {
+                min = thisMin.times(thatMin);
+                max = thisMax.times(thatMax);
             } else {
-                min = thisMax.timesBasic(thatMin);
-                max = thisMin.timesBasic(thatMax);
+                min = thisMax.times(thatMin);
+                max = thisMin.times(thatMax);
             }
         } else {
-            if (thatMin.compareTo(thatMax.oppositeBasic()) > 0) {
-                min = thisMin.timesBasic(thatMax);
-                max = thisMax.timesBasic(thatMin);
+            if (thatMin.compareTo(thatMax.opposite()) > 0) {
+                min = thisMin.times(thatMax);
+                max = thisMax.times(thatMin);
             } else {
-                min = thisMax.timesBasic(thatMax);
-                max = thisMin.timesBasic(thatMin);
+                min = thisMax.times(thatMax);
+                max = thisMin.times(thatMin);
             }
         }
         Real real = FACTORY.object();
         real._exponent = (int) exp;
-        real._mantissa = min.plusBasic(max).shiftRight(1);
-        real._error = max.minusBasic(min).plusBasic(LargeInteger.ONE);
+        real._mantissa = min.plus(max).shiftRight(1);
+        real._error = max.minus(min).plus(LargeInteger.ONE);
         return real.scale();
     }
     
@@ -497,8 +501,8 @@ public final class Real extends Number<Real> {
         if ((_error == null) || (divisor == 0)) return NaN;
         Real real = FACTORY.object();
         real._exponent = this._exponent - 18;
-        real._mantissa = this._mantissa.timesBasic(E18asLong).divide(divisor);
-        real._error = this._error.timesBasic(E18asLong).divide(divisor).plusBasic(LargeInteger.ONE);
+        real._mantissa = this._mantissa.times(E18asLong).divide(divisor);
+        real._error = this._error.times(E18asLong).divide(divisor).plus(LargeInteger.ONE);
         return real.scale();
     }
     private static long E18asLong = 1000000000000000000L;
@@ -511,7 +515,7 @@ public final class Real extends Number<Real> {
      * @throws ArithmeticException if <code>that.equals(ZERO)</code>
      */
     public Real divide(Real that) {
-        return this.times(that.reciprocal());
+        return this.times(that.inverse());
     }
 
     /**
@@ -519,12 +523,12 @@ public final class Real extends Number<Real> {
      *
      * @return <code>1 / this</code>.
      */
-    public final Real reciprocal() {
+    public Real inverse() {
         if (this._error == null) {
             return NaN;
         }
-        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
-        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
+        LargeInteger thisMin = this._mantissa.minus(this._error);
+        LargeInteger thisMax = this._mantissa.plus(this._error);
         if (thisMin.isNegative() && thisMax.isPositive()) { // Encompasses 0
             return NaN;
         }
@@ -540,8 +544,8 @@ public final class Real extends Number<Real> {
         LargeInteger max = div(2 * digits, thisMin);
         Real real = (Real) FACTORY.object();
         real._exponent = (int) exp;
-        real._mantissa = min.plusBasic(max).shiftRight(1);
-        real._error = max.minusBasic(min).plusBasic(LargeInteger.ONE);
+        real._mantissa = min.plus(max).shiftRight(1);
+        real._error = max.minus(min).plus(LargeInteger.ONE);
         return real.scale();
 
     }
@@ -553,19 +557,19 @@ public final class Real extends Number<Real> {
         return result.shiftRight(expBitLength + 1);
     }
     private static final double BITS_TO_DIGITS = MathLib.LOG2 / MathLib.LOG10;
-    private static final double DIGITS_TO_BITS = 1.0 / BITS_TO_DIGITS;
+    private static final double DIGITS_TO_BITS = MathLib.LOG10 / MathLib.LOG2;
 
     /**
-     * Returns the norm (or absolute value) of this real number.
+     * Returns the absolute value of this real number.
      * 
-     * @return <code>|this}</code>.
+     * @return <code>|this|</code>.
      */
-    public Real norm() {
+    public Real abs() {
         return _mantissa.isNegative() ? this.opposite() : this;
     }
 
     /**
-     * Compares the {@link #norm norm} of two real numbers.
+     * Compares the absolute value of two real numbers.
      *
      * @param that the real number to be compared with.
      * @return <code>|this| > |that|</code>
@@ -588,8 +592,8 @@ public final class Real extends Number<Real> {
      */
     public Real sqrt() {
         if (this._error == null) return NaN;
-        LargeInteger thisMin = this._mantissa.minusBasic(this._error);
-        LargeInteger thisMax = this._mantissa.plusBasic(this._error);
+        LargeInteger thisMin = this._mantissa.minus(this._error);
+        LargeInteger thisMax = this._mantissa.plus(this._error);
         if (thisMin.isNegative()) return NaN;
         int exponent = _exponent >> 1;
         if ((_exponent & 1) == 1) { // Odd exponent.
@@ -597,11 +601,11 @@ public final class Real extends Number<Real> {
             thisMax = thisMax.E(1);
         }
         LargeInteger minSqrt = thisMin.sqrt();
-        LargeInteger maxSqrt = thisMax.sqrt().plusBasic(LargeInteger.ONE);
-        LargeInteger sqrt = minSqrt.plusBasic(maxSqrt).shiftRight(1);
+        LargeInteger maxSqrt = thisMax.sqrt().plus(LargeInteger.ONE);
+        LargeInteger sqrt = minSqrt.plus(maxSqrt).shiftRight(1);
         Real z = FACTORY.object();
         z._mantissa = sqrt;
-        z._error = maxSqrt.minusBasic(sqrt);
+        z._error = maxSqrt.minus(sqrt);
         z._exponent = exponent;
         return z;
     }
@@ -614,8 +618,8 @@ public final class Real extends Number<Real> {
     public Text toText() {
         if (this.isNaN()) return Text.valueOf("NaN");
         int errorDigits = (int) (_error.bitLength() * BITS_TO_DIGITS + 1);
-        LargeInteger m = (_mantissa.isPositive()) ? _mantissa.plusBasic(FIVE
-                .E(errorDigits - 1)) : _mantissa.plusBasic(MINUS_FIVE
+        LargeInteger m = (_mantissa.isPositive()) ? _mantissa.plus(FIVE
+                .E(errorDigits - 1)) : _mantissa.plus(MINUS_FIVE
                 .E(errorDigits - 1));
         m = m.E(-errorDigits);
         int exp = _exponent + errorDigits;
@@ -679,7 +683,15 @@ public final class Real extends Number<Real> {
      *         to type <code>double</code>.
      */
     public double doubleValue() {
-        return _mantissa.doubleValue() * MathLib.pow(10, _exponent);
+        // Shift the mantissa to a 18+ digits integer (long compatible).
+        int nbrDigits = (int)(_mantissa.bitLength() * BITS_TO_DIGITS);
+        int digitShift = nbrDigits - 18;
+        long reducedMantissa = _mantissa.E(-digitShift).longValue();
+        int exponent = _exponent + digitShift;
+        return exponent < 0 ? reducedMantissa / Math.pow(10, -exponent)
+                : reducedMantissa * Math.pow(10, exponent);
+        // TODO Javolution should provide utilities in MathLib
+        //      to perform sudh conversion efficiently (no Math.pow) 
     }
 
     /**
@@ -723,7 +735,7 @@ public final class Real extends Number<Real> {
         int e = this._exponent - exponent;
         Real real = FACTORY.object();
         real._mantissa = this._mantissa.E(e);
-        real._error = this._error.E(e).plusBasic(LargeInteger.ONE);
+        real._error = this._error.E(e).plus(LargeInteger.ONE);
         real._exponent = exponent;
         return real;
     }

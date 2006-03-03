@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,20 +8,30 @@
  */
 package org.jscience.mathematics.numbers;
 
-import java.io.Serializable;
+import org.jscience.mathematics.structures.Ring;
+import javolution.lang.Immutable;
 import javolution.realtime.RealtimeObject;
 
 /**
  * <p> This class represents an immutable number.</p>
  * 
- * <p> Instances of this class are created using  
+ * <p> Instances of this class are typically created using real-time 
  *     {@link javolution.realtime.RealtimeObject.Factory factories}.</p>
  *
- * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2004
+ * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
+ * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Number">
+ *      Wikipedia: Number</a>
  */
-public abstract class Number<T extends Number<T>> extends RealtimeObject implements
-        Numeric<T>, Comparable<T>, Serializable {
+public abstract class Number<T extends Number<T>> extends RealtimeObject
+        implements Ring<T>, Comparable<T>, Immutable {
+
+    /**
+     * Compares the magnitude of this number with that number.
+     *
+     * @return <code>|this| > |that|</code>
+     */
+    public abstract boolean isLargerThan(T that);
 
     /**
      * Returns the value of this number as a <code>long</code>.
@@ -40,57 +50,17 @@ public abstract class Number<T extends Number<T>> extends RealtimeObject impleme
     public abstract double doubleValue();
 
     /**
-    * Compares this number with the specified number for order.  Returns a
-    * negative integer, zero, or a positive integer as this number is less
-    * than, equal to, or greater than the specified number. 
-    * Implementation must ensure that this method is consistent with equals 
-    * <code>(x.compareTo(y)==0) == (x.equals(y))</code>,  
-    * 
-    * @param that the number to be compared.
-    * @return a negative integer, zero, or a positive integer as this number
-    *        is less than, equal to, or greater than the specified number.
-    */
+     * Compares this number with the specified number for order.  Returns a
+     * negative integer, zero, or a positive integer as this number is less
+     * than, equal to, or greater than the specified number. 
+     * Implementation must ensure that this method is consistent with equals 
+     * <code>(x.compareTo(y)==0) == (x.equals(y))</code>,  
+     * 
+     * @param that the number to be compared.
+     * @return a negative integer, zero, or a positive integer as this number
+     *        is less than, equal to, or greater than the specified number.
+     */
     public abstract int compareTo(T that);
-
-    /**
-     * Returns the difference between this number and the one specified.
-     *
-     * @param  that the number to be subtracted.
-     * @return <code>this - that</code>.
-     */
-    public T minus(T that) {
-        return this.plus(that.opposite());
-    }
-
-    /**
-     * Returns this number divided by the one specified.
-     *
-     * @param  that the number divisor.
-     * @return <code>this / that</code>.
-     */
-    public T divide(T that) {
-        return this.times(that.reciprocal());
-    }
-
-    /**
-     * Returns the absolute value of this number (equivalent to  
-     * {@link Numeric#norm()}.
-     *
-     * @return <code>|this|</code>.
-     */
-    public T abs() {
-        return (T) this.norm();
-    }
-
-    /**
-     * Returns the inverse value of this number (equivalent to 
-     * {@link #reciprocal()}.
-     *
-     * @return <code>1 / this</code>.
-     */
-    public T inverse() {
-        return reciprocal();
-    }
 
     /**
      * Indicates if this number is ordered before that number
@@ -113,28 +83,37 @@ public abstract class Number<T extends Number<T>> extends RealtimeObject impleme
     }
 
     /**
-     * Returns this numeric raised at the specified exponent.
+     * Returns the difference between this number and the one specified.
      *
-     * @param  exp the exponent.
-     * @return <code>this<sup>exp</sup></code>
+     * @param  that the number to be subtracted.
+     * @return <code>this - that</code>.
      */
+    public T minus(T that) {
+        return this.plus(that.opposite());
+    }
+
+    /**
+     * Returns this number raised at the specified positive exponent.
+     *
+     * @param  exp the positive exponent.
+     * @return <code>this<sup>exp</sup></code>
+     * @throws IllegalArgumentException if <code>exp &lt;= 0</code> 
+     */
+    @SuppressWarnings("unchecked")
     public T pow(int exp) {
-        if (exp > 0) {
-            T pow2 = (T) this;
-            T result = null;
-            while (exp >= 1) { // Iteration.
-                if ((exp & 1) == 1) {
-                    result = (result == null) ? pow2 : result.times(pow2);
-                }
-                pow2 = pow2.times(pow2);
-                exp >>>= 1;
+        if (exp <= 0)
+            throw new IllegalArgumentException("exp: " + exp
+                    + " should be a positive number");
+        T pow2 = (T) this;
+        T result = null;
+        while (exp >= 1) { // Iteration.
+            if ((exp & 1) == 1) {
+                result = (result == null) ? pow2 : result.times(pow2);
             }
-            return result;
-        } else if (exp < 0) {
-            return this.pow(-exp).reciprocal();
-        } else { // exp == 0
-            return this.times(this.reciprocal()); // Identity.
+            pow2 = pow2.times(pow2);
+            exp >>>= 1;
         }
+        return result;
     }
 
     /**
@@ -167,7 +146,7 @@ public abstract class Number<T extends Number<T>> extends RealtimeObject impleme
      *          to type <code>int</code>.
      */
     public final int intValue() {
-        return (int)longValue();
+        return (int) longValue();
     }
 
     /**
@@ -178,7 +157,7 @@ public abstract class Number<T extends Number<T>> extends RealtimeObject impleme
      *          to type <code>float</code>.
      */
     public final float floatValue() {
-        return (float)doubleValue();
+        return (float) doubleValue();
     }
 
 }

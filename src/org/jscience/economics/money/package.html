@@ -1,40 +1,37 @@
 <body>
 <p> Provides support for monetary quantities and their currencies.</p>
-<p> For equality comparison between money quantities (regardless of their
-    currency), it is recommended to use the {@link org.jscience.physics.quantities.Quantity#approxEquals 
-    approxEquals} method. Two money are then equivalent when their error intervals overlap.</p>
-<p> Errors on money quantities are typically very small (numeric errors).
-    Nevertheless, applications may detect accuracy overflow at anytime 
-    (e.g. {@link org.jscience.physics.quantities.Quantity#getAbsoluteError() accuracy} > 0.5 cents).</p> 
+
 <p> Conversions between quantities stated in different currencies is possible
     if the exchange rates for the currencies have been set (otherwise
     <code>ConversionException</code> is thrown).
-<p> Monetary quantities support the dynamic changes of the currencies exchange
-    rates as illustrated in the following example:<pre>
-    import static org.jscience.economics.money.Currency.*;
-    import static org.jscience.physics.units.SI.*;
-    import static org.jscience.physics.units.NonSI.*;
     
-    ///////////////////////////////////////////////////////////////////////
-    // Calculates the cost of a car trip in Europe for an American tourist.
-    ///////////////////////////////////////////////////////////////////////
+<p> Monetary quantities support the dynamic changes of the currencies exchange
+    rates as illustrated in the following example:[code]
+    import static javax.units.SI.*;
+    import static javax.units.NonSI.*;
+    import static org.jscience.economics.money.Currency.*;
+    
+        ///////////////////////////////////////////////////////////////////////
+        // Calculates the cost of a car trip in Europe for an American tourist.
+        ///////////////////////////////////////////////////////////////////////
 
-    // Use currency symbols instead of ISO-4217 codes.
-    USD.label("$"); // Use "$" symbol instead of currency code ("USD")
-    EUR.label("€"); // Use "€" symbol instead of currency code ("EUR")
+        // Use currency symbols instead of ISO-4217 codes.
+        UnitFormat.getStandardInstance().label(USD, "$"); // Use "$" symbol instead of currency code ("USD")
+        UnitFormat.getStandardInstance().label(EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
 
-	// Calculates trip cost.
-	Quantity    carMileage   = Quantity.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
-	Quantity    gazPrice     = Quantity.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-	Length      tripDistance = Length.valueOf(400, KILO(SI.METER)); // 400 km
-	Money       tripCost     = (Money) tripDistance.divide(carMileage).times(gazPrice);
+        // Sets exchange rates.
+        Currency.setReferenceCurrency(USD);
+        EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
 
-	// Sets exchange rates.
-	Currency.setReferenceCurrency(USD);
-	EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
+        // Calculates trip cost.
+        Measure<?> carMileage        = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
+        Measure<?> gazPrice          = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+        Measure<Length> tripDistance = Measure.valueOf(400, KILO(SI.METER)); // 400 km
+        Measure<Money>  tripCost     = tripDistance.divide(carMileage).times(gazPrice).to(USD);
 
-	// Displays cost.
-	System.out.println("Trip cost = " + tripCost.to(USD) + " (" + tripCost.to(EUR) + ")");
+        // Displays cost.
+        System.out.println("Trip cost = " + tripCost + " (" + tripCost.to(EUR) + ")");
 
-    > Trip cost = 66.05 $ (56.45 €)</pre></p>
+    > Trip cost = 66.05 $ (56.45 €)
+   [/code]
 </body>

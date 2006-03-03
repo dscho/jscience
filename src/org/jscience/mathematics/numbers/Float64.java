@@ -1,12 +1,14 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.numbers;
+
+import org.jscience.mathematics.structures.Field;
 
 import javolution.lang.MathLib;
 import javolution.lang.Text;
@@ -16,11 +18,11 @@ import javolution.xml.XmlFormat;
 
 /**
  * <p> This class represents a 64 bits floating point number.</p>
- *
- * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2004
+ * 
+ * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
+ * @version 3.0, February 13, 2006
  */
-public final class Float64 extends Number<Float64> {
+public final class Float64 extends Number<Float64> implements Field<Float64> {
 
     /**
      * Holds the default XML representation for 64 bits floating point numbers.
@@ -51,12 +53,12 @@ public final class Float64 extends Number<Float64> {
     /**
      * The 64 bits floating point representing zero.
      */
-    public static final Float64 ZERO = valueOf(0.0).moveHeap();
+    public static final Float64 ZERO = new Float64(0.0);
 
     /**
      * The 64 bits floating point representing one.
      */
-    public static final Float64 ONE = valueOf(1.0).moveHeap();
+    public static final Float64 ONE = new Float64(1.0);
 
     /**
      * The associated double value.
@@ -67,6 +69,15 @@ public final class Float64 extends Number<Float64> {
      * Default constructor.
      */
     private Float64() {
+    }
+
+    /**
+     * Creates a 64 bits float having the specified <code>double</code> value.
+     *
+     * @param  doubleValue the <code>double</code> value for this number.
+     */
+    public Float64(double doubleValue) {
+        _value = doubleValue;
     }
 
     /**
@@ -153,7 +164,7 @@ public final class Float64 extends Number<Float64> {
      * Returns the product of this number with the one specified.
      *
      * @param  that the number multiplier.
-     * @return <code>this * that</code>.
+     * @return <code>this · that</code>.
      */
     public Float64 times(Float64 that) {
         Float64 r = FACTORY.object();
@@ -166,7 +177,7 @@ public final class Float64 extends Number<Float64> {
      *
      * @return <code>1 / this</code>.
      */
-    public Float64 reciprocal() {
+    public Float64 inverse() {
         Float64 r = FACTORY.object();
         r._value = 1.0 / this._value;
         return r;
@@ -184,8 +195,9 @@ public final class Float64 extends Number<Float64> {
         return r;
     }
 
+
     /**
-     * Compares the {@link #norm norm} of this number with that number.
+     * Compares the absolute value of this number with that number.
      *
      * @return <code>|this| > |that|</code>
      */
@@ -194,11 +206,11 @@ public final class Float64 extends Number<Float64> {
     }
 
     /**
-     * Returns the norm of this number.
+     * Returns the absolute value of this number.
      *
-     * @return <code>abs(this)</code>.
+     * @return <code>|this|</code>.
      */
-    public Float64 norm() {
+    public Float64 abs() {
         Float64 r = FACTORY.object();
         r._value = MathLib.abs(this._value);
         return r;
@@ -296,17 +308,17 @@ public final class Float64 extends Number<Float64> {
         return h ^ (h >>> 10);
     }
 
-    // Implements abstract method.
+    @Override
     public long longValue() {
         return (long) _value;
     }
 
-    // Implements abstract method.
+    @Override
     public double doubleValue() {
         return _value;
     }
 
-    // Implements Comparable.
+    @Override
     public int compareTo(Float64 that) {
         if (this._value < that._value) {
             return -1;
@@ -319,5 +331,5 @@ public final class Float64 extends Number<Float64> {
         }
     }
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -2031004185033550670L;
 }

@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,75 +8,54 @@
  */
 package org.jscience;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.math.BigInteger;
+import java.text.DateFormat;
 import java.util.Random;
 
-import javolution.realtime.PoolContext;
-import javolution.lang.TextBuilder;
-import javolution.xml.ObjectReader;
-import javolution.xml.ObjectWriter;
+import javax.quantities.*;
+import javax.units.*;
 
 import org.jscience.economics.money.Currency;
-import org.jscience.mathematics.matrices.Matrix;
+import org.jscience.economics.money.Money;
+import org.jscience.geography.coordinates.Altitude;
+import org.jscience.geography.coordinates.CompoundCoordinates;
+import org.jscience.geography.coordinates.Coordinates;
+import org.jscience.geography.coordinates.LatLong;
+import org.jscience.geography.coordinates.Time;
+import org.jscience.geography.coordinates.UTM;
+import org.jscience.geography.coordinates.XYZ;
+import org.jscience.geography.coordinates.crs.CoordinatesConverter;
+import org.jscience.geography.coordinates.crs.ProjectedCRS;
+import org.jscience.mathematics.functions.Polynomial;
+import org.jscience.mathematics.functions.Variable;
 import org.jscience.mathematics.numbers.Complex;
 import org.jscience.mathematics.numbers.Float64;
 import org.jscience.mathematics.numbers.LargeInteger;
-import org.jscience.physics.quantities.Acceleration;
-import org.jscience.physics.quantities.AmountOfSubstance;
-import org.jscience.physics.quantities.Angle;
-import org.jscience.physics.quantities.AngularAcceleration;
-import org.jscience.physics.quantities.AngularVelocity;
-import org.jscience.physics.quantities.Area;
-import org.jscience.physics.quantities.CatalyticActivity;
-import org.jscience.physics.quantities.DataAmount;
-import org.jscience.physics.quantities.DataRate;
-import org.jscience.physics.quantities.Duration;
-import org.jscience.physics.quantities.ElectricCapacitance;
-import org.jscience.physics.quantities.ElectricCharge;
-import org.jscience.physics.quantities.ElectricConductance;
-import org.jscience.physics.quantities.ElectricCurrent;
-import org.jscience.physics.quantities.ElectricInductance;
-import org.jscience.physics.quantities.ElectricPotential;
-import org.jscience.physics.quantities.ElectricResistance;
-import org.jscience.physics.quantities.Energy;
-import org.jscience.physics.quantities.Force;
-import org.jscience.physics.quantities.Frequency;
-import org.jscience.physics.quantities.Illuminance;
-import org.jscience.physics.quantities.Length;
-import org.jscience.physics.quantities.LuminousFlux;
-import org.jscience.physics.quantities.LuminousIntensity;
-import org.jscience.physics.quantities.MagneticFlux;
-import org.jscience.physics.quantities.MagneticFluxDensity;
-import org.jscience.physics.quantities.Mass;
-import org.jscience.physics.quantities.Power;
-import org.jscience.physics.quantities.Pressure;
-import org.jscience.physics.quantities.Quantity;
-import org.jscience.physics.quantities.RadiationDoseAbsorbed;
-import org.jscience.physics.quantities.RadiationDoseEffective;
-import org.jscience.physics.quantities.RadioactiveActivity;
-import org.jscience.physics.quantities.Dimensionless;
-import org.jscience.physics.quantities.SolidAngle;
-import org.jscience.physics.quantities.Temperature;
-import org.jscience.physics.quantities.Torque;
-import org.jscience.physics.quantities.Velocity;
-import org.jscience.physics.quantities.Volume;
-import org.jscience.physics.quantities.VolumetricDensity;
-import org.jscience.physics.units.NonSI;
-import org.jscience.physics.units.SI;
+import org.jscience.mathematics.numbers.ModuloInteger;
+import org.jscience.mathematics.numbers.Rational;
+import org.jscience.mathematics.numbers.Real;
+import org.jscience.mathematics.vectors.Matrix;
+import org.jscience.mathematics.vectors.MatrixFloat64;
+import org.jscience.mathematics.vectors.Vector;
+import org.jscience.physics.measures.Measure;
+import org.jscience.physics.measures.MeasureFormat;
+import org.jscience.physics.models.RelativisticModel;
 
+import javolution.lang.MathLib;
+import javolution.lang.TextBuilder;
+import javolution.realtime.LocalContext;
+import javolution.realtime.PoolContext;
+import static javax.units.SI.*;
+import static javax.units.NonSI.*;
+import static org.jscience.economics.money.Currency.*;
 
 /**
- * <p> This class represents the <b>J</b>Science library; it contains the 
- *     library optional {@link #initialize} method as well as a {@link #main}
- *     method for versionning, self-tests, and performance analysis.</p>
- * <p> Initialization is performed automatically when quantities classes are
- *     used for the first time or explicitely by calling the 
- *     {@link #initialize} static method.</p>
- *
+ * <p> This class represents the <b>J</b>Science library; it contains the
+ *    {@link #main} method for versionning, self-tests, and performance 
+ *    analysis.</p>
+ * 
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 3.0, February 13, 2006
  */
 public final class JScience {
 
@@ -86,33 +65,31 @@ public final class JScience {
     public final static String VERSION = "@VERSION@";
 
     /**
-     * Indicates if this library has been initialized.
-     */
-    private static boolean IsInitialized;
-    
-    /**
      * Default constructor.
      */
     private JScience() {// Forbids derivation.
     }
 
     /**
-     * The library {@link #main} method.
-     * The archive <codejscience.jar</code> is auto-executable.
+     * The library {@link #main} method. The archive <codejscience.jar</code>
+     * is auto-executable.
      * <ul>
-     * <li><code>java [-cp javolution.jar] -jar jscience.jar version</code> 
-     *     to output version information.</li>
-     * <li><code>java [-cp javolution.jar] -jar jscience.jar test</code> 
-     *     to perform self-tests.</li>
-     * <li><code>java [-cp javolution.jar] -jar jscience.jar perf</code> 
-     *     for performance analysis.</li>
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar version</code>
+     * to output version information.</li>
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar test</code> to
+     * perform self-tests.</li>
+     * <li><code>java [-cp javolution.jar] -jar jscience.jar perf</code> for
+     * performance analysis.</li>
      * </ul>
-     *
-     * @param  args the option arguments.
-     * @throws Exception if a problem occurs.
+     * 
+     * @param args
+     *            the option arguments.
+     * @throws Exception
+     *             if a problem occurs.
      */
     public static void main(String[] args) throws Exception {
-        System.out.println("JScience - Java(TM) Tools and Libraries for the Advancement of Sciences");
+        System.out.println("JScience - Java(TM) Tools and Libraries for"
+                + " the Advancement of Sciences");
         System.out.println("Version " + VERSION + " (http://jscience.org)");
         System.out.println("");
         if (args.length > 0) {
@@ -127,85 +104,13 @@ public final class JScience {
                 return;
             }
         }
-        System.out.println("Usage: java [-cp javolution.jar] -jar jscience.jar [arg]");
+        System.out
+                .println("Usage: java [-cp javolution.jar] -jar jscience.jar [arg]");
         System.out.println("where arg is one of:");
         System.out.println("    version (to show version information)");
         System.out.println("    test    (to perform self-tests)");
         System.out.println("    perf    (to run benchmark)");
     }
-
-    /**
-     * Initializes library classes. This method is automatically called when the
-     * {@link Quantity}classes are initialized. It ensures that:
-     * <ol>
-     * <li>The unit database is loaded (e.g. <code>Unit.valueOf("ft")</code>
-     *     returns <code>NonSI.FOOT</code>).</li>
-     * <li>Predefined quantity sub-classes are mapped to their respective units
-     *     (e.g. <code>Quantity.valueOf(1, SI.METER)</code> returns a
-     *     <code>Length</code> instance).</li>
-     * <li>Execution time is more predictable as class initialization has
-     *     already been performed.</li>
-     * </ol>
-     * 
-     * <p><i>Note: It the library is extended (e.g. new quantity sub-classes), it
-     *             is the responsibility of the application to ensure that the new classes
-     *             are properly initialized as well. </i></p>
-     */
-    public static synchronized void initialize() {
-        if (!JScience.IsInitialized) { //  Performs initialization only once.
-            JScience.IsInitialized = true;
-
-            // Forces initialization through references to static members.
-            // The temporary object is volatile to prevent compiler
-            // optimization.
-
-            // Initializes physical quantities.
-            JScience.Volatile = Acceleration.ZERO;
-            JScience.Volatile = AmountOfSubstance.ZERO;
-            JScience.Volatile = Angle.ZERO;
-            JScience.Volatile = AngularAcceleration.ZERO;
-            JScience.Volatile = AngularVelocity.ZERO;
-            JScience.Volatile = Area.ZERO;
-            JScience.Volatile = CatalyticActivity.ZERO;
-            JScience.Volatile = DataAmount.ZERO;
-            JScience.Volatile = DataRate.ZERO;
-            JScience.Volatile = Duration.ZERO;
-            JScience.Volatile = ElectricCapacitance.ZERO;
-            JScience.Volatile = ElectricCharge.ZERO;
-            JScience.Volatile = ElectricConductance.ZERO;
-            JScience.Volatile = ElectricCurrent.ZERO;
-            JScience.Volatile = ElectricInductance.ZERO;
-            JScience.Volatile = ElectricPotential.ZERO;
-            JScience.Volatile = ElectricResistance.ZERO;
-            JScience.Volatile = Energy.ZERO;
-            JScience.Volatile = Force.ZERO;
-            JScience.Volatile = Frequency.ZERO;
-            JScience.Volatile = Illuminance.ZERO;
-            JScience.Volatile = Length.ZERO;
-            JScience.Volatile = LuminousFlux.ZERO;
-            JScience.Volatile = LuminousIntensity.ZERO;
-            JScience.Volatile = MagneticFlux.ZERO;
-            JScience.Volatile = MagneticFluxDensity.ZERO;
-            JScience.Volatile = Mass.ZERO;
-            JScience.Volatile = Power.ZERO;
-            JScience.Volatile = Pressure.ZERO;
-            JScience.Volatile = RadiationDoseAbsorbed.ZERO;
-            JScience.Volatile = RadiationDoseEffective.ZERO;
-            JScience.Volatile = RadioactiveActivity.ZERO;
-            JScience.Volatile = Dimensionless.ZERO;
-            JScience.Volatile = SolidAngle.ZERO;
-            JScience.Volatile = Temperature.ZERO;
-            JScience.Volatile = Torque.ZERO;
-            JScience.Volatile = Velocity.ZERO;
-            JScience.Volatile = Volume.ZERO;
-            JScience.Volatile = VolumetricDensity.ZERO;
-
-            // Initializes money package.
-            JScience.Volatile = Currency.USD;
-        }
-    }
-
-    static volatile Object Volatile;
 
     /**
      * Performs simple tests.
@@ -215,32 +120,260 @@ public final class JScience {
     private static void testing() throws Exception {
         System.out.println();
         System.out.println("Testing...");
-        Matrix<Quantity> M = Matrix.valueOf(new Quantity[][] {
-                { Dimensionless.valueOf("33"), Dimensionless.ZERO },
-                { Quantity.valueOf(2, NonSI.BAR), Dimensionless.valueOf(1.234) },
-                { Quantity.valueOf(22.336, Currency.EUR),
-                        Quantity.valueOf(2, Currency.USD) },
-                { Quantity.valueOf(1, NonSI.FOOT),
-                        Quantity.valueOf(3, NonSI.POUND) }, });
+        {
+            System.out.println("");
+            System.out.println("Exact Measurements");
+            Measure<Mass> m0 = Measure.valueOf(100, POUND);
+            Measure<Mass> m1 = m0.times(33).divide(2);
+            Measure<ElectricCurrent> m2 = Measure.valueOf("234 mA").to(
+                    MILLI(AMPERE));
+            System.out.println("m0 = " + m0);
+            System.out.println("m1 = " + m1);
+            System.out.println("m2 = " + m2);
 
-        // Writes Matrix.
-        ObjectWriter ow = new ObjectWriter();
-        ow.setPackagePrefix("", "org.jscience.physics.quantities");
-        ow.setPackagePrefix("money", "org.jscience.economics.money");
-        ow.setPackagePrefix("math", "org.jscience.mathematics.matrices");
+            System.out.println("");
+            System.out.println("Inexact Measurements");
+            Measure<Mass> m3 = Measure.valueOf(100.0, POUND);
+            Measure<Mass> m4 = m0.divide(3);
+            Measure<ElectricCurrent> m5 = Measure.valueOf("234 mA").to(AMPERE);
+            Measure<Temperature> t0 = Measure.valueOf(-7.3, 0.5, CELSIUS);
+            System.out.println("m3 = " + m3);
+            System.out.println("m4 = " + m4);
+            System.out.println("m5 = " + m5);
+            System.out.println("t0 = " + t0);
 
-        StringWriter out = new StringWriter();
-        ow.write(M, out);
-        System.err.println(out.getBuffer().toString()); // For Debugging
+            System.out.println("");
+            System.out.println("Interval measurements");
+            Measure<Volume> m6 = Measure.valueOf(20, 0.1, LITER);
+            Measure<Frequency> m7 = Measure.rangeOf(10, 11, KILO(HERTZ));
+            System.out.println("m6 = " + m6);
+            System.out.println("m7 = " + m7);
 
-        // Read Matrix.
-        StringReader in = new StringReader(out.getBuffer().toString());
-        ObjectReader or = new ObjectReader();
-        Matrix R = (Matrix) or.read(in);
-        //System.err.println(R); // For Debugging
+            System.out.println("");
+            System.out
+                    .println("Equals (identical) / Distinct (no interval overlap)");
+            Measure<Frequency> m8 = Measure.valueOf(9000, HERTZ);
+            Measure<Frequency> m9 = Measure.valueOf(9, KILO(HERTZ));
+            Measure<Frequency> m10 = m8.plus(Measure.valueOf(0, HERTZ));
+            System.out.println("m8 = " + m8);
+            System.out.println("m9 = " + m9);
+            System.out.println("m10 = " + m10);
+            System.out.println("m9.equals(m8) = " + m9.equals(m8));
+            System.out.println("m9.isDistinctFrom(m8) = "
+                    + m9.isDistinctFrom(m8));
+            System.out.println("m10.equals(m8) = " + m10.equals(m8));
+            System.out.println("m10.isDistinctFrom(m8) = "
+                    + m10.isDistinctFrom(m8));
 
-        System.out.println(M);
-        System.out.println(R);
+            System.out.println("");
+            System.out.println("MeasureFormat - Plus/Minus Error (4 digits error)");
+            MeasureFormat.setInstance(MeasureFormat
+                    .getPlusMinusErrorInstance(4));
+            System.out.println("m3 = " + m3);
+            System.out.println("m4 = " + m4);
+            System.out.println("m5 = " + m5);
+
+            System.out.println("");
+            System.out.println("MeasureFormat - Bracket Error (2 digits error)");
+            MeasureFormat.setInstance(MeasureFormat.getBracketErrorInstance(2));
+            System.out.println("m3 = " + m3);
+            System.out.println("m4 = " + m4);
+            System.out.println("m5 = " + m5);
+
+            System.out.println("");
+            System.out.println("MeasureFormat - Exact Digits Only");
+            MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
+            System.out.println("m3 = " + m3);
+            System.out.println("m4 = " + m4);
+            System.out.println("m5 = " + m5);
+
+            System.out.println("");
+            System.out.println("Numeric Errors");
+            {
+                Measure<Length> x = Measure.valueOf(1.0, METER);
+                Measure<Velocity> v = Measure.valueOf(0.01, METER_PER_SECOND);
+                Measure<Duration> t = Measure.valueOf(1.0, MICRO(SECOND));
+                long ns = System.nanoTime();
+                for (int i = 0; i < 10000000; i++) {
+                    x = x.plus(v.times(t));
+                }
+                ns = System.nanoTime() - ns;
+                MeasureFormat.setInstance(MeasureFormat
+                        .getExactDigitsInstance());
+                System.out.println(x
+                        + " ("
+                        + Measure.valueOf(ns, 0.5, NANO(SECOND)).to(
+                                MILLI(SECOND)) + ")");
+            }
+            {
+                double x = 1.0; // m
+                double v = 0.01; // m/s
+                double t = 1E-6; // s
+                for (int i = 0; i < 10000000; i++) {
+                    x += v * t; // Note: Most likely the compiler get v * t out of the loop.
+                }
+                System.out.println(x);
+            }
+            MeasureFormat.setInstance(MeasureFormat
+                    .getPlusMinusErrorInstance(2));
+        }
+        {
+            System.out.println("");
+            System.out.println("Physical Models");
+            Measure<Length> x = Measure.valueOf(100, NonSI.INCH);
+            LocalContext.enter(); // Avoids impacting others threads.
+            try {
+                RelativisticModel.select(); // Selects the relativistic model.
+                x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
+                System.out.println(x);
+                Measure<Mass> m = Measure.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
+                System.out.println(m);
+            } finally {
+                LocalContext.exit();
+            }
+        }
+
+        {
+            System.out.println("");
+            System.out.println("Money/Currencies");
+            ///////////////////////////////////////////////////////////////////////
+            // Calculates the cost of a car trip in Europe for an American tourist.
+            ///////////////////////////////////////////////////////////////////////
+
+            // Use currency symbols instead of ISO-4217 codes.
+            UnitFormat.getStandardInstance().label(USD, "$"); // Use "$" symbol instead of currency code ("USD")
+            UnitFormat.getStandardInstance().label(EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
+
+            // Sets exchange rates.
+            Currency.setReferenceCurrency(USD);
+            EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
+
+            // Calculates trip cost.
+            Measure<?> carMileage = Measure.valueOf(20, MILE
+                    .divide(GALLON_LIQUID_US)); // 20 mi/gal.
+            Measure<?> gazPrice = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+            Measure<Length> tripDistance = Measure.valueOf(400, KILO(SI.METER)); // 400 km
+            Measure<Money> tripCost = tripDistance.divide(carMileage).times(
+                    gazPrice).to(USD);
+            // Displays cost.
+            System.out.println("Trip cost = " + tripCost + " ("
+                    + tripCost.to(EUR) + ")");
+        }
+        {
+            System.out.println("");
+            System.out.println("Matrices/Vectors");
+
+            Measure<ElectricResistance> R1 = Measure.valueOf(100, 1, OHM); // 1% precision. 
+            Measure<ElectricResistance> R2 = Measure.valueOf(300, 3, OHM); // 1% precision.
+            Measure<ElectricPotential> U0 = Measure.valueOf(28, 0.01, VOLT); // ±0.01 V fluctuation.
+
+            // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
+            //             U1 = R1 * I    =>  |-1 0  R1| * |U2| = |0 |
+            //             U2 = R2 * I        |0 -1  R2|   |I |   |0 |
+            //
+            //                                    A      *  X   =  B
+            //
+            Matrix<Measure> A = Matrix.valueOf(new Measure[][] {
+                    { Measure.ONE, Measure.ONE, Measure.valueOf(0, OHM) },
+                    { Measure.ONE.opposite(), Measure.ZERO, R1 },
+                    { Measure.ZERO, Measure.ONE.opposite(), R2 } });
+            Vector<Measure> B = Vector.valueOf((Measure) U0, Measure.valueOf(0,
+                    VOLT), Measure.valueOf(0, VOLT));
+            Vector<Measure> X = A.solve(B);
+            System.out.println(X);
+            System.out.println(X.get(2).to(MILLI(AMPERE)));
+        }
+        {
+            System.out.println("");
+            System.out.println("Polynomials");
+
+            // Defines two local variables (x, y).
+            Variable<Complex> varX = new Variable.Local<Complex>("x");
+            Variable<Complex> varY = new Variable.Local<Complex>("y");
+
+            // f(x) = 1 + 2x + ix²
+            Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, varX);
+            Polynomial<Complex> fx = x.pow(2).times(Complex.I).plus(
+                    x.times(Complex.valueOf(2, 0)).plus(Complex.ONE));
+            System.out.println(fx);
+            System.out.println(fx.pow(2));
+            System.out.println(fx.differentiate(varX));
+            System.out.println(fx.integrate(varY));
+            System.out.println(fx.compose(fx));
+
+            // Calculates expression.
+            varX.set(Complex.valueOf(2, 3));
+            System.out.println(fx.evaluate());
+        }
+
+        {
+            System.out.println("");
+            System.out.println("Coordinates Conversions");
+
+            // Simple Lat/Long to UTM conversion.
+            CoordinatesConverter<LatLong, UTM> latLongToUTM = LatLong.CRS
+                    .getConverterTo(UTM.CRS);
+            LatLong latLong = LatLong.valueOf(34.34, 23.56, DEGREE_ANGLE);
+            UTM utm = latLongToUTM.convert(latLong);
+            System.out.println(utm);
+
+            // Converts any projected coordinates to Latitude/Longitude.
+            Coordinates<ProjectedCRS> coord2d = utm;
+            ProjectedCRS crs = coord2d.getCoordinateReferenceSystem();
+            CoordinatesConverter<Coordinates, LatLong> cvtr = crs
+                    .getConverterTo(LatLong.CRS);
+            latLong = cvtr.convert(coord2d);
+            System.out.println(latLong);
+
+            // Compound coordinates.
+            Altitude alt = Altitude.valueOf(2000, FOOT);
+            CompoundCoordinates<LatLong, Altitude> latLongAlt = new CompoundCoordinates<LatLong, Altitude>(
+                    latLong, alt);
+            System.out.println(latLongAlt);
+
+            // Converts compound coordinates (3-D) to XYZ (GPS).
+            XYZ xyz = latLongAlt.getCoordinateReferenceSystem().getConverterTo(
+                    XYZ.CRS).convert(latLongAlt);
+            System.out.println(xyz);
+
+            // Even more compounding...
+            Time time = Time.valueOf(DateFormat.getDateTimeInstance().parse(
+                    "Mar 1, 2006 2:36:10 AM"));
+            CompoundCoordinates<CompoundCoordinates, Time> latLongAltTime = new CompoundCoordinates<CompoundCoordinates, Time>(
+                    latLongAlt, time);
+            System.out.println(latLongAltTime);
+        }
+
+        {
+            System.out.println("");
+            System.out.println("Numbers");
+
+            Real two = Real.valueOf(2, 100); // 2.0000..00 (100 zeros after decimal point).
+            Real sqrt2 = two.sqrt();
+            System.out.println("sqrt(2)   = " + sqrt2);
+            System.out.println("Precision = " + sqrt2.getPrecision()
+                    + " digits.");
+
+            LargeInteger dividend = LargeInteger.valueOf("3133861182986538201");
+            LargeInteger divisor = LargeInteger.valueOf("25147325102501733369");
+            Rational rational = Rational.valueOf(dividend, divisor);
+            System.out.println("rational  = " + rational);
+
+            ModuloInteger m = ModuloInteger.valueOf("233424242346");
+            LocalContext.enter(); // Avoids impacting others threads.
+            try {
+                ModuloInteger.setModulus(LargeInteger.valueOf("31225208137"));
+                ModuloInteger inv = m.inverse();
+                System.out.println("inverse modulo = " + inv);
+
+                ModuloInteger one = inv.times(m);
+                System.out.println("verification: one = " + one);
+
+            } finally {
+                LocalContext.exit();
+            }
+
+        }
     }
 
     /**
@@ -249,13 +382,7 @@ public final class JScience {
     private static void benchmark() throws Exception {
         System.out.println("Benchmark...");
 
-        System.out.println();
-        System.out.print("Initialization: ");
-        startTime();
-        initialize();
-        endTime(1);
         Object[] results = new Object[10000];
-        Duration.showAs(SI.MICRO(SI.SECOND));
 
         System.out.println("");
         System.out.println("Numerics Operations");
@@ -284,11 +411,11 @@ public final class JScience {
         }
         endTime(1000 * results.length);
 
-        System.out.print("Quantity (mass) add: ");
+        System.out.print("Measure (mass) add: ");
         startTime();
         for (int i = 0; i < 1000; i++) {
             PoolContext.enter();
-            Quantity x = Quantity.valueOf(1, SI.KILOGRAM);
+            Measure<Mass> x = Measure.valueOf(1.0, SI.KILOGRAM);
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.plus(x);
             }
@@ -320,11 +447,11 @@ public final class JScience {
         }
         endTime(1000 * results.length);
 
-        System.out.print("Quantity (mass) multiply: ");
+        System.out.print("Measure (mass) multiply: ");
         startTime();
         for (int i = 0; i < 1000; i++) {
             PoolContext.enter();
-            Quantity x = Quantity.valueOf(1, SI.KILOGRAM);
+            Measure<Mass> x = Measure.valueOf(1.0, SI.KILOGRAM);
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.times(x);
             }
@@ -334,16 +461,7 @@ public final class JScience {
 
         System.out.println();
         System.out.println("LargeInteger (PoolContext) versus BigInteger");
-
-        System.out.print("BigInteger (1024 bits) add: ");
         BigInteger big = BigInteger.probablePrime(1024, new Random());
-        startTime();
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < results.length; j++) {
-                results[j] = big.add(big);
-            }
-        }
-        endTime(100 * results.length);
 
         System.out.print("LargeInteger (1024 bits) add: ");
         byte[] bytes = big.toByteArray();
@@ -358,18 +476,104 @@ public final class JScience {
         }
         endTime(100 * results.length);
 
+        System.out.print("BigInteger (1024 bits) add: ");
+        startTime();
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < results.length; j++) {
+                results[j] = big.add(big);
+            }
+        }
+        endTime(100 * results.length);
+
+        System.out.println();
+        System.out.println("Matrix<Float64> and Matrix<Complex> versus "
+                + "non-parameterized matrix (double)");
+        final int size = 500;
+
+        System.out.print("Non-parameterized matrix (double based)"
+                + " 500x500 multiplication: ");
+        double[][] values = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                values[i][j] = MathLib.random();
+            }
+        }
+        PrimitiveMatrix PM = new PrimitiveMatrix(values);
+        startTime();
+        PM.multiply(PM);
+        endTime(1);
+
+        System.out.print("MatrixFloat64 500x500 multiplication: ");
+        double[][] floats = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                floats[i][j] = MathLib.random();
+            }
+        }
+        MatrixFloat64 FM = Matrix.valueOf(floats);
+        startTime();
+        FM.times(FM);
+        endTime(1);
+
+        System.out.print("Matrix<Complex> 500x500 multiplication: ");
+        Complex[][] complexes = new Complex[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                complexes[i][j] = Complex.valueOf(MathLib.random(), MathLib
+                        .random());
+            }
+        }
+        Matrix<Complex> CM = Matrix.valueOf(complexes);
+        startTime();
+        CM.times(CM);
+        endTime(1);
+
         System.out.println();
         System.out.println("More performance analysis in future versions...");
+    }
+
+    private static final class PrimitiveMatrix {
+        double[][] o;
+
+        int m; // Nbr of columns.
+
+        int n; // Nbr of rows.
+
+        PrimitiveMatrix(double[][] elements) {
+            o = elements;
+            m = elements.length;
+            n = elements[0].length;
+        }
+
+        PrimitiveMatrix multiply(PrimitiveMatrix that) {
+            if (this.m == that.n) {
+                PrimitiveMatrix M = new PrimitiveMatrix(
+                        new double[this.n][that.m]);
+                for (int i = 0; i < this.n; i++) {
+                    for (int j = 0; j < that.m; j++) {
+                        double sum = this.o[i][0] * that.o[0][j];
+                        for (int k = 1; k < this.m; k++) {
+                            sum = sum + this.o[i][k] * that.o[k][j];
+                        }
+                        M.o[i][j] = sum;
+                    }
+                }
+                return M;
+            } else {
+                throw new Error("Wrong dimensions");
+            }
+        }
     }
 
     private static void startTime() {
         _time = System.nanoTime();
     }
+
     /**
      * Ends measuring time and display the execution time per iteration.
      * 
-     * @param iterations the number iterations performed since 
-     *        {@link #startTime}.
+     * @param iterations
+     *            the number iterations performed since {@link #startTime}.
      */
     public static void endTime(int iterations) {
         long nanoSeconds = System.nanoTime() - _time;
@@ -393,7 +597,7 @@ public final class JScience {
         tb.append(picoDuration / divisor);
         int fracDigits = 4 - tb.length(); // 4 digits precision.
         tb.append(".");
-        for (int i=0, j=10; i < fracDigits; i++, j *= 10) {
+        for (int i = 0, j = 10; i < fracDigits; i++, j *= 10) {
             tb.append((picoDuration * j / divisor) % 10);
         }
         System.out.println(tb.append(unit));

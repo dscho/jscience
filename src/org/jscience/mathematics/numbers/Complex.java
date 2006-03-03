@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -8,10 +8,15 @@
  */
 package org.jscience.mathematics.numbers;
 
-import org.jscience.mathematics.matrices.Matrix;
+import java.io.IOException;
+
+import org.jscience.mathematics.structures.Field;
+
 import javolution.lang.MathLib;
 import javolution.lang.Text;
+import javolution.lang.TextFormat;
 import javolution.lang.TypeFormat;
+import javolution.realtime.LocalReference;
 import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
@@ -19,9 +24,49 @@ import javolution.xml.XmlFormat;
  * <p> This class represents an immutable complex number.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2004
+ * @version 3.0, February 13, 2006
  */
-public final class Complex extends Number<Complex> {
+public final class Complex extends Number<Complex> implements Field<Complex> {
+
+    /**
+     * Holds the local text format for complex numbers (cartesian form 
+     * by default, e.g.<code> "2.34 - 0.4i"</code>).
+     */
+    public static final LocalReference<TextFormat<Complex>> FORMAT = new LocalReference<TextFormat<Complex>>(
+            new TextFormat<Complex>() {
+                public Appendable format(Complex complex, Appendable appendable)
+                        throws IOException {
+                    TypeFormat.format(complex._real, appendable);
+                    if (complex._imaginary < 0.0) {
+                        appendable.append(" - ");
+                        TypeFormat.format(-complex._imaginary, appendable);
+                    } else {
+                        appendable.append(" + ");
+                        TypeFormat.format(complex._imaginary, appendable);
+                    }
+                    return appendable.append('i');
+                }
+
+                public Complex parse(CharSequence csq, Cursor cursor) {
+                    // Reads real part.
+                    double real = TypeFormat.parseDouble(csq, cursor);
+
+                    // Reads separator.
+                    cursor.skip(' ', csq);
+                    char op = cursor.next(csq);
+                    if ((op != '+') && (op != '-'))
+                        throw new NumberFormatException("'+' or '-' expected");
+                    cursor.skip(' ', csq);
+
+                    // Reads imaginary part.
+                    double imaginary = TypeFormat.parseDouble(csq, cursor);
+                    char i = cursor.next(csq);
+                    if (i != 'i')
+                        throw new NumberFormatException("'i' expected");
+                    return Complex.valueOf(real, op == '-' ? -imaginary
+                            : imaginary);
+                }
+            });
 
     /**
      * Holds the default XML representation for complex numbers.
@@ -29,7 +74,7 @@ public final class Complex extends Number<Complex> {
      * <code>imaginary</code> attributes (e.g. 
      * <code>&lt;Complex real="2.34" imaginary="-0.4"/&gt;</code>).
      */
-    protected static final XmlFormat<Complex> XML = new XmlFormat<Complex>(
+    public static final XmlFormat<Complex> XML = new XmlFormat<Complex>(
             Complex.class) {
         public void format(Complex complex, XmlElement xml) {
             xml.setAttribute("real", complex._real);
@@ -43,6 +88,21 @@ public final class Complex extends Number<Complex> {
     };
 
     /**
+     * The complex number zero.
+     */
+    public static final Complex ZERO = new Complex(0.0, 0.0);
+
+    /**
+     * The complex number one.
+     */
+    public static final Complex ONE = new Complex(1.0, 0.0);
+
+    /**
+     * The imaginary unit <i><b>i</b></i>.
+     */
+    public static final Complex I = new Complex(0.0, 1.0);
+
+    /**
      * Holds the factory constructing complex instances.
      */
     private static final Factory<Complex> FACTORY = new Factory<Complex>() {
@@ -50,21 +110,6 @@ public final class Complex extends Number<Complex> {
             return new Complex();
         }
     };
-
-    /**
-     * The complex number zero.
-     */
-    public static final Complex ZERO = valueOf(0.0, 0.0).moveHeap();
-
-    /**
-     * The complex number one.
-     */
-    public static final Complex ONE = valueOf(1.0, 0.0).moveHeap();
-
-    /**
-     * The imaginary unit <i><b>i</b></i>.
-     */
-    public static final Complex I = valueOf(0.0, 1.0).moveHeap();
 
     /**
      * Holds the real component.
@@ -80,6 +125,18 @@ public final class Complex extends Number<Complex> {
      * Default constructor.
      */
     private Complex() {
+    }
+
+    /**
+     * Creates a complex number having the specified real and imaginary
+     * components.
+     * 
+     * @param  real the real component of this complex number.
+     * @param  imaginary the imaginary component of this complex number.
+     */
+    public Complex(double real, double imaginary) {
+        _real = real;
+        _imaginary = imaginary;
     }
 
     /**
@@ -101,42 +158,15 @@ public final class Complex extends Number<Complex> {
 
     /**
      * Returns the complex number for the specified character sequence.
-     * The character sequence must contain the cartesian form of the
-     * complex number to return.
-     * For example: <code>"1.0 + 2.0i"</code>, <code>"1.3 - 2.5i"</code>).
      *
-     * @param  chars the character sequence.
-     * @return the corresponding real number.
-     * @throws NumberFormatException if this character sequence does not contain
-     *         a parsable complex number.
+     * @param  csq the character sequence.
+     * @return <code>Complex.FORMAT.get().parse(csq)</code>
+     * @throws IllegalArgumentException if the character sequence does not 
+     *         contain a parsable complex number.
+     * @see    Complex#FORMAT
      */
-    public static Complex valueOf(CharSequence chars) {
-        Complex c = FACTORY.object();
-        try {
-            // Reads real part.
-            int realEnd = TypeFormat.indexOf(" ", chars, 1);
-            c._real = TypeFormat.parseDouble(chars.subSequence(1, realEnd));
-
-            // Reads imaginary part.
-            boolean negImaginary = false;
-            if (chars.charAt(realEnd + 1) != '+') {
-                if (chars.charAt(realEnd + 1) != '-') {
-                    throw new NumberFormatException("'+' or '-' expected");
-                }
-                negImaginary = true;
-            }
-            double imaginary = TypeFormat.parseDouble(chars.subSequence(
-                    realEnd + 3, chars.length() - 1));
-            c._imaginary = negImaginary ? -imaginary : imaginary;
-
-            if (chars.charAt(chars.length() - 1) != 'i') {
-                throw new NumberFormatException("'i' expected");
-            }
-            return c;
-        } catch (IndexOutOfBoundsException e) {
-            throw new NumberFormatException("For input characters: \""
-                    + chars.toString() + "\"");
-        }
+    public static Complex valueOf(CharSequence csq) {
+        return Complex.FORMAT.get().parse(csq);
     }
 
     /**
@@ -245,11 +275,11 @@ public final class Complex extends Number<Complex> {
     }
 
     /**
-     * Returns the reciprocal of this complex.
+     * Returns the inverse of this complex.
      *
      * @return <code>1 / this</code>.
      */
-    public Complex reciprocal() {
+    public Complex inverse() {
         Complex c = FACTORY.object();
         double tmp = (this._real * this._real)
                 + (this._imaginary * this._imaginary);
@@ -280,25 +310,12 @@ public final class Complex extends Number<Complex> {
     public Complex divide(Complex that) {
         double tmp = (that._real * that._real)
                 + (that._imaginary * that._imaginary);
-        double thatInvReal = this._real / tmp;
-        double thatInvImaginary = -this._imaginary / tmp;
+        double thatInvReal = that._real / tmp;
+        double thatInvImaginary = -that._imaginary / tmp;
         Complex c = FACTORY.object();
         c._real = this._real * thatInvReal - this._imaginary * thatInvImaginary;
         c._imaginary = this._real * thatInvImaginary + this._imaginary
                 * thatInvReal;
-        return c;
-    }
-
-    /**
-     * Returns the norm of this number (its {@link #magnitude magnitude} 
-     * represented by a complex number with no imaginary component).
-     *
-     * @return <code>|this|</code>.
-     */
-    public Complex norm() {
-        Complex c = FACTORY.object();
-        c._real = this.magnitude();
-        c._imaginary = 0.0;
         return c;
     }
 
@@ -426,40 +443,6 @@ public final class Complex extends Number<Complex> {
     }
 
     /**
-     * Indicates if two complex matrices are "sufficiently" alike to be
-     * considered equal.
-     *
-     * @param  A the first complex matrix.
-     * @param  B the second complex matrix.
-     * @param  tolerance the maximum difference between their complex elements
-     *         before they are considered <i>not</i> equal.
-     * @return <code>true</code> if <code>A</code> and <code>B</code> are
-     *         considered equal; <code>false</code> otherwise.
-     * @throws ClassCastException if <code>A</code> or <code>B</code> are not
-     *         exclusively composed of complex numbers.
-     * @see    #equals(Complex, double)
-     */
-    public static boolean equals(Matrix<Complex> A, Matrix<Complex> B,
-            double tolerance) {
-        int m = A.getNumberOfRows();
-        int n = B.getNumberOfColumns();
-        if ((B.getNumberOfRows() == m) && (B.getNumberOfColumns() == n)) {
-            for (int i = 0; i < m; i++) {
-                for (int j = 0; j < n; j++) {
-                    Complex a = A.get(i, j);
-                    Complex b = B.get(i, j);
-                    if (!a.equals(b, tolerance)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Compares this complex against the specified Object.
      *
      * @param  that the object to compare with.
@@ -487,25 +470,14 @@ public final class Complex extends Number<Complex> {
     }
 
     /**
-     * Returns the text representation of this complex number using
-     * its cartesian form.
-     * For example: <code>"1.0 + 2.0i"</code>, <code>"1.3 - 2.5i"</code>).
+     * Returns the text representation of this complex number.
      *
-     * @return the text representation of this complex number.
+     * @return <code>Complex.FORMAT.get().format(this)</code>
+     * @see Complex#FORMAT
      */
     public Text toText() {
-        Text txt = Text.valueOf(_real);
-        if (_imaginary >= 0) {
-            txt = txt.concat(PLUS).concat(Text.valueOf(_imaginary));
-        } else {
-            txt = txt.concat(MINUS).concat(Text.valueOf(-_imaginary));
-        }
-        return txt.concat(Text.valueOf('i'));
+        return Complex.FORMAT.get().format(this);
     }
-
-    private static final Text PLUS = Text.valueOf(" + ").intern();
-
-    private static final Text MINUS = Text.valueOf(" - ").intern();
 
     /**
      * Returns the {@link #getReal real} component of this {@link Complex}
@@ -569,6 +541,5 @@ public final class Complex extends Number<Complex> {
         return this.magnitude() > that.magnitude();
     }
 
-    private static final long serialVersionUID = 1L;
-
+    private static final long serialVersionUID = -848517302600420283L;
 }

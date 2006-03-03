@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2005 - JScience (http://jscience.org/)
+ * Copyright (C) 2006 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -17,12 +17,10 @@ import javolution.xml.XmlFormat;
 /**
  * <p> This class represents a 64 bits integer number.</p>
  * 
- * <p><i> Note: Arithmetic operation are non-modular (e.g. {@link #reciprocal}
- *        throws {@link ArithmeticException}), for modular arithmetic the 
- *        {@link LargeInteger} class should be used.</p>
- *
- * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 2.0, June 6, 2004
+ * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
+ * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Integer">
+ *      Wikipedia: Integer</a>
  */
 public final class Integer64 extends Number<Integer64> {
 
@@ -53,14 +51,14 @@ public final class Integer64 extends Number<Integer64> {
     };
 
     /**
-     * The 64 bits integer representing zero.
+     * The 64 bits floating point representing zero.
      */
-    public static final Integer64 ZERO = valueOf(0).moveHeap();
+    public static final Integer64 ZERO = new Integer64(0L);
 
     /**
-     * The 64 bits integer representing one.
+     * The 64 bits floating point representing one.
      */
-    public static final Integer64 ONE = valueOf(1).moveHeap();
+    public static final Integer64 ONE = new Integer64(1L);
 
     /**
      * The associated long value.
@@ -74,7 +72,17 @@ public final class Integer64 extends Number<Integer64> {
     }
 
     /**
-     * Returns the 64 bits integer for the specified <code>long</code> value.
+     * Returns the 64 bits integer from the specified <code>long</code> value.
+     *
+     * @param  longValue the <code>long</code> value for this number.
+     * @see    #longValue()
+     */
+    public Integer64(long longValue) {
+         _value = longValue;
+    }
+
+    /**
+     * Returns the 64 bits integer from the specified <code>long</code> value.
      *
      * @param  longValue the <code>long</code> value for this number.
      * @return the corresponding number.
@@ -87,7 +95,7 @@ public final class Integer64 extends Number<Integer64> {
     }
 
     /**
-     * Returns the  64 bits integer number for the specified character sequence.
+     * Returns the number for the specified character sequence.
      *
      * @param  chars the character sequence.
      * @return the corresponding number.
@@ -108,7 +116,7 @@ public final class Integer64 extends Number<Integer64> {
         r._value = -this._value;
         return r;
     }
-    
+
     /**
      * Returns the sum of this number with the one specified.
      *
@@ -120,6 +128,7 @@ public final class Integer64 extends Number<Integer64> {
         r._value = this._value + that._value;
         return r;
     }
+
     /**
      * Returns the difference between this number and the one specified.
      *
@@ -136,7 +145,7 @@ public final class Integer64 extends Number<Integer64> {
      * Returns the product of this number with the one specified.
      *
      * @param  that the number multiplier.
-     * @return <code>this * that</code>.
+     * @return <code>this · that</code>.
      */
     public Integer64 times(Integer64 that) {
         Integer64 r = FACTORY.object();
@@ -145,14 +154,7 @@ public final class Integer64 extends Number<Integer64> {
     }
 
     /**
-     * Throws {@link ArithmeticException}.
-     */
-    public Integer64 reciprocal() {
-        throw new ArithmeticException("Non-modular arithmetic");
-    }
-
-    /**
-     * Returns this number divided by the one specified (integer division).
+     * Returns this number divided by the one specified.
      *
      * @param  that the number divisor.
      * @return <code>this / that</code>.
@@ -164,19 +166,7 @@ public final class Integer64 extends Number<Integer64> {
     }
 
     /**
-     * Returns this number modulo the specified number. 
-     * 
-     * @param m the modulus.
-     * @return <code>this % m</code>
-     */
-    public Integer64 mod(Integer64 m) {
-        Integer64 r = FACTORY.object();
-        r._value = this._value % m._value;
-        return r;
-    }
-
-    /**
-     * Compares the {@link #norm norm} of this number with that number.
+     * Compares the magnitude of this number with that number.
      *
      * @return <code>|this| > |that|</code>
      */
@@ -185,26 +175,13 @@ public final class Integer64 extends Number<Integer64> {
     }
 
     /**
-     * Returns the norm of this number.
+     * Returns the absolute value of this number.
      *
-     * @return <code>abs(this)</code>.
+     * @return <code>|this|</code>.
      */
-    public Integer64 norm() {
+    public Integer64 abs() {
         Integer64 r = FACTORY.object();
         r._value = MathLib.abs(this._value);
-        return r;
-    }
-
-    /**
-     * Returns the positive square root of this number (rounding to the 
-     * nearest integer value).
-     *
-     * @return <code>sqrt(this)</code>.
-     * @throws UnsupportedOperationException
-     */
-    public Integer64 sqrt() {
-        Integer64 r = FACTORY.object();
-        r._value = (long) MathLib.sqrt(this._value);
         return r;
     }
 
@@ -235,24 +212,24 @@ public final class Integer64 extends Number<Integer64> {
      * @return the hash code value.
      */
     public int hashCode() {
-        int h = (int)(_value ^ (_value >>> 32));
+        int h = Float.floatToIntBits((float) _value);
         h += ~(h << 9);
         h ^= (h >>> 14);
         h += (h << 4);
         return h ^ (h >>> 10);
     }
 
-    // Implements abstract method.
+    @Override
     public long longValue() {
         return _value;
     }
 
-    // Implements abstract method.
+    @Override
     public double doubleValue() {
         return _value;
     }
 
-    // Implements Comparable.
+    @Override
     public int compareTo(Integer64 that) {
         if (this._value < that._value) {
             return -1;
@@ -263,5 +240,5 @@ public final class Integer64 extends Number<Integer64> {
         }
     }
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7466935461817060967L;
 }

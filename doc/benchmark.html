@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>JScience - Benchmark Results (Microsoft Windows 2000 - Intel Pentium 4 - 2.26 GHz)</TITLE>
+<META content="text/html; charset=utf-8" http-equiv=Content-Type>
+<META NAME="keywords" CONTENT="JScience, benchmark">
+<LINK REL ="stylesheet" TYPE="text/css" HREF="javadoc.css" TITLE="Style">
+</HEAD>
+<BODY><PRE>
+<B>D:\jscience-3.0>java -jar jscience.jar perf</B>
+
+JScience - Java(TM) Tools and Libraries for the Advancement of Sciences
+Version 3.0.0 March 1 2005 (http://jscience.org)
+
+Benchmark...
+
+Numerics Operations
+Float64 add: 59.45 ns
+Complex add: 62.37 ns
+Measure&lt;Mass&gt; add: 81.51 ns
+Float64 multiply: 43.43 ns
+Complex multiply: 55.33 ns
+Measure&lt;Mass&gt; multiply: 129.4 ns
+
+LargeInteger (PoolContext) versus BigInteger
+LargeInteger (1024 bits) add: 299.4 ns
+BigInteger (1024 bits) add: 2.509 us
+
+Matrix&lt;Float64&gt; and Matrix&lt;Complex&gt; versus non-parameterized matrix (double)
+Non-parameterized matrix (double based) 500x500 multiplication: 2.690 s
+MatrixFloat64 500x500 multiplication: 2.651 s
+Matrix&lt;Complex&gt; 500x500 multiplication: 18.47 s
+
+More performance analysis in future versions...
+
+</PRE></BODY></HTML>
