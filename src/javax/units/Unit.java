@@ -16,6 +16,7 @@ import javax.quantities.Dimensionless;
 import javax.quantities.Quantity;
 import javax.units.converters.AddConverter;
 import javax.units.converters.ConversionException;
+import javax.units.converters.RationalConverter;
 import javax.units.converters.UnitConverter;
 import javax.units.converters.MultiplyConverter;
 
@@ -54,8 +55,7 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     /**
      * Holds the unique symbols collection (base unit or alternate units).
      */
-    static final HashMap<String, Unit> SYMBOL_TO_UNIT 
-           = new HashMap<String, Unit> ();
+    static final HashMap<String, Unit> SYMBOL_TO_UNIT = new HashMap<String, Unit>();
 
     /**
      * Default constructor (applications should sub-class either 
@@ -77,14 +77,14 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      *              (e.g. °C/m and K/m).</i></p>
      * @return the base units this unit is derived from.
      */
-    public abstract Unit<? super Q> getBaseUnits();  
+    public abstract Unit<? super Q> getBaseUnits();
 
     /**
      * Returns the converter from this unit to its base units.
      * 
      * @return <code>this.getConverterTo(this.getBaseUnits())</code>
      */
-    public abstract UnitConverter toBaseUnits();  
+    public abstract UnitConverter toBaseUnits();
 
     /**
      * Returns the hash code for this unit.
@@ -114,7 +114,8 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @return <code>this.getDimension().equals(that.getDimension())</code>
      */
     public final boolean isCompatible(Unit that) {
-        return (this == that) || this.getBaseUnits().equals(that.getBaseUnits())
+        return (this == that)
+                || this.getBaseUnits().equals(that.getBaseUnits())
                 || this.getDimension().equals(that.getDimension());
     }
 
@@ -126,14 +127,13 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     public final Dimension getDimension() {
         Unit baseUnits = getBaseUnits();
         if (baseUnits instanceof BaseUnit)
-            return ((BaseUnit)baseUnits)._dimension;
+            return ((BaseUnit) baseUnits)._dimension;
         // Product of base units.
         ProductUnit productUnit = (ProductUnit) baseUnits;
         Dimension dimension = Dimension.NONE;
         for (int i = 0; i < productUnit.getUnitCount(); i++) {
             Dimension d = productUnit.getUnit(i).getDimension().pow(
-                    productUnit.getUnitPow(i)).root(
-                    productUnit.getUnitRoot(i));
+                    productUnit.getUnitPow(i)).root(productUnit.getUnitRoot(i));
             dimension = dimension.multiply(d);
         }
         return dimension;
@@ -147,7 +147,8 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @throws ConversionException if the conveter cannot be constructed
      *         (e.g. <code>!this.isCompatible(that)</code>).
      */
-    public final UnitConverter getConverterTo(Unit that) throws ConversionException {
+    public final UnitConverter getConverterTo(Unit that)
+            throws ConversionException {
         if (this.equals(that))
             return UnitConverter.IDENTITY;
         Unit thisBaseUnits = this.getBaseUnits();
@@ -158,9 +159,12 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
         Dimension thisDimension = this.getDimension();
         Dimension thatDimension = that.getDimension();
         if (!thisDimension.equals(thatDimension))
-            throw new ConversionException(this + " is not compatible with " + that);
-        UnitConverter thisTransform = this.toBaseUnits().concatenate(thisDimension.getTransform());
-        UnitConverter thatTransform = that.toBaseUnits().concatenate(thatDimension.getTransform());
+            throw new ConversionException(this + " is not compatible with "
+                    + that);
+        UnitConverter thisTransform = this.toBaseUnits().concatenate(
+                thisDimension.getTransform());
+        UnitConverter thatTransform = that.toBaseUnits().concatenate(
+                thatDimension.getTransform());
         return thatTransform.inverse().concatenate(thisTransform);
     }
 
@@ -191,9 +195,13 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @return the unit after the specified transformation.
      */
     public final Unit<Q> transform(UnitConverter operation) {
-        Unit<? super Q> baseUnits = this.getBaseUnits();
-        UnitConverter toBaseUnits = this.toBaseUnits().concatenate(operation);
-        return new TransformedUnit<Q>(baseUnits, toBaseUnits);
+        if (this instanceof TransformedUnit) {
+            TransformedUnit<Q> tf = (TransformedUnit<Q>) this;
+            Unit<? super Q> parent = tf.getParentUnit();
+            UnitConverter toParent = tf.toParentUnit().concatenate(operation);
+            return new TransformedUnit<Q>(parent, toParent);
+        }
+        return new TransformedUnit<Q>(this, operation);
     }
 
     /**
@@ -209,16 +217,25 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     }
 
     /**
-     * Returns the result of multiplying this unit by a scale factor. The
-     * returned unit is convertible with all units that are convertible with
-     * this unit.
+     * Returns the result of multiplying this unit by an exact factor. 
      *
-     * @param  scale the scale factor
+     * @param  factor the exact scale factor
      *         (e.g. <code>KILOMETER = METER.multiply(1000)</code>).
-     * @return <code>this.transform(new MultiplyConverter(scale))</code>
+     * @return <code>this.transform(new RationalConverter(factor, 1))</code>
      */
-    public final Unit<Q> times(double scale) {
-        return transform(new MultiplyConverter(scale));
+    public final Unit<Q> times(long factor) {
+        return transform(new RationalConverter(factor, 1));
+    }
+
+    /**
+     * Returns the result of multiplying this unit by a an approximate factor
+     *
+     * @param  factor the approximate factor (e.g. 
+     *         <code>ELECTRON_MASS = KILOGRAM.times(9.10938188e-31)</code>).
+     * @return <code>this.transform(new MultiplyConverter(factor))</code>
+     */
+    public final Unit<Q> times(double factor) {
+        return transform(new MultiplyConverter(factor));
     }
 
     /**
@@ -230,7 +247,7 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     public final Unit<? extends Quantity> times(Unit that) {
         return ProductUnit.getProductInstance(this, that);
     }
-    
+
     /**
      * Returns the inverse of this unit.
      *
@@ -241,13 +258,21 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     }
 
     /**
-     * Returns the result of dividing this unit by the scale divisor. The
-     * returned unit is convertible with all units that are convertible with
-     * this unit.
+     * Returns the result of dividing this unit by an exact divisor.
      *
-     * @param  divisor the scale divisor.
+     * @param  divisor the exact divisor.
      *         (e.g. <code>QUART = GALLON_LIQUID_US.divide(4)</code>).
-     * @return <code>this.transform(new MultiplyConverter(1 /divisor))</code>
+     * @return <code>this.transform(new RationalConverter(1 , divisor))</code>
+     */
+    public final Unit<Q> divide(long divisor) {
+        return transform(new RationalConverter(1, divisor));
+    }
+
+    /**
+     * Returns the result of dividing this unit by an approximate divisor.
+     *
+     * @param  divisor the approximate divisor.
+     * @return <code>this.transform(new MultiplyConverter(1.0 / divisor))</code>
      */
     public final Unit<Q> divide(double divisor) {
         return transform(new MultiplyConverter(1.0 / divisor));
@@ -315,7 +340,8 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      *         cannot be correctly parsed (e.g. symbol unknown).
      */
     public static Unit<? extends Quantity> valueOf(CharSequence csq) {
-        return UnitFormat.getStandardInstance().parse(csq, new ParsePosition(0));
+        return UnitFormat.getStandardInstance()
+                .parse(csq, new ParsePosition(0));
     }
 
     //////////////////////

@@ -40,30 +40,51 @@ import javax.units.converters.UnitConverter;
 public final class TransformedUnit<Q extends Quantity> extends DerivedUnit<Q> {
 
     /**
-     * Holds the base units.
+     * Holds the parent unit (not a transformed unit).
      */
-    private final Unit<? super Q> _baseUnits;
+    private final Unit<? super Q> _parentUnit;
 
     /**
-     * Holds the converter to base units.
+     * Holds the converter to the parent unit.
      */
-    private final UnitConverter _toBaseUnits;
+    private final UnitConverter _toParentUnit;
 
     /**
-     * Creates a transformed unit having the specified base unit.
+     * Creates a transformed unit from the specified parent unit.
      *
-     * @param  baseUnits the units from which this unit is derived.
-     * @param  toBaseUnits the converter to the base units.
+     * @param parentUnit the untransformed unit from which this unit is 
+     *        derived.
+     * @param  toParentUnit the converter to the parent units.
      */
-    TransformedUnit(Unit<? super Q> baseUnits, UnitConverter toBaseUnits) {
-        _baseUnits = baseUnits;
-        _toBaseUnits = toBaseUnits;
+    TransformedUnit(Unit<? super Q> parentUnit, UnitConverter toParentUnit) {
+        _parentUnit = parentUnit;
+        _toParentUnit = toParentUnit;
+    }
+        
+    /**
+     * Returns the parent unit for this unit. The parent unit is the 
+     * untransformed unit from which this unit is derived. It typically
+     * identifies the unit type.
+     *
+     * @return the untransformed unit from which this unit is derived.
+\     */
+    public Unit<? super Q> getParentUnit() {
+        return _parentUnit;
+    }
+        
+    /**
+     * Returns the converter to the parent unit.
+     *
+     * @return the converter to the parent unit.
+\     */
+    public UnitConverter toParentUnit() {
+        return _toParentUnit;
     }
         
     /**
      * Indicates if this transformed unit is considered equals to the specified 
-     * object (both are transformed units with equal base units and equal
-     * converter to base units).
+     * object (both are transformed units with equal parent unit and equal
+     * converter to parent unit).
      *
      * @param  that the object to compare for equality.
      * @return <code>true</code> if <code>this</code> and <code>that</code>
@@ -73,25 +94,25 @@ public final class TransformedUnit<Q extends Quantity> extends DerivedUnit<Q> {
         if (this == that) return true;
         if (!(that instanceof TransformedUnit)) return false;
         TransformedUnit thatUnit = (TransformedUnit) that; 
-        return this._baseUnits.equals(thatUnit._baseUnits) &&
-                 this._toBaseUnits.equals(thatUnit._toBaseUnits);
+        return this._parentUnit.equals(thatUnit._parentUnit) &&
+                 this._toParentUnit.equals(thatUnit._toParentUnit);
     }
 
     // Implements abstract method.
     public int hashCode() {
-        return _baseUnits.hashCode() + _toBaseUnits.hashCode();
+        return _parentUnit.hashCode() + _toParentUnit.hashCode();
     }
 
     // Implements abstract method.
     public Unit<? super Q> getBaseUnits() {
-        return _baseUnits;
+        return _parentUnit.getBaseUnits();
     }
 
     // Implements abstract method.
     public UnitConverter toBaseUnits() {
-        return _toBaseUnits;
+        return _parentUnit.toBaseUnits().concatenate(_toParentUnit);
     }
 
-    private static final long serialVersionUID = 5577732467382952324L;
+    private static final long serialVersionUID = 1L;
 
 }

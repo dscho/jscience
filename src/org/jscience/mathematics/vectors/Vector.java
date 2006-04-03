@@ -32,8 +32,8 @@ import org.jscience.mathematics.structures.VectorSpace;
  * @see <a href="http://en.wikipedia.org/wiki/Vector_space">
  *      Wikipedia: Vector Space</a>
  */
-public abstract class Vector<F extends Field> extends RealtimeObject implements
-        VectorSpace<Vector<F>, F>, Immutable {
+public abstract class Vector<F extends Field<F>> extends RealtimeObject
+        implements VectorSpace<Vector<F>, F>, Immutable {
 
     /**
      * Holds the default XML representation for {@link Vector} and its
@@ -55,12 +55,12 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
             }
         }
 
+        @SuppressWarnings("unchecked")
         public Vector parse(XmlElement xml) {
             int d = xml.getAttribute("dimension", 1);
-            FastTable<Field> elements = FastTable.newInstance();
+            FastTable elements = FastTable.newInstance();
             for (int i = d; --i >= 0;) {
-                Field element = xml.getNext();
-                elements.add(element);
+                elements.add(xml.getNext());
             }
             return Vector.valueOf(elements);
         }
@@ -72,7 +72,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
      * @param elements the vector elements.
      * @return the vector having the specified elements.
      */
-    public static <F extends Field> Vector<F> valueOf(F... elements) {
+    public static <F extends Field<F>> Vector<F> valueOf(F... elements) {
         final int d = elements.length;
         VectorDefault<F> v = VectorDefault.newInstance(d);
         for (int i = 0; i < d; i++) {
@@ -99,7 +99,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
      * @param  elements the collection of field objects.
      * @return the vector having the specified elements.
      */
-    public static <F extends Field> Vector<F> valueOf(Collection<F> elements) {
+    public static <F extends Field<F>> Vector<F> valueOf(Collection<F> elements) {
         final int d = elements.size();
         VectorDefault<F> v = VectorDefault.newInstance(elements.size());
         Iterator<F> iterator = elements.iterator();
@@ -185,7 +185,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
         try {
             F sum = (F) this.get(0).times(that.get(0));
             for (int i = 1; i < this.getDimension(); i++) {
-                sum = (F) sum.plus(this.get(i).times(that.get(i)));
+                sum = sum.plus(this.get(i).times(that.get(i)));
             }
             sum.move(ObjectSpace.OUTER);
             return sum;
@@ -202,18 +202,18 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
      * @throws DimensionException if 
      *         <code>(this.getDimension() != 3) && (that.getDimension() != 3)</code> 
      */
-    public final Vector<F> cross(Vector<F> that) {
+    public Vector<F> cross(Vector<F> that) {
         if ((this.getDimension() != 3) || (that.getDimension() != 3))
             throw new DimensionException(
                     "The cross product of two vectors requires "
                             + "3-dimensional vectors");
         VectorDefault<F> v = VectorDefault.newInstance(3);
-        v.set_(0, (F) ((F) this.get(1).times(that.get(2))).plus(((F) this
-                .get(2).times(that.get(1))).opposite()));
-        v.set_(1, (F) ((F) this.get(2).times(that.get(0))).plus(((F) this
-                .get(0).times(that.get(2))).opposite()));
-        v.set_(2, (F) ((F) this.get(0).times(that.get(1))).plus(((F) this
-                .get(1).times(that.get(0))).opposite()));
+        v.set_(0, (this.get(1).times(that.get(2))).plus((this.get(2).times(that
+                .get(1))).opposite()));
+        v.set_(1, (this.get(2).times(that.get(0))).plus((this.get(0).times(that
+                .get(2))).opposite()));
+        v.set_(2, (this.get(0).times(that.get(1))).plus((this.get(1).times(that
+                .get(0))).opposite()));
         return v;
     }
 
@@ -320,7 +320,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
         final int d = this.getDimension();
         VectorDefault<F> v = VectorDefault.newInstance(d);
         for (int i = d; --i >= 0;) {
-            v.set_(i, (F)this.get(i).times(a));
+            v.set_(i, this.get(i).times(a));
         }
         return v;
     }
@@ -331,7 +331,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
             throw new DimensionException();
         VectorDefault<F> v = VectorDefault.newInstance(d);
         for (int i = d; --i >= 0;) {
-            v.set_(i, (F)this.get(i).plus(that.get(i)));
+            v.set_(i, this.get(i).plus(that.get(i)));
         }
         return v;
     }
@@ -340,7 +340,7 @@ public abstract class Vector<F extends Field> extends RealtimeObject implements
         final int d = this.getDimension();
         VectorDefault<F> v = VectorDefault.newInstance(d);
         for (int i = d; --i >= 0;) {
-            v.set_(i, (F)this.get(i).opposite());
+            v.set_(i, this.get(i).opposite());
         }
         return v;
     }

@@ -29,7 +29,7 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<Float64> XML = new XmlFormat<Float64>(
+    public static final XmlFormat<Float64> XML = new XmlFormat<Float64>(
             Float64.class) {
         public void format(Float64 obj, XmlElement xml) {
             xml.setAttribute("value", obj._value);
@@ -331,5 +331,5 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
         }
     }
 
-    private static final long serialVersionUID = -2031004185033550670L;
+    private static final long serialVersionUID = 1L;
 }

@@ -9,14 +9,13 @@
 package org.jscience.mathematics.functions;
 
 import java.io.Serializable;
-import java.util.Set;
-
+import java.util.List;
 import org.jscience.mathematics.structures.Ring;
-
+import javolution.lang.MathLib;
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 import javolution.realtime.RealtimeObject;
-import javolution.util.FastSet;
+import javolution.util.FastTable;
 
 /**
  * This class represents the term of a {@link Polynomial polynomial} 
@@ -25,38 +24,23 @@ import javolution.util.FastSet;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public final class Term extends RealtimeObject implements Comparable<Term>,
-        Serializable {
+public final class Term extends RealtimeObject 
+     implements Serializable, Comparable<Term> {
 
     /**
-     * Holds the term factory.
+     * Holds the multiplicative identity.
      */
-    private static final Factory<Term> TERM_FACTORY = new Factory<Term>() {
-
-        protected Term create() {
-            return new Term();
-        }
-    };
+    public static Term ONE = new Term();
+    
+    /**
+     * Holds the variables (ordered).
+     */
+    private FastTable<Variable> _variables = new FastTable<Variable>();
 
     /**
-     * Holds the term representing no variables.
+     * Holds the corresponding powers (positive and different from zero).
      */
-    public static final Term CONSTANT = new Term();
-
-    /**
-     * Holds the first variable.
-     */
-    private Variable _variable;
-
-    /**
-     * Holds the variable exponent.
-     */
-    private int _power;
-
-    /**
-     * Holds the next variables (ordered).
-     */
-    private Term _next;
+    private int[] _powers = new int[4];
 
     /**
      * Default constructor.
@@ -71,71 +55,85 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
      * @param v the variable.
      * @param n the power. 
      * @return the term for <code>v<sup>n</sup></code>
-     * @throws IllegalArgumentException if <code>n &lt;= 0</code> 
+     * @throws IllegalArgumentException if <code>n &lt; 0</code> 
      */
     public static Term valueOf(Variable v, int n) {
-        if (n <= 0)
+        if (n == 0) return ONE;
+        if (n < 0)
             throw new IllegalArgumentException("n: " + n
-                    + " zero or negative values are not allowed");
-        Term term = TERM_FACTORY.object();
-        term._variable = v;
-        term._power = n;
-        term._next = null;
+                    + " negative values are not allowed");
+        Term term = Term.newInstance(1);
+        term._variables.add(v);
+        term._powers[0] = n;
         return term;
     }
 
     /**
-     * Return the power of the specified variable within this term.
+     * Returns the variables for this term (lexically ordered).
      * 
-     * @param v the variable.
-     * @return the the power of v or <code>0</code> if v is not part of
-     *         this term. 
+     * @return this term variables.
      */
-    public int getPower(Variable v) {
-        for (Term t = this; t != null; t = t._next) {
-            if (v == t._variable) {
-                return t._power;
-            }
-        }
-        return 0;
+    public List<Variable> getVariables() {
+        return _variables.unmodifiable();
+    }
+
+    /**
+     * Returns the power of the specified variable.
+     * 
+     * @param var the variable for which the power is returned.
+     * @return the power of the corresponding variable or <code>0</code> if 
+     *         this term does not hold the specified variable.
+     * @throws IllegalArgumentException if <code>(i < 0) || (i >= length())</code> 
+     */
+    public int getPower(Variable var) {
+        int i = _variables.indexOf(var);
+        return (i < 0) ? 0 : _powers[i];
     }
 
     /**
      * Return the product of this term with the one specified. 
      * 
      * @param that the term multiplier.
-     * @return <code>this·that</code>
+     * @return <code>this · that</code>
+     * @throws IllegalArgumentException if the specified term holds a 
+     *         variable having the same symbol as one of the variable of
+     *         this term; but both variables are distinct.
      */
     public Term times(Term that) {
-        if (this == CONSTANT) {
-            return that;
-        } else if (that == CONSTANT) {
-            return this;
-        } else {
-            return multiply(this, that);
-        }
-    }
-
-    private static Term multiply(Term left, Term right) {
-        if (left == null) {
-            return right;
-        } else if (right == null) {
-            return left;
-        } else {
-            if (left._variable == right._variable) {
-                Term result = TERM_FACTORY.object();
-                result._variable = left._variable;
-                result._power = left._power + right._power;
-                result._next = multiply(left._next, right._next);
-                return result;
-            } else if (left._variable.getSymbol().compareTo(right._variable.getSymbol()) > 0) {
-                return multiply(right, left); //Swaps.
+        final int thisSize = this._variables.size();
+        final int thatSize = that._variables.size();
+        Term result = Term.newInstance(thisSize + thatSize);
+        for (int i=0, j =0;;) {
+            Variable left = (i < thisSize) ? this._variables.get(i) : null;
+            Variable right = (j < thatSize) ? that._variables.get(j) : null;
+            if (left == null) {
+                if (right == null) return result;
+                result._powers[result._variables.size()] = that._powers[j++];
+                result._variables.add(right);
+                continue;
+            }
+            if (right == null) {
+                result._powers[result._variables.size()] = this._powers[i++];
+                result._variables.add(left);
+                continue;
+            }
+            if (right == left) {
+                result._powers[result._variables.size()] 
+                               = this._powers[i++] + that._powers[j++];
+                result._variables.add(right);
+                continue;
+            }
+            final int cmp = left.getSymbol().compareTo(right.getSymbol());
+            if (cmp <  0) {
+                result._powers[result._variables.size()] = this._powers[i++];
+                result._variables.add(left);
+            } else if (cmp > 0) {
+                result._powers[result._variables.size()] = that._powers[j++];
+                result._variables.add(right);
             } else {
-                Term result = (Term) TERM_FACTORY.object();
-                result._variable = left._variable;
-                result._power = left._power;
-                result._next = multiply(left._next, right);
-                return result;
+                throw new IllegalArgumentException(
+                        "Found distinct variables with same symbol: " 
+                            + left.getSymbol());
             }
         }
     }
@@ -144,85 +142,52 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
      * Return the division of this term with the one specified. 
      * 
      * @param that the term divisor.
-     * @return <code>this/that</code>
+     * @return <code>this / that</code>
      * @throws UnsupportedOperationException if this division would 
      *         result in negative power.
+     * @throws IllegalArgumentException if the specified term holds a 
+     *         variable having the same symbol as one of the variable of
+     *         this term; but both variables are distinct.
      */
     public Term divide(Term that) {
-        if (that == CONSTANT) {
-            return this;
-        } else if (this == CONSTANT) {
-            throw new UnsupportedOperationException("Cannot divide " + this
-                    + " by " + that);
-        } else {
-            Term result = divide(this, that);
-            return result != null ? result : CONSTANT;
-        }
-    }
-
-    private static Term divide(Term left, Term right) {
-        if (right == null) {
-            return left;
-        } else if (left == null) {
-            throw new UnsupportedOperationException("Cannot divide " + left
-                    + " by " + right);
-        } else {
-            if (left._variable == right._variable) {
-                int power = left._power - right._power;
-                if (power > 0) {
-                    Term result = (Term) TERM_FACTORY.object();
-                    result._variable = left._variable;
-                    result._power = power;
-                    result._next = divide(left._next, right._next);
-                    return result;
-                } else if (power == 0) { // Cancels out, ignores.    
-                    return divide(left._next, right._next);
-                } else {
-                    throw new UnsupportedOperationException("Cannot divide "
-                            + left + " by " + right);
-                }
-            } else if (left._variable.getSymbol().compareTo(right._variable.getSymbol()) < 0) {
-                Term result = (Term) TERM_FACTORY.object();
-                result._variable = left._variable;
-                result._power = left._power;
-                result._next = divide(left._next, right);
-                return result;
-            } else {
-                throw new UnsupportedOperationException("Cannot divide " + left
-                        + " by " + right);
+        final int thisSize = this._variables.size();
+        final int thatSize = that._variables.size();
+        Term result = Term.newInstance(MathLib.max(thisSize, thatSize));
+        for (int i=0, j =0;;) {
+            Variable left = (i < thisSize) ? this._variables.get(i) : null;
+            Variable right = (j < thatSize) ? that._variables.get(j) : null;
+            if (left == null) {
+                if (right == null) return result;
+                throw new UnsupportedOperationException(this + "/" + that + 
+                        " would result in a negative power");
             }
-        }
-    }
-
-    /**
-     * Evaluates this term by replacing its {@link Variable
-     * variables} by their current (context-local) values.
-     *
-     * @return the evaluation of this term or <code>null</code> if constant
-     *         term.
-     * @throws FunctionException if any of this term's variable is not set.
-     */
-    public Ring evaluate() {
-        if (this == CONSTANT) {
-            return null;
-        } else {
-            Ring<Ring> value = (Ring) _variable.get();
-            if (value != null) {
-                Ring<Ring> pow2 = value;
-                Ring<Ring> result = null;
-                int n = _power;
-                while (n >= 1) { // Iteration.
-                    if ((n & 1) == 1) {
-                        result = (result == null) ? pow2 : result.times(pow2);
-                    }
-                    pow2 = pow2.times(pow2);
-                    n >>>= 1;
+            if (right == null) {
+                result._powers[result._variables.size()] = this._powers[i++];
+                result._variables.add(left);
+                continue;
+            }
+            if (right == left) {
+                final int power = this._powers[i++] - that._powers[j++];
+                if (power < 0)
+                    throw new UnsupportedOperationException(this + "/" + that + 
+                    " would result in a negative power");
+                if (power > 0) {
+                    result._powers[result._variables.size()] = power;
+                    result._variables.add(right);
                 }
-                return (_next == null) ? result : result
-                        .times(_next.evaluate());
+                continue;
+            }
+            final int cmp = left.getSymbol().compareTo(right.getSymbol());
+            if (cmp <  0) {
+                result._powers[result._variables.size()] = this._powers[i++];
+                result._variables.add(left);
+            } else if (cmp > 0) {
+                throw new UnsupportedOperationException(this + "/" + that + 
+                      " would result in a negative power");
             } else {
-                throw new FunctionException("Variable: " + _variable
-                        + " is undefined");
+                throw new IllegalArgumentException(
+                        "Found distinct variables with same symbol: " 
+                            + left.getSymbol());
             }
         }
     }
@@ -230,33 +195,21 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
     /**
      * Indicates if this term is equal to the object specified.
      *
-     * @param  o the object to compare for equality.
+     * @param  obj the object to compare for equality.
      * @return <code>true</code> if this term and the specified object are
      *         considered equal; <code>false</code> otherwise.
      */
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        } else if ((this == CONSTANT) || (o == CONSTANT)) {
-            return false;
-        } else if (o instanceof Term) {
-            Term that = (Term) o;
-            // Variable must be equal with same powers.
-            if ((this._variable == that._variable)
-                    && (this._power == that._power)) {
-                if (this._next != null) {
-                    return this._next.equals(that._next);
-                } else if (that._next != null) {
-                    return that._next.equals(null);
-                } else { // null == null
-                    return true;
-                }
-            } else { // Not the same variable or different powers.
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Term)) return false;
+        Term that = (Term) obj;
+        if (!this._variables.equals(that._variables)) return false;
+        final int size = this._variables.size();
+        for (int i=0; i < size; i++) {
+            if (this._powers[i] != that._powers[i])
                 return false;
-            }
-        } else {
-            return false;
         }
+        return true;
     }
 
     /**
@@ -265,101 +218,109 @@ public final class Term extends RealtimeObject implements Comparable<Term>,
      * @return a hash code value for this object.
      */
     public final int hashCode() {
-        if (this == CONSTANT) {
-            return 0;
-        } else {
-            int h = 0;
-            for (Term t = this; t != null; t = t._next) {
-                h += t._variable.hashCode() * t._power;
-            }
-            return h;
+        int h = 0;
+        final int size = this._variables.size();
+        for (int i=0; i < size; i++) {
+            h += _variables.get(i).hashCode() * _powers[i];
         }
+        return h;
     }
 
     /**
-     * Compares this term with the specified term for order.
-     *
-     * @param that the term to compare with.
-     * @return a negative integer, zero, or a positive integer as this 
-     *         term is less than, equal to, or greater than the
-     *         specified term.
-     * @throws ClassCastException if the specified object is not a term.
-     */
-    public int compareTo(Term that) {
-        if (this == CONSTANT) {
-            return (that == CONSTANT) ? 0 : -1;
-        } else if (that == CONSTANT) {
-            return 1;
-        } else {
-            // Compares variables then power.
-            if (this._variable == that._variable) {
-                if (this._power == that._power) {
-                    if (this._next == null) {
-                        return -1;
-                    } else if (that._next == null) {
-                        return 1;
-                    } else {
-                        return this._next.compareTo(that._next);
-                    }
-                } else { // Different powers.
-                    return this._power - that._power;
-                }
-            } else { // Different variables.
-                return this._variable.getSymbol().compareTo(that._variable.getSymbol());
-            }
-        }
-    }
-
-    /**
-     * Returns a set containing this term {@link Variable variables}.
-     *
-     * @return the variables for this term.
-     */
-    public Set<Variable> getVariables() {
-        FastSet<Variable> variables = FastSet.newInstance();
-        for (Term t = this; t != null; t = t._next) {
-            if (t != Term.CONSTANT) {
-                variables.add(t._variable);
-            }
-        }
-        return variables;
-    }
-
-    /**
-     * Returns the  text representation of this term.
+     * Returns the text representation of this term.
      */
     public Text toText() {
         TextBuilder tb = TextBuilder.newInstance();
-        if (this != CONSTANT) {
-            for (Term t = this; t != null; t = t._next) {
-                tb.append(t._variable.getSymbol());
-                switch (t._power) {
-                case 1:
-                    break;
-                case 2:
-                    tb.append('²');
-                    break;
-                case 3:
-                    tb.append('³');
-                    break;
-                default:
-                    tb.append(t._power);
-                }
+        final int size = this._variables.size();
+        for (int i=0; i < size; i++) {
+            tb.append(_variables.get(i).getSymbol());
+            switch (_powers[i]) {
+            case 1:
+                break;
+            case 2:
+                tb.append('²');
+                break;
+            case 3:
+                tb.append('³');
+                break;
+            default:
+                tb.append(_powers[i]);
             }
         }
         return tb.toText();
     }
 
-    // Overrides.
-    public boolean move(ObjectSpace os) {
-        if (super.move(os)) {
-            if (_next != null) {
-                _next.move(os);
-            }
-            return true;
+    /**
+     * Compares this term with the one specified for order.
+     * 
+     * @param that the term to be compared to.
+     * @return a negative integer, zero, or a positive integer as this term
+     *         is less than, equal to, or greater than the specified term.
+     */
+    public int compareTo(Term that) {
+        int n = Math.min(this._variables.size(), that._variables.size());
+        for (int i=0; i < n; i++) {
+            int cmp = this._variables.get(i).getSymbol().compareTo(
+                    that._variables.get(i).getSymbol());
+            if (cmp != 0) return cmp;
+            cmp = that._powers[i] - this._powers[i];
+            if (cmp != 0) return cmp;
         }
-        return false;
+        return that._variables.size() - this._variables.size();
     }
 
+    /**
+     * Evaluates this term by replacing its {@link Variable
+     * variables} by their current (context-local) values.
+     *
+     * @return the evaluation of this term or <code>null</code> if ONE.
+     * @throws FunctionException if any of this term's variable is not set.
+     */
+    @SuppressWarnings("unchecked") 
+    Ring evaluate() {
+        Ring result = null;
+        final int size = this._variables.size();
+        for (int i=0; i < size; i++) {
+            Ring pow2 = (Ring)_variables.get(i).get();
+            if (pow2 == null)
+                throw new FunctionException("Variable: " + _variables.get(i)
+                        + " is not set");
+            int n = _powers[i];
+            while (n >= 1) { // Iteration.
+                if ((n & 1) == 1) {
+                    result = (result == null) ? pow2 : 
+                        (Ring) result.times(pow2);
+                }
+                pow2 = (Ring) pow2.times(pow2);
+                n >>>= 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns a new instance of specified capacity.
+     * 
+     * @param capacity the minimum number of variables.
+     * @return the corresponding instance.
+     */
+    private static Term newInstance(int capacity) {
+        Term term = FACTORY.object();
+        if (term._powers.length < capacity) {
+            term._powers = new int[capacity];
+        }
+        return term;
+    }
+    
+    private static final Factory<Term> FACTORY = new Factory<Term>() {
+
+        protected Term create() {
+            return new Term();
+        }
+        protected void cleanup(Term term) {
+            term._variables.reset();
+        }
+    };
+    
     private static final long serialVersionUID = 1L;
 }

@@ -108,5 +108,5 @@ public final class CompoundUnit<Q extends Quantity> extends DerivedUnit<Q> {
         return _first.toBaseUnits();
     }
 
-    private static final long serialVersionUID = 8226634084067305310L;
+    private static final long serialVersionUID = 1L;
 }

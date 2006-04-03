@@ -8,13 +8,10 @@
  */
 package org.jscience.mathematics.functions;
 
+import java.util.List;
 import java.util.SortedMap;
-import java.util.Set;
-
-import org.jscience.mathematics.structures.Ring;
-
 import javolution.realtime.Realtime;
-import javolution.util.FastSet;
+import javolution.util.FastList;
 
 /**
  * <p> This class represents a function defined from a mapping betweem 
@@ -26,22 +23,22 @@ import javolution.util.FastSet;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public final class DiscreteFunction<P, V extends Ring> extends Function<P, V> {
+public final class DiscreteFunction<X, Y> extends Function<X, Y> {
 
     /**
      * Holds the point-value entries.
      */
-    private SortedMap<P, V> _pointValues;
+    private SortedMap<X, Y> _pointValues;
 
     /**
      * Holds the variable.
      */
-    private Variable<P> _variable;
+    private FastList<Variable<X>> _variables = new FastList<Variable<X>>();
 
     /**
      * Holds the interpolator.
      */
-    Interpolator<P, V> _interpolator;
+    private Interpolator<X, Y> _interpolator;
 
     /**
      * Creates the discrete function for the specified point-value entries.
@@ -50,9 +47,9 @@ public final class DiscreteFunction<P, V extends Ring> extends Function<P, V> {
      * @param  interpolator the interpolator.
      * @param  variable this function variable.
      */
-    public DiscreteFunction(SortedMap<P, V> pointValues, Interpolator<P, V> interpolator, Variable variable) {
+    public DiscreteFunction(SortedMap<X, Y> pointValues, Interpolator<X, Y> interpolator, Variable<X> variable) {
         _pointValues = pointValues;
-        _variable = variable;
+        _variables.add(variable);
         _interpolator = interpolator;
     }
 
@@ -61,7 +58,7 @@ public final class DiscreteFunction<P, V extends Ring> extends Function<P, V> {
      *
      * @return the point-value mapping.
      */
-    public SortedMap getPointValues() {
+    public SortedMap<X, Y> getPointValues() {
         return _pointValues;
     }
 
@@ -70,29 +67,23 @@ public final class DiscreteFunction<P, V extends Ring> extends Function<P, V> {
      *
      * @return the interpolator used to estimate the value between two points.
      */
-    public Interpolator<P, V> getInterpolator() {
+    public Interpolator<X, Y> getInterpolator() {
         return _interpolator;
     }
 
-    // Implements abstract method.  
-    public V evaluate() {
-        P point = _variable.get();
+    @Override
+    public Y evaluate() {
+        X point = _variables.get(0).get();
         if (point == null) {
-            throw new FunctionException("Variable " + _variable + " not set");
+            throw new FunctionException("Variable " + _variables.get(0) + " not set");
         }
         return _interpolator.interpolate(point, _pointValues);
     }
 
-    // Implements abstract method.  
-    public Set<Variable<P>> getVariables() {
-        FastSet<Variable<P>> variables = FastSet.newInstance();
-        variables.add(_variable);
-        return variables;
-    }
-
-    // Overrides.
+    @Override
     public boolean move(ObjectSpace os) {
         if (super.move(os)) {
+            _variables.move(os);
             if (_pointValues instanceof Realtime) {
                 ((Realtime) _pointValues).move(os);
             }
@@ -101,5 +92,11 @@ public final class DiscreteFunction<P, V extends Ring> extends Function<P, V> {
         return false;
     }
 
+    @Override
+    public List<Variable<X>> getVariables() {
+        return _variables;
+    }
+
     private static final long serialVersionUID = 1L;
+
 }

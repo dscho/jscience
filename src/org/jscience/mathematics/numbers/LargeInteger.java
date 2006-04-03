@@ -39,8 +39,8 @@ import javolution.xml.XmlFormat;
  *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
- * @see <a href="http://en.wikipedia.org/wiki/Integer">
- *      Wikipedia: Integer</a>
+ * @see <a href="http://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic">
+ *      Wikipedia: Arbitrary-precision Arithmetic</a>
  */
 public final class LargeInteger extends Number<LargeInteger> {
 
@@ -49,7 +49,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<LargeInteger> XML = new XmlFormat<LargeInteger>(
+    public static final XmlFormat<LargeInteger> XML = new XmlFormat<LargeInteger>(
             LargeInteger.class) {
         public void format(LargeInteger obj, XmlElement xml) {
             xml.setAttribute("value", obj.toText());
@@ -614,16 +614,17 @@ public final class LargeInteger extends Number<LargeInteger> {
                 try { // this = a + 2^n b,   that = c + 2^n d
                     ConcurrentContext.execute(MULTIPLY, a, c, ac);
                     ConcurrentContext.execute(MULTIPLY, b, d, bd);
-                    ConcurrentContext.execute(MULTIPLY, a.plus(b), c
-                            .plus(d), abcd);
+                    ConcurrentContext.execute(MULTIPLY, a.plus(b), c.plus(d),
+                            abcd);
                 } finally {
                     ConcurrentContext.exit();
                 }
                 // z = a*c + ((a+b)*(c+d)-a*c-b*d) 2^n + b*d 2^2n 
-                LargeInteger z = ac.get().plus(
-                        abcd.get().minus(ac.get()).minus(bd.get())
-                                .shiftLeft(n)).plus(
-                        bd.get().shiftLeft(2 * n));
+                LargeInteger z = ac.get()
+                        .plus(
+                                abcd.get().minus(ac.get()).minus(bd.get())
+                                        .shiftLeft(n)).plus(
+                                bd.get().shiftLeft(2 * n));
                 return z;
             }
         } else {
@@ -711,14 +712,19 @@ public final class LargeInteger extends Number<LargeInteger> {
                 result = result.shiftRight(thisAbs.bitLength() + 1);
 
                 // Calculates remainder, corrects for result +/- 1 error. 
-                LargeInteger remainder = thisAbs.minus(thatAbs
-                        .times(result));
+                LargeInteger remainder = thisAbs.minus(thatAbs.times(result));
                 if (remainder.compareTo(thatAbs) >= 0) {
                     remainder = remainder.minus(thatAbs);
                     result = result.plus(ONE);
+                    if (remainder.compareTo(thatAbs) >= 0)
+                        throw new Error("Verification error for " + this + "/"
+                                + that + ", please submit a bug report.");
                 } else if (remainder.isNegative()) {
                     remainder = remainder.plus(thatAbs);
                     result = result.minus(ONE);
+                    if (remainder.isNegative())
+                        throw new Error("Verification error for " + this + "/"
+                                + that + ", please submit a bug report.");
                 }
 
                 // Sets signs for result and remainder.
@@ -759,9 +765,9 @@ public final class LargeInteger extends Number<LargeInteger> {
      */
     public LargeInteger inverseScaled(int precision) {
         // TODO: Use faster square() method, shift on place.
-        if (precision <= 31) { // Straight calculation.
-            long divisor = this.shiftRight(this.bitLength() - precision)._words[0];
-            long dividend = 1L << precision * 2;
+        if (precision <= 30) { // Straight calculation.
+            long divisor = this.shiftRight(this.bitLength() - precision - 1)._words[0];
+            long dividend = 1L << (precision * 2 + 1);
             return (this.isNegative()) ? LargeInteger.valueOf(-dividend
                     / divisor) : LargeInteger.valueOf(dividend / divisor);
         } else { // Newton iteration (x = 2 * x - x^2 * this).
@@ -1454,25 +1460,25 @@ public final class LargeInteger extends Number<LargeInteger> {
     ///////////////////////
     // Factory creation. //
     ///////////////////////
-    
+
     private static LargeInteger newInstance(int nbrWords) {
         LargeInteger z = FACTORY.object();
         if ((z._words == null) || (z._words.length < nbrWords)) {
-            z._words = new long[nbrWords + 4]; 
+            z._words = new long[nbrWords + 4];
         }
         return z;
     }
-    
+
     // TODO Use different factories for very large integers.
     private static final Factory<LargeInteger> FACTORY = new Factory<LargeInteger>() {
         protected LargeInteger create() {
             return new LargeInteger();
         }
     };
-    
+
     private LargeInteger() {
     }
 
-    private static final long serialVersionUID = 8312831557338659864L;
+    private static final long serialVersionUID = 1L;
 
 }

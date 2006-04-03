@@ -59,19 +59,20 @@ public final class MatrixFloat64 extends Matrix<Float64> {
     }
 
     /**
-     * Returns an instance of this class equivalent to the specified
-     * matrix.
+     * Returns a MatrixFloat64 equivalent to the specified matrix.
      *
-     * @param matrix the equivalent matrix.
-     * @return the matrix having the values of the specified matrix.
+     * @param that the matrix to convert. 
+     * @return <code>that</code> or new equivalent MatrixFloat64.
      */
-    static MatrixFloat64 newInstance(Matrix<Float64> matrix) {
-        int m = matrix.getNumberOfRows();
-        int n = matrix.getNumberOfColumns();
+    static MatrixFloat64 valueOf(Matrix<Float64> that) {
+        if (that instanceof MatrixFloat64)
+            return (MatrixFloat64) that;
+        int m = that.getNumberOfRows();
+        int n = that.getNumberOfColumns();
         MatrixFloat64 M = MatrixFloat64.newInstance(m, n);
         for (int i = 0, k = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                M._values[k++] = matrix.get(i, j).doubleValue();
+                M._values[k++] = that.get(i, j).doubleValue();
             }
         }
         return M;
@@ -121,8 +122,7 @@ public final class MatrixFloat64 extends Matrix<Float64> {
 
     @Override
     public MatrixFloat64 plus(Matrix<Float64> that) {
-        MatrixFloat64 t = (that instanceof MatrixFloat64) ? (MatrixFloat64) that
-                : MatrixFloat64.newInstance(that);
+        MatrixFloat64 t = MatrixFloat64.valueOf(that);
         if ((_m != t._m) || (_n != t._n))
             throw new DimensionException();
         MatrixFloat64 M = MatrixFloat64.newInstance(_m, _n);
@@ -135,8 +135,7 @@ public final class MatrixFloat64 extends Matrix<Float64> {
 
     @Override
     public MatrixFloat64 minus(Matrix<Float64> that) {
-        MatrixFloat64 t = (that instanceof MatrixFloat64) ? (MatrixFloat64) that
-                : MatrixFloat64.newInstance(that);
+        MatrixFloat64 t = MatrixFloat64.valueOf(that);
         if ((_m != t._m) || (_n != t._n))
             throw new DimensionException();
         MatrixFloat64 M = MatrixFloat64.newInstance(_m, _n);
@@ -149,8 +148,7 @@ public final class MatrixFloat64 extends Matrix<Float64> {
 
     @Override
     public MatrixFloat64 times(Matrix<Float64> that) {
-        MatrixFloat64 t = (that instanceof MatrixFloat64) ? (MatrixFloat64) that
-                : MatrixFloat64.newInstance(that);
+        MatrixFloat64 t = MatrixFloat64.valueOf(that);
         if (_n != t._m)
             throw new DimensionException();
         MatrixFloat64 M = MatrixFloat64.newInstance(_m, t._n);
@@ -168,8 +166,7 @@ public final class MatrixFloat64 extends Matrix<Float64> {
 
     @Override
     public VectorFloat64 times(Vector<Float64> that) {
-        VectorFloat64 v = (that instanceof VectorFloat64) ? (VectorFloat64) that
-                : VectorFloat64.newInstance(that);
+        VectorFloat64 v = VectorFloat64.valueOf(that);
         if (v.getDimension() != _n)
             throw new DimensionException();
         VectorFloat64 r = VectorFloat64.newInstance(_m);
@@ -218,4 +215,5 @@ public final class MatrixFloat64 extends Matrix<Float64> {
     private MatrixFloat64() {
     }
 
+    private static final long serialVersionUID = 1L;
 }

@@ -9,7 +9,7 @@
 package org.jscience;
 
 import java.math.BigInteger;
-import java.text.DateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import javax.quantities.*;
@@ -119,14 +119,14 @@ public final class JScience {
      */
     private static void testing() throws Exception {
         System.out.println();
-        System.out.println("Testing...");
+        System.out.println("Testing...");   
         {
             System.out.println("");
             System.out.println("Exact Measurements");
             Measure<Mass> m0 = Measure.valueOf(100, POUND);
             Measure<Mass> m1 = m0.times(33).divide(2);
             Measure<ElectricCurrent> m2 = Measure.valueOf("234 mA").to(
-                    MILLI(AMPERE));
+                    MICRO(AMPERE));
             System.out.println("m0 = " + m0);
             System.out.println("m1 = " + m1);
             System.out.println("m2 = " + m2);
@@ -150,20 +150,18 @@ public final class JScience {
             System.out.println("m7 = " + m7);
 
             System.out.println("");
-            System.out
-                    .println("Equals (identical) / Distinct (no interval overlap)");
+            System.out.println("Measure.equals (identical) / Measure.approximates " +
+                    "(takes into account errors such as numeric errors)");
             Measure<Frequency> m8 = Measure.valueOf(9000, HERTZ);
-            Measure<Frequency> m9 = Measure.valueOf(9, KILO(HERTZ));
-            Measure<Frequency> m10 = m8.plus(Measure.valueOf(0, HERTZ));
+            Measure<Frequency> m10 = m8.divide(3).times(3); // Still exact.
+            Measure<Frequency> m11 = m8.divide(7).times(7); // No more exact.
             System.out.println("m8 = " + m8);
-            System.out.println("m9 = " + m9);
             System.out.println("m10 = " + m10);
-            System.out.println("m9.equals(m8) = " + m9.equals(m8));
-            System.out.println("m9.isDistinctFrom(m8) = "
-                    + m9.isDistinctFrom(m8));
-            System.out.println("m10.equals(m8) = " + m10.equals(m8));
-            System.out.println("m10.isDistinctFrom(m8) = "
-                    + m10.isDistinctFrom(m8));
+            System.out.println("m11 = " + m11);
+            System.out.println("(m10 == m8) = " + m10.equals(m8));
+            System.out.println("(m10 ≅ m8) = " + m10.approximates(m8));
+            System.out.println("(m11 == m8) = " + m11.equals(m8));
+            System.out.println("(m11 ≅ m8) = " + m11.approximates(m8));
 
             System.out.println("");
             System.out.println("MeasureFormat - Plus/Minus Error (4 digits error)");
@@ -220,17 +218,17 @@ public final class JScience {
         {
             System.out.println("");
             System.out.println("Physical Models");
+            // Selects a relativistic model for dimension checking (typically at start-up).
+            RelativisticModel.select(); 
+
+            // Length and Duration can be added.
             Measure<Length> x = Measure.valueOf(100, NonSI.INCH);
-            LocalContext.enter(); // Avoids impacting others threads.
-            try {
-                RelativisticModel.select(); // Selects the relativistic model.
-                x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
-                System.out.println(x);
-                Measure<Mass> m = Measure.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
-                System.out.println(m);
-            } finally {
-                LocalContext.exit();
-            }
+            x = x.plus(Measure.valueOf("2.3 µs")).to(METER); 
+            System.out.println(x); 
+               
+            // Energy is compatible with mass (E=mc2)
+            Measure<Mass> m = Measure.valueOf("12 GeV").to(KILOGRAM); 
+            System.out.println(m); 
         }
 
         {
@@ -273,13 +271,13 @@ public final class JScience {
             //
             //                                    A      *  X   =  B
             //
-            Matrix<Measure> A = Matrix.valueOf(new Measure[][] {
+            Matrix<Measure<?>> A = Matrix.valueOf(new Measure<?>[][] {
                     { Measure.ONE, Measure.ONE, Measure.valueOf(0, OHM) },
                     { Measure.ONE.opposite(), Measure.ZERO, R1 },
                     { Measure.ZERO, Measure.ONE.opposite(), R2 } });
-            Vector<Measure> B = Vector.valueOf((Measure) U0, Measure.valueOf(0,
-                    VOLT), Measure.valueOf(0, VOLT));
-            Vector<Measure> X = A.solve(B);
+            Vector<Measure<?>> B = Vector.valueOf(new Measure<?>[] { U0, Measure.valueOf(0,
+                    VOLT), Measure.valueOf(0, VOLT)});
+            Vector<Measure<?>> X = A.solve(B);
             System.out.println(X);
             System.out.println(X.get(2).to(MILLI(AMPERE)));
         }
@@ -319,9 +317,8 @@ public final class JScience {
 
             // Converts any projected coordinates to Latitude/Longitude.
             Coordinates<ProjectedCRS> coord2d = utm;
-            ProjectedCRS crs = coord2d.getCoordinateReferenceSystem();
-            CoordinatesConverter<Coordinates, LatLong> cvtr = crs
-                    .getConverterTo(LatLong.CRS);
+            ProjectedCRS<Coordinates> crs = coord2d.getCoordinateReferenceSystem();
+            CoordinatesConverter<Coordinates, LatLong> cvtr = crs.getConverterTo(LatLong.CRS);
             latLong = cvtr.convert(coord2d);
             System.out.println(latLong);
 
@@ -337,8 +334,7 @@ public final class JScience {
             System.out.println(xyz);
 
             // Even more compounding...
-            Time time = Time.valueOf(DateFormat.getDateTimeInstance().parse(
-                    "Mar 1, 2006 2:36:10 AM"));
+            Time time = Time.valueOf(new Date());
             CompoundCoordinates<CompoundCoordinates, Time> latLongAltTime = new CompoundCoordinates<CompoundCoordinates, Time>(
                     latLongAlt, time);
             System.out.println(latLongAltTime);

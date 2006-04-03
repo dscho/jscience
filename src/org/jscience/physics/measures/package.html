@@ -51,32 +51,19 @@ unit is the actual unit for the measure (which is then returned unchanged).
     
 <h4> Dimension checking.</h4>
 
-The  {@link org.jscience.physics.measures.Measure Measure}
-class is parameterized with the quantity onto which the measure applies 
-(<code>Measure&lt;Q extends Quantity&gt;). If the quantity is not known then
-      &lt;?&gt; can be used. For example:[code]
-       Measure<?> carMileage = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US));
-       Measure<?> gazPrice   = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-     [/code]
-     
 The unit of a measure determinates its type.
 For example, <code>Measure.valueOf("1 µm")</code> and <code>Measure.valueOf("1.2 ft")</code>
 are <code>Length</code> measures (both <code>"µm"</code> and <code>"ft"</code> units
 are derived from <code>SI.METER</code>).  Multiple physical models are supported (e.g. <code>Standard</code>,
 <code>Relativistic</code>, <code>High-Energy</code>, <code>Quantum</code>
-and <code>Natural</code>). The current model defines the conversions being allowed.
+and <code>Natural</code>). The physical model sets which conversions are allowed or disallowed.
 For example:[code]
+        RelativisticModel.select(); // Selects a relativistic model.
         Measure<Length> x = Length.valueOf(100, NonSI.INCH);
-        LocalContext.enter();
-        try {
-            RelativisticModel.select(); // Selects the relativistic model.
-            x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
-            System.out.println(x); 
-            Measure<Mass> m = Quantity.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
-            System.out.println(m); 
-        } finally {
-           LocalContext.exit();
-        }
+        x = x.plus(Measure.valueOf("2.3 µs")).to(METER); // Length and Duration can be added.
+        Measure<Mass> m = Quantity.valueOf("12 GeV").to(KILOGRAM); // Energy is compatible with mass (E=mc2)
+        System.out.println(x); 
+        System.out.println(m); 
         
         > (692.06265340000008 ± 5.1E-13) m
         > (2.1391940763025056E-26 ± 4.3E-42) kg[/code]</p>
@@ -87,4 +74,13 @@ This package provides the latest physical {@link org.jscience.physics.measures.C
 with the best known accuracy (the more accurate the constant, the higher the precision of the calculations
 making use of these constants). 
         
+<h4> Measurement vectors</h4>
+
+This package also provide measurement vectors compatible with the {@link org.jscience.mathematics.vectors mathematical vectors}
+module. For example:[code]
+      MeasureVector<Velocity> velocityVector = MeasureVector.valueOf(METER_PER_SECOND, 12.3, -2.9);
+      Measure<Velocity> velocity = velocityVector.norm();
+      Matrix<Measure<?>> M = ...;
+      Vector<Measure<?>> solution = M.solve(velocity2d);
+      [/code]
 </body>

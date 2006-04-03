@@ -106,6 +106,5 @@ public class Scalar<Q extends Quantity> implements Quantity<Q>,
         }
     }
 
-    private static final long serialVersionUID = 4549321816567634463L;
-
+    private static final long serialVersionUID = 1L;
 }

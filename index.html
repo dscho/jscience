@@ -178,7 +178,7 @@
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
          <DIV ALIGN="center"><SPAN CLASS="style7"><B>J</B>Science version
-            3.0.1 - March 3, 2006</SPAN></DIV></TD>
+            3.1.0 - April 2, 2006</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -189,10 +189,10 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.0.1-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-3.1.0-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.0.1-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-3.1.0-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
@@ -223,7 +223,7 @@
          <TR>
          
          <TD CLASS="lineheight1 style5">
-       <P><IMG SRC="doc/img/new.gif"><A HREF="api/overview-summary.html#TUTORIAL">Tutorial and Code Examples</A></P>
+       <P><A HREF="api/overview-summary.html#TUTORIAL">Tutorial and Code Examples</A></P>
        <P><B>J</B>Science is <A HREF="http://javolution.org"><IMG
             HEIGHT="32" SRC="doc/img/javolution.png" WIDTH="144"></A> for: 
          </P>
@@ -339,16 +339,25 @@
          <UL>
             <LI CLASS="lineheight1 style5">
             <A href="http://www.matheclipse.org"><IMG SRC="doc/img/calculator.png"></A>
-            MathEclipse On-Line Calculator powered by <B>J</B>Science</LI>
+            MathEclipse On-Line Calculator powered by <B>J</B>Science</LI><BR>
             
             <LI CLASS="lineheight1 style5">
+            <A href="http://en.wikipedia.org/wiki/JScience"><IMG SRC="doc/img/wikipedia.png"></A>
+            Wikipedia on <B>J</B>Science</LI><BR>
+
+            <LI CLASS="lineheight1 style5">
             <A href="http://geoapi.sourceforge.net/">GeoAPI</A>
-            Provides neutral, interface-only APIs derived from OGC/ISO Standards.</LI>
+            Provides neutral, interface-only APIs derived from OGC/ISO Standards.</LI><BR>
+
+            <LI CLASS="lineheight1 style5">
+            <A href="http://jscience.org/jsr-275-bin.zip">jsr-275-bin.zip</A> and 
+            <A href="http://jscience.org/jsr-275-src.zip">jsr-275-src.zip</a> 
+            Standalone quantities/units packages.</LI><BR>
 
             <LI CLASS="lineheight1 style5">
             <A href="https://jscience.dev.java.net/files/documents/2263/10335/JSciencepackages.zip">JScience Experimental Packages</A>
             and <A href="https://jscience.dev.java.net/files/documents/2263/22082/Datafilesonly.zip">Data Files</A>
-            maintained by <A HREF="mailto:silvere@digitalbiosphere.com">Silvère Martin-Michiellot</A>.</LI>
+            maintained by <A HREF="mailto:silvere@digitalbiosphere.com">Silvère Martin-Michiellot</A>.</LI><BR>
          </UL></TD>
          </TR>
       </TABLE>
@@ -376,36 +385,34 @@
          <TR>
          <TD>
          <UL>
-            <LI CLASS="lineheight1 style5"><B><I>March 2, 2006 : JScience 3.0</I></B><BR> 
+            <LI CLASS="lineheight1 style5"><B>April 2, 2006 : JScience 3.1</B><BR> 
+            New <A HREF="api/org/jscience/physics/measures/MeasureVector.html">MeasureVector</A> class
+            for multi-dimensional measurements [3.1.0] <BR>
+            Added <code>RationalConverter</code> for exact unit conversion. As a consequence
+            an exact <A HREF="api/org/jscience/physics/measures/package-summary.html#package_description">measurement</A>
+            may be stated in different units and is still exact [3.1.0] <BR> 
+            Automatic removal of terms with zero coefficients for polynomials [3.1.0] <BR> 
+            Fixed defects 27, 28, 29 (<A HREF="http://jscience.dev.java.net/">java.net</A> issues database) [3.1.0] <BR> 
+            </LI>
+            <LI CLASS="lineheight1 style5"><B>March 2, 2006 : JScience 3.0</B><BR> 
             Major upgrade of the library to leverage JDK 1.5 class paramaterization capabilities.<BR>
             Rigourous mapping of mathematical structures (e.g. Group, Ring, Field, etc.)<BR>
             A new measure module integrated with the units/quantities and the numbers modules
             (replace <code>org.jscience.physics.quantities</code> classes).<BR>
             Optimized implementation for vector/matrices of <code>double</code> type (VectorFloat64, MatrixFloat64).<BR>
+            Fixed defects 17, 19, 20, 21, 25 (<A HREF="http://jscience.dev.java.net/">java.net</A>) [3.0.2] <BR> 
             Added new quantities for flow rate and viscosity [3.0.1] <BR> 
             </LI>
 
-            <LI CLASS="lineheight1 style5"><B><I>January 22, 2006 : JSR-275 (v1.2) Prerelease</I></B><BR> 
-            Standalone quantities/units packages has been submitted to 
-            the JSR-275 for review. The new API can be browsed
-            <a href="http://jscience.org/jsr-275/api/">here</a>.<BR>
-            Standalone packages <a href="http://jscience.org/jsr-275/jsr-275-1.2.0-src.zip">source</a> and
-            <a href="http://jscience.org/jsr-275/jsr-275-1.2.0-bin.zip">binary</a> are also available.<BR> 
-            </LI>
-
             <LI CLASS="lineheight1 style5"><B>October 11, 2005 : JScience 2.0</B><BR> 
-            Official 2.0 release (all current issues fixed).<BR> 
             Javolution classes included into the JScience binary (.jar)<BR> 
             </LI>
 
-            <LI CLASS="lineheight1 style5"><B> January 26, 2005: JScience 1.0.4 </B> <BR> 
-            Custom interpolators for 
-            <A HREF="api/org/jscience/mathematics/functions/DiscreteFunction.html">DiscreteFunction</A> [1.0.4] <BR> 
+            <LI CLASS="lineheight1 style5"><B> January 26, 2005: JScience 1.0 </B> <BR> 
             Upgrade to Javolution 2.2 [1.0.3] <BR> 
             Upgrade to Javolution 2.0 [1.0.2] <BR> 
             Upgrade to Javolution 1.1 [1.0.1] <BR> 
-            Spin-off of <A HREF="http://jade.dautelle.com">Java(TM)
-            Addition to Default Environment </A> [1.0.0]
+            Spin-off of <A HREF="http://jade.dautelle.com">Java(TM) Addition to Default Environment </A> [1.0.0]
             </LI>
          </UL></TD>
          </TR>
@@ -425,7 +432,7 @@
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : March 3, 2006<BR>
+          Revision      : April 2, 2006<BR>
          </TD>
          </TR>
          <TR>

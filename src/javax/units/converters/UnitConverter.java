@@ -16,7 +16,7 @@ import java.io.Serializable;
  *    (e.g. currency converter).</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, January 14, 2006
+ * @version 3.1, April 2, 2006
  */
 public abstract class UnitConverter implements Serializable {
 

@@ -10,6 +10,7 @@ package javax.units;
 
 import javax.quantities.*;
 import javax.units.converters.MultiplyConverter;
+import javax.units.converters.RationalConverter;
 
 /**
  * <p> This class contains SI (Système International d'Unités) base units,
@@ -114,7 +115,7 @@ public final class SI {
      * The derived unit for mass quantities (<code>g</code>).
      * The base unit for mass quantity is {@link #KILOGRAM}.
      */
-    public static final Unit<Mass> GRAM = KILOGRAM.times(1e-3);
+    public static final Unit<Mass> GRAM = KILOGRAM.divide(1000);
 
     /**
      * The unit for plane angle quantities (<code>rad</code>).
@@ -577,37 +578,37 @@ public final class SI {
 
     static final MultiplyConverter E21 = new MultiplyConverter(1E21);
 
-    static final MultiplyConverter E18 = new MultiplyConverter(1E18);
+    static final RationalConverter E18 = new RationalConverter(1000000000000000000L, 1);
 
-    static final MultiplyConverter E15 = new MultiplyConverter(1E15);
+    static final RationalConverter E15 = new RationalConverter(1000000000000000L, 1);
 
-    static final MultiplyConverter E12 = new MultiplyConverter(1E12);
+    static final RationalConverter E12 = new RationalConverter(1000000000000L, 1);
 
-    static final MultiplyConverter E9 = new MultiplyConverter(1E9);
+    static final RationalConverter E9  = new RationalConverter(1000000000L, 1);
 
-    static final MultiplyConverter E6 = new MultiplyConverter(1E6);
+    static final RationalConverter E6 = new RationalConverter(1000000L, 1);
 
-    static final MultiplyConverter E3 = new MultiplyConverter(1E3);
+    static final RationalConverter E3 = new RationalConverter(1000L, 1);
 
-    static final MultiplyConverter E2 = new MultiplyConverter(1E2);
+    static final RationalConverter E2 = new RationalConverter(100L, 1);
 
-    static final MultiplyConverter E1 = new MultiplyConverter(1E1);
+    static final RationalConverter E1 = new RationalConverter(10L, 1);
 
-    static final MultiplyConverter Em1 = new MultiplyConverter(1E-1);
+    static final RationalConverter Em1 = new RationalConverter(1, 10L);
 
-    static final MultiplyConverter Em2 = new MultiplyConverter(1E-2);
+    static final RationalConverter Em2 = new RationalConverter(1, 100L);
 
-    static final MultiplyConverter Em3 = new MultiplyConverter(1E-3);
+    static final RationalConverter Em3 = new RationalConverter(1, 1000L);
 
-    static final MultiplyConverter Em6 = new MultiplyConverter(1E-6);
+    static final RationalConverter Em6 = new RationalConverter(1, 1000000L);
 
-    static final MultiplyConverter Em9 = new MultiplyConverter(1E-9);
+    static final RationalConverter  Em9 = new RationalConverter(1, 1000000000L);
 
-    static final MultiplyConverter Em12 = new MultiplyConverter(1E-12);
+    static final RationalConverter Em12 = new RationalConverter(1, 1000000000000L);
 
-    static final MultiplyConverter Em15 = new MultiplyConverter(1E-15);
+    static final RationalConverter Em15 = new RationalConverter(1, 1000000000000000L);
 
-    static final MultiplyConverter Em18 = new MultiplyConverter(1E-18);
+    static final RationalConverter Em18 = new RationalConverter(1, 1000000000000000000L);
 
     static final MultiplyConverter Em21 = new MultiplyConverter(1E-21);
 

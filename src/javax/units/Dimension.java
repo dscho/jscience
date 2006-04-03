@@ -206,5 +206,5 @@ public final class Dimension implements Serializable {
         return _pseudoUnit.hashCode();
     }
 
-    private static final long serialVersionUID = -5206990834227516550L;
+    private static final long serialVersionUID = 1L;
 }

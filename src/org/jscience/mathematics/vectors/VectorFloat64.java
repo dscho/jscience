@@ -22,8 +22,8 @@ import org.jscience.mathematics.structures.VectorSpaceNormed;
  * @see <a href="http://en.wikipedia.org/wiki/Vector_space">
  *      Wikipedia: Vector Space</a>
  */
-public final class VectorFloat64 extends Vector<Float64>
-     implements VectorSpaceNormed<Vector<Float64>, Float64> {
+public final class VectorFloat64 extends Vector<Float64> implements
+        VectorSpaceNormed<Vector<Float64>, Float64> {
 
     /**
      * Holds the values.
@@ -50,19 +50,20 @@ public final class VectorFloat64 extends Vector<Float64>
     }
 
     /**
-     * Returns an instance of this class equivalent to the specified
-     * vector.
+     * Returns a VectorFloat64 equivalent to the specified matrix.
      *
-     * @param vector the vector to copy into a {@link VectorFloat64} instance.
-     * @return the vector having the values of the specified vector.
+     * @param that the vector to convert. 
+     * @return <code>that</code> or new equivalent VectorFloat64.
      */
-    static VectorFloat64 newInstance(Vector<Float64> vector) {
-        int dimension = vector.getDimension();
+    static VectorFloat64 valueOf(Vector<Float64> that) {
+        if (that instanceof VectorFloat64)
+            return (VectorFloat64) that;
+        int dimension = that.getDimension();
         VectorFloat64 v = VectorFloat64.newInstance(dimension);
         for (int i = dimension; --i >= 0;) {
-            v._values[i] = vector.get(i).doubleValue();
+            v._values[i] = that.get(i).doubleValue();
         }
-        return v; 
+        return v;
     }
 
     /**
@@ -131,8 +132,7 @@ public final class VectorFloat64 extends Vector<Float64>
 
     @Override
     public Float64 times(Vector<Float64> that) {
-        VectorFloat64 v = (that instanceof VectorFloat64) ?
-                (VectorFloat64) that : VectorFloat64.newInstance(that);
+        VectorFloat64 v = VectorFloat64.valueOf(that);
         if (v._dimension != _dimension)
             throw new DimensionException();
         double sum = _values[0] * v._values[0];
@@ -153,8 +153,7 @@ public final class VectorFloat64 extends Vector<Float64>
 
     @Override
     public VectorFloat64 plus(Vector<Float64> that) {
-        VectorFloat64 v = (that instanceof VectorFloat64) ?
-                (VectorFloat64) that : VectorFloat64.newInstance(that);
+        VectorFloat64 v = VectorFloat64.valueOf(that);
         if (v._dimension != _dimension)
             throw new DimensionException();
         VectorFloat64 r = newInstance(_dimension);
@@ -166,8 +165,7 @@ public final class VectorFloat64 extends Vector<Float64>
 
     @Override
     public VectorFloat64 minus(Vector<Float64> that) {
-        VectorFloat64 v = (that instanceof VectorFloat64) ?
-                (VectorFloat64) that : VectorFloat64.newInstance(that);
+        VectorFloat64 v = VectorFloat64.valueOf(that);
         if (v._dimension != _dimension)
             throw new DimensionException();
         VectorFloat64 r = newInstance(_dimension);
@@ -186,6 +184,27 @@ public final class VectorFloat64 extends Vector<Float64>
         return v;
     }
 
+    @Override
+    public MatrixFloat64 asRowMatrix() {
+        int d = this.getDimension();
+        MatrixFloat64 M = MatrixFloat64.newInstance(1, d);
+        for (int i = 0; i < d; i++) {
+            M.set_(0, i, this.getValue(i));
+        }
+        return M;
+    }
+
+    @Override
+    public MatrixFloat64 asColumnMatrix() {
+        int d = this.getDimension();
+        MatrixFloat64 M = MatrixFloat64.newInstance(d, 1);
+        for (int i = 0; i < d; i++) {
+            M.set_(i, 0, this.getValue(i));
+        }
+        return M;
+    }
+
+
     // Sets the specified element.
     final void set_(int i, double value) {
         _values[i] = value;
@@ -195,11 +214,11 @@ public final class VectorFloat64 extends Vector<Float64>
     final double get_(int i) {
         return _values[i];
     }
-    
+
     ///////////////////////
     // Factory creation. //
     ///////////////////////
-    
+
     static VectorFloat64 newInstance(int dimension) {
         VectorFloat64 vector = FACTORY.object();
         if ((vector._values == null) || (vector._values.length < dimension)) {
@@ -219,4 +238,5 @@ public final class VectorFloat64 extends Vector<Float64>
     private VectorFloat64() {
     }
 
+    private static final long serialVersionUID = 1L;
 }

@@ -15,7 +15,7 @@ package javax.units.converters;
  * <p> Instances of this class are immutable.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, January 14, 2006
+ * @version 3.1, April 2, 2006
  */
 public final class MultiplyConverter extends UnitConverter {
 

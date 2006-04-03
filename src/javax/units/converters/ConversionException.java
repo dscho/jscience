@@ -13,7 +13,7 @@ package javax.units.converters;
  * converter between two units or during the conversion itself.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, January 14, 2006
+ * @version 3.1, April 2, 2006
  */
 public class ConversionException extends RuntimeException {
 

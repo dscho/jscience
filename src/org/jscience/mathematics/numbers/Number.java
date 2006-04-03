@@ -10,6 +10,7 @@ package org.jscience.mathematics.numbers;
 
 import org.jscience.mathematics.structures.Ring;
 import javolution.lang.Immutable;
+import javolution.lang.Text;
 import javolution.realtime.RealtimeObject;
 
 /**
@@ -158,6 +159,42 @@ public abstract class Number<T extends Number<T>> extends RealtimeObject
      */
     public final float floatValue() {
         return (float) doubleValue();
+    }
+    /**
+     * Indicates if this number is equals to the specified object.
+     *
+     * @param obj the object to be compared with.
+     * @return <code>true</code> if this number and the specified argument
+     *         represent the same number; <code>false</code> otherwise.
+     */
+    public abstract boolean equals(Object obj);
+
+    /**
+     * Returns the hash code for this number (consistent with 
+     * {@link #equals(Object)}.
+     *
+     * @return this number hash code.
+     */
+    public abstract int hashCode();
+
+    /**
+     * Returns the textual representation of this real-time object
+     * (equivalent to <code>toString</code> except that the returned value
+     * can be allocated from the local context space).
+     * 
+     * @return this object's textual representation.
+     */
+    public abstract Text toText();
+
+    /**
+     * Moves this real-time object to the specified object space.
+     * 
+     * @param os the object space to move this real-time object to.
+     * @return <code>true</code> if the move has to be propagated to 
+     *         external real-time references; <code>false</code> otherwise.
+     */
+    public boolean move(ObjectSpace os) {
+        return super.move(os);
     }
 
 }

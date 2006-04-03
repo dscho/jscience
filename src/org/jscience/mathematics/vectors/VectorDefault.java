@@ -16,7 +16,7 @@ import org.jscience.mathematics.structures.Field;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-final class VectorDefault<F extends Field> extends Vector<F> {
+final class VectorDefault<F extends Field<F>> extends Vector<F> {
 
     /**
      * Holds the vector's elements.
@@ -54,7 +54,8 @@ final class VectorDefault<F extends Field> extends Vector<F> {
     // Factory creation. //
     ///////////////////////
     
-    static <F extends Field> VectorDefault<F> newInstance(int dimension) {
+    @SuppressWarnings("unchecked")
+    static <F extends Field<F>> VectorDefault<F> newInstance(int dimension) {
         VectorDefault<F> v = FACTORY.object();
         if ((v._elements == null) || (v._elements.length < dimension)) {
             v._elements = (F[]) new Field[dimension];
@@ -72,4 +73,6 @@ final class VectorDefault<F extends Field> extends Vector<F> {
 
     private VectorDefault() {
     }
+
+    private static final long serialVersionUID = 1L;
 }

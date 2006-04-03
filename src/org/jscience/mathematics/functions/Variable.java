@@ -9,13 +9,16 @@
 package org.jscience.mathematics.functions;
 
 import javolution.lang.Reference;
+import javolution.realtime.LocalReference;
 
 /**
  * <p> This interface represents a symbol on whose value a {@link Function}
  *     depends. If the functions is not shared between multiple-threads the 
  *     simple {@link Variable.Local} implementation can be used. 
  *     For global functions (functions used concurrently by multiple threads)
- *     the {@link Variable.Global} implementation is provided.</p>
+ *     the {@link Variable.Global} implementation with 
+ *     {@link javolution.realtime.LocalContext context-local} settings is 
+ *     recommended.</p>
  *   
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
@@ -71,17 +74,36 @@ public interface Variable<X> extends Reference<X> {
     }
 
     /**
-     * This class represents a simple {@link Variable} implementation for 
-     * functions shared between threads (e.g. static functions). 
-     * The variable value is thread-local and can be set independantly
-     * by concurrent threads.
+     * This class represents a simple {@link Variable} implementation with 
+     * {@link javolution.realtime.LocalContext context-local} values.
+     * Instances of this class can be set independently by multiple-threads 
+     * as long as each concurrent thread executes within a 
+     * {@link javolution.realtime.LocalContext LocalContext}. For example:[code]
+     * public abstract class Engine  {
+     *     public static final Variable.Global<Measure<AngularVelocity>> RPM
+     *         = new Variable.Global<Measure<AngularVelocity>>("rpm");
+     *     public abstract Function<Measure<AngularVelocity>, Measure<Torque>> getTorque();    
+     * }
+     * ...
+     * LocalContext.enter(); 
+     * try {
+     *     RPM.set(rpm);
+     *     Measure<Torque> torque = myEngine.getTorque().evaluate();
+     * } finally {
+     *     LocalContext.exit();
+     * }[/code]
+     * It should be noted that parameterized evaluations are performed within
+     *  a local context. Therefore, the example
+     * above could also be rewritten:[code]
+     *     Measure<Torque> torque = myEngine.getTorque().evaluate(rpm);
+     * [/code]
      */
     public static class Global<X> implements Variable<X> {
 
         /**
          * Holds the reference value.
          */
-        private ThreadLocal<X> _value = new ThreadLocal<X>();
+        private LocalReference<X> _value = new LocalReference<X>();
 
         /**
          * Holds the variable symbol.

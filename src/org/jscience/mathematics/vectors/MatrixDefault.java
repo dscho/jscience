@@ -16,7 +16,8 @@ import org.jscience.mathematics.structures.Field;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-final class MatrixDefault<F extends Field> extends Matrix<F> {
+final class MatrixDefault<F extends Field<F>> extends Matrix<F> {
+
 
     /**
      * The array of field elements (M[i,j] = o[i*n+j], i < m, j < n).
@@ -65,7 +66,8 @@ final class MatrixDefault<F extends Field> extends Matrix<F> {
     // Factory creation. //
     ///////////////////////
     
-    static <F extends Field> MatrixDefault<F> newInstance(int m, int n) {
+    @SuppressWarnings("unchecked")
+    static <F extends Field<F>> MatrixDefault<F> newInstance(int m, int n) {
         MatrixDefault<F> M = FACTORY.object();
         M._numberOfRows = m;
         M._numberOfColumns = n;
@@ -86,4 +88,5 @@ final class MatrixDefault<F extends Field> extends Matrix<F> {
     private MatrixDefault() {        
     }
 
+    private static final long serialVersionUID = 1L;
 }

@@ -21,7 +21,9 @@ import javolution.xml.XmlFormat;
  *     known/guaranteed uncertainty. A real number consists of a 
  *     {@link #getMantissa mantissa}, a maximum {@link #getError error} 
  *     (on the mantissa) and a decimal {@link #getExponent exponent}: 
- *     (<code>(mantissa ± error) · 10<sup>exponent</sup></code>).<p>
+ *     (<code>(mantissa ± error) · 10<sup>exponent</sup></code>).
+ *     Except for {@link #ZERO}, reals number are never exact (tests for 
+ *     equality should employ the {@link #approximates} method).<p>
  * 
  * <p> The decimal representations of real instances are indicative of
  *     their precision as only exact digits are written out.
@@ -48,6 +50,8 @@ import javolution.xml.XmlFormat;
  *  
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Real_number">
+ *      Wikipedia: Real number</a>
  */
 public final class Real extends Number<Real> implements Field<Real> {
 
@@ -56,7 +60,7 @@ public final class Real extends Number<Real> implements Field<Real> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<Real> XML = new XmlFormat<Real>(Real.class) {
+    public static final XmlFormat<Real> XML = new XmlFormat<Real>(Real.class) {
         public void format(Real r, XmlElement xml) {
             xml.setAttribute("value", r.toText());
         }
@@ -70,24 +74,26 @@ public final class Real extends Number<Real> implements Field<Real> {
      * Holds a Not-a-Number instance (infinite error). 
      */
     public static final Real NaN = new Real();
+    static {
+        NaN._mantissa = LargeInteger.ZERO;
+    }
 
-    /**
-     * Holds the factory constructing real instances.
+    /** 
+     * Holds ZERO (the only real number being exact). 
      */
-    private static final Factory<Real> FACTORY = new Factory<Real>() {
-
-        public Real create() {
-            return new Real();
-        }
-    };
+    public static final Real ZERO = new Real();
+    static {
+        ZERO._mantissa = LargeInteger.ZERO;
+        ZERO._error = LargeInteger.ZERO;
+    }
 
     /**
      * The mantissa value.
      */
-    private LargeInteger _mantissa = LargeInteger.ZERO;
+    private LargeInteger _mantissa;
 
     /**
-     * The mantissa  error or <code>null</code> if NaN
+     * The mantissa  error or <code>null</code> if NaN.
      */
     private LargeInteger _error;
 
@@ -206,27 +212,29 @@ public final class Real extends Number<Real> implements Field<Real> {
      * @param doubleValue the <code>double</code> value to convert.
      */
     public static Real valueOf(double doubleValue) {
+        if (doubleValue == 0.0) return ZERO;
         long bits = Double.doubleToRawLongBits(doubleValue);
         boolean isNegative = (bits & 0x8000000000000000L) != 0L;
         int exponent = (int) ((bits & 0x7ff0000000000000L) >> 52);
         long mantissa = (bits & 0x000fffffffffffffL) | 0x0010000000000000L;
-        if (exponent != 0x7ff) {
-            Real unscaledMantissa = isNegative ? valueOf(LargeInteger
-                    .valueOf(-mantissa), LargeInteger.ONE, 0) : valueOf(
-                    LargeInteger.valueOf(mantissa), LargeInteger.ONE, 0);
-            int pow2 = exponent - 1023 - 52;
-            // Calculates the scale factor with at least 52 bits accuracy.
-            Real scale = Real.valueOf(E18.shiftLeft(MathLib.abs(pow2)),
-                    LargeInteger.ONE, -18);
-            return (pow2 >= 0)
-                    ? unscaledMantissa.times(scale).scale()
-                    : unscaledMantissa.divide(scale).scale();
-        } else {
+        if (exponent == 0x7ff)
             return NaN;
+        // real = pow2Mantissa * expFactor  
+        Real pow2Mantissa = valueOf(LargeInteger.valueOf(isNegative ? - mantissa : mantissa), LargeInteger.ONE, 0);
+        Real expFactor = FACTORY.object();
+        expFactor._error = LargeInteger.ZERO;
+        expFactor._exponent = -18;
+        int pow2 = exponent - 1023 - 52;
+        if (pow2 < 0) {
+            expFactor._mantissa = E18.shiftLeft(-pow2);
+            return pow2Mantissa.divide(expFactor);
+        } else {
+            expFactor._mantissa = E18.shiftLeft(pow2);
+            return pow2Mantissa.times(expFactor);
         }
     }
     private static final LargeInteger E18 
-    = LargeInteger.ONE.E(18); // > 52 bits precision.
+        = LargeInteger.ONE.E(18).moveHeap(); // > 52 bits precision.
 
     /**
      * Converts an integer value to a real instance. 
@@ -341,8 +349,8 @@ public final class Real extends Number<Real> implements Field<Real> {
     }
 
     /**
-     * Indicates if this real is approximately equals to the one 
-     * specified. This method takes into account possible errors (e.g. numeric
+     * Indicates if this real approximates the one specified. 
+     * This method takes into account possible errors (e.g. numeric
      * errors) to make this determination.
      *  
      * <p>Note: This method returns <code>false</code> if <code>this</code> or 
@@ -351,7 +359,7 @@ public final class Real extends Number<Real> implements Field<Real> {
      * @param  that the real to compare with.
      * @return <code>this &asymp; that</code>
      */
-    public boolean approxEquals(Real that) {
+    public boolean approximates(Real that) {
         Real diff = this.minus(that);
         if (diff._error != null) {
             return diff._error.isLargerThan(diff._mantissa);
@@ -427,7 +435,7 @@ public final class Real extends Number<Real> implements Field<Real> {
         } else if (this._exponent > that._exponent) {
             return this.minus(that.scale(this._exponent));
         } else {
-            return that.minus(this.scale(that._exponent));
+            return this.scale(that._exponent).minus(that);
         }
     }
 
@@ -637,10 +645,8 @@ public final class Real extends Number<Real> implements Field<Real> {
         }
         return txt;
     }
-    private static final LargeInteger FIVE = (LargeInteger) LargeInteger
-            .valueOf(5).moveHeap();
-    private static final LargeInteger MINUS_FIVE = (LargeInteger) LargeInteger
-            .valueOf(-5).moveHeap();
+    private static final LargeInteger FIVE = LargeInteger.valueOf(5).moveHeap();
+    private static final LargeInteger MINUS_FIVE = LargeInteger.valueOf(-5).moveHeap();
 
     /**
      * Compares this real number against the specified object.
@@ -753,8 +759,17 @@ public final class Real extends Number<Real> implements Field<Real> {
             return this;
         }
     }
-    private static final LargeInteger MAX_ERROR = (LargeInteger) LargeInteger.ONE
-            .E(16).moveHeap();
+    private static final LargeInteger MAX_ERROR = LargeInteger.ONE.E(16).moveHeap();
+
+    /**
+     * Holds the factory constructing real instances.
+     */
+    private static final Factory<Real> FACTORY = new Factory<Real>() {
+
+        public Real create() {
+            return new Real();
+        }
+    };
 
     private static final long serialVersionUID = 1L;
 

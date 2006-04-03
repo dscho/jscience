@@ -10,8 +10,8 @@
     <target name="init">
     	<tstamp/>
         <property name="library"   value="jscience" />
-        <property name="version"   value="3.0" />
-        <property name="release"   value="1" />
+        <property name="version"   value="3.1" />
+        <property name="release"   value="0" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />

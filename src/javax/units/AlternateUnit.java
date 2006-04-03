@@ -110,5 +110,5 @@ public final class AlternateUnit<Q extends Quantity> extends DerivedUnit<Q> {
         return _symbol.hashCode();
     }
 
-    private static final long serialVersionUID = 530937577308797441L;
+    private static final long serialVersionUID = 1L;
 }

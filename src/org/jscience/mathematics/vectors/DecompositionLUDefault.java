@@ -292,7 +292,7 @@ final class DecompositionLUDefault<F extends Field<F>> extends
     
     
     @SuppressWarnings("unchecked")
-    static <F extends Field> DecompositionLU<F> newInstance(Matrix<F> source) {
+    static <F extends Field<F>> DecompositionLU<F> newInstance(Matrix<F> source) {
         if (!source.isSquare())
             throw new DimensionException("Matrix is not square");
         int dimension = source.getNumberOfRows();

@@ -282,8 +282,8 @@ public class Currency extends DerivedUnit<Money> {
             return _invert ? _code.hashCode() : - _code.hashCode();
         }
 
-        private static final long serialVersionUID = 1109512010713045999L;
+        private static final long serialVersionUID = 1L;
     }
 
-    private static final long serialVersionUID = -7625950222079894860L;
+    private static final long serialVersionUID = 1L;
 }

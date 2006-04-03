@@ -33,5 +33,5 @@ public class DimensionException extends RuntimeException {
         super(message);
     }
 
-    private static final long serialVersionUID = -1316231269976461785L;
+    private static final long serialVersionUID = 1L;
 }

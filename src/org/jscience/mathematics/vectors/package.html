@@ -27,8 +27,8 @@
     resistors and the current (I) traversing the circuit.[code]
     import static org.jscience.physics.units.SI.*;
     
-            Measure<ElectricResistance> R1 = Measure.valueOf(1000, 1, OHM); // 1% precision. 
-            Measure<ElectricResistance> R2 = Measure.valueOf(3000, 3, OHM); // 1% precision.
+            Measure<ElectricResistance> R1 = Measure.valueOf(100, 1, OHM); // 1% precision. 
+            Measure<ElectricResistance> R2 = Measure.valueOf(300, 3, OHM); // 1% precision.
             Measure<ElectricPotential> U0 = Measure.valueOf(28, 0.01, VOLT); // ±0.01 V fluctuation.
 
             // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
@@ -44,18 +44,16 @@
             Vector<Measure> B = Vector.valueOf((Measure)U0, Measure.valueOf(0, VOLT), Measure.valueOf(0, VOLT));
             Vector<Measure> X = A.solve(B);
             System.out.println(X);
-            System.out.println(X.get(2).doubleValue(MILLI(AMPERE)) + " mA");
+            System.out.println(X.get(2).to(MILLI(AMPERE)));
 
-        > {7 V, 21 V, 7.0E-2 V/Ω}
-        > 70.00725072507251 mA
+        > {(7.0 ± 1.6E-1) V, (21.0 ± 1.5E-1) V, (7.0E-2 ± 7.3E-4) V/Ω}
+        > (70.0 ± 7.3E-1) mA
         [/code]
         
-    As you can see the estimated current (70.0072 mA) is slightly higher than the current
-    you would get using real numbers (28.0 / 400.0 = 70mA). This is due to the errors
-    on the input values (R1, R2, U0) and the fact that the relationship between the
-    resistors and the current is not linear (I = U/R).
-    The estimated value is the median value of the quantity interval. In this particular
-    case, the current is <b><i>guaranteed</i></b> to be: <code>70.00032 ±0.32 mA</code>.
-    If the inputs have no error specified, the error on the result corresponds to
-    calculations numeric errors only.</p>
+    Because the {@link org.jscience.physics.measures.Measure} class guarantees 
+    the accuracy/precision of its calculations. As long as the input resistances, voltage
+    stay within their specification range then the current <b>is guaranteed</b>
+    to be <code>(70.0 ± 7.3E-1) mA</code>. When the inputs have no error specified, 
+    the error on the result corresponds to calculations numeric errors only
+    (which might increase significantly if the matrix is close to singularity).</p>
 </body>

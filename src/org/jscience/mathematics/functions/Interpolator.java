@@ -25,12 +25,11 @@ import org.jscience.mathematics.structures.Field;
  *     
  * <p> Custom interpolators can be used between Java objects of different kind.
  *     For example:[code]
- *     // Creates a linear interpolator between the java.util.Date and Measure<Mass> types.
- *     dateMassLinear = new Interpolator<Date, Measure<Mass>>() { ... }
- *
- *     // Weight as a function of time. 
- *     DiscreteFunction<Date, Measure<Mass>> dateToWeight 
- *         = new DiscreteFunction<Date, Measure<Mass>>(samples, dateMassLinear, Variable.T);
+ *     // Creates a linear interpolator between the java.util.Date and Measures<Mass>
+ *     Interpolator<Date, Measure<Mass>> linear 
+ *          = new Interpolator<Date, Measure<Mass>>() { ... }
+ *     DiscreteFunction<Date, Measure<Mass>> weight 
+ *         = new DiscreteFunction<Date, Measure<Mass>>(samples, linear, t);
  *     [/code]</p>
  *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </a>
@@ -79,7 +78,7 @@ public interface Interpolator<P, V> extends Immutable, Serializable {
             return ((y1.times(k1))).plus(y2.times(k2));
         }        
 
-        private static final long serialVersionUID = 4043178066620269565L;
+        private static final long serialVersionUID = 1L;
     }
 
 }

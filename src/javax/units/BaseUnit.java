@@ -103,5 +103,5 @@ public class BaseUnit<Q extends Quantity> extends Unit<Q> {
         return UnitConverter.IDENTITY;
     }
 
-    private static final long serialVersionUID = 4709307296575248603L;
+    private static final long serialVersionUID = 1L;
 }

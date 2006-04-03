@@ -25,6 +25,8 @@ import javolution.xml.XmlFormat;
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Complex_number">
+ *      Wikipedia: Complex number</a>
  */
 public final class Complex extends Number<Complex> implements Field<Complex> {
 
@@ -541,5 +543,5 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
         return this.magnitude() > that.magnitude();
     }
 
-    private static final long serialVersionUID = -848517302600420283L;
+    private static final long serialVersionUID = 1L;
 }

@@ -9,7 +9,6 @@
 package org.jscience.physics.models;
 
 import static javax.units.Dimension.LENGTH;
-import static javax.units.Dimension.TIME;
 
 import javax.units.converters.UnitConverter;
 

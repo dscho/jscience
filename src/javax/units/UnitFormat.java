@@ -21,6 +21,7 @@ import javax.quantities.Quantity;
 import javax.units.converters.AddConverter;
 import javax.units.converters.UnitConverter;
 import javax.units.converters.MultiplyConverter;
+import javax.units.converters.RationalConverter;
 import static javax.units.SI.*;
 
 /**
@@ -273,6 +274,10 @@ public abstract class UnitFormat extends Format {
                 if (cvtr instanceof AddConverter) {
                     return "[" + baseUnits + "+"
                             + (((AddConverter) cvtr).getOffset()) + "]";
+                } else if (cvtr instanceof RationalConverter) {
+                    return "[" + baseUnits + "*"
+                            + ((RationalConverter) cvtr).getDividend() + "/" +
+                               ((RationalConverter) cvtr).getDivisor() + "]";
                 } else if (cvtr instanceof MultiplyConverter) {
                     return "[" + baseUnits + "*"
                             + (((MultiplyConverter) cvtr).derivative(0)) + "]";
@@ -693,12 +698,12 @@ public abstract class UnitFormat extends Format {
             "M", "k", "h", "da", "d", "c", "m", "µ", "n", "p", "f", "a", "z",
             "y" };
 
-    private static final MultiplyConverter[] CONVERTERS = { E24, E21, E18, E15, E12,
+    private static final UnitConverter[] CONVERTERS = { E24, E21, E18, E15, E12,
             E9, E6, E3, E2, E1, Em1, Em2, Em3, Em6, Em9, Em12,
             Em15, Em18, Em21, Em24 };
     
     private static String asciiPrefix(String prefix) {
-        return prefix == "µ" ? "micro" : "µ";
+        return prefix == "µ" ? "micro" : prefix;
     }
     
     
@@ -789,7 +794,7 @@ public abstract class UnitFormat extends Format {
         STANDARD.label(NonSI.MILE, "mi");
         STANDARD.label(NonSI.NAUTICAL_MILE, "nmi");
         STANDARD.label(NonSI.ANGSTROM, "Å");
-        ASCII.label(NonSI.ANGSTROM, "angstrom");
+        ASCII.label(NonSI.ANGSTROM, "Angstrom");
         STANDARD.label(NonSI.ASTRONOMICAL_UNIT, "ua");
         STANDARD.label(NonSI.LIGHT_YEAR, "ly");
         STANDARD.label(NonSI.PARSEC, "pc");

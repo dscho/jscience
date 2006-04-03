@@ -10,6 +10,7 @@ package org.jscience.physics.measures;
 
 import java.io.Serializable;
 
+import javolution.lang.Immutable;
 import javolution.lang.MathLib;
 import javolution.lang.Text;
 import javolution.realtime.RealtimeObject;
@@ -21,6 +22,7 @@ import javolution.xml.XmlFormat;
 import org.jscience.mathematics.structures.Field;
 
 import javax.units.converters.ConversionException;
+import javax.units.converters.RationalConverter;
 import javax.units.converters.UnitConverter;
 import javax.units.Unit;
 import javax.quantities.Dimensionless;
@@ -37,13 +39,13 @@ import javax.realtime.MemoryArea;
  *     expressed as an exact <code>long</code> integer in the measure unit.
  *     The framework tries to keep measures exact as much as possible.
  *     For example:[code]
- *        Measure<Length> m = Measure.valueOf(100, FOOT).sqrt().divide(5).to(FOOT);
+ *        Measure<Length> m = Measure.valueOf(33, FOOT).divide(11).times(2);
  *        System.out.println(m);
  *        System.out.println(m.isExact() ? "exact" : "inexact");
  *        System.out.println(m.getExactValue());
- *        > 2 ft
+ *        > 6 ft
  *        > exact
- *        > 2[/code] 
+ *        > 6[/code] 
  *     </p>
  *     
  * <p> Errors (including numeric errors) are calculated using numeric intervals.
@@ -65,7 +67,7 @@ import javax.realtime.MemoryArea;
  *     <code>Measure&lt;Duration&gt; is not allowed by the 
  *     {@link org.jscience.physics.models.StandardModel StandardModel}, 
  *     but is authorized with the {@link
- *     org.jscience.physics.models.RelativisticModel RelativisticModel}).</p>
+ *     org.jscience.physics.models.RelativisticModel RelativisticModel}.</p>
  *     
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 26, 2006
@@ -73,7 +75,7 @@ import javax.realtime.MemoryArea;
  *       Wikipedia: Measuring</a>
  */
 public final class Measure<Q extends Quantity> extends RealtimeObject implements
-        Quantity<Q>, Field<Measure>, Comparable<Measure>, Serializable {
+        Quantity<Q>, Field<Measure<?>>, Comparable<Measure>, Serializable, Immutable {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Note: In the future, Measure might be abstract (with more measure types)   // 
@@ -361,14 +363,22 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
     public <R extends Quantity> Measure<R> to(Unit<R> unit) {
         if ((_unit == unit) || this._unit.equals(unit))
             return (Measure<R>) this;
-        Measure<R> m = Measure.newInstance(unit);
+        Measure result = this;
         UnitConverter cvtr = Measure.converterOf(_unit, unit);
+        if (cvtr instanceof RationalConverter) {
+             RationalConverter rc = (RationalConverter) cvtr;
+             result = rc.getDividend() != 1 ? result.times(rc.getDividend()) : result;
+             result = rc.getDivisor() != 1 ? result.divide(rc.getDivisor()) : result;
+             result._unit = unit;
+             return result;
+        }
+        result = Measure.newInstance(unit);
         double min = cvtr.convert(_minimum);
         double max = cvtr.convert(_maximum);
-        m._isExact = false;
-        m._minimum = (min < 0) ? min * INCREMENT : min * DECREMENT;
-        m._maximum = (max < 0) ? max * DECREMENT : max * INCREMENT;
-        return m;
+        result._isExact = false;
+        result._minimum = (min < 0) ? min * INCREMENT : min * DECREMENT;
+        result._maximum = (max < 0) ? max * DECREMENT : max * INCREMENT;
+        return result;
     }
 
     /**
@@ -396,18 +406,17 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
      */
     @SuppressWarnings("unchecked")
     public Measure<Q> plus(Measure that) throws ConversionException {
-        if ((this._unit != that._unit) && !this._unit.equals(that._unit))
-            return this.plus(that.to(_unit));
+        final Measure thatToUnit = that.to(_unit);
         Measure<Q> m = Measure.newInstance(_unit);
-        if (this._isExact && that._isExact) {
-            long sumLong = this._exactValue + that._exactValue;
+        if (this._isExact && thatToUnit._isExact) {
+            long sumLong = this._exactValue + thatToUnit._exactValue;
             double sumDouble = ((double) this._exactValue)
-                    + ((double) that._exactValue);
+                    + ((double) thatToUnit._exactValue);
             if (sumLong == sumDouble)
                 return m.setExact(sumLong);
         }
-        double min = this._minimum + that._minimum;
-        double max = this._maximum + that._maximum;
+        double min = this._minimum + thatToUnit._minimum;
+        double max = this._maximum + thatToUnit._maximum;
         m._isExact = false;
         m._minimum = (min < 0) ? min * INCREMENT : min * DECREMENT;
         m._maximum = (max < 0) ? max * DECREMENT : max * INCREMENT;
@@ -424,18 +433,17 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
      */
     @SuppressWarnings("unchecked")
     public Measure<Q> minus(Measure that) throws ConversionException {
-        if ((this._unit != that._unit) && !this._unit.equals(that._unit))
-            return this.minus(that.to(_unit));
+        final Measure thatToUnit = that.to(_unit);
         Measure<Q> m = Measure.newInstance(_unit);
-        if (this._isExact && that._isExact) {
-            long diffLong = this._exactValue - that._exactValue;
+        if (this._isExact && thatToUnit._isExact) {
+            long diffLong = this._exactValue - thatToUnit._exactValue;
             double diffDouble = ((double) this._exactValue)
-                    - ((double) that._exactValue);
+                    - ((double) thatToUnit._exactValue);
             if (diffLong == diffDouble)
                 return m.setExact(diffLong);
         }
-        double min = this._minimum - that._maximum;
-        double max = this._maximum - that._minimum;
+        double min = this._minimum - thatToUnit._maximum;
+        double max = this._maximum - thatToUnit._minimum;
         m._isExact = false;
         m._minimum = (min < 0) ? min * INCREMENT : min * DECREMENT;
         m._maximum = (max < 0) ? max * DECREMENT : max * INCREMENT;
@@ -723,20 +731,19 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
      */
     @SuppressWarnings("unchecked")
     public int compareTo(Measure that) {
-        if ((this._unit != that._unit) && !this._unit.equals(that._unit))
-            return this.compareTo(that.to(_unit));
-        if (this._isExact && that._isExact)
-            return this._exactValue < that._exactValue ? -1
-                    : this._exactValue > that._exactValue ? 1 : 0;
+        Measure thatToUnit = that.to(_unit);
+        if (_isExact && thatToUnit._isExact)
+            return _exactValue < thatToUnit._exactValue ? -1
+                    : _exactValue > thatToUnit._exactValue ? 1 : 0;
         double thisValue = this.getEstimatedValue();
-        double thatValue = this.getEstimatedValue();
-        if (thisValue < thatValue) {
+        double thatToUnitValue = thatToUnit.getEstimatedValue();
+        if (thisValue < thatToUnitValue) {
             return -1;
-        } else if (thisValue > thatValue) {
+        } else if (thisValue > thatToUnitValue) {
             return 1;
         } else {
             long l1 = Double.doubleToLongBits(thisValue);
-            long l2 = Double.doubleToLongBits(thatValue);
+            long l2 = Double.doubleToLongBits(thatToUnitValue);
             return (l1 == l2 ? 0 : (l1 < l2 ? -1 : 1));
         }
     }
@@ -782,16 +789,20 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
     }
 
     /**
-     * Indicates if this measure is definitively distinct from that 
-     * measure. Measures are considered distinct if their value intervals
-     * do not overlap.
+     * Indicates if this measure approximates that measure.
+     * Measures are considered approximately equals if their value intervals
+     * overlaps. It should be noted that less accurate measurements are 
+     * more likely to be approximately equals. It is therefore recommended
+     * to ensure that the measurement error is not too large before testing
+     * for approximate equality.
      *
-     * @return <code>true</code> if this measure and that measure are 
-     *         distinct; <code>false</code> otherwise.
+     * @return <code>this ≅ that</code>
      */
-    public boolean isDistinctFrom(Measure<Q> that) {
-        return (this._maximum < that._minimum)
-                || (that._maximum < this._minimum);
+    @SuppressWarnings("unchecked")
+    public boolean approximates(Measure that) {
+        Measure thatToUnit = that.to(_unit);
+        return (this._maximum >= thatToUnit._minimum)
+                && (thatToUnit._maximum >= this._minimum);
     }
 
     /**
@@ -994,5 +1005,5 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
 
     static final double INCREMENT = (1.0 + DOUBLE_RELATIVE_ERROR);
 
-    private static final long serialVersionUID = 4467570852177749786L;
+    private static final long serialVersionUID = 1L;
 }

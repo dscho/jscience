@@ -16,14 +16,14 @@ import javolution.xml.XmlElement;
 import javolution.xml.XmlFormat;
 
 /**
- * <p> This class represents an modulo integer. It can be used in conjonction 
+ * <p> This class represents a modulo integer. It can be used in conjonction 
  *     with the {@link org.jscience.mathematics.vectors.Matrix Matrix}
  *     class to resolve modulo equations (ref. number theory).</p>
  *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
- * @see     <a href="http://mathworld.wolfram.com/KaratsubaMultiplication.html">
- *          Karatsuba Multiplication -- from MathWorld</a>
+ * @see <a href="http://en.wikipedia.org/wiki/Modular_arithmetic">
+ *      Wikipedia: Modular Arithmetic</a>
  */
 public final class ModuloInteger extends Number<ModuloInteger> implements Field<ModuloInteger> {
     
@@ -32,7 +32,7 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<ModuloInteger> XML = new XmlFormat<ModuloInteger>(
+    public static final XmlFormat<ModuloInteger> XML = new XmlFormat<ModuloInteger>(
             ModuloInteger.class) {
         public void format(ModuloInteger obj, XmlElement xml) {
             xml.setAttribute("value", obj._value.toText());
@@ -46,12 +46,18 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
     /**
      * The modulo integer representing the additive identity.
      */
-    public static final ModuloInteger ZERO = new ModuloInteger(LargeInteger.ZERO);
+    public static final ModuloInteger ZERO = new ModuloInteger();
+    static {
+        ZERO._value = LargeInteger.ZERO;
+    }
 
     /**
      * The modulo integer representing the multiplicative identity.
      */
-    public static final ModuloInteger ONE = new ModuloInteger(LargeInteger.ONE);
+    public static final ModuloInteger ONE = new ModuloInteger();
+    static {
+        ONE._value = LargeInteger.ONE;
+    }
 
     /**
      * Holds the local modulus (for modular arithmetic).
@@ -63,16 +69,6 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
      * Holds the large integer value.
      */
     private LargeInteger _value;
-
-    /**
-     * Creates a modulo integer having the specified value (independently of
-     * the current modulo).
-     * 
-     * @param value the modulo integer intrinsic value.
-     */
-    public ModuloInteger(LargeInteger value) {
-        
-    }
 
     /**
      * Returns the modulo integer having the specified value (independently of
@@ -243,5 +239,5 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
     private ModuloInteger() {
     }
 
-    private static final long serialVersionUID = -842729139015064744L;
+    private static final long serialVersionUID = 1L;
 }

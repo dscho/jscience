@@ -8,15 +8,16 @@
  */
 package org.jscience.mathematics.functions;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jscience.mathematics.structures.GroupAdditive;
 import org.jscience.mathematics.structures.GroupMultiplicative;
 import org.jscience.mathematics.structures.Ring;
 
 import javolution.util.FastMap;
-import javolution.util.FastSet;
+import javolution.util.FastTable;
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 
@@ -25,35 +26,32 @@ import javolution.lang.TextBuilder;
  *     in one or more {@link Variable variables} multiplied by 
  *     coefficients (such as <code>x² + x·y + 3y²</code>).</p>
  *     
- * <p> Polynomials are also characterized by the type of variable they operate 
+ * <p> Polynomials are characterized by the type of variable they operate 
  *     upon. For example:[code]
- *           Polynomial<Measure> x = Polynomial.valueOf(new Measure(1, SI.METER), Variable.X);
+ *           Variable<Measure<?>> varX = new Variable.Local<Measure<?>>("x");
+ *           Polynomial<Measure<?>> x = Polynomial.valueOf(Measure.valueOf(1, SI.METER), varX);
  *     and
- *           Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, Variable.T);[/code]
- *     are two different polynomials, the first operates on 
- *     {@link org.jscience.physics.measures.Measure measurable quantities},
+ *           Variable<Complex> varX = new Variable.Local<Complex>("x");
+ *           Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, new varX);[/code]
+ *     are two different polynomials, the first one operates on physical 
+ *     {@link org.jscience.physics.measures.Measure measures},
  *     whereas the second operates on 
  *     {@link org.jscience.mathematics.numbers.Complex complex} numbers.</p>
+ *     
+ * <p> Terms (others than {@link Term#ONE ONE}) having zero (additive identity) 
+ *     for coefficient are automatically removed.</p>    
  * 
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 3.1, April 1, 2006
  */
-public class Polynomial<R extends Ring<R>> extends Function<R, R> {
+public class Polynomial<R extends Ring<R>> extends Function<R, R> implements 
+         Ring<Polynomial<R>> {
 
     /**
-     * Holds the factory constructing polynomial instances.
+     * Holds the terms to coefficients mapping 
+     * (never empty, holds Term.ONE when constant)
      */
-    private static final Factory<Polynomial> FACTORY = new Factory<Polynomial>() {
-
-        protected Polynomial create() {
-            return new Polynomial();
-        }
-    };
-
-    /**
-     * Holds the terms of this polynomial with their associated coefficients.
-     */
-    FastMap<Term, R> _terms;
+    FastMap<Term, R> _termToCoef = new FastMap<Term, R>();
 
     /**
      * Default constructor.
@@ -84,23 +82,24 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
      */
     public static <R extends Ring<R>> Polynomial<R> valueOf(R coefficient,
             Term term) {
-        if (term != Term.CONSTANT) {
-            Polynomial<R> p = FACTORY.object();
-            p._terms = FastMap.newInstance();
-            p._terms.put(term, coefficient);
-            return p;
-        } else {
-            return Constant.valueOf(coefficient);
-        }
+        if (term.equals(Term.ONE)) return Constant.valueOf(coefficient);
+        if (isZero(coefficient)) return Constant.valueOf(coefficient);
+        Polynomial<R> p = Polynomial.newInstance();
+        p._termToCoef.put(term, coefficient);
+        return p;
     }
 
+    private static boolean isZero(GroupAdditive coefficient) {
+        return coefficient.equals(coefficient.opposite());
+    }
+    
     /**
      * Returns the terms of this polynomial.
      * 
      * @return this polynomial's terms.
      */
-    public Collection<Term> getTerms() {
-        return _terms.keySet();
+    public Set<Term> getTerms() {
+        return _termToCoef.unmodifiable().keySet();
     }
 
     /**
@@ -110,8 +109,8 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
      * @return the coefficient for the specified term or <code>null</code>
      *         if this polynomial does not contain the specified term.
      */
-    public R getCoefficient(Term term) {
-        return _terms.get(term);
+    public final R getCoefficient(Term term) {
+        return _termToCoef.get(term);
     }
 
     /**
@@ -119,39 +118,15 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
      * 
      * @return the polynomial order relative to the specified variable.
      */
-    public int getOrder(Variable v) {
+    public int getOrder(Variable<R> v) {
         int order = 0;
-        for (Term term : _terms.keySet()) {
+        for (Term term : _termToCoef.keySet()) {
             int power = term.getPower(v);
             if (power > order) {
                 order = power;
             }
         }
         return order;
-    }
-
-    /**
-     * Compares this polynomial against the specified object.
-     * 
-     * @param that the object to compare with.
-     * @return <code>true</code> if the objects are the same;
-     *         <code>false</code> otherwise.
-     */
-    public boolean equals(Object that) {
-        if (that instanceof Polynomial) {
-            return this._terms.equals(((Polynomial) that)._terms);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Returns the hash code for this polynomial.
-     * 
-     * @return the hash code value.
-     */
-    public int hashCode() {
-        return _terms.hashCode();
     }
 
     /**
@@ -166,29 +141,6 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
     }
 
     /**
-     * Returns the sum of two polynomials.
-     * 
-     * @param that the polynomial being added.
-     * @return <code>this + that</code>
-     */
-    public Polynomial<R> plus(Polynomial<R> that) {
-        Polynomial<R> result = FACTORY.object();
-        result._terms = FastMap.newInstance();
-        result._terms.putAll(this._terms);
-        for (Map.Entry<Term, R> entry : that._terms.entrySet()) {
-            Term term = entry.getKey();
-            R thatCoef = entry.getValue();
-            R thisCoef = result._terms.get(term);
-            if (thisCoef != null) {
-                result._terms.put(term, thisCoef.plus(thatCoef));
-            } else {
-                result._terms.put(term, thatCoef);
-            }
-        }
-        return result;
-    }
-
-    /**
      * Returns the product of this polynomial with a constant polynomial 
      * having the specified value (convenience method).
      * 
@@ -200,31 +152,88 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
     }
 
     /**
+     * Returns the sum of two polynomials.
+     * 
+     * @param that the polynomial being added.
+     * @return <code>this + that</code>
+     */
+    public Polynomial<R> plus(Polynomial<R> that) {
+        Polynomial<R> result = Polynomial.newInstance();
+        R zero = null;
+        result._termToCoef.putAll(this._termToCoef);
+        result._termToCoef.putAll(that._termToCoef);
+        for (FastMap.Entry<Term, R> e = result._termToCoef.head(), 
+                end = result._termToCoef.tail(); (e = e.getNext()) != end;) {
+            Term term = e.getKey();
+            R thisCoef = this._termToCoef.get(term);
+            R thatCoef = that._termToCoef.get(term);
+            if ((thisCoef != null) && (thatCoef != null)) {
+                R sum = thisCoef.plus(thatCoef);
+                if (isZero(sum)) { // Remove entry (be careful iterating)
+                    FastMap.Entry<Term, R> prev = e.getPrevious();
+                    result._termToCoef.remove(term);
+                    e = prev; // Move back to previous entry.
+                    zero = sum; // To be used if constant polynomial.
+                } else {
+                    result._termToCoef.put(term, sum);
+                }
+            } // Else the current coefficient is correct.
+        }
+        if (result._termToCoef.size() == 0) return Constant.valueOf(zero);
+        return result;
+    }
+
+    /**
+     * Returns the opposite of this polynomial.
+     * 
+     * @return <code> - this</code>
+     */
+    public Polynomial<R> opposite() {
+        Polynomial<R> result = Polynomial.newInstance();
+        for (FastMap.Entry<Term, R> e = _termToCoef.head(), 
+                end = _termToCoef.tail(); (e = e.getNext()) != end;) {
+            result._termToCoef.put(e.getKey(), e.getValue().opposite());
+        }
+        return result;
+    }
+    
+    /**
+     * Returns the difference of two polynomials.
+     * 
+     * @param that the polynomial being subtracted.
+     * @return <code>this - that</code>
+     */
+    public Polynomial<R> minus(Polynomial<R> that) {
+        return this.plus(that.opposite());
+    }
+
+    /**
      * Returns the product of two polynomials.
      * 
      * @param that the polynomial multiplier.
      * @return <code>this · that</code>
      */
     public Polynomial<R> times(Polynomial<R> that) {
-        Polynomial<R> result = FACTORY.object();
-        result._terms = FastMap.newInstance();
-        for (Map.Entry<Term, R> entry1 : this._terms.entrySet()) {
+        Polynomial<R> result = Polynomial.newInstance();
+        R zero = null;
+        for (Map.Entry<Term, R> entry1 : this._termToCoef.entrySet()) {
             Term t1 = entry1.getKey();
             R c1 = entry1.getValue();
-            for (Map.Entry<Term, R> entry2 : that._terms.entrySet()) {
+            for (Map.Entry<Term, R> entry2 : that._termToCoef.entrySet()) {
                 Term t2 = entry2.getKey();
                 R c2 = entry2.getValue();
-
                 Term t = t1.times(t2);
                 R c = c1.times(c2);
                 R prev = result.getCoefficient(t);
-                if (prev != null) {
-                    result._terms.put(t, prev.plus(c));
+                R coef = (prev != null) ? prev.plus(c) : c;
+                if (isZero(coef)) {
+                    zero = coef;
                 } else {
-                    result._terms.put(t, c);
+                    result._termToCoef.put(t, coef);
                 }
             }
         }
+        if (result._termToCoef.size() == 0) return Constant.valueOf(zero);
         return result;
     }
 
@@ -237,13 +246,12 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
      * @throws FunctionException if this function is not univariate.
      */
     public Polynomial<R> compose(Polynomial<R> that) {
-        Set<Variable<R>> variables = getVariables();
-        if (variables.size() != 1)
-            throw new FunctionException("Single variable required: "
-                    + variables);
-        Variable v = variables.iterator().next();
+        List<Variable<R>> variables = getVariables();
+        if (getVariables().size() != 1)
+            throw new FunctionException("This polynomial is not monovariate");
+        Variable<R> v = variables.get(0);
         Polynomial<R> result = null;
-        for (Map.Entry<Term, R> entry : this._terms.entrySet()) {
+        for (Map.Entry<Term, R> entry : this._termToCoef.entrySet()) {
             Term term = entry.getKey();
             Constant<R> cst = Constant.valueOf(entry.getValue());
             int power = term.getPower(v);
@@ -258,86 +266,22 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
         return result;
     }
 
-    // Implements abstract method.
-    public Set<Variable<R>> getVariables() {
-        FastSet variables = FastSet.newInstance();
-        for (Term term : _terms.keySet()) {
-            variables.addAll(term.getVariables());
-        }
-        return variables;
+    ////////////////////////////////////////////////////////////////
+    // Overrides parent method potentially returning polynomials  //
+    ////////////////////////////////////////////////////////////////
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <Z> Function<Z, R> compose(Function<Z, R> that) {
+      return (Function<Z, R>) ((that instanceof Polynomial) ?
+      compose((Polynomial)that) : super.compose(that)); 
     }
 
-    // Implements abstract method.
-    public R evaluate() {
-        R sum = null;
-        for (Map.Entry<Term, R> entry : _terms.entrySet()) {
-            Term term = entry.getKey();
-            R coef = entry.getValue();
-            R product = (term == Term.CONSTANT) ? coef : coef.times((R) term
-                    .evaluate());
-            sum = (sum == null) ? product : sum.plus(product);
-        }
-        return sum;
-    }
-
-    // Implements interface.
-    public Text toText() {
-        TextBuilder tb = TextBuilder.newInstance();
-        boolean first = true;
-        for (Map.Entry<Term, R> entry : _terms.entrySet()) {
-            tb.append(first ? "" : " + ");
-            first = false;
-            Term term = entry.getKey();
-            R coef = entry.getValue();
-            tb.append('[');
-            tb.append(coef);
-            tb.append(']');
-            tb.append(term);
-        }
-        return tb.toText();
-    }
-
-    // Overrides
-    public Function<R, R> plus(Function<R, R> that) {
-        if (that instanceof Polynomial) 
-            return plus((Polynomial<R>)that);
-        return super.plus(that);
-    }
-
-    // Overrides.
-    public Polynomial<R> opposite() {
-        Polynomial<R> result = FACTORY.object();
-        result._terms = FastMap.newInstance();
-        for (Map.Entry<Term, R> entry : _terms.entrySet()) {
-            result._terms.put(entry.getKey(), entry.getValue().opposite());
-        }
-        return result;
-    }
-
-    // Overrides.
-    public Function<R, R> times(Function<R, R> that) {
-        if (that instanceof Polynomial) 
-            return times((Polynomial<R>)that);
-        return super.times(that);
-    }
-
-    // Overrides.
-    public Polynomial<R> pow(int n) {
-        return (Polynomial<R>) super.pow(n);
-    }
-        
-    // Overrides.
-    public <Z> Function<Z, R> compose(Function<Z, ? extends Ring> that) {
-        if (that instanceof Polynomial) 
-            return (Function) compose((Polynomial)that);
-        return super.compose(that);
-    }
-
-    // Overrides.
-    public Polynomial<R> differentiate(Variable v) {
+    @Override
+    public Polynomial<R> differentiate(Variable<R> v) {
         if (this.getOrder(v) > 0) {
             Polynomial<R> result = null;
-            for (Map.Entry<Term, R> entry : this._terms.entrySet()) {
+            for (Map.Entry<Term, R> entry : this._termToCoef.entrySet()) {
                 Term term = entry.getKey();
                 R coef = entry.getValue();
                 int power = term.getPower(v);
@@ -350,7 +294,7 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
             }
             return result;
         } else { // Returns zero.
-            R coef = _terms.values().iterator().next();
+            R coef = _termToCoef.values().iterator().next();
             return Constant.valueOf(coef.plus(coef.opposite()));
         }
     }
@@ -371,10 +315,11 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
         return result;
     }
 
-    // Overrides.
-    public Polynomial<R> integrate(Variable v) {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Polynomial<R> integrate(Variable<R> v) {
         Polynomial<R> result = null;
-        for (Map.Entry<Term, R> entry : this._terms.entrySet()) {
+        for (Map.Entry<Term, R> entry : this._termToCoef.entrySet()) {
             Term term = entry.getKey();
             R coef = entry.getValue();
             int power = term.getPower(v);
@@ -386,14 +331,107 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> {
         return result;
     }
 
-    // Overrides.
+    @Override
+    public Function<R, R> plus(Function<R, R> that) {
+        return (that instanceof Polynomial) ?
+                this.plus((Polynomial<R>)that) : super.plus(that);       
+    }
+
+    @Override
+    public Function<R, R> minus(Function<R, R> that) {
+        return (that instanceof Polynomial) ?
+                this.minus((Polynomial<R>)that) : super.minus(that);       
+    }
+
+    @Override
+    public Function<R, R> times(Function<R, R> that) {
+        return (that instanceof Polynomial) ?
+                this.times((Polynomial<R>)that) : super.times(that);       
+    }
+    
+    @Override
+    public Polynomial<R> pow(int n) {
+        return (Polynomial<R>) super.pow(n);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Variable<R>> getVariables() {
+        List vars = _termToCoef.head().getNext().getKey().getVariables();
+        for (FastMap.Entry<Term, R> e = _termToCoef.head().getNext(), 
+                end = _termToCoef.tail(); (e = e.getNext()) != end;) {
+            vars = merge(vars, e.getKey().getVariables());
+        }
+        return (List<Variable<R>>) vars;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public R evaluate() {
+        R sum = null;
+        for (Map.Entry<Term, R> entry : _termToCoef.entrySet()) {
+            Term term = entry.getKey();
+            R coef = entry.getValue();
+            R termValue = (R) term.evaluate();
+            R value = (termValue != null) ? coef.times(termValue) : coef;
+            sum = (sum == null) ? value : sum.plus(value);
+        }
+        return sum;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Polynomial))
+            return false;
+        Polynomial that = (Polynomial) obj;
+        return this._termToCoef.equals(that._termToCoef);
+    }
+
+    @Override
+    public int hashCode() {
+        return _termToCoef.hashCode();
+    }
+
+    @Override
+    public Text toText() {
+        FastTable<Term> terms = FastTable.newInstance();
+        terms.addAll(_termToCoef.keySet());
+        terms.sort();
+        TextBuilder tb = TextBuilder.newInstance();
+        for (int i=0, n = terms.size(); i < n; i++) {
+            if (i != 0) {
+                tb.append(" + ");
+            }
+            tb.append('[').append(_termToCoef.get(terms.get(i)));
+            tb.append(']').append(terms.get(i));
+        }
+        return tb.toText();
+    }
+
+    @Override
     public boolean move(ObjectSpace os) {
         if (super.move(os)) {
-            _terms.move(os);
+            _termToCoef.move(os);
             return true;
         }
         return false;
     }
+    
+    @SuppressWarnings("unchecked")
+    private static <R extends Ring<R>> Polynomial<R> newInstance() {
+        return FACTORY.object();
+    }
+    private static final Factory<Polynomial> FACTORY = new Factory<Polynomial>() {
+
+        protected Polynomial create() {
+            return new Polynomial();
+        }
+        
+        protected void cleanup(Polynomial p) {
+            p._termToCoef.reset();
+        }
+    };
 
     private static final long serialVersionUID = 1L;
+
 }

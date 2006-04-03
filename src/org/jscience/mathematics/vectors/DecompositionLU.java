@@ -11,7 +11,6 @@ package org.jscience.mathematics.vectors;
 import java.util.Comparator;
 
 import org.jscience.mathematics.structures.Field;
-import org.jscience.mathematics.numbers.Float64;
 import org.jscience.mathematics.numbers.Number;
 
 import javolution.realtime.LocalReference;
@@ -43,7 +42,8 @@ import javolution.realtime.RealtimeObject;
  * @see <a href="http://en.wikipedia.org/wiki/LU_decomposition">
  *      Wikipedia: LU decomposition</a>
  */
-public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
+public abstract class DecompositionLU<F extends Field<F>> extends
+        RealtimeObject {
 
     /**
      * Holds the default comparator for pivoting.
@@ -65,8 +65,7 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
     /**
      * Holds the local comparator.
      */
-    private static final LocalReference<Comparator<Field>>
-         PIVOT_COMPARATOR = new LocalReference<Comparator<Field>>(
+    private static final LocalReference<Comparator<Field>> PIVOT_COMPARATOR = new LocalReference<Comparator<Field>>(
             NUMERIC_COMPARATOR);
 
     /**
@@ -82,20 +81,14 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @return the lower/upper decomposition of the specified matrix.
      * @throws DimensionException if the specified matrix is not square.
      */
-    public static <F extends Field> DecompositionLU<F> valueOf(Matrix<F> source) {
-         return DecompositionLUDefault.newInstance(source);
-    }
-
-    /**
-     * Returns the lower/upper decomposition of the specified 64 bits 
-     * float matrix.
-     *
-     * @param  source the matrix for which the decomposition is calculated.
-     * @return the lower/upper decomposition of the specified matrix.
-     * @throws DimensionException if the specified matrix is not square.
-     */
-    public static <F extends Field> DecompositionLU<Float64> valueOf(MatrixFloat64 source) {
-         return DecompositionLUDefault.newInstance(source); // TODO
+    @SuppressWarnings("unchecked")
+    public static <F extends Field<F>> DecompositionLU<F> valueOf(
+            Matrix<F> source) {
+        Matrix s = source;
+        if (s instanceof MatrixFloat64)
+            return (DecompositionLU) DecompositionLUFloat64
+                    .newInstance((MatrixFloat64) s);
+        return DecompositionLUDefault.newInstance(source);
     }
 
     /**
@@ -128,7 +121,7 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @throws DimensionException if the dimensions do not match.
      */
     public abstract Vector<F> solve(Vector<F> B);
-    
+
     /**
      * Returns the solution X of the equation: A * X = B  with
      * <code>this = A.lu()</code> using back and forward substitutions.
@@ -138,7 +131,7 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @throws DimensionException if the dimensions do not match.
      */
     public abstract Matrix<F> solve(Matrix<F> B);
-    
+
     /**
      * Returns the solution X of the equation: A * X = Identity  with
      * <code>this = A.lu()</code> using back and forward substitutions.
@@ -146,7 +139,7 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @return <code>this.solve(Identity)</code>
      */
     public abstract Matrix<F> inverse();
-    
+
     /**
      * Returns the determinant of the {@link Matrix} having this
      * decomposition.
@@ -173,7 +166,7 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @return the upper matrix.
      */
     public abstract Matrix<F> getUpper(F zero);
-    
+
     /**
      * Returns the permutation matrix (<code>P</code>). 
      *
@@ -182,14 +175,14 @@ public abstract class DecompositionLU<F extends Field> extends RealtimeObject {
      * @return the permutation matrix.
      */
     public abstract Matrix<F> getPermutation(F zero, F one);
-    
+
     /**
      * Returns the lower/upper decomposition in one single matrix. 
      *
      * @return the lower/upper matrix merged in a single matrix.
      */
     public abstract Matrix<F> getLU();
-    
+
     /**
      * Returns the pivots elements of this decomposition. 
      *

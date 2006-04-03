@@ -7,33 +7,27 @@
  * freely granted, provided that this notice is preserved.
  */
 package org.jscience.mathematics.functions;
-import java.util.Set;
+
+import java.util.List;
 
 import org.jscience.mathematics.structures.Field;
 
-import javolution.util.FastSet;
 import javolution.lang.Text;
 import javolution.lang.TextBuilder;
 
 /**
  * This class represents the quotient of two {@link Polynomial}, 
- * it is also a {@link Field field} (invertible).
+ * it is also a {@link Field field} (invertible). 
  * 
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 3.1, April 1, 2006
  */
-public class RationalFunction<F extends Field<F>> extends Function<F, F> implements Field<Function<F, F>>{
+public class RationalFunction<F extends Field<F>> extends Function<F, F>
+        implements Field<RationalFunction<F>> {
 
     /**
      * Holds the factory for rational functions.
      */
-    private static final Factory<RationalFunction> FACTORY = new Factory<RationalFunction>() {
-
-        protected RationalFunction create() {
-            return new RationalFunction();
-        }
-    };
-
     /**
      * Holds the dividend.
      */
@@ -75,6 +69,7 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F> impleme
      * @param divisor the divisor value.
      * @return <code>dividend / divisor</code>
      */
+    @SuppressWarnings("unchecked")
     public static <F extends Field<F>> RationalFunction<F> valueOf(
             Polynomial<F> dividend, Polynomial<F> divisor) {
         RationalFunction<F> rf = FACTORY.object();
@@ -83,46 +78,93 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F> impleme
         return rf;
     }
 
-    /**
-     * Compares this rational function against the specified object.
-     * 
-     * @param obj the object to compare with.
-     * @return <code>true</code> if the objects are the same;
-     *         <code>false</code> otherwise.
-     */
-    public boolean equals(Object obj) {
-        if (obj instanceof RationalFunction) {
-            RationalFunction that = (RationalFunction) obj;
-            return this._dividend.equals(this._dividend)
-                    && this._divisor.equals(that._divisor);
-        } else {
-            return false;
+    private static final Factory<RationalFunction> FACTORY = new Factory<RationalFunction>() {
+
+        protected RationalFunction create() {
+            return new RationalFunction();
         }
+
+        @SuppressWarnings("unchecked")
+        protected void cleanup(RationalFunction rf) {
+            rf._dividend = null;
+            rf._divisor = null;
+        }
+    };
+
+    /**
+     * Returns the sum of two rational functions.
+     * 
+     * @param that the rational function being added.
+     * @return <code>this + that</code>
+     */
+    public RationalFunction<F> plus(RationalFunction<F> that) {
+        return valueOf(this._dividend.times(that._divisor).plus(
+                this._divisor.times(that._dividend)), this._divisor
+                .times(that._divisor));
     }
 
     /**
-     * Returns the hash code for this rational function.
+     * Returns the opposite of this rational function.
      * 
-     * @return the hash code value.
+     * @return <code>- this</code>
      */
-    public int hashCode() {
-        return _dividend.hashCode() - _divisor.hashCode();
+    public RationalFunction<F> opposite() {
+        return valueOf(_dividend.opposite(), _divisor);
     }
 
-    // Implements abstract method.
-    public Set<Variable<F>> getVariables() {
-        FastSet<Variable<F>> variables = FastSet.newInstance();
-        variables.addAll(_dividend.getVariables());
-        variables.addAll(_divisor.getVariables());
-        return variables;
+    /**
+     * Returns the difference of two rational functions.
+     * 
+     * @param that the rational function being subtracted.
+     * @return <code>this - that</code>
+     */
+    public RationalFunction<F> minus(RationalFunction<F> that) {
+        return this.plus(that.opposite());
     }
 
-    // Implements abstract method.
+    /**
+     * Returns the product of two rational functions.
+     * 
+     * @param that the rational function multiplier.
+     * @return <code>this · that</code>
+     */
+    public RationalFunction<F> times(RationalFunction<F> that) {
+        return valueOf(this._dividend.times(that._dividend), this._divisor
+                .times(that._divisor));
+    }
+
+    /**
+     * Returns the inverse of this rational function.
+     * 
+     * @return <code>1 / this</code>
+     */
+    public RationalFunction<F> inverse() {
+        return valueOf(_divisor, _dividend);
+    }
+
+    /**
+     * Returns the quotient of two rational functions.
+     * 
+     * @param that the rational function divisor.
+     * @return <code>this / that</code>
+     */
+    public RationalFunction<F> divide(RationalFunction<F> that) {
+        return this.times(that.inverse());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Variable<F>> getVariables() {
+        return merge(_dividend.getVariables(), _divisor.getVariables());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public F evaluate() {
         return _dividend.evaluate().times(_divisor.evaluate().inverse());
     }
 
-    // Implements interface.
+    @Override
     public Text toText() {
         TextBuilder tb = TextBuilder.newInstance();
         tb.append('(');
@@ -133,7 +175,23 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F> impleme
         return tb.toText();
     }
 
-    // Overrides.
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RationalFunction) {
+            RationalFunction that = (RationalFunction) obj;
+            return this._dividend.equals(this._dividend)
+                    && this._divisor.equals(that._divisor);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return _dividend.hashCode() - _divisor.hashCode();
+    }
+
+    @Override
     public boolean move(ObjectSpace os) {
         if (super.move(os)) {
             _dividend.move(os);
@@ -143,42 +201,46 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F> impleme
         return false;
     }
 
-    // Implements Operable.
-    public RationalFunction<F> plus(RationalFunction<F> that) {
-        return valueOf(this._dividend.times(that._divisor).plus(
-                this._divisor.times(that._dividend)),
-                this._divisor.times(that._divisor));
-    }
 
-    // Overrides.
-    public RationalFunction<F>  opposite() {
-        return valueOf(_dividend.opposite(), _divisor);
-    }
-
-    // Overrides.
-    public RationalFunction<F> times(RationalFunction<F> that) {
-            return valueOf(this._dividend.times(that._dividend),
-                    this._divisor.times(that._divisor));
-    }
-
-    // Implements Operable.
-    public RationalFunction<F> reciprocal() {
-        return valueOf(_divisor, _dividend);
-    }
-
-    // Overrides.
-    public RationalFunction<F> differentiate(Variable v) {
-        return valueOf(_divisor.times(_dividend.differentiate(v))
-                .plus(_dividend.times(_divisor.differentiate(v)).opposite()),
+    //////////////////////////////////////////////////////////////////////
+    // Overrides parent method potentially returning rational functions //
+    //////////////////////////////////////////////////////////////////////
+    
+    @Override
+    public RationalFunction<F> differentiate(Variable<F> v) {
+        return valueOf(_divisor.times(_dividend.differentiate(v)).plus(
+                _dividend.times(_divisor.differentiate(v)).opposite()),
                 _dividend.pow(2));
     }
 
-    private static final long serialVersionUID = 1L;
-
-    public Function<F, F> inverse() {
-        RationalFunction<F> rf = FACTORY.object();
-        rf._dividend = _divisor;
-        rf._divisor = _dividend;
-        return rf;
+    @Override
+    public Function<F, F> plus(Function<F, F> that) {
+        return (that instanceof RationalFunction) ?
+                this.plus((RationalFunction<F>)that) : super.plus(that);       
     }
+
+    @Override
+    public Function<F, F> minus(Function<F, F> that) {
+        return (that instanceof RationalFunction) ?
+                this.minus((RationalFunction<F>)that) : super.minus(that);       
+    }
+
+    @Override
+    public Function<F, F> times(Function<F, F> that) {
+        return (that instanceof RationalFunction) ?
+                this.times((RationalFunction<F>)that) : super.times(that);       
+    }
+    
+    @Override
+    public Function<F, F> divide(Function<F, F> that) {
+        return (that instanceof RationalFunction) ?
+                this.divide((RationalFunction<F>)that) : super.divide(that);       
+    }
+    
+    @Override
+    public RationalFunction<F> pow(int n) {
+        return (RationalFunction<F>) super.pow(n);
+    }
+
+    private static final long serialVersionUID = 1L;
 }

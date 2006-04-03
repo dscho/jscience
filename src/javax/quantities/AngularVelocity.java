@@ -24,6 +24,7 @@ public interface AngularVelocity extends Quantity<AngularVelocity> {
      * Holds the SI unit (Système International d'Unités) for this quantity.
      */
     @SuppressWarnings("unchecked")
-    public final static Unit<Angle> SI_UNIT = (Unit<Angle>) SI.RADIAN.divide(SI.SECOND);
+    public final static Unit<AngularVelocity> SI_UNIT 
+        = (Unit<AngularVelocity>) SI.RADIAN.divide(SI.SECOND);
 
 }

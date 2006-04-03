@@ -445,8 +445,8 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
             return _root;
         }
 
-        private static final long serialVersionUID = 3134935871458943071L;
+        private static final long serialVersionUID = 1L;
     }
 
-    private static final long serialVersionUID = 6174869865282683504L;
+    private static final long serialVersionUID = 1L;
 }

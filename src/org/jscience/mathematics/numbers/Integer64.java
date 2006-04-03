@@ -29,7 +29,7 @@ public final class Integer64 extends Number<Integer64> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<Integer64> XML = new XmlFormat<Integer64>(
+    public static final XmlFormat<Integer64> XML = new XmlFormat<Integer64>(
             Integer64.class) {
         public void format(Integer64 obj, XmlElement xml) {
             xml.setAttribute("value", obj._value);
@@ -240,5 +240,5 @@ public final class Integer64 extends Number<Integer64> {
         }
     }
 
-    private static final long serialVersionUID = 7466935461817060967L;
+    private static final long serialVersionUID = 1L;
 }

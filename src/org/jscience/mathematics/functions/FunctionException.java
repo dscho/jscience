@@ -32,5 +32,5 @@ public class FunctionException extends RuntimeException {
         super(message);
     }
 
-    private static final long serialVersionUID = -3146391701681108513L;
+    private static final long serialVersionUID = 1L;
 }

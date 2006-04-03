@@ -24,29 +24,32 @@ import static javax.units.SI.*;
 public final class NonSI {
 
     /**
-     * Holds the standard gravity constant.
+     * Holds the standard gravity constant: 9.80665 m/s² exact.
      */
-    private static double STANDARD_GRAVITY = 9.80665; // (m/s²) exact.
+    private static final int STANDARD_GRAVITY_DIVIDEND = 980665;
+    private static final int STANDARD_GRAVITY_DIVISOR  = 100000;
 
     /**
-     * Holds the international foot.
+     * Holds the international foot: 0.3048 m exact.
      */
-    private static double INTERNATIONAL_FOOT = 0.3048; // (m) exact.
+    private static final int INTERNATIONAL_FOOT_DIVIDEND =  3048;
+    private static final int INTERNATIONAL_FOOT_DIViSOR  = 10000;
 
     /**
-     * Holds the avoirdupois pound.
+     * Holds the avoirdupois pound: 0.45359237 kg exact
      */
-    private static double AVOIRDUPOIS_POUND = 0.45359237; // (kg) exact.
+    private static final int AVOIRDUPOIS_POUND_DIVIDEND =  45359237; 
+    private static final int AVOIRDUPOIS_POUND_DIVISOR  = 100000000; 
 
     /**
      * Holds the Avogadro constant.
      */
-    private static double AVOGADRO_CONSTANT = 6.02214199e23; // (1/mol).
+    private static final double AVOGADRO_CONSTANT = 6.02214199e23; // (1/mol).
 
     /**
      * Holds the electric charge of one electron.
      */
-    private static double ELEMENTARY_CHARGE = 1.602176462e-19; // (C).
+    private static final double ELEMENTARY_CHARGE = 1.602176462e-19; // (C).
 
     /**
      * Default constructor (prevents this class from being instantiated).
@@ -88,7 +91,7 @@ public final class NonSI {
      * (standard name <code>grav</code>).
      */
     public static final Unit<Acceleration> G = METER_PER_SQUARE_SECOND
-            .times(STANDARD_GRAVITY);
+            .times(STANDARD_GRAVITY_DIVIDEND).divide(STANDARD_GRAVITY_DIVISOR);
 
     /////////////////////////
     // Amount of substance //
@@ -286,7 +289,7 @@ public final class NonSI {
      * A unit of energy equal to <code>1E-7 J</code>
      * (standard name <code>erg</code>).
      */
-    public static final Unit<Energy> ERG = JOULE.times(1e-7);
+    public static final Unit<Energy> ERG = JOULE.divide(10000000);
 
     /**
      * A unit of energy equal to one electron-volt (standard name 
@@ -303,7 +306,7 @@ public final class NonSI {
      * A unit of illuminance equal to <code>1E4 Lx</code>
      * (standard name <code>La</code>).
      */
-    public static final Unit<Illuminance> LAMBERT = LUX.times(1e4);
+    public static final Unit<Illuminance> LAMBERT = LUX.times(10000);
 
     ////////////
     // Length //
@@ -313,7 +316,7 @@ public final class NonSI {
      * A unit of length equal to <code>0.3048 m</code> 
      * (standard name <code>ft</code>).
      */
-    public static final Unit<Length> FOOT = METER.times(INTERNATIONAL_FOOT);
+    public static final Unit<Length> FOOT = METER.times(INTERNATIONAL_FOOT_DIVIDEND).divide(INTERNATIONAL_FOOT_DIViSOR);
 
     /**
      * A unit of length equal to <code>1200/3937 m</code> 
@@ -321,7 +324,7 @@ public final class NonSI {
      * See also: <a href="http://www.sizes.com/units/foot.htm">foot</a>
      */
     public static final Unit<Length> FOOT_SURVEY_US = METER
-            .times(1200.0 / 3937.0);
+            .times(1200).divide(3937);
 
     /**
      * A unit of length equal to <code>0.9144 m</code>
@@ -339,19 +342,19 @@ public final class NonSI {
      * A unit of length equal to <code>1609.344 m</code>
      * (standard name <code>mi</code>).
      */
-    public static final Unit<Length> MILE = METER.times(1609.344);
+    public static final Unit<Length> MILE = METER.times(1609344).divide(1000);
 
     /**
      * A unit of length equal to <code>1852.0 m</code>
      * (standard name <code>nmi</code>).
      */
-    public static final Unit<Length> NAUTICAL_MILE = METER.times(1852.0);
+    public static final Unit<Length> NAUTICAL_MILE = METER.times(1852);
 
     /**
      * A unit of length equal to <code>1E-10 m</code>
      * (standard name <code>Å</code>).
      */
-    public static final Unit<Length> ANGSTROM = METER.times(1e-10);
+    public static final Unit<Length> ANGSTROM = METER.divide(10000000000L);
 
     /**
      * A unit of length equal to the average distance from the center of the
@@ -380,7 +383,7 @@ public final class NonSI {
      * (standard name <code>pt</code>).
      * @see     #PIXEL
      */
-    public static final Unit<Length> POINT = INCH.times(0.013837);
+    public static final Unit<Length> POINT = INCH.times(13837).divide(1000000);
 
     /**
      * A unit of length equal to <code>1/72 {@link #INCH}</code>
@@ -403,7 +406,7 @@ public final class NonSI {
      * A unit of magnetic flux equal <code>1E-8 Wb</code>
      * (standard name <code>Mx</code>).
      */
-    public static final Unit<MagneticFlux> MAXWELL = WEBER.times(1e-8);
+    public static final Unit<MagneticFlux> MAXWELL = WEBER.divide(100000000);
 
     ///////////////////////////
     // Magnetic Flux Density //
@@ -413,7 +416,7 @@ public final class NonSI {
      * A unit of magnetic flux density equal <code>1000 A/m</code>
      * (standard name <code>G</code>).
      */
-    public static final Unit<MagneticFluxDensity> GAUSS = TESLA.times(1e-4);
+    public static final Unit<MagneticFluxDensity> GAUSS = TESLA.divide(10000);
 
     //////////
     // Mass //
@@ -437,7 +440,7 @@ public final class NonSI {
      * A unit of mass equal to <code>453.59237 grams</code> (avoirdupois pound,
      * standard name <code>lb</code>).
      */
-    public static final Unit<Mass> POUND = KILOGRAM.times(AVOIRDUPOIS_POUND);
+    public static final Unit<Mass> POUND = KILOGRAM.times(AVOIRDUPOIS_POUND_DIVIDEND).divide(AVOIRDUPOIS_POUND_DIVISOR);
 
     /**
      * A unit of mass equal to <code>1 / 16 {@link #POUND}</code>
@@ -471,21 +474,22 @@ public final class NonSI {
      * A unit of force equal to <code>1E-5 N</code>
      * (standard name <code>dyn</code>).
      */
-    public static final Unit<Force> DYNE = NEWTON.times(1e-5);
+    public static final Unit<Force> DYNE = NEWTON.divide(100000);
 
     /**
      * A unit of force equal to <code>9.80665 N</code>
      * (standard name <code>kgf</code>).
      */
     public static final Unit<Force> KILOGRAM_FORCE = NEWTON
-            .times(STANDARD_GRAVITY);
+            .times(STANDARD_GRAVITY_DIVIDEND).divide(STANDARD_GRAVITY_DIVISOR);
 
     /**
      * A unit of force equal to <code>{@link #POUND}·{@link #G}</code>
      * (standard name <code>lbf</code>).
      */
     public static final Unit<Force> POUND_FORCE = NEWTON
-            .times(AVOIRDUPOIS_POUND * STANDARD_GRAVITY);
+            .times(1L * AVOIRDUPOIS_POUND_DIVIDEND * STANDARD_GRAVITY_DIVIDEND).divide(
+                    1L * AVOIRDUPOIS_POUND_DIVISOR * STANDARD_GRAVITY_DIVISOR);
 
     ///////////
     // Power //
@@ -512,7 +516,7 @@ public final class NonSI {
      * A unit of pressure equal to <code>100 kPa</code>
      * (standard name <code>bar</code>).
      */
-    public static final Unit<Pressure> BAR = PASCAL.times(100e3);
+    public static final Unit<Pressure> BAR = PASCAL.times(100000);
 
     /**
      * A unit of pressure equal to the pressure exerted at the Earth's
@@ -554,14 +558,14 @@ public final class NonSI {
      * (standard name <code>Ci</code>).
      */
     public static final Unit<RadioactiveActivity> CURIE = BECQUEREL
-            .times(3.7e10);
+            .times(37000000000L);
 
     /**
      * A unit of radioctive activity equal to 1 million radioactive
      * disintegrations per second (standard name <code>Rd</code>).
      */
     public static final Unit<RadioactiveActivity> RUTHERFORD = SI.BECQUEREL
-            .times(1e6);
+            .times(1000000);
 
     /////////////////
     // Solid angle //
@@ -582,7 +586,7 @@ public final class NonSI {
      * A unit of temperature equal to <code>5/9 °K</code>
      * (standard name <code>°R</code>).
      */
-    public static final Unit<Temperature> RANKINE = KELVIN.times(5.0 / 9.0);
+    public static final Unit<Temperature> RANKINE = KELVIN.times(5).divide(9);
 
     /**
      * A unit of temperature equal to degree Rankine minus 
@@ -613,7 +617,7 @@ public final class NonSI {
      * A unit of velocity relative to the speed of light
      * (standard name <code>c</code>).
      */
-    public static final Unit<Velocity> C = METER_PER_SECOND.times(299792458.0);
+    public static final Unit<Velocity> C = METER_PER_SECOND.times(299792458);
 
     ////////////
     // Volume //
@@ -649,13 +653,13 @@ public final class NonSI {
      * A unit of volume equal to one US dry gallon.
      * (standard name <code>gallon_dry_us</code>).
      */
-    public static final Unit<Volume> GALLON_DRY_US = CUBIC_INCH.times(268.8025);
+    public static final Unit<Volume> GALLON_DRY_US = CUBIC_INCH.times(2688025).divide(10000);
 
     /**
      * A unit of volume equal to <code>4.546 09 {@link #LITER}</code>
      * (standard name <code>gal_uk</code>).
      */
-    public static final Unit<Volume> GALLON_UK = LITER.times(4.54609);
+    public static final Unit<Volume> GALLON_UK = LITER.times(454609).divide(100000);
 
     /**
      * A unit of volume equal to <code>1 / 160 {@link #GALLON_UK}</code>

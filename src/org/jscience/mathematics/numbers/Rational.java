@@ -23,6 +23,8 @@ import javolution.xml.XmlFormat;
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
+ * @see <a href="http://en.wikipedia.org/wiki/Rational_numbers">
+ *      Wikipedia: Rational Numbers</a>
  */
 public final class Rational extends Number<Rational> implements Field<Rational>{
 
@@ -31,7 +33,7 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    protected static final XmlFormat<Rational> XML = new XmlFormat<Rational>(
+    public static final XmlFormat<Rational> XML = new XmlFormat<Rational>(
             Rational.class) {
         public void format(Rational r, XmlElement xml) {
             xml.setAttribute("value", r.toText());

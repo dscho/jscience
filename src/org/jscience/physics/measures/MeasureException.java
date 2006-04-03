@@ -32,5 +32,5 @@ public class MeasureException extends RuntimeException {
         super(message);
     }
 
-    private static final long serialVersionUID = 993709944368642809L;
+    private static final long serialVersionUID = 1L;
 }

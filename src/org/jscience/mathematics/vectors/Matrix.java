@@ -59,8 +59,8 @@ import org.jscience.mathematics.structures.VectorSpace;
  * @see <a href="http://en.wikipedia.org/wiki/Matrix_%28mathematics%29">
  *      Wikipedia: Matrix (mathematics)</a>
  */
-public abstract class Matrix<F extends Field> extends RealtimeObject implements
-     VectorSpace<Matrix<F>, F>, Ring<Matrix<F>>, Immutable {
+public abstract class Matrix<F extends Field<F>> extends RealtimeObject
+        implements VectorSpace<Matrix<F>, F>, Ring<Matrix<F>>, Immutable {
 
     /**
      * Holds the default XML representation for {@link Matrix} and its
@@ -86,13 +86,13 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
             }
         }
 
+        @SuppressWarnings("unchecked")
         public Matrix parse(XmlElement xml) {
             int m = xml.getAttribute("rows", 1);
             int n = xml.getAttribute("columns", 1);
-            FastTable<Field> elements = FastTable.newInstance();
+            FastTable elements = FastTable.newInstance();
             for (int i = m * n; --i >= 0;) {
-                Field element = xml.getNext();
-                elements.add(element);
+                elements.add(xml.getNext());
             }
             return Matrix.valueOf(m, n, elements);
         }
@@ -108,7 +108,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      * @return the matrix having the specified elements.
      * @throws DimensionException if rows have different length.
      */
-    public static <F extends Field> Matrix<F> valueOf(F[][] elements) {
+    public static <F extends Field<F>> Matrix<F> valueOf(F[][] elements) {
         int m = elements.length;
         int n = elements[0].length;
         MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
@@ -136,8 +136,8 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      * @return a m-by-n matrix with <code>d</code> on the diagonal and
      *         <code>o</code> elsewhere.
      */
-    public static <F extends Field> Matrix<F> valueOf(int m, int n, F diagonal,
-            F other) {
+    public static <F extends Field<F>> Matrix<F> valueOf(int m, int n,
+            F diagonal, F other) {
         MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -170,7 +170,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      * @return the matrix having the specified size and elements.
      * @throws DimensionException if <code>elements.size() != m * n</code>
      */
-    public static <F extends Field> Matrix<F> valueOf(int m, int n,
+    public static <F extends Field<F>> Matrix<F> valueOf(int m, int n,
             Collection<F> elements) {
         if (elements.size() != m * n)
             throw new DimensionException(m * n
@@ -273,7 +273,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
         MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                M.set_(i, j, (F) this.get(i, j).opposite());
+                M.set_(i, j, this.get(i, j).opposite());
             }
         }
         return M;
@@ -294,7 +294,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
         MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                M.set_(i, j, (F) this.get(i, j).plus(that.get(i, j)));
+                M.set_(i, j, this.get(i, j).plus(that.get(i, j)));
             }
         }
         return M;
@@ -306,7 +306,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      * @param  that the matrix to be subtracted.
      * @return <code>this - that</code>.
      * @throws  DimensionException matrices's dimensions are different.
-     \     */
+     */
     public Matrix<F> minus(Matrix<F> that) {
         return this.plus(that.opposite());
     }
@@ -323,7 +323,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
         MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                M.set_(i, j, (F) this.get(i, j).times(k));
+                M.set_(i, j, this.get(i, j).times(k));
             }
         }
         return M;
@@ -348,10 +348,9 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
             for (int j = 0; j < thatn; j++) {
                 PoolContext.enter();
                 try {
-                    F sum = (F) this.get(i, 0).times(that.get(0, j));
+                    F sum = this.get(i, 0).times(that.get(0, j));
                     for (int k = 1; k < thisn; k++) {
-                        sum = (F) sum
-                                .plus(this.get(i, k).times(that.get(k, j)));
+                        sum = sum.plus(this.get(i, k).times(that.get(k, j)));
                     }
                     M.set_(i, j, sum);
                     sum.move(ObjectSpace.OUTER); // Exports.
@@ -413,32 +412,36 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      * @since  January 2002, by Jonathan Grattage (jjg99c@cs.nott.ac.uk).
      */
     public Matrix<F> tensor(Matrix<F> that) {
-          throw new UnsupportedOperationException("Not yet converted to v3.0");
-//        Matrix<O> C = newInstance(this.m * that.m, this.n * that.n);
-//        boolean endCol = false;
-//        int cCount = 0, rCount = 0;
-//        int subMatrix = 0, iref = 0, jref = 0;
-//        for (int j = 0; j < n; j++) {
-//            for (int i = 0; i < m; i++) {
-//                Matrix<O> X = that.times(o[i * this.n + j]);
-//                rCount = subMatrix % m;
-//                if (rCount > 0) {
-//                    endCol = true;
-//                }
-//                if ((rCount == 0) && (endCol == true)) {
-//                    cCount++;
-//                }
-//                for (int y = 0; y < that.n; y++) {
-//                    for (int x = 0; x < that.m; x++) {
-//                        iref = x + (rCount * that.m);
-//                        jref = y + (cCount * that.m);
-//                        C.o[iref * C.n + jref] = X.get(x, y);
-//                    }
-//                }
-//                subMatrix++;
-//            }
-//        }
-//        return C;
+        final int thism = this.getNumberOfRows();
+        final int thisn = this.getNumberOfColumns();
+        final int thatm = that.getNumberOfRows();
+        final int thatn = that.getNumberOfColumns();
+        MatrixDefault<F> C = MatrixDefault.newInstance(thism * thatm, thisn
+                * thatn);
+        boolean endCol = false;
+        int cCount = 0, rCount = 0;
+        int subMatrix = 0, iref = 0, jref = 0;
+        for (int j = 0; j < thisn; j++) {
+            for (int i = 0; i < thism; i++) {
+                Matrix<F> X = that.times(this.get(i, j));
+                rCount = subMatrix % thism;
+                if (rCount > 0) {
+                    endCol = true;
+                }
+                if ((rCount == 0) && (endCol == true)) {
+                    cCount++;
+                }
+                for (int y = 0; y < thatn; y++) {
+                    for (int x = 0; x < thatm; x++) {
+                        iref = x + (rCount * thatm);
+                        jref = y + (cCount * thatm);
+                        C.set_(iref, jref, X.get(x, y));
+                    }
+                }
+                subMatrix++;
+            }
+        }
+        return C;
     }
 
     /**
@@ -455,12 +458,12 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
         if (v.getDimension() != n)
             throw new DimensionException();
         VectorDefault<F> r = VectorDefault.newInstance(m);
-        for (int i=0; i < m; i++) {
+        for (int i = 0; i < m; i++) {
             PoolContext.enter();
             try {
-                F sum = (F) this.get(i, 0).times(v.get(0));
+                F sum = this.get(i, 0).times(v.get(0));
                 for (int k = 1; k < n; k++) {
-                    sum = (F) sum.plus(this.get(i, k).times(v.get(k)));
+                    sum = sum.plus(this.get(i, k).times(v.get(k)));
                 }
                 r.set_(i, sum);
                 sum.move(ObjectSpace.OUTER); // Exports.
@@ -480,7 +483,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
     public F determinant() {
         return DecompositionLU.valueOf(this).determinant();
     }
- 
+
     /**
      * Returns the transpose of this matrix.
      *
@@ -510,24 +513,25 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      *         is less than 2.
      */
     public F cofactor(int i, int j) {
-        throw new UnsupportedOperationException("Not yet converted to v3.0");
-//        Matrix<O> M = newInstance(m - 1, n - 1);
-//        int row = 0;
-//        for (int k1 = 0; k1 < m; k1++) {
-//            if (k1 == i) {
-//                continue;
-//            }
-//            int column = 0;
-//            for (int k2 = 0; k2 < n; k2++) {
-//                if (k2 == j) {
-//                    continue;
-//                }
-//                M.o[row * M.n + column] = o[k1 * n + k2];
-//                column++;
-//            }
-//            row++;
-//        }
-//        return M.determinant();
+        final int thism = this.getNumberOfRows();
+        final int thisn = this.getNumberOfColumns();
+        MatrixDefault<F> M = MatrixDefault.newInstance(thism - 1, thisn - 1);
+        int row = 0;
+        for (int k1 = 0; k1 < thism; k1++) {
+            if (k1 == i) {
+                continue;
+            }
+            int column = 0;
+            for (int k2 = 0; k2 < thisn; k2++) {
+                if (k2 == j) {
+                    continue;
+                }
+                M.set_(row, column, this.get(k1, k2));
+                column++;
+            }
+            row++;
+        }
+        return M.determinant();
     }
 
     /**
@@ -541,16 +545,17 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
      *         its dimension is less than 2.
      */
     public Matrix<F> adjoint() {
-        throw new UnsupportedOperationException("Not yet converted to v3.0");
-//        Matrix<O> M = newInstance(m, n);
-//        for (int i = 0; i < m; i++) {
-//            for (int j = 0; j < n; j++) {
-//                M.o[i * n + j] = ((i + j) % 2 == 0) ? this.cofactor(i, j)
-//                        : this.cofactor(i, j).opposite();
-//            }
-//        }
-//        return M.transpose();
-     }
+        final int thism = this.getNumberOfRows();
+        final int thisn = this.getNumberOfColumns();
+        MatrixDefault<F> M = MatrixDefault.newInstance(thism, thisn);
+        for (int i = 0; i < thism; i++) {
+            for (int j = 0; j < thisn; j++) {
+                M.set_(i, j, ((i + j) % 2 == 0) ? this.cofactor(i, j) : this
+                        .cofactor(i, j).opposite());
+            }
+        }
+        return M.transpose();
+    }
 
     /**
      * Indicates if this matrix is square.
@@ -627,7 +632,7 @@ public abstract class Matrix<F extends Field> extends RealtimeObject implements
     public F trace() {
         F sum = this.get(0, 0);
         for (int i = MathLib.min(getNumberOfColumns(), getNumberOfRows()); --i > 0;) {
-            sum = (F) sum.plus(get(i, i));
+            sum = sum.plus(get(i, i));
         }
         return sum;
     }
