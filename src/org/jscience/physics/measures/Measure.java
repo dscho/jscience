@@ -12,21 +12,21 @@ import java.io.Serializable;
 
 import javolution.lang.Immutable;
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.realtime.RealtimeObject;
+import javolution.text.Text;
+import javolution.context.RealtimeObject;
 import javolution.util.FastComparator;
 import javolution.util.FastMap;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.mathematics.structures.Field;
 
-import javax.units.converters.ConversionException;
-import javax.units.converters.RationalConverter;
-import javax.units.converters.UnitConverter;
-import javax.units.Unit;
-import javax.quantities.Dimensionless;
-import javax.quantities.Quantity;
+import javax.measure.converters.ConversionException;
+import javax.measure.converters.RationalConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.quantities.Dimensionless;
+import javax.measure.quantities.Quantity;
+import javax.measure.units.Unit;
 import javax.realtime.MemoryArea;
 
 /**
@@ -115,22 +115,14 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
      * &lt;Measure value="12" unit="µA"/&gt;</pre>
      * represents an electric current measurement.
      */
-    protected static final XmlFormat<Measure> XML = new XmlFormat<Measure>(
+    protected static final XMLFormat<Measure> XML = new XMLFormat<Measure>(
             Measure.class) {
-        public void format(Measure m, XmlElement xml) {
-            if (m._isExact) {
-                xml.setAttribute("value", m._exactValue);
-            } else {
-                xml.setAttribute("value", m.getEstimatedValue());
-                xml.setAttribute("error", m.getAbsoluteError());
-            }
-            xml.setAttribute("unit", m._unit.toString());
-        }
-
-        public Measure parse(XmlElement xml) {
+        
+        @Override
+        public Measure newInstance(Class<Measure> cls, InputElement xml) throws XMLStreamException {
             Unit unit = Unit.valueOf(xml.getAttribute("unit"));
             Measure<?> m = Measure.newInstance(unit);
-            if (!xml.isAttribute("error")) // Exact.
+            if (xml.getAttribute("error") == null) // Exact.
                 return m.setExact(xml.getAttribute("value", 0L));
             m._isExact = false;
             double estimatedValue = xml.getAttribute("value", 0.0);
@@ -138,6 +130,22 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
             m._minimum = estimatedValue - error;
             m._maximum = estimatedValue + error;
             return m;
+        }
+
+        @Override
+        public void read(javolution.xml.XMLFormat.InputElement arg0, Measure arg1) throws XMLStreamException {
+            // Nothing to do.
+        }
+
+        @Override
+        public void write(Measure m, OutputElement xml) throws XMLStreamException {
+            if (m._isExact) {
+                xml.setAttribute("value", m._exactValue);
+            } else {
+                xml.setAttribute("value", m.getEstimatedValue());
+                xml.setAttribute("error", m.getAbsoluteError());
+            }
+            xml.setAttribute("unit", m._unit.toString());
         }
     };
 
@@ -363,16 +371,19 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
     public <R extends Quantity> Measure<R> to(Unit<R> unit) {
         if ((_unit == unit) || this._unit.equals(unit))
             return (Measure<R>) this;
-        Measure result = this;
         UnitConverter cvtr = Measure.converterOf(_unit, unit);
-        if (cvtr instanceof RationalConverter) {
+        if (cvtr == UnitConverter.IDENTITY) { // No conversion necessary.
+            Measure result = Measure.copyOf(this);
+            result._unit = unit;
+            return result;
+        }
+        if (cvtr instanceof RationalConverter) { // Exact conversion.
              RationalConverter rc = (RationalConverter) cvtr;
-             result = rc.getDividend() != 1 ? result.times(rc.getDividend()) : result;
-             result = rc.getDivisor() != 1 ? result.divide(rc.getDivisor()) : result;
+             Measure result = this.times(rc.getDividend()).divide(rc.getDivisor());
              result._unit = unit;
              return result;
         }
-        result = Measure.newInstance(unit);
+        Measure<R> result = Measure.newInstance(unit);
         double min = cvtr.convert(_minimum);
         double max = cvtr.convert(_maximum);
         result._isExact = false;
@@ -969,6 +980,17 @@ public final class Measure<Q extends Quantity> extends RealtimeObject implements
     private static <Q extends Quantity> Measure<Q> newInstance(Unit unit) {
         Measure<Q> measure = FACTORY.object();
         measure._unit = unit;
+        return measure;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <Q extends Quantity> Measure<Q> copyOf(Measure original) {
+        Measure<Q> measure = FACTORY.object();
+        measure._exactValue = original._exactValue;
+        measure._isExact = original._isExact;
+        measure._maximum = original._maximum;
+        measure._minimum = original._minimum;
+        measure._unit = original._unit;
         return measure;
     }
 

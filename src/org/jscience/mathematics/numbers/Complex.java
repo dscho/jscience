@@ -13,12 +13,13 @@ import java.io.IOException;
 import org.jscience.mathematics.structures.Field;
 
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TextFormat;
-import javolution.lang.TypeFormat;
-import javolution.realtime.LocalReference;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.text.Text;
+import javolution.text.TextFormat;
+import javolution.text.TypeFormat;
+import javolution.context.LocalContext.Reference;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
+//@RETROWEAVER import javolution.text.Appendable;
 
 /**
  * <p> This class represents an immutable complex number.</p>
@@ -34,7 +35,7 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      * Holds the local text format for complex numbers (cartesian form 
      * by default, e.g.<code> "2.34 - 0.4i"</code>).
      */
-    public static final LocalReference<TextFormat<Complex>> FORMAT = new LocalReference<TextFormat<Complex>>(
+    public static final Reference<TextFormat<Complex>> FORMAT = new Reference<TextFormat<Complex>>(
             new TextFormat<Complex>() {
                 public Appendable format(Complex complex, Appendable appendable)
                         throws IOException {
@@ -76,16 +77,21 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      * <code>imaginary</code> attributes (e.g. 
      * <code>&lt;Complex real="2.34" imaginary="-0.4"/&gt;</code>).
      */
-    public static final XmlFormat<Complex> XML = new XmlFormat<Complex>(
-            Complex.class) {
-        public void format(Complex complex, XmlElement xml) {
+   protected static final XMLFormat<Complex> XML = new XMLFormat<Complex>(Complex.class) {
+       
+       @Override
+       public Complex newInstance(Class<Complex> cls, InputElement xml) throws XMLStreamException {
+           return Complex.valueOf(xml.getAttribute("real", 0.0), xml
+                   .getAttribute("imaginary", 0.0));
+       }
+       
+       public void write(Complex complex, OutputElement xml) throws XMLStreamException {
             xml.setAttribute("real", complex._real);
             xml.setAttribute("imaginary", complex._imaginary);
         }
 
-        public Complex parse(XmlElement xml) {
-            return Complex.valueOf(xml.getAttribute("real", 0.0), xml
-                    .getAttribute("imaginary", 0.0));
+        public void read(InputElement xml, Complex complex) {
+            // Nothing to do, immutable.
         }
     };
 
@@ -136,7 +142,7 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      * @param  real the real component of this complex number.
      * @param  imaginary the imaginary component of this complex number.
      */
-    public Complex(double real, double imaginary) {
+    private Complex(double real, double imaginary) {
         _real = real;
         _imaginary = imaginary;
     }

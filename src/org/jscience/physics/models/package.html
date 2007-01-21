@@ -3,8 +3,18 @@
 
 <p> The difference between models lies in the assumptions each makes and,
     in consequence,the operations each permits. For example, the summation
-    of a {@link javax.quantities.Length length} and a {@link javax.quantities.Duration duration}
+    of a {@link javax.measure.quantities.Length length} and a {@link javax.measure.quantities.Duration duration}
     is not allowed by the standard model, but is quite valid in a relativistic context.</p>
+    
+<p> Models are {@link javolution.context.LocalContext context-local}, allowing 
+    multiple models to be used concurrently. For example:[code]
+        LocalContext.enter();
+        try {
+            RelativisticModel.select(); // Affects the current thread only.
+            ...
+        } finally {
+           LocalContext.exit();
+        }[/code]</p>
 
 <p> The names and characteristics of the models are presented in the following table:</p>
 

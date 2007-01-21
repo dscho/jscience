@@ -12,7 +12,7 @@ package org.jscience.mathematics.structures;
  * This interface represents an algebraic structure in which the operations of 
  * addition, subtraction, multiplication and division (except division by zero)
  * may be performed. It is not required for the multiplication to be 
- * commutative (non commutative field are also called division ring
+ * commutative (non commutative fields are also called division rings
  * or skew fields). 
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>

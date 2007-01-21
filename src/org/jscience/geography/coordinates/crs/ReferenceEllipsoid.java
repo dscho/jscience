@@ -8,8 +8,8 @@
  */
 package org.jscience.geography.coordinates.crs;
 
-import javax.quantities.*;
-import javax.units.SI;
+import javax.measure.quantities.*;
+import javax.measure.units.SI;
 
 /**
  * <p> The ReferenceEllipsoid class defines a geodetic reference ellipsoid
@@ -25,7 +25,7 @@ import javax.units.SI;
  *
  * <p> The ellipsoid is an approximation of the shape of the earth. Although
  *     not exact, the ellipsoid is much more accurate than a spherical
- *     approximation and is still mathematically simple. The <i>geoid<i> is
+ *     approximation and is still mathematically simple. The <i>geoid</i> is
  *     a still closer approximation of the shape of the earth (intended to
  *     represent the mean sea level), and is generally specified by it's
  *     deviation from the ellipsoid.</p>

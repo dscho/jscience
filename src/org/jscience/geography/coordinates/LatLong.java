@@ -8,11 +8,11 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.quantities.Angle;
-import javax.quantities.Scalar;
-import javax.units.SI;
-import javax.units.Unit;
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.quantities.Angle;
+import javax.measure.quantities.Scalar;
+import javax.measure.units.SI;
+import javax.measure.units.Unit;
 
 import org.jscience.geography.coordinates.crs.GeographicCRS;
 import org.opengis.referencing.cs.CoordinateSystem;

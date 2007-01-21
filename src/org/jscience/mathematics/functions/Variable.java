@@ -9,7 +9,7 @@
 package org.jscience.mathematics.functions;
 
 import javolution.lang.Reference;
-import javolution.realtime.LocalReference;
+import javolution.context.LocalContext;
 
 /**
  * <p> This interface represents a symbol on whose value a {@link Function}
@@ -17,7 +17,7 @@ import javolution.realtime.LocalReference;
  *     simple {@link Variable.Local} implementation can be used. 
  *     For global functions (functions used concurrently by multiple threads)
  *     the {@link Variable.Global} implementation with 
- *     {@link javolution.realtime.LocalContext context-local} settings is 
+ *     {@link javolution.context.LocalContext context-local} settings is 
  *     recommended.</p>
  *   
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
@@ -35,9 +35,9 @@ public interface Variable<X> extends Reference<X> {
 
     /**
      * This class represents a simple {@link Variable} implementation for 
-     * functions not shared between threads (e.g. non static functions).
-     * Functions shared between multiple-thread should use a different 
-     * implementation (such as {@link Variable.Global}. 
+     * functions not shared between threads (non static).
+     * Functions shared between multiple-threads should use a different 
+     * type of variable such as {@link Variable.Global}. 
      */
     public static class Local<X> implements Variable<X> {
 
@@ -75,10 +75,10 @@ public interface Variable<X> extends Reference<X> {
 
     /**
      * This class represents a simple {@link Variable} implementation with 
-     * {@link javolution.realtime.LocalContext context-local} values.
+     * {@link javolution.context.LocalContext context-local} values.
      * Instances of this class can be set independently by multiple-threads 
      * as long as each concurrent thread executes within a 
-     * {@link javolution.realtime.LocalContext LocalContext}. For example:[code]
+     * {@link javolution.context.LocalContext LocalContext}. For example:[code]
      * public abstract class Engine  {
      *     public static final Variable.Global<Measure<AngularVelocity>> RPM
      *         = new Variable.Global<Measure<AngularVelocity>>("rpm");
@@ -103,7 +103,7 @@ public interface Variable<X> extends Reference<X> {
         /**
          * Holds the reference value.
          */
-        private LocalReference<X> _value = new LocalReference<X>();
+        private LocalContext.Reference<X> _value = new LocalContext.Reference<X>();
 
         /**
          * Holds the variable symbol.

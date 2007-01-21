@@ -10,9 +10,9 @@ package org.jscience.mathematics.numbers;
 
 import org.jscience.mathematics.structures.Field;
 
-import javolution.lang.Text;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.text.Text;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 /**
  * <p> This class represents the ratio of two {@link LargeInteger} numbers.</p>
@@ -33,16 +33,21 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    public static final XmlFormat<Rational> XML = new XmlFormat<Rational>(
-            Rational.class) {
-        public void format(Rational r, XmlElement xml) {
-            xml.setAttribute("value", r.toText());
-        }
-
-        public Rational parse(XmlElement xml) {
+    protected static final XMLFormat<Rational> XML = new XMLFormat<Rational>(Rational.class) {
+        
+        @Override
+        public Rational newInstance(Class<Rational> cls, InputElement xml) throws XMLStreamException {
             return Rational.valueOf(xml.getAttribute("value"));
         }
-    };
+        
+        public void write(Rational rational, OutputElement xml) throws XMLStreamException {
+            xml.setAttribute("value", rational.toText());
+        }
+
+         public void read(InputElement xml, Rational rational) {
+             // Nothing to do, immutable.
+         }
+     };
 
     /**
      * Holds the factory constructing rational instances.
@@ -90,7 +95,7 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
      * @param divisor the divisor value.
      * @throws ArithmeticException if <code>divisor == 0</code>
      */
-    public Rational(LargeInteger dividend, LargeInteger divisor) {
+    private Rational(LargeInteger dividend, LargeInteger divisor) {
         _dividend = dividend;
         _divisor = divisor;
     }

@@ -10,8 +10,8 @@
     <target name="init">
     	<tstamp/>
         <property name="library"   value="jscience" />
-        <property name="version"   value="3.1" />
-        <property name="release"   value="0" />
+        <property name="version"   value="3.3" />
+        <property name="release"   value="Beta" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />
@@ -43,6 +43,7 @@
 		        <include name="**/res-files/*" />
 		    </fileset>
 		</copy>
+		
     </target>
 
 	<target name="javadoc" depends="init">
@@ -118,6 +119,37 @@
              </manifest>
         </jar>
     </target>
+	 
+    <target name="retroweaver" depends="init">
+    	<unzip src="retroweaver.jar"
+    	       dest="${bin}">
+    	    <patternset>
+    	        <include name="**/*.class"/>
+    	    </patternset>
+    	</unzip> 
+        <jar jarfile="${library}-vm14.jar"
+             basedir="${bin}"
+             update="false">
+             <manifest>
+                 <attribute name="Main-Class"
+                           value="org.jscience.JScience"/>
+                 <attribute name="Specification-Title"
+                            value="JScience - Core"/>
+                 <attribute name="Specification-Version"
+                            value="${version}-VM1.4"/>
+                 <attribute name="Specification-Vendor"
+                            value="JScience"/>
+                 <attribute name="Implementation-Title"
+                            value="JScience - Core"/>
+                 <attribute name="Implementation-URL"
+                            value="http://jscience.org"/>
+                 <attribute name="Implementation-Vendor"
+                            value="JScience"/>
+                 <attribute name="Implementation-Version"
+                            value="${version}.${release} ${TODAY} VM1.4"/>
+             </manifest>
+        </jar>
+    </target>
 
 	<target name="clean" depends="init">
         <delete dir="${bin}" />
@@ -139,4 +171,19 @@
                                   index.html, ${library}.jar" />
         </zip>
     </target>
+    <!-- NETBEANS SUPPORT -->
+    <target name="run" depends="clean, compile">
+        <java classpath="${classpath}" classname="org.jscience.JScience" fork="true">
+            <jvmarg value="-server" />
+            <jvmarg value="-Xms512M" />
+            <jvmarg value="-Xmx512M" />
+            <arg value="perf" />
+        </java>
+    </target>
+    <target name="test" depends="clean, compile">
+        <java classpath="${classpath}" classname="org.jscience.JScience" fork="true">
+            <arg value="test" />
+        </java>
+    </target>
+	
 </project>

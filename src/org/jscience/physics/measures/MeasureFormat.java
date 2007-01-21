@@ -12,19 +12,33 @@ import java.io.IOException;
 import org.jscience.economics.money.Currency;
 import org.jscience.economics.money.Money;
 
-import javax.units.Unit;
-import javax.units.UnitFormat;
+import javax.measure.units.Unit;
+import javax.measure.units.UnitFormat;
 
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
-import javolution.lang.TextFormat;
-import javolution.lang.TypeFormat;
-import javolution.realtime.LocalReference;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
+import javolution.text.TextFormat;
+import javolution.text.TypeFormat;
+import javolution.context.LocalContext;
+//@RETROWEAVER import javolution.text.Appendable;
 
 /**
  * <p> This class provides the interface for formatting and parsing {@link 
- *     Measure measures} instances.</p>
+ *     Measure measures} instances. For example:[code]
+ *     // Display measurements using unscaled units (e.g. base units or alternate units).
+ *     MeasureFormat.setInstance(new MeasureFormat() { // Context local.
+ *         public Appendable format(Measure m, Appendable a) throws IOException {
+ *             Unit u = m.getUnit();
+ *             if (u instanceof TransformedUnit)
+ *                   u = ((TransformedUnit)u).getParentUnit();
+ *             return MeasureFormat.getPlusMinusErrorInstance(2).format(m.to(u), a);
+ *         }
+ *         public Measure parse(CharSequence csq, Cursor c) {
+ *             return MeasureFormat.getPlusMinusErrorInstance(2).parse(csq, c);
+ *         }
+ *     });[/code]
+ *     </p>
  *     
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 21, 2006
@@ -34,8 +48,8 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
     /**
      * Holds current format.
      */
-    private static final LocalReference<MeasureFormat> CURRENT =
-        new LocalReference<MeasureFormat>(new PlusMinusError(2));
+    private static final LocalContext.Reference<MeasureFormat> CURRENT = new LocalContext.Reference<MeasureFormat>(
+            new PlusMinusError(2));
 
     /**
      * Default constructor.
@@ -44,7 +58,7 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
     }
 
     /**
-     * Returns the current {@link javolution.realtime.LocalContext local}  
+     * Returns the current {@link javolution.context.LocalContext local}  
      * format (default <code>MeasureFormat.getPlusMinusErrorInstance(2)</code>).
      *
      * @return the context local format.
@@ -55,7 +69,7 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
     }
 
     /**
-     * Sets the current {@link javolution.realtime.LocalContext local} format.
+     * Sets the current {@link javolution.context.LocalContext local} format.
      *
      * @param format the new format.
      */
@@ -75,9 +89,10 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
     }
 
     /**
-     * Returns a format for which the digits in error (if present) are 
-     * in brackets; for example <code>"1.34[56] m"</code>. This format can be 
-     * used for formatting only.
+     * Returns a format for which the error is represented by an integer 
+     * value in brackets; for example <code>"1.3456[20] m"</code> 
+     * is equivalent to <code>"1.3456 ± 0.0020 m"</code>. 
+     * This format can be used for formatting as well as for parsing.
      * 
      * @param digitsInError the maximum number of digits in error.
      */
@@ -95,12 +110,12 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
     public static MeasureFormat getExactDigitsInstance() {
         return new ExactDigitsOnly();
     }
-        
+
     /**
      * This class represents the plus minus error format.
      */
     private static class PlusMinusError extends MeasureFormat {
-        
+
         /**
          * Holds the number of digits in error.
          */
@@ -120,32 +135,34 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
         @Override
         public Appendable format(Measure arg0, Appendable arg1)
                 throws IOException {
-            if (arg0.getUnit() instanceof Currency) 
+            if (arg0.getUnit() instanceof Currency)
                 return formatMoney(arg0, arg1);
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
+                        arg1);
             }
-           double value = arg0.getEstimatedValue();
-           double relativeError = arg0.getRelativeError();
-           int digits = (int) -(MathLib.log10(relativeError));
-           if (digits <= 0) {
-                digits = 1;
-           }
-           digits += _errorDigits;
-           boolean scientific = (MathLib.abs(value) >= 1E6)
-                  || (MathLib.abs(value) < 1E-6);
-           boolean showZeros = false;
-           arg1.append('(');
-           TypeFormat.format(value, digits, scientific, showZeros, arg1);
-           arg1.append(" ± ");
-           double error = arg0.getAbsoluteError();
-           scientific = (MathLib.abs(error) >= 1E6) || (MathLib.abs(error) < 1E-6);
-           showZeros = true;
-           TypeFormat.format(error, _errorDigits, scientific, showZeros, arg1);
-           arg1.append(") ");
-           return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+            double value = arg0.getEstimatedValue();
+            double error = arg0.getAbsoluteError();
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Error = (int) MathLib.floor(MathLib.log10(error));
+            int digits = log10Value - log10Error; // Exact digits.
+            digits = MathLib.max(1, digits + _errorDigits);
+ 
+            boolean scientific = (MathLib.abs(value) >= 1E6)
+                    || (MathLib.abs(value) < 1E-6);
+            boolean showZeros = false;
+            arg1.append('(');
+            TypeFormat.format(value, digits, scientific, showZeros, arg1);
+            arg1.append(" ± ");
+            scientific = (MathLib.abs(error) >= 1E6)
+                    || (MathLib.abs(error) < 1E-6);
+            showZeros = true;
+            TypeFormat.format(error, _errorDigits, scientific, showZeros, arg1);
+            arg1.append(") ");
+            return UnitFormat.getStandardInstance()
+                    .format(arg0.getUnit(), arg1);
         }
 
         @Override
@@ -155,7 +172,8 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
             long value = TypeFormat.parseLong(arg0, 10, arg1);
             if (arg0.charAt(arg1.getIndex()) == ' ') { // Exact! 
                 arg1.skip(' ', arg0);
-                Unit<?> unit = UnitFormat.getStandardInstance().parse(arg0, arg1);
+                Unit<?> unit = UnitFormat.getStandardInstance().parse(arg0,
+                        arg1);
                 return Measure.valueOf(value, unit);
             }
             arg1.setIndex(start);
@@ -178,7 +196,7 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
      * This class represents the bracket error format.
      */
     private static class BracketError extends MeasureFormat {
-        
+
         /**
          * Holds the number of digits in error.
          */
@@ -198,42 +216,47 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
         @Override
         public Appendable format(Measure arg0, Appendable arg1)
                 throws IOException {
-            if (arg0.getUnit() instanceof Currency) 
+            if (arg0.getUnit() instanceof Currency)
                 return formatMoney(arg0, arg1);
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
+                        arg1);
             }
-           double value = arg0.getEstimatedValue();
-           double relativeError = arg0.getRelativeError();
-           int digits = (int) -(MathLib.log10(relativeError));
-           if (digits <= 0) {
-                digits = 1;
-           }
-           digits += _errorDigits;
-           boolean scientific = (MathLib.abs(value) >= 1E6)
-                  || (MathLib.abs(value) < 1E-6);
-           boolean showZeros = true;
-           TextBuilder tb = TextBuilder.newInstance();
-           TypeFormat.format(value, digits, scientific, showZeros, tb);
-           Text txt = tb.toText();
-           int i = txt.indexOf('E', 0);
-           i = (i < 0) ? txt.length() : i;
-           tb.insert(i, "]");
-           tb.insert(i - _errorDigits, "[");
-           arg1.append(tb);
-           arg1.append(' ');
-           return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+            double value = arg0.getEstimatedValue();
+            double error = arg0.getAbsoluteError();
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Error = (int) MathLib.floor(MathLib.log10(error));
+            int digits = log10Value - log10Error; // Exact digits.
+            digits = MathLib.max(1, digits + _errorDigits);
+ 
+            boolean scientific = (MathLib.abs(value) >= 1E6)
+                    || (MathLib.abs(value) < 1E-6);
+            boolean showZeros = true;
+            TextBuilder tb = TextBuilder.newInstance();
+            TypeFormat.format(value, digits, scientific, showZeros, tb);
+            int endMantissa = 0;
+            for (; endMantissa < tb.length(); endMantissa++) {
+                if (tb.charAt(endMantissa) == 'E')
+                    break;
+            }
+            int bracketError = (int) (error * MathLib.toDoublePow10(1, -log10Error + _errorDigits - 1));
+            tb.insert(endMantissa, Text.valueOf('[').plus(Text.valueOf(bracketError))
+                    .plus(']'));
+            arg1.append(tb);
+            arg1.append(' ');
+            return UnitFormat.getStandardInstance()
+                    .format(arg0.getUnit(), arg1);
         }
 
         @Override
         public Measure parse(CharSequence arg0, Cursor arg1) {
-            throw new UnsupportedOperationException(
-                    "This format should not be used for parsing " +
-                    "(not enough information on the error");
+            // TBD
+            throw new UnsupportedOperationException("Not supported yet");
         }
     }
+
     /**
      * This class represents the exact digits only format.
      */
@@ -249,32 +272,34 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
         @Override
         public Appendable format(Measure arg0, Appendable arg1)
                 throws IOException {
-            if (arg0.getUnit() instanceof Currency) 
+            if (arg0.getUnit() instanceof Currency)
                 return formatMoney(arg0, arg1);
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
+                        arg1);
             }
-           double value = arg0.getEstimatedValue();
-           double relativeError = arg0.getRelativeError();
-                int digits = (int) -(MathLib.log10(relativeError));
-                if (digits <= 0) {
-                    digits = 1;
-                }
-                boolean scientific = (MathLib.abs(value) >= 1E6)
-                        || (MathLib.abs(value) < 1E-6);
-                boolean showZeros = true;
-                arg1.append(Text.valueOf(value, digits, scientific, showZeros));
+            double value = arg0.getEstimatedValue();
+            double error = arg0.getAbsoluteError();
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Error = (int) MathLib.floor(MathLib.log10(error));
+            int digits = log10Value - log10Error - 1; // Exact digits.
+ 
+            boolean scientific = (MathLib.abs(value) >= 1E6)
+                    || (MathLib.abs(value) < 1E-6);
+            boolean showZeros = true;
+            TypeFormat.format(value, digits, scientific, showZeros, arg1);
             arg1.append(' ');
-            return UnitFormat.getStandardInstance().format(arg0.getUnit(), arg1);
+            return UnitFormat.getStandardInstance()
+                    .format(arg0.getUnit(), arg1);
         }
 
         @Override
         public Measure parse(CharSequence arg0, Cursor arg1) {
             throw new UnsupportedOperationException(
-                    "This format should not be used for parsing " +
-                    "(not enough information on the error");
+                    "This format should not be used for parsing "
+                            + "(not enough information on the error");
         }
     }
 
@@ -282,7 +307,7 @@ public abstract class MeasureFormat extends TextFormat<Measure> {
      * Provides custom formatting for money measurements.
      */
     private static Appendable formatMoney(Measure<Money> arg0, Appendable arg1)
-        throws IOException {
+            throws IOException {
         Currency currency = (Currency) arg0.getUnit();
         int fraction = currency.getDefaultFractionDigits();
         if (fraction == 0) {

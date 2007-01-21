@@ -10,7 +10,7 @@ package org.jscience.mathematics.functions;
 
 import java.util.List;
 import java.util.SortedMap;
-import javolution.realtime.Realtime;
+import javolution.context.Realtime;
 import javolution.util.FastList;
 
 /**

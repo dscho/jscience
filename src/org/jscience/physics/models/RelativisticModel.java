@@ -8,20 +8,27 @@
  */
 package org.jscience.physics.models;
 
-import static javax.units.Dimension.*;
-
-import javax.units.converters.MultiplyConverter;
+import javax.measure.converters.RationalConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.units.BaseUnit;
+import javax.measure.units.Dimension;
+import javax.measure.units.SI;
 
 /**
  * This class represents the relativistic model.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
- * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 1.0, October 24, 2004
+ * @version 3.1, April 22, 2006
  */
 public class RelativisticModel extends PhysicalModel {
 
+    
+    /**
+     * Holds the meter to time transform.
+     */
+    private static RationalConverter METER_TO_TIME 
+        = new RationalConverter(1, 299792458);
+    
     /**
      * Holds the single instance of this class.
      */
@@ -31,25 +38,18 @@ public class RelativisticModel extends PhysicalModel {
      * Selects the relativistic model as the current model.
      */
     public static void select() {
-        INSTANCE.setDimensions();
         PhysicalModel.setCurrent(INSTANCE);
     }
 
-    protected void setDimensions() {
-        LENGTH.setEquivalentTo(TIME, new MultiplyConverter(1.0 / 299792458.0));
-        
-//
-//        // SPEED_OF_LIGHT (METER / SECOND) = 1
-//        SI.METER.setDimension(SI.SECOND, new MultiplyConverter(1 / c));
-//
-//        // ENERGY = m²·kg/s² = kg·c²
-//        SI.KILOGRAM.setDimension(NonSI.ELECTRON_VOLT, new MultiplyConverter(c
-//                * c / ePlus));
-//
-//        SI.SECOND.setDimension(SI.SECOND, Converter.IDENTITY);
-//        SI.KELVIN.setDimension(SI.KELVIN, Converter.IDENTITY);
-//        SI.AMPERE.setDimension(SI.AMPERE, Converter.IDENTITY);
-//        SI.MOLE.setDimension(SI.MOLE, Converter.IDENTITY);
-//        SI.CANDELA.setDimension(SI.CANDELA, Converter.IDENTITY);
+    // Implements Dimension.Model
+    public Dimension getDimension(BaseUnit unit) {
+        if (unit.equals(SI.METER)) return Dimension.TIME;
+        return Dimension.Model.STANDARD.getDimension(unit);
+    }
+
+    // Implements Dimension.Model
+    public UnitConverter getTransform(BaseUnit unit) {
+        if (unit.equals(SI.METER)) return METER_TO_TIME;
+        return Dimension.Model.STANDARD.getTransform(unit);
     }
 }

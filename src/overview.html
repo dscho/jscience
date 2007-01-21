@@ -55,19 +55,19 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
     > (m11 == m8) = false
     > (m11 ≅ m8) = true
 
-    // MeasureFormat - Plus/Minus Error (4 digits error)
-    MeasureFormat.setInstance(MeasureFormat.getPlusMinusError(4));
+    // MeasureFormat - Plus/Minus Error (3 digits error)
+    MeasureFormat.setInstance(MeasureFormat.getPlusMinusError(3));
 
-    > m3 = (100.0 ± 2.132E-14) lb
-    > m4 = (33.33333333333333504 ± 7.105E-15) lb
-    > m5 = (2.340000000000000512E-1 ± 4.163E-17) A
+    > m3 = (100.0 ± 2.13E-14) lb
+    > m4 = (33.33333333333333504 ± 7.11E-15) lb
+    > m5 = (2.340000000000000512E-1 ± 4.16E-17) A
 
     // MeasureFormat - Bracket Error (2 digits error)
     MeasureFormat.setInstance(MeasureFormat.getBracketErrorInstance(2));
 
-    > m3 = 100.000000000000[00] lb
-    > m4 = 33.3333333333333[36] lb
-    > m5 = 2.34000000000000[04]E-1 A
+    > m3 = 100.000000000000000[21] lb
+    > m4 = 33.3333333333333376[71] lb
+    > m5 = 2.34000000000000032[41]E-1 A
 
     // MeasureFormat - Exact Digits Only
     MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
@@ -281,9 +281,9 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
 <a name="license"></a>
 <h3><b>License:</b></h3>
 <p> Permission to use, copy, modify, and distribute this software is freely granted, 
-    provided that copyright notices are preserved (the full license text can be found 
-    <a href="../doc/license.txt">here</a>).</p>
+    provided that copyright notices are preserved.<BR>
+    The full license text can be found <a href="../doc/license.txt">here</a>).</p>
 
-<i>Note: The <b>J</b>Science binary (.jar) includes the latest 
+<i>Note: The <b>J</b>Science binary (.jar) includes the latest
           <a href="http://javolution.org">Javolution</a> classes for the J2SE 1.5+ runtime.</i>
 </body>

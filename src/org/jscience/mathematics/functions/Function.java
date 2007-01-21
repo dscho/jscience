@@ -15,12 +15,12 @@ import java.util.List;
 import org.jscience.mathematics.structures.GroupAdditive;
 import org.jscience.mathematics.structures.GroupMultiplicative;
 
-import javolution.realtime.LocalContext;
-import javolution.realtime.RealtimeObject;
+import javolution.context.LocalContext;
+import javolution.context.RealtimeObject;
 import javolution.util.FastList;
 import javolution.lang.Immutable;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
 
 /**
  * <p> This abstract class represents a mapping between two sets such that
@@ -46,7 +46,7 @@ import javolution.lang.TextBuilder;
  *         // Calculates df(x,y)/dx
  *         System.out.println("df(x,y)/dx = " + fx_y.differentiate(varX));
  *          
- *         > f(x,y) = [1/1]x² + [1/1]xy + [1/1]
+ *         > f(x,y) = [1/1]x^2 + [1/1]xy + [1/1]
  *         > f(1,0) = 2/1
  *         > df(x,y)/dx = [2/1]x + [1/1]y
  *     [/code]</p>
@@ -147,7 +147,7 @@ public abstract class Function<X, Y> extends RealtimeObject implements
     /**
      * Evaluates this function for the specified argument value
      * (convenience method). The evaluation is performed 
-     * in a {@link javolution.realtime.LocalContext LocalContext} and 
+     * in a {@link javolution.context.LocalContext LocalContext} and 
      * can safely be called upon functions with {@link Variable.Global global
      * variables}.
      *
@@ -174,7 +174,7 @@ public abstract class Function<X, Y> extends RealtimeObject implements
     /**
      * Evaluates this function for the specified arguments values
      * (convenience method). The evaluation is performed 
-     * in a {@link javolution.realtime.LocalContext LocalContext} and 
+     * in a {@link javolution.context.LocalContext LocalContext} and 
      * can safely be called upon functions with {@link Variable.Global global
      * variables}.
      *

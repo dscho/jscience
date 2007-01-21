@@ -8,11 +8,11 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.quantities.Length;
-import javax.quantities.Quantity;
-import javax.units.SI;
-import javax.units.Unit;
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.quantities.Length;
+import javax.measure.quantities.Quantity;
+import javax.measure.units.SI;
+import javax.measure.units.Unit;
 
 import org.jscience.geography.coordinates.crs.VerticalCRS;
 import org.opengis.referencing.cs.CoordinateSystem;

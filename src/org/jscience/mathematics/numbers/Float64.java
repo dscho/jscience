@@ -11,10 +11,10 @@ package org.jscience.mathematics.numbers;
 import org.jscience.mathematics.structures.Field;
 
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TypeFormat;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.text.Text;
+import javolution.text.TypeFormat;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 /**
  * <p> This class represents a 64 bits floating point number.</p>
@@ -29,14 +29,21 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    public static final XmlFormat<Float64> XML = new XmlFormat<Float64>(
-            Float64.class) {
-        public void format(Float64 obj, XmlElement xml) {
-            xml.setAttribute("value", obj._value);
+    protected static final XMLFormat<Float64> XML = new XMLFormat<Float64>(Float64.class) {
+
+        @Override
+        public Float64 newInstance(Class<Float64> cls, InputElement xml)
+                throws XMLStreamException {
+            return Float64.valueOf(xml.getAttribute("value", 0.0));
         }
 
-        public Float64 parse(XmlElement xml) {
-            return Float64.valueOf(xml.getAttribute("value", 0.0));
+        public void write(Float64 float64, OutputElement xml)
+                throws XMLStreamException {
+            xml.setAttribute("value", float64._value);
+        }
+
+        public void read(InputElement xml, Float64 float64) {
+            // Nothing to do, immutable.
         }
     };
 
@@ -76,7 +83,7 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
      *
      * @param  doubleValue the <code>double</code> value for this number.
      */
-    public Float64(double doubleValue) {
+    private Float64(double doubleValue) {
         _value = doubleValue;
     }
 
@@ -194,7 +201,6 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
         r._value = this._value / that._value;
         return r;
     }
-
 
     /**
      * Compares the absolute value of this number with that number.

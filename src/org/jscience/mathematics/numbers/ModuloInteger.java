@@ -10,10 +10,10 @@ package org.jscience.mathematics.numbers;
 
 import org.jscience.mathematics.structures.Field;
 
-import javolution.realtime.LocalReference;
-import javolution.lang.Text;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.context.LocalContext;
+import javolution.text.Text;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 /**
  * <p> This class represents a modulo integer. It can be used in conjonction 
@@ -32,16 +32,21 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    public static final XmlFormat<ModuloInteger> XML = new XmlFormat<ModuloInteger>(
-            ModuloInteger.class) {
-        public void format(ModuloInteger obj, XmlElement xml) {
-            xml.setAttribute("value", obj._value.toText());
+    protected static final XMLFormat<ModuloInteger> XML = new XMLFormat<ModuloInteger>(ModuloInteger.class) {
+        
+        @Override
+        public ModuloInteger newInstance(Class<ModuloInteger> cls, InputElement xml) throws XMLStreamException {
+            return ModuloInteger.valueOf(xml.getAttribute("value"));
         }
+        
+        public void write(ModuloInteger mi, OutputElement xml) throws XMLStreamException {
+            xml.setAttribute("value", mi._value.toText());
+            }
 
-        public ModuloInteger parse(XmlElement xml) {
-            return ModuloInteger.valueOf(LargeInteger.valueOf(xml.getAttribute("value")));
-        }
-    };
+         public void read(InputElement xml, ModuloInteger mi) {
+             // Nothing to do, immutable.
+         }
+     };
 
     /**
      * The modulo integer representing the additive identity.
@@ -62,8 +67,8 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
     /**
      * Holds the local modulus (for modular arithmetic).
      */
-    private static final LocalReference<LargeInteger> MODULUS
-        = new LocalReference<LargeInteger>();
+    private static final LocalContext.Reference<LargeInteger> MODULUS
+        = new LocalContext.Reference<LargeInteger>();
 
     /**
      * Holds the large integer value.
@@ -92,7 +97,7 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
     }
     
     /**
-     * Returns the {@link javolution.realtime.LocalContext local} modulus 
+     * Returns the {@link javolution.context.LocalContext local} modulus 
      * for modular arithmetic or <code>null</code> if the arithmetic operations
      * are non-modular (default). 
      * 
@@ -104,7 +109,7 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
     }
 
     /**
-     * Sets the {@link javolution.realtime.LocalContext local} modulus 
+     * Sets the {@link javolution.context.LocalContext local} modulus 
      * for modular arithmetic.
      * 
      * @param modulus the new modulus or <code>null</code> to unset the modulus.

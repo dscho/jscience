@@ -12,9 +12,9 @@ import java.io.Serializable;
 import java.util.List;
 import org.jscience.mathematics.structures.Ring;
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
-import javolution.realtime.RealtimeObject;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
+import javolution.context.RealtimeObject;
 import javolution.util.FastTable;
 
 /**
@@ -234,16 +234,9 @@ public final class Term extends RealtimeObject
         final int size = this._variables.size();
         for (int i=0; i < size; i++) {
             tb.append(_variables.get(i).getSymbol());
-            switch (_powers[i]) {
-            case 1:
-                break;
-            case 2:
-                tb.append('²');
-                break;
-            case 3:
-                tb.append('³');
-                break;
-            default:
+            int power = _powers[i];
+            if (power > 1) {
+                tb.append('^');
                 tb.append(_powers[i]);
             }
         }

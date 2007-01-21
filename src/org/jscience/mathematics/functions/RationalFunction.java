@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.jscience.mathematics.structures.Field;
 
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
 
 /**
  * This class represents the quotient of two {@link Polynomial}, 

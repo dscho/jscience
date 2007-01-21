@@ -8,9 +8,8 @@
  */
 package org.jscience.economics.money;
 
-import javax.units.BaseUnit;
-import javax.units.Dimension;
-import javax.quantities.Quantity;
+import javax.measure.quantities.Quantity;
+import javax.measure.units.BaseUnit;
 
 /**
  * This interface represents something generally accepted as a medium of 
@@ -23,14 +22,8 @@ import javax.quantities.Quantity;
 public interface Money extends Quantity<Money> {
 
     /**
-     * Holds the money dimension ('$').
-     */
-    public static final Dimension DIMENSION = new Dimension('$');
-
-    /**
      * Holds the base unit for money quantities (symbol "¤", currency symbol).
      */
-    public final static BaseUnit<Money> BASE_UNIT = new BaseUnit<Money>("¤",
-            Money.DIMENSION);
+    public final static BaseUnit<Money> BASE_UNIT = new BaseUnit<Money>("¤");
 
 }

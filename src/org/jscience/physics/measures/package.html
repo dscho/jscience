@@ -1,7 +1,7 @@
 <body>
 <p> Provides support for exact or arbitrary precision measurements.</p>
 
-<h4>Measures as {@link javax.quantities quantities}:</h4>
+<h4>Measures as {@link javax.measure.quantities quantities}:</h4>
 
 The {@link org.jscience.physics.measures.Measure Measure}
        base class is parameterized with the quantity onto which the measure applies 
@@ -68,19 +68,20 @@ For example:[code]
         > (692.06265340000008 ± 5.1E-13) m
         > (2.1391940763025056E-26 ± 4.3E-42) kg[/code]</p>
 
-<h4> Physical Constants</h4>
-
-This package provides the latest physical {@link org.jscience.physics.measures.Constants constants} measurements
-with the best known accuracy (the more accurate the constant, the higher the precision of the calculations
-making use of these constants). 
-        
 <h4> Measurement vectors</h4>
 
-This package also provide measurement vectors compatible with the {@link org.jscience.mathematics.vectors mathematical vectors}
+This package provides measurement vectors compatible with the {@link org.jscience.mathematics.vectors mathematical vectors}
 module. For example:[code]
       MeasureVector<Velocity> velocityVector = MeasureVector.valueOf(METER_PER_SECOND, 12.3, -2.9);
       Measure<Velocity> velocity = velocityVector.norm();
       Matrix<Measure<?>> M = ...;
-      Vector<Measure<?>> solution = M.solve(velocity2d);
+      Vector<Measure<?>> solution = M.solve(velocityVector);
       [/code]
+
+<h4> Physical Constants</h4>
+
+Finally, this package holds the latest physical {@link org.jscience.physics.measures.Constants constants} measurements
+with the best known accuracy (the more accurate the constant, the higher the precision of the calculations
+making use of these constants). 
+        
 </body>

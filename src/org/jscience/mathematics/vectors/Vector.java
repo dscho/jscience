@@ -8,19 +8,12 @@
  */
 package org.jscience.mathematics.vectors;
 
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
-
 import javolution.lang.Immutable;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
-import javolution.realtime.PoolContext;
-import javolution.realtime.RealtimeObject;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
+import javolution.context.RealtimeObject;
 import javolution.util.FastTable;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
-
 import org.jscience.mathematics.structures.Field;
 import org.jscience.mathematics.structures.VectorSpace;
 
@@ -28,7 +21,7 @@ import org.jscience.mathematics.structures.VectorSpace;
  * <p> This class represents an immutable element of a vector space.</p>
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 3.3, January 2, 2007
  * @see <a href="http://en.wikipedia.org/wiki/Vector_space">
  *      Wikipedia: Vector Space</a>
  */
@@ -36,77 +29,29 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
         implements VectorSpace<Vector<F>, F>, Immutable {
 
     /**
-     * Holds the default XML representation for {@link Vector} and its
-     * sub-classes.  This representation consists of the vector 
-     * elements as nested XML elements and the vector <code>dimension</code>
-     * as attributes. For example:[code]
-     *    <vectors:Vector dimension="2">
-     *      <numbers:Complex real="1.0" imaginary="0.0">
-     *      <numbers:Complex real="0.0" imaginary="1.0">
-     *    </vectors:Vector>[/code]
-     */
-    protected static final XmlFormat<Vector> XML = new XmlFormat<Vector>(
-            Vector.class) {
-        public void format(Vector v, XmlElement xml) {
-            final int d = v.getDimension();
-            xml.setAttribute("dimension", d);
-            for (int i = 0; i < d; i++) {
-                xml.add(v.get(i));
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        public Vector parse(XmlElement xml) {
-            int d = xml.getAttribute("dimension", 1);
-            FastTable elements = FastTable.newInstance();
-            for (int i = d; --i >= 0;) {
-                elements.add(xml.getNext());
-            }
-            return Vector.valueOf(elements);
-        }
-    };
-
-    /**
-     * Returns a vector implementation holding the specified elements.
+     * Returns a vector implementation holding the specified elements
+     * (convenience method equivalent to <code>DenseVector.valueOf(elements)
+     * </code>)
      *
      * @param elements the vector elements.
-     * @return the vector having the specified elements.
+     * @return the dense vector having the specified elements.
+     * @deprecated Since 3.3 - Replaced by {@link DenseVector#valueOf(Field[])}
      */
     public static <F extends Field<F>> Vector<F> valueOf(F... elements) {
-        final int d = elements.length;
-        VectorDefault<F> v = VectorDefault.newInstance(d);
-        for (int i = 0; i < d; i++) {
-            v.set_(i, elements[i]);
-        }
-        return v;
+        return DenseVector.valueOf(elements);
     }
 
     /**
-     * Returns a vector implementation ({@link VectorFloat64}) holding the 
-     * specified elements values (convenience method).
+     * Returns a vector implementation holding the specified <code>double</code>
+     * values (convenience method equivalent to 
+     * <code>Float64Vector.valueOf(values)</code>).
      *
      * @param values the values of the vector elements.
      * @return the vector having the specified elements values.
+     * @deprecated Since 3.3 - Replaced by {@link Float64Vector#valueOf(double[])}
      */
-    public static VectorFloat64 valueOf(double... values) {
-        return VectorFloat64.newInstance(values);
-    }
-
-    /**
-     * Returns a vector populated from the specified collection of
-     * {@link Field Field} objects.
-     *
-     * @param  elements the collection of field objects.
-     * @return the vector having the specified elements.
-     */
-    public static <F extends Field<F>> Vector<F> valueOf(Collection<F> elements) {
-        final int d = elements.size();
-        VectorDefault<F> v = VectorDefault.newInstance(elements.size());
-        Iterator<F> iterator = elements.iterator();
-        for (int i = 0; i < d; i++) {
-            v.set_(i, iterator.next());
-        }
-        return v;
+    public static Float64Vector valueOf(double... values) {
+        return Float64Vector.valueOf(values);
     }
 
     /**
@@ -132,32 +77,20 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
     public abstract F get(int i);
 
     /**
-     * Returns this vector as a row matrix.
+     * Returns the negation of this vector.
      *
-     * @return this vector as a row matrix.
+     * @return <code>-this</code>.
      */
-    public Matrix<F> asRowMatrix() {
-        int d = this.getDimension();
-        MatrixDefault<F> M = MatrixDefault.newInstance(1, d);
-        for (int i = 0; i < d; i++) {
-            M.set_(0, i, this.get(i));
-        }
-        return M;
-    }
+    public abstract Vector<F> opposite();
 
     /**
-     * Returns this vector as a column matrix.
+     * Returns the sum of this vector with the one specified.
      *
-     * @return this vector as a column matrix.
+     * @param   that the vector to be added.
+     * @return  <code>this + that</code>.
+     * @throws  DimensionException is vectors dimensions are different.
      */
-    public Matrix<F> asColumnMatrix() {
-        int d = this.getDimension();
-        MatrixDefault<F> M = MatrixDefault.newInstance(d, 1);
-        for (int i = 0; i < d; i++) {
-            M.set_(i, 0, this.get(i));
-        }
-        return M;
-    }
+    public abstract Vector<F> plus(Vector<F> that);
 
     /**
      * Returns the difference between this vector and the one specified.
@@ -170,6 +103,14 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
     }
 
     /**
+     * Returns the product of this vector with the specified coefficient.
+     *
+     * @param  k the coefficient multiplier.
+     * @return <code>this · k</code>
+     */
+    public abstract Vector<F> times(F k);
+    
+    /**
      * Returns the dot product of this vector with the one specified.
      *
      * @param  that the vector multiplier.
@@ -178,22 +119,8 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
      * @see <a href="http://en.wikipedia.org/wiki/Dot_product">
      *      Wikipedia: Dot Product</a>
      */
-    public F times(Vector<F> that) {
-        if (this.getDimension() != that.getDimension())
-            throw new DimensionException();
-        PoolContext.enter();
-        try {
-            F sum = (F) this.get(0).times(that.get(0));
-            for (int i = 1; i < this.getDimension(); i++) {
-                sum = sum.plus(this.get(i).times(that.get(i)));
-            }
-            sum.move(ObjectSpace.OUTER);
-            return sum;
-        } finally {
-            PoolContext.exit();
-        }
-    }
-
+    public abstract F times(Vector<F> that);
+    
     /**
      * Returns the cross product of two 3-dimensional vectors.
      *
@@ -202,19 +129,21 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
      * @throws DimensionException if 
      *         <code>(this.getDimension() != 3) && (that.getDimension() != 3)</code> 
      */
-    public Vector<F> cross(Vector<F> that) {
+    public DenseVector<F> cross(Vector<F> that) {
         if ((this.getDimension() != 3) || (that.getDimension() != 3))
             throw new DimensionException(
                     "The cross product of two vectors requires "
                             + "3-dimensional vectors");
-        VectorDefault<F> v = VectorDefault.newInstance(3);
-        v.set_(0, (this.get(1).times(that.get(2))).plus((this.get(2).times(that
+        FastTable<F> elements = FastTable.newInstance();
+        elements.add((this.get(1).times(that.get(2))).plus((this.get(2).times(that
                 .get(1))).opposite()));
-        v.set_(1, (this.get(2).times(that.get(0))).plus((this.get(0).times(that
+        elements.add((this.get(2).times(that.get(0))).plus((this.get(0).times(that
                 .get(2))).opposite()));
-        v.set_(2, (this.get(0).times(that.get(1))).plus((this.get(1).times(that
+        elements.add((this.get(0).times(that.get(1))).plus((this.get(1).times(that
                 .get(0))).opposite()));
-        return v;
+        DenseVector<F> V = DenseVector.valueOf(elements);
+        FastTable.recycle(elements);
+        return V;
     }
 
     /**
@@ -224,16 +153,18 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
      */
     public Text toText() {
         final int dimension = this.getDimension();
-        TextBuilder tb = TextBuilder.newInstance();
-        tb.append('{');
+        TextBuilder tmp = TextBuilder.newInstance();
+        tmp.append('{');
         for (int i = 0; i < dimension; i++) {
-            tb.append(get(i).toText());
+            tmp.append(get(i).toText());
             if (i != dimension - 1) {
-                tb.append(", ");
+                tmp.append(", ");
             }
         }
-        tb.append('}');
-        return tb.toText();
+        tmp.append('}');
+        Text txt = tmp.toText();
+        TextBuilder.recycle(tmp); 
+        return txt;
     }
 
     /**
@@ -298,50 +229,5 @@ public abstract class Vector<F extends Field<F>> extends RealtimeObject
             code += get(i).hashCode();
         }
         return code;
-    }
-
-    @Override
-    public boolean move(ObjectSpace os) {
-        if (super.move(os)) {
-            final int dimension = this.getDimension();
-            for (int i = dimension; --i >= 0;) {
-                get(i).move(os);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    //////////////////////////////////////
-    // Default Interface implementation //
-    //////////////////////////////////////
-
-    public Vector<F> times(F a) {
-        final int d = this.getDimension();
-        VectorDefault<F> v = VectorDefault.newInstance(d);
-        for (int i = d; --i >= 0;) {
-            v.set_(i, this.get(i).times(a));
-        }
-        return v;
-    }
-
-    public Vector<F> plus(Vector<F> that) {
-        final int d = this.getDimension();
-        if (that.getDimension() != d)
-            throw new DimensionException();
-        VectorDefault<F> v = VectorDefault.newInstance(d);
-        for (int i = d; --i >= 0;) {
-            v.set_(i, this.get(i).plus(that.get(i)));
-        }
-        return v;
-    }
-
-    public Vector<F> opposite() {
-        final int d = this.getDimension();
-        VectorDefault<F> v = VectorDefault.newInstance(d);
-        for (int i = d; --i >= 0;) {
-            v.set_(i, this.get(i).opposite());
-        }
-        return v;
     }
 }

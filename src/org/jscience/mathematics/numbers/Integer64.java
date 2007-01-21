@@ -9,10 +9,10 @@
 package org.jscience.mathematics.numbers;
 
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TypeFormat;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.text.Text;
+import javolution.text.TypeFormat;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 /**
  * <p> This class represents a 64 bits integer number.</p>
@@ -29,17 +29,24 @@ public final class Integer64 extends Number<Integer64> {
      * This representation consists of a simple <code>value</code> attribute
      * holding the {@link #toText() textual} representation.
      */
-    public static final XmlFormat<Integer64> XML = new XmlFormat<Integer64>(
-            Integer64.class) {
-        public void format(Integer64 obj, XmlElement xml) {
-            xml.setAttribute("value", obj._value);
-        }
+    protected static final XMLFormat<Integer64> XML = new XMLFormat<Integer64>(Integer64.class) {
 
-        public Integer64 parse(XmlElement xml) {
+        @Override
+        public Integer64 newInstance(Class<Integer64> cls, InputElement xml)
+                throws XMLStreamException {
             return Integer64.valueOf(xml.getAttribute("value", 0L));
         }
-    };
 
+        public void write(Integer64 integer64, OutputElement xml)
+                throws XMLStreamException {
+            xml.setAttribute("value", integer64._value);
+        }
+
+        public void read(InputElement xml, Integer64 integer64) {
+            // Nothing to do, immutable.
+        }
+    };
+ 
     /**
      * Holds the factory used to produce 64 bits integer instances.
      */
@@ -77,7 +84,7 @@ public final class Integer64 extends Number<Integer64> {
      * @param  longValue the <code>long</code> value for this number.
      * @see    #longValue()
      */
-    public Integer64(long longValue) {
+    private Integer64(long longValue) {
          _value = longValue;
     }
 

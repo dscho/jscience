@@ -8,17 +8,17 @@
  */
 package org.jscience.economics.money;
 
-import javolution.realtime.LocalReference;
+import javolution.context.LocalContext;
 import javolution.util.LocalMap;
 
-import javax.units.DerivedUnit;
-import javax.units.Unit;
-import javax.units.UnitFormat;
-import javax.units.converters.ConversionException;
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.ConversionException;
+import javax.measure.converters.UnitConverter;
+import javax.measure.units.DerivedUnit;
+import javax.measure.units.Unit;
+import javax.measure.units.UnitFormat;
 
 /**
- * <p> This class represents a currency {@link javax.units.Unit Unit}.
+ * <p> This class represents a currency {@link javax.measure.units.Unit Unit}.
  *     Currencies are a special form of {@link DerivedUnit}, conversions
  *     between currencies is possible if their respective exchange rates 
  *     have been set and the conversion factor can be changed dynamically.</p>
@@ -29,7 +29,7 @@ import javax.units.converters.UnitConverter;
  * <p> By default, the label associated to a currency is its ISO-4217 code
  *     (see the <a href="http://www.bsi-global.com/iso4217currency"> ISO 4217
  *     maintenance agency</a> for a table of currency codes). An application may
- *     change this default using the {@link javax.units.UnitFormat#label
+ *     change this default using the {@link javax.measure.units.UnitFormat#label
  *     UnitFormat.label(String)} method.
  *     For example:[code]
  *     UnitFormat.getStandardInstance().label(Currency.EUR, "€");
@@ -92,8 +92,8 @@ public class Currency extends DerivedUnit<Money> {
     /**
      * Holds the reference currency.
      */
-    private static final LocalReference<Currency> 
-        REFERENCE = new LocalReference<Currency>();
+    private static final LocalContext.Reference<Currency> 
+        REFERENCE = new LocalContext.Reference<Currency>();
     
     /**
      * Holds the exchanges rate to the reference currency.
@@ -151,7 +151,7 @@ public class Currency extends DerivedUnit<Money> {
      * reference currency clears all the exchange rates previously set.
      *
      * @param  currency the new reference currency.
-     * @see    javolution.realtime.LocalContext
+     * @see    javolution.context.LocalContext
      */
     public static void setReferenceCurrency(Currency currency) {
         REFERENCE.set(currency);
@@ -219,12 +219,12 @@ public class Currency extends DerivedUnit<Money> {
     }    
     
     @Override
-    public Unit<? super Money> getBaseUnits() {
+    public Unit<? super Money> getSystemUnit() {
         return Money.BASE_UNIT;
     }
 
     @Override
-    public UnitConverter toBaseUnits() {
+    public UnitConverter toSystemUnit() {
         return _toBaseUnit;
     }
 
@@ -253,14 +253,6 @@ public class Currency extends DerivedUnit<Money> {
             if (refAmount == null) 
                   throw new ConversionException("Exchange rate not set for " + _code);
             return _invert ? x / refAmount.doubleValue() : x * refAmount.doubleValue();
-        }
-
-        @Override
-        public double derivative(double x) {
-            Double refAmount = TO_REFERENCE.get(_code);
-            if (refAmount == null) 
-                  throw new ConversionException("Exchange rate not set for " + _code);
-            return _invert ? 1 / refAmount.doubleValue() : refAmount.doubleValue();
         }
 
         @Override

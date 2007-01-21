@@ -18,8 +18,8 @@ import org.jscience.mathematics.structures.Ring;
 
 import javolution.util.FastMap;
 import javolution.util.FastTable;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
 
 /**
  * <p> This class represents a mathematical expression involving a sum of powers
@@ -32,7 +32,7 @@ import javolution.lang.TextBuilder;
  *           Polynomial<Measure<?>> x = Polynomial.valueOf(Measure.valueOf(1, SI.METER), varX);
  *     and
  *           Variable<Complex> varX = new Variable.Local<Complex>("x");
- *           Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, new varX);[/code]
+ *           Polynomial<Complex> x = Polynomial.valueOf(Complex.ONE, varX);[/code]
  *     are two different polynomials, the first one operates on physical 
  *     {@link org.jscience.physics.measures.Measure measures},
  *     whereas the second operates on 

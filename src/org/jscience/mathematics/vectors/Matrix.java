@@ -8,21 +8,18 @@
  */
 package org.jscience.mathematics.vectors;
 
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 
 import javolution.lang.Immutable;
 import javolution.lang.MathLib;
-import javolution.lang.Text;
-import javolution.lang.TextBuilder;
-import javolution.realtime.ConcurrentContext;
-import javolution.realtime.PoolContext;
-import javolution.realtime.RealtimeObject;
-import javolution.util.FastTable;
-import javolution.xml.XmlElement;
-import javolution.xml.XmlFormat;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
+import javolution.context.PoolContext;
+import javolution.context.RealtimeObject;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
+import org.jscience.mathematics.numbers.Complex;
 import org.jscience.mathematics.numbers.Float64;
 import org.jscience.mathematics.structures.Field;
 import org.jscience.mathematics.structures.Ring;
@@ -36,12 +33,30 @@ import org.jscience.mathematics.structures.VectorSpace;
  *     involving <i>any kind</i> of {@link Field Field} elements
  *     (e.g. {@link org.jscience.mathematics.numbers.Real Real}, 
  *     {@link org.jscience.mathematics.numbers.Complex Complex}, 
- *     {@link org.jscience.physics.measures.Measure Measure},
+ *     {@link org.jscience.physics.measures.Measure Measure&lt;?&gt;},
  *     {@link org.jscience.mathematics.functions.Function Function}, etc).
  *     For example:[code]
- *        // Creates a matrix of complex elements.
- *        Complex[][] complexElements = ...;
- *        Matrix<Complex> M = Matrix.valueOf(complexElements);
+ *        // Creates a dense matrix (2x2) of Rational numbers.
+ *        DenseMatrix<Rational> M = DenseMatrix.valueOf(
+ *            { Rational.valueOf(23, 45), Rational.valueOf(33, 75) },
+ *            { Rational.valueOf(15, 31), Rational.valueOf(-20, 45)});
+ *            
+ *        // Creates a sparse matrix (16x2) of Real numbers.
+ *        SparseMatrix<Real> M = SparseMatrix.valueOf(
+ *            SparseVector.valueOf(16, Real.ZERO, 0, Real.valueOf(5)),
+ *            SparseVector.valueOf(16, Real.ZERO, 15, Real.valueOf(-3)));
+ *            
+ *        // Creates a floating-point (64 bits) matrix (3x2).
+ *        Float64Matrix M = Float64Matrix.valueOf(
+ *           {{ 1.0, 2.0, 3.0}, { 4.0, 5.0, 6.0}});
+ *            
+ *        // Creates a complex single column matrix (1x2).
+ *        ComplexMatrix M = ComplexMatrix.valueOf(
+ *           {{ Complex.valueOf(1.0, 2.0), Complex.valueOf(4.0, 5.0)}}).transpose();
+ *            
+ *        // Creates an identity matrix (2x2) for modulo integer.
+ *        SparseMatrix<ModuloInteger> IDENTITY = SparseMatrix.valueOf(
+ *           DenseVector.valueOf(ModuloInteger.ONE, ModuloInteger.ONE), ModuloInteger.ZERO);
  *     [/code]</p>
  *     
  * <p> Non-commutative field multiplication is supported. Invertible square 
@@ -49,13 +64,14 @@ import org.jscience.mathematics.structures.VectorSpace;
  *     ring). In which case this class may be used to resolve system of linear
  *     equations with matrix coefficients.</p>
  *     
- * <p> For maximum performance, {@link javolution.realtime.PoolContext 
- *     PoolContext} are recommended. Matrices implementation may 
- *     also take advantage of {@link ConcurrentContext concurrent contexts}
- *     to accelerate calculations on multi-processor systems.</p>
+ * <p> Implementation Note: Matrices may use {@link 
+ *     javolution.context.PoolContext PoolContext} and {@link 
+ *     javolution.context.ConcurrentContext ConcurrentContext} in order to 
+ *     minimize heap allocation and accelerate calculations on multi-core 
+ *     systems.</p>
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 3.3, December 24, 2006
  * @see <a href="http://en.wikipedia.org/wiki/Matrix_%28mathematics%29">
  *      Wikipedia: Matrix (mathematics)</a>
  */
@@ -63,18 +79,25 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
         implements VectorSpace<Matrix<F>, F>, Ring<Matrix<F>>, Immutable {
 
     /**
-     * Holds the default XML representation for {@link Matrix} and its
-     * sub-classes.  This representation consists of the matrix 
-     * elements as nested XML elements and the matrix <code>row</code> and
-     * <code>column</code> as attributes. For example:[code]
-     *    <vectors:Matrix row="2" column="1">
-     *      <numbers:Complex real="1.0" imaginary="0.0">
-     *      <numbers:Complex real="0.0" imaginary="1.0">
-     *    </vectors:Matrix>[/code]
+     * Holds the default XML representation for matrices. For example:[code]
+     *    <DenseMatrix rows="2" columns="2">
+     *        <Complex real="1.0" imaginary="0.0" />
+     *        <Complex real="0.0" imaginary="1.0" />
+     *        <Complex real="0.0" imaginary="0.4" />
+     *        <Complex real="-5.0" imaginary="-1.0" />
+     *    </DenseMatrix>[/code]
      */
-    protected static final XmlFormat<Matrix> XML = new XmlFormat<Matrix>(
+    protected static final XMLFormat<Matrix> XML = new XMLFormat<Matrix>(
             Matrix.class) {
-        public void format(Matrix M, XmlElement xml) {
+
+        @Override
+        public void read(InputElement xml, Matrix M) throws XMLStreamException {
+            // Nothing to do.
+        }
+
+        @Override
+        public void write(Matrix M, OutputElement xml)
+                throws XMLStreamException {
             final int m = M.getNumberOfRows();
             final int n = M.getNumberOfColumns();
             xml.setAttribute("rows", m);
@@ -85,104 +108,60 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
                 }
             }
         }
-
-        @SuppressWarnings("unchecked")
-        public Matrix parse(XmlElement xml) {
-            int m = xml.getAttribute("rows", 1);
-            int n = xml.getAttribute("columns", 1);
-            FastTable elements = FastTable.newInstance();
-            for (int i = m * n; --i >= 0;) {
-                elements.add(xml.getNext());
-            }
-            return Matrix.valueOf(m, n, elements);
-        }
     };
 
     /**
-     * Returns a matrix implementation from the specified 2-dimensional array.
-     * The first dimension being the row and the second being the column.
+     * Returns a dense matrix from the specified 2-dimensional array
+     * (convenience method).
      * 
-     * <p>Note: It is safe to reuse the specified array as it is not internally
-     *          referenced by the matrix being returned.</p>
      * @param elements this matrix elements.
      * @return the matrix having the specified elements.
      * @throws DimensionException if rows have different length.
+     * @deprecated Since 3.3 - Replaced by {@link DenseMatrix#valueOf(Field[][])} 
      */
     public static <F extends Field<F>> Matrix<F> valueOf(F[][] elements) {
-        int m = elements.length;
-        int n = elements[0].length;
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        for (int i = 0; i < m; i++) {
-            if (elements[i].length != n)
-                throw new DimensionException(
-                        "All rows must have the same length.");
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, elements[i][j]);
-            }
-        }
-        return M;
+        return DenseMatrix.valueOf(elements);
     }
 
     /**
-     * Returns a m-by-n matrix filled with the specified diagonal element
-     * and the specified non-diagonal element.
-     * This constructor may be used to create an identity matrix
-     * (e.g. <code>valueOf(m, m, ONE, ZERO)</code>).
-     *
-     * @param  m the number of rows.
-     * @param  n the number of columns.
-     * @param  diagonal the diagonal element.
-     * @param  other the non-diagonal element.
-     * @return a m-by-n matrix with <code>d</code> on the diagonal and
-     *         <code>o</code> elsewhere.
-     */
-    public static <F extends Field<F>> Matrix<F> valueOf(int m, int n,
-            F diagonal, F other) {
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, (i != j) ? other : diagonal);
-            }
-        }
-        return M;
-    }
-
-    /**
-     * Returns a matrix from a 2-dimensional array of <code>double</code>
-     * values. The first dimension being the number
-     * of rows and the second being the number of columns ([m,n]).
+     * Returns a dense matrix from a 2-dimensional array of <code>double</code>
+     * values (convenience method).
      *
      * @param  values the array of <code>double</code> values.
-     * @return the corresponding matrix of {@link Float64} elements.
-     * @throws IllegalArgumentException if rows have different length.
+     * @return the matrix having the specified elements.
+     * @throws DimensionException if rows have different length.
+     * @deprecated Since 3.3 - Replaced by {@link Float64Matrix#valueOf(double[][])} 
      */
-    public static MatrixFloat64 valueOf(double[][] values) {
-        return MatrixFloat64.newInstance(values);
+    public static Matrix<Float64> valueOf(double[][] values) {
+        return Float64Matrix.valueOf(values);
     }
 
     /**
-     * Returns a m-by-n matrix populated from the specified collection of
-     * {@link Field Field} objects (rows first).
+     * Returns a dense matrix from a 2-dimensional array of {@link Complex 
+     * complex} numbers (convenience method). 
      *
-     * @param  m the number of rows.
-     * @param  n the number of columns.
-     * @param  elements the collection of matrix elements.
-     * @return the matrix having the specified size and elements.
-     * @throws DimensionException if <code>elements.size() != m * n</code>
+     * @param  elements the array of complex elements.
+     * @return the matrix having the specified elements.
+     * @throws DimensionException if rows have different length.
+     * @deprecated Since 3.3 - Replaced by {@link ComplexMatrix#valueOf(Complex[][])} 
      */
-    public static <F extends Field<F>> Matrix<F> valueOf(int m, int n,
-            Collection<F> elements) {
-        if (elements.size() != m * n)
-            throw new DimensionException(m * n
-                    + " elements expected but found " + elements.size());
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        Iterator<F> iterator = elements.iterator();
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, iterator.next());
-            }
-        }
-        return M;
+    public static Matrix<Complex> valueOf(Complex[][] elements) {
+        return ComplexMatrix.valueOf(elements);
+    }
+
+    /**
+     * Returns the sparse square matrix having the specified diagonal
+     * vector.          
+     *
+     * @param  diagonal the diagonal vector.
+     * @param  zero value of non-diagonal elements.
+     * @return a square matrix with <code>diagonal</code> on the diagonal and
+     *         <code>zero</code> elsewhere.
+     * @deprecated Since 3.3 - Replaced by {@link SparseMatrix#valueOf(Vector, Field)} 
+     */
+    public static <F extends Field<F>> Matrix<F> valueOf(Vector<F> diagonal, 
+            F zero) {
+        return SparseMatrix.valueOf(diagonal, zero);
     }
 
     /**
@@ -192,19 +171,19 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
     }
 
     /**
-     * Returns the number of rows for this matrix.
+     * Returns the number of rows <code>m</code> for this matrix.
      *
      * @return m, the number of rows.
      */
     public abstract int getNumberOfRows();
 
     /**
-     * Returns the number of columns for this matrix.
+     * Returns the number of columns <code>n</code> for this matrix.
      *
      * @return n, the number of columns.
      */
     public abstract int getNumberOfColumns();
-
+ 
     /**
      * Returns a single element from this matrix.
      *
@@ -216,68 +195,37 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      */
     public abstract F get(int i, int j);
 
-    ////////////////////////////
-    // Default Implementation //
-    ////////////////////////////
+    /**
+     * Returns the row identified by the specified index in this matrix.
+     *
+     * @param  i the row index (range [0..m[).
+     * @return the vector holding the specified row.
+     * @throws IndexOutOfBoundsException <code>(i < 0) || (i >= m)</code>
+     */
+    public abstract Vector<F> getRow(int i);
 
     /**
-     * Returns a sub-matrix of this matrix given the range of its rows and
-     * columns indices.
+     * Returns the column identified by the specified index in this matrix.
      *
-     * @param  i0 the initial row index.
-     * @param  i1 the final row index.
-     * @param  j0 the initial column index.
-     * @param  j1 the final column index.
-     * @return <code>THIS(i0:i1, j0:j1)</code>
+     * @param  j the column index (range [0..n[).
+     * @return the vector holding the specified column.
+     * @throws IndexOutOfBoundsException <code>(j < 0) || (j >= n)</code>
      */
-    public final Matrix<F> getMatrix(int i0, int i1, int j0, int j1) {
-        int Mm = i1 - i0 + 1;
-        int Mn = j1 - j0 + 1;
-        MatrixDefault<F> M = MatrixDefault.newInstance(Mm, Mn);
-        for (int i = 0; i < Mm; i++) {
-            for (int j = 0; j < Mn; j++) {
-                M.set_(i, j, this.get(i + i0, j + j0));
-            }
-        }
-        return M;
-    }
+    public abstract Vector<F> getColumn(int j);
 
     /**
-     * Returns a sub-matrix composed of the specified rows and columns from
-     * this matrix.
+     * Returns the diagonal vector.
      *
-     * @param  rows the indices of the rows to return.
-     * @param  columns the indices of the columns to return.
-     * @return the sub-matrix from the specified rows and columns.
+     * @return the vector holding the diagonal elements.
      */
-    public final Matrix<F> getMatrix(int[] rows, int[] columns) {
-        int Mn = columns.length;
-        int Mm = rows.length;
-        MatrixDefault<F> M = MatrixDefault.newInstance(Mm, Mn);
-        for (int i = 0; i < Mm; i++) {
-            for (int j = 0; j < Mn; j++) {
-                M.set_(i, j, this.get(rows[i], columns[j]));
-            }
-        }
-        return M;
-    }
+    public abstract Vector<F> getDiagonal();
 
     /**
      * Returns the negation of this matrix.
      *
      * @return <code>-this</code>.
      */
-    public Matrix<F> opposite() {
-        final int m = this.getNumberOfRows();
-        final int n = this.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, this.get(i, j).opposite());
-            }
-        }
-        return M;
-    }
+    public abstract Matrix<F> opposite();
 
     /**
      * Returns the sum of this matrix with the one specified.
@@ -286,19 +234,7 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @return  <code>this + that</code>.
      * @throws  DimensionException matrices's dimensions are different.
      */
-    public Matrix<F> plus(Matrix<F> that) {
-        final int m = this.getNumberOfRows();
-        final int n = this.getNumberOfColumns();
-        if ((m != that.getNumberOfRows()) || (n != that.getNumberOfColumns()))
-            throw new DimensionException();
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, this.get(i, j).plus(that.get(i, j)));
-            }
-        }
-        return M;
-    }
+    public abstract Matrix<F> plus(Matrix<F> that);
 
     /**
      * Returns the difference between this matrix and the one specified.
@@ -317,18 +253,18 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @param  k the coefficient multiplier.
      * @return <code>this · k</code>
      */
-    public Matrix<F> times(F k) {
-        final int m = this.getNumberOfRows();
-        final int n = this.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(m, n);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(i, j, this.get(i, j).times(k));
-            }
-        }
-        return M;
-    }
-
+    public abstract Matrix<F> times(F k);
+    
+    /**
+     * Returns the product of this matrix by the specified vector.
+     *
+     * @param  v the vector.
+     * @return <code>this · v</code>
+     * @throws DimensionException if <code>
+     *         v.getDimension() != this.getNumberOfColumns()<code>
+     */
+    public abstract Vector<F> times(Vector<F> v);
+    
     /**
      * Returns the product of this matrix with the one specified.
      *
@@ -337,30 +273,15 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @throws DimensionException if <code>
      *         this.getNumberOfColumns() != that.getNumberOfRows()</code>.
      */
-    public Matrix<F> times(Matrix<F> that) {
-        if (this.getNumberOfColumns() != that.getNumberOfRows())
-            throw new DimensionException();
-        final int thism = this.getNumberOfRows();
-        final int thisn = this.getNumberOfColumns();
-        final int thatn = that.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(thism, thatn);
-        for (int i = 0; i < thism; i++) {
-            for (int j = 0; j < thatn; j++) {
-                PoolContext.enter();
-                try {
-                    F sum = this.get(i, 0).times(that.get(0, j));
-                    for (int k = 1; k < thisn; k++) {
-                        sum = sum.plus(this.get(i, k).times(that.get(k, j)));
-                    }
-                    M.set_(i, j, sum);
-                    sum.move(ObjectSpace.OUTER); // Exports.
-                } finally {
-                    PoolContext.exit();
-                }
-            }
-        }
-        return M;
-    }
+    public abstract Matrix<F> times(Matrix<F> that);    
+
+    /**
+     * Returns the inverse of this matrix (must be square).
+     *
+     * @return <code>1 / this</code>
+     * @throws DimensionException if this matrix is not square.
+     */
+    public abstract Matrix<F> inverse();
 
     /**
      * Returns this matrix divided by the one specified.
@@ -375,18 +296,6 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
     }
 
     /**
-     * Returns the inverse of this matrix (must be square).
-     *
-     * @return <code>1 / this</code>
-     * @throws MatrixException if this matrix is not square.
-     */
-    public Matrix<F> inverse() {
-        if (!isSquare())
-            throw new DimensionException("Matrix not square");
-        return DecompositionLU.valueOf(this).inverse();
-    }
-
-    /**
      * Returns the inverse or pseudo-inverse if this matrix if not square.
      *
      * <p> Note: To resolve the equation <code>A * X = B</code>,
@@ -397,81 +306,9 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      */
     public Matrix<F> pseudoInverse() {
         if (isSquare())
-            return DecompositionLU.valueOf(this).inverse();
+            return this.inverse();
         Matrix<F> thisTranspose = this.transpose();
         return (thisTranspose.times(this)).inverse().times(thisTranspose);
-    }
-
-    /**
-     * Returns the linear algebraic matrix tensor product of this matrix
-     * and another.
-     *
-     * @param  that the second matrix.
-     * @return the Kronecker Tensor (direct) product of <code>this</code>
-     *         and <code>that</code>.
-     * @since  January 2002, by Jonathan Grattage (jjg99c@cs.nott.ac.uk).
-     */
-    public Matrix<F> tensor(Matrix<F> that) {
-        final int thism = this.getNumberOfRows();
-        final int thisn = this.getNumberOfColumns();
-        final int thatm = that.getNumberOfRows();
-        final int thatn = that.getNumberOfColumns();
-        MatrixDefault<F> C = MatrixDefault.newInstance(thism * thatm, thisn
-                * thatn);
-        boolean endCol = false;
-        int cCount = 0, rCount = 0;
-        int subMatrix = 0, iref = 0, jref = 0;
-        for (int j = 0; j < thisn; j++) {
-            for (int i = 0; i < thism; i++) {
-                Matrix<F> X = that.times(this.get(i, j));
-                rCount = subMatrix % thism;
-                if (rCount > 0) {
-                    endCol = true;
-                }
-                if ((rCount == 0) && (endCol == true)) {
-                    cCount++;
-                }
-                for (int y = 0; y < thatn; y++) {
-                    for (int x = 0; x < thatm; x++) {
-                        iref = x + (rCount * thatm);
-                        jref = y + (cCount * thatm);
-                        C.set_(iref, jref, X.get(x, y));
-                    }
-                }
-                subMatrix++;
-            }
-        }
-        return C;
-    }
-
-    /**
-     * Return the product of this matrix by the specified vector.
-     *
-     * @param  v the vector.
-     * @return <code>this · v</code>
-     * @throws DimensionException if <code>
-     *         v.getDimension() != this.getNumberOfColumns()<code>
-     */
-    public Vector<F> times(Vector<F> v) {
-        final int m = this.getNumberOfRows();
-        final int n = this.getNumberOfColumns();
-        if (v.getDimension() != n)
-            throw new DimensionException();
-        VectorDefault<F> r = VectorDefault.newInstance(m);
-        for (int i = 0; i < m; i++) {
-            PoolContext.enter();
-            try {
-                F sum = this.get(i, 0).times(v.get(0));
-                for (int k = 1; k < n; k++) {
-                    sum = sum.plus(this.get(i, k).times(v.get(k)));
-                }
-                r.set_(i, sum);
-                sum.move(ObjectSpace.OUTER); // Exports.
-            } finally {
-                PoolContext.exit();
-            }
-        }
-        return r;
     }
 
     /**
@@ -480,26 +317,14 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @return this matrix determinant.
      * @throws DimensionException if this matrix is not square.
      */
-    public F determinant() {
-        return DecompositionLU.valueOf(this).determinant();
-    }
+    public abstract F determinant();
 
     /**
      * Returns the transpose of this matrix.
      *
      * @return <code>A'</code>.
      */
-    public Matrix<F> transpose() {
-        final int m = this.getNumberOfRows();
-        final int n = this.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(n, m);
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                M.set_(j, i, this.get(i, j));
-            }
-        }
-        return M;
-    }
+    public abstract Matrix<F> transpose();
 
     /**
      * Returns the cofactor of an element in this matrix. It is the value
@@ -512,27 +337,7 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @throws DimensionException matrix is not square or its dimension
      *         is less than 2.
      */
-    public F cofactor(int i, int j) {
-        final int thism = this.getNumberOfRows();
-        final int thisn = this.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(thism - 1, thisn - 1);
-        int row = 0;
-        for (int k1 = 0; k1 < thism; k1++) {
-            if (k1 == i) {
-                continue;
-            }
-            int column = 0;
-            for (int k2 = 0; k2 < thisn; k2++) {
-                if (k2 == j) {
-                    continue;
-                }
-                M.set_(row, column, this.get(k1, k2));
-                column++;
-            }
-            row++;
-        }
-        return M.determinant();
-    }
+    public abstract F cofactor(int i, int j);
 
     /**
      * Returns the adjoint of this matrix. It is obtained by replacing each
@@ -544,19 +349,8 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      * @throws DimensionException if this matrix is not square or if
      *         its dimension is less than 2.
      */
-    public Matrix<F> adjoint() {
-        final int thism = this.getNumberOfRows();
-        final int thisn = this.getNumberOfColumns();
-        MatrixDefault<F> M = MatrixDefault.newInstance(thism, thisn);
-        for (int i = 0; i < thism; i++) {
-            for (int j = 0; j < thisn; j++) {
-                M.set_(i, j, ((i + j) % 2 == 0) ? this.cofactor(i, j) : this
-                        .cofactor(i, j).opposite());
-            }
-        }
-        return M.transpose();
-    }
-
+    public abstract Matrix<F> adjoint();
+    
     /**
      * Indicates if this matrix is square.
      *
@@ -576,7 +370,9 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      *         do not match.
      */
     public Vector<F> solve(Vector<F> y) {
-        return DecompositionLU.valueOf(this).solve(y); // Default implementation.
+        DenseMatrix<F> M = DenseMatrix.newInstance(y.getDimension(), true);
+        M._rows.add(DenseVector.valueOf(y));
+        return solve(M).getColumn(0);
     }
 
     /**
@@ -589,7 +385,7 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
      *         do not match.
      */
     public Matrix<F> solve(Matrix<F> y) {
-        return DecompositionLU.valueOf(this).solve(y); // Default implementation.
+        return LUDecomposition.valueOf(this).solve(y); // Default implementation.
     }
 
     /**
@@ -638,6 +434,30 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
     }
 
     /**
+     * Returns the linear algebraic matrix tensor product of this matrix
+     * and another (Kronecker product). The default implementation returns
+     * a {@link DenseMatrix}. 
+     *
+     * @param  that the second matrix.
+     * @return <code>this &otimes; that</code>
+     * @see    <a href="http://en.wikipedia.org/wiki/Kronecker_product">
+     *         Wikipedia: Kronecker Product</a>
+     */
+    public abstract Matrix<F> tensor(Matrix<F> that);
+
+    /**
+     * Returns the vectorization of this matrix. The vectorization of 
+     * a matrix is the column vector obtain by stacking the columns of the
+     * matrix on top of one another. The default implementation returns 
+     * a {@link DenseVector}.
+     *
+     * @return the vectorization of this matrix.
+     * @see    <a href="http://en.wikipedia.org/wiki/Vectorization_%28mathematics%29">
+     *         Wikipedia: Vectorization.</a>
+     */
+    public abstract Vector<F> vectorization();
+    
+    /**
      * Returns the text representation of this matrix.
      *
      * @return the text representation of this matrix.
@@ -645,22 +465,24 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
     public Text toText() {
         final int m = this.getNumberOfRows();
         final int n = this.getNumberOfColumns();
-        TextBuilder tb = TextBuilder.newInstance();
-        tb.append('{');
+        TextBuilder tmp = TextBuilder.newInstance();
+        tmp.append('{');
         for (int i = 0; i < m; i++) {
-            tb.append('{');
+            tmp.append('{');
             for (int j = 0; j < n; j++) {
-                tb.append(get(i, j).toText());
+                tmp.append(get(i, j).toText());
                 if (j != n - 1) {
-                    tb.append(", ");
+                    tmp.append(", ");
                 }
             }
             if (i != m - 1) {
-                tb.append("},\n");
+                tmp.append("},\n");
             }
         }
-        tb.append("}}");
-        return tb.toText();
+        tmp.append("}}");
+        Text txt = tmp.toText();
+        TextBuilder.recycle(tmp);
+        return txt;
     }
 
     /**
@@ -736,19 +558,5 @@ public abstract class Matrix<F extends Field<F>> extends RealtimeObject
         }
         return code;
     }
-
-    @Override
-    public boolean move(ObjectSpace os) {
-        if (super.move(os)) {
-            final int m = this.getNumberOfRows();
-            final int n = this.getNumberOfColumns();
-            for (int i = m; --i >= 0;) {
-                for (int j = n; --j >= 0;) {
-                    get(i, j).move(os);
-                }
-            }
-            return true;
-        }
-        return false;
-    }
+    
 }

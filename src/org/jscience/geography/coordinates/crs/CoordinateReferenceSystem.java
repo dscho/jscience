@@ -11,11 +11,11 @@ package org.jscience.geography.coordinates.crs;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.quantities.Angle;
-import javax.quantities.Duration;
-import javax.quantities.Length;
-import javax.quantities.Quantity;
-import javax.units.Unit;
+import javax.measure.quantities.Angle;
+import javax.measure.quantities.Duration;
+import javax.measure.quantities.Length;
+import javax.measure.quantities.Quantity;
+import javax.measure.units.Unit;
 
 import javolution.util.FastSet;
 

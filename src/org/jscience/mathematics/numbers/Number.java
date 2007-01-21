@@ -10,14 +10,14 @@ package org.jscience.mathematics.numbers;
 
 import org.jscience.mathematics.structures.Ring;
 import javolution.lang.Immutable;
-import javolution.lang.Text;
-import javolution.realtime.RealtimeObject;
+import javolution.text.Text;
+import javolution.context.RealtimeObject;
 
 /**
  * <p> This class represents an immutable number.</p>
  * 
  * <p> Instances of this class are typically created using real-time 
- *     {@link javolution.realtime.RealtimeObject.Factory factories}.</p>
+ *     {@link javolution.context.RealtimeObject.Factory factories}.</p>
  *
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006

@@ -10,9 +10,9 @@ package org.jscience.geography.coordinates;
 
 import static org.jscience.geography.coordinates.crs.ReferenceEllipsoid.WGS84;
 
-import javax.quantities.*;
-import javax.units.*;
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.quantities.*;
+import javax.measure.units.*;
 
 import org.jscience.geography.coordinates.crs.*;
 import org.opengis.referencing.cs.CoordinateSystem;

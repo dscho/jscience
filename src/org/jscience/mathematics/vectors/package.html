@@ -37,12 +37,12 @@
             //
             //                                    A      *  X   =  B
             //
-            Matrix<Measure> A = Matrix.valueOf(new Measure[][]{
+            DenseMatrix<Measure> A = DenseMatrix.valueOf(new Measure[][]{
                     {Measure.ONE,            Measure.ONE,            Measure.valueOf(0, OHM)},
                     {Measure.ONE.opposite(), Measure.ZERO,           R1},
                     {Measure.ZERO,           Measure.ONE.opposite(), R2}});
-            Vector<Measure> B = Vector.valueOf((Measure)U0, Measure.valueOf(0, VOLT), Measure.valueOf(0, VOLT));
-            Vector<Measure> X = A.solve(B);
+            DenseVector<Measure> B = DenseVector.valueOf((Measure)U0, Measure.valueOf(0, VOLT), Measure.valueOf(0, VOLT));
+            DesneVector<Measure> X = A.solve(B);
             System.out.println(X);
             System.out.println(X.get(2).to(MILLI(AMPERE)));
 

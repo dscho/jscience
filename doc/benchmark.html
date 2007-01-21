@@ -5,30 +5,35 @@
 <LINK REL ="stylesheet" TYPE="text/css" HREF="javadoc.css" TITLE="Style">
 </HEAD>
 <BODY><PRE>
-<B>D:\jscience-3.0>java -jar jscience.jar perf</B>
+<B>C:\jscience-3.3>ant run</B>
 
-JScience - Java(TM) Tools and Libraries for the Advancement of Sciences
-Version 3.0.0 March 1 2005 (http://jscience.org)
+     ...
+run:
+     [java] JScience - Java(TM) Tools and Libraries for the Advancement of Sciences
+     [java] Version 3.3.Beta January 4 2007 (http://jscience.org)
 
-Benchmark...
+     [java] Benchmark...
 
-Numerics Operations
-Float64 add: 59.45 ns
-Complex add: 62.37 ns
-Measure&lt;Mass&gt; add: 81.51 ns
-Float64 multiply: 43.43 ns
-Complex multiply: 55.33 ns
-Measure&lt;Mass&gt; multiply: 129.4 ns
+     [java] Numerics Operations
+     [java] Float64 add: 50.95 ns
+     [java] Complex add: 44.84 ns
+     [java] Measure (mass) add: 58.71 ns
+     [java] Float64 multiply: 44.57 ns
+     [java] Complex multiply: 49.09 ns
+     [java] Measure (mass) multiply: 107.9 ns
 
-LargeInteger (PoolContext) versus BigInteger
-LargeInteger (1024 bits) add: 299.4 ns
-BigInteger (1024 bits) add: 2.509 us
+     [java] LargeInteger (PoolContext) versus BigInteger
+     [java] LargeInteger (1024 bits) addition: 322.2 ns
+<FONT COLOR="999999">     [java] BigInteger (1024 bits) addition: 828.6 ns</FONT>
+     [java] LargeInteger (1024 bits) multiplication: 18.28 us
+<FONT COLOR="999999">     [java] BigInteger (1024 bits) multiplication: 14.66 us</FONT>
 
-Matrix&lt;Float64&gt; and Matrix&lt;Complex&gt; versus non-parameterized matrix (double)
-Non-parameterized matrix (double based) 500x500 multiplication: 2.690 s
-MatrixFloat64 500x500 multiplication: 2.651 s
-Matrix&lt;Complex&gt; 500x500 multiplication: 18.47 s
+     [java] Matrix&lt;Float64&gt; and Matrix&lt;Complex&gt; versus non-parameterized matrix (double)
+<FONT COLOR="999999">     [java] Non-parameterized matrix (double based) 500x500 multiplication: 869.7 ms</FONT>
+     [java] Matrix&lt;Float64&gt; 500x500 multiplication: 431.5 ms
+     [java] Matrix&lt;Complex&gt; 500x500 multiplication: 1.702 s
+     [java] Matrix&lt;Measure&gt; 500x500 multiplication: 33.91 s
 
-More performance analysis in future versions...
+     [java] More performance analysis in future versions...
 
 </PRE></BODY></HTML>

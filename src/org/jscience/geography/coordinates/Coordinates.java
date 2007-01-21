@@ -9,7 +9,7 @@
 package org.jscience.geography.coordinates;
 
 import javolution.lang.Immutable;
-import javolution.lang.TextBuilder;
+import javolution.text.TextBuilder;
 
 import org.jscience.geography.coordinates.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.cs.CoordinateSystem;

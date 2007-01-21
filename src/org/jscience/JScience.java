@@ -12,20 +12,18 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Random;
 
-import javax.quantities.*;
-import javax.units.*;
+import javax.measure.quantities.*;
+import javax.measure.units.*;
 
 import org.jscience.economics.money.Currency;
 import org.jscience.economics.money.Money;
 import org.jscience.geography.coordinates.Altitude;
 import org.jscience.geography.coordinates.CompoundCoordinates;
-import org.jscience.geography.coordinates.Coordinates;
 import org.jscience.geography.coordinates.LatLong;
 import org.jscience.geography.coordinates.Time;
 import org.jscience.geography.coordinates.UTM;
 import org.jscience.geography.coordinates.XYZ;
 import org.jscience.geography.coordinates.crs.CoordinatesConverter;
-import org.jscience.geography.coordinates.crs.ProjectedCRS;
 import org.jscience.mathematics.functions.Polynomial;
 import org.jscience.mathematics.functions.Variable;
 import org.jscience.mathematics.numbers.Complex;
@@ -34,19 +32,25 @@ import org.jscience.mathematics.numbers.LargeInteger;
 import org.jscience.mathematics.numbers.ModuloInteger;
 import org.jscience.mathematics.numbers.Rational;
 import org.jscience.mathematics.numbers.Real;
+import org.jscience.mathematics.vectors.ComplexMatrix;
+import org.jscience.mathematics.vectors.DenseMatrix;
+import org.jscience.mathematics.vectors.DenseVector;
+import org.jscience.mathematics.vectors.Float64Matrix;
 import org.jscience.mathematics.vectors.Matrix;
-import org.jscience.mathematics.vectors.MatrixFloat64;
+import org.jscience.mathematics.vectors.SparseMatrix;
 import org.jscience.mathematics.vectors.Vector;
 import org.jscience.physics.measures.Measure;
 import org.jscience.physics.measures.MeasureFormat;
 import org.jscience.physics.models.RelativisticModel;
 
 import javolution.lang.MathLib;
-import javolution.lang.TextBuilder;
-import javolution.realtime.LocalContext;
-import javolution.realtime.PoolContext;
-import static javax.units.SI.*;
-import static javax.units.NonSI.*;
+import javolution.text.Text;
+import javolution.text.TextBuilder;
+import javolution.context.ConcurrentContext;
+import javolution.context.LocalContext;
+import javolution.context.PoolContext;
+import static javax.measure.units.NonSI.*;
+import static javax.measure.units.SI.*;
 import static org.jscience.economics.money.Currency.*;
 
 /**
@@ -58,7 +62,7 @@ import static org.jscience.economics.money.Currency.*;
  * @version 3.0, February 13, 2006
  */
 public final class JScience {
-
+    
     /**
      * Holds the version information.
      */
@@ -82,10 +86,8 @@ public final class JScience {
      * performance analysis.</li>
      * </ul>
      * 
-     * @param args
-     *            the option arguments.
-     * @throws Exception
-     *             if a problem occurs.
+     * @param args the option arguments.
+     * @throws Exception if a problem occurs.
      */
     public static void main(String[] args) throws Exception {
         System.out.println("JScience - Java(TM) Tools and Libraries for"
@@ -111,14 +113,13 @@ public final class JScience {
         System.out.println("    test    (to perform self-tests)");
         System.out.println("    perf    (to run benchmark)");
     }
-
+    
     /**
      * Performs simple tests.
      * 
      * @throws Exception if a problem occurs.
      */
     private static void testing() throws Exception {
-        System.out.println();
         System.out.println("Testing...");   
         {
             System.out.println("");
@@ -164,9 +165,9 @@ public final class JScience {
             System.out.println("(m11 ≅ m8) = " + m11.approximates(m8));
 
             System.out.println("");
-            System.out.println("MeasureFormat - Plus/Minus Error (4 digits error)");
+            System.out.println("MeasureFormat - Plus/Minus Error (3 digits error)");
             MeasureFormat.setInstance(MeasureFormat
-                    .getPlusMinusErrorInstance(4));
+                    .getPlusMinusErrorInstance(3));
             System.out.println("m3 = " + m3);
             System.out.println("m4 = " + m4);
             System.out.println("m5 = " + m5);
@@ -271,11 +272,11 @@ public final class JScience {
             //
             //                                    A      *  X   =  B
             //
-            Matrix<Measure<?>> A = Matrix.valueOf(new Measure<?>[][] {
+            DenseMatrix<Measure<?>> A = DenseMatrix.valueOf(new Measure<?>[][] {
                     { Measure.ONE, Measure.ONE, Measure.valueOf(0, OHM) },
                     { Measure.ONE.opposite(), Measure.ZERO, R1 },
                     { Measure.ZERO, Measure.ONE.opposite(), R2 } });
-            Vector<Measure<?>> B = Vector.valueOf(new Measure<?>[] { U0, Measure.valueOf(0,
+            DenseVector<Measure<?>> B = DenseVector.valueOf(new Measure<?>[] { U0, Measure.valueOf(0,
                     VOLT), Measure.valueOf(0, VOLT)});
             Vector<Measure<?>> X = A.solve(B);
             System.out.println(X);
@@ -316,11 +317,11 @@ public final class JScience {
             System.out.println(utm);
 
             // Converts any projected coordinates to Latitude/Longitude.
-            Coordinates<ProjectedCRS> coord2d = utm;
-            ProjectedCRS<Coordinates> crs = coord2d.getCoordinateReferenceSystem();
-            CoordinatesConverter<Coordinates, LatLong> cvtr = crs.getConverterTo(LatLong.CRS);
-            latLong = cvtr.convert(coord2d);
-            System.out.println(latLong);
+            //Coordinates<ProjectedCRS> coord2d = utm;
+            //ProjectedCRS<Coordinates> crs = coord2d.getCoordinateReferenceSystem();
+            //CoordinatesConverter<Coordinates, LatLong> cvtr = crs.getConverterTo(LatLong.CRS);
+            //latLong = cvtr.convert(coord2d);
+            //System.out.println(latLong);
 
             // Compound coordinates.
             Altitude alt = Altitude.valueOf(2000, FOOT);
@@ -344,7 +345,7 @@ public final class JScience {
             System.out.println("");
             System.out.println("Numbers");
 
-            Real two = Real.valueOf(2, 100); // 2.0000..00 (100 zeros after decimal point).
+            Real two = Real.valueOf(2); // 2.0000..00 (100 zeros after decimal point).
             Real sqrt2 = two.sqrt();
             System.out.println("sqrt(2)   = " + sqrt2);
             System.out.println("Precision = " + sqrt2.getPrecision()
@@ -371,13 +372,15 @@ public final class JScience {
 
         }
     }
-
+    
     /**
      * Measures performance.
      */
     private static void benchmark() throws Exception {
         System.out.println("Benchmark...");
-
+        ConcurrentContext.setEnabled(false);
+        //PoolContext.setEnabled(false);      
+ 
         Object[] results = new Object[10000];
 
         System.out.println("");
@@ -458,10 +461,10 @@ public final class JScience {
         System.out.println();
         System.out.println("LargeInteger (PoolContext) versus BigInteger");
         BigInteger big = BigInteger.probablePrime(1024, new Random());
-
-        System.out.print("LargeInteger (1024 bits) add: ");
         byte[] bytes = big.toByteArray();
         LargeInteger large = LargeInteger.valueOf(bytes, 0, bytes.length);
+
+        System.out.print("LargeInteger (1024 bits) addition: ");
         startTime();
         for (int i = 0; i < 100; i++) {
             PoolContext.enter();
@@ -472,7 +475,7 @@ public final class JScience {
         }
         endTime(100 * results.length);
 
-        System.out.print("BigInteger (1024 bits) add: ");
+        System.out.print("BigInteger (1024 bits) addition: ");
         startTime();
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < results.length; j++) {
@@ -480,6 +483,26 @@ public final class JScience {
             }
         }
         endTime(100 * results.length);
+
+        System.out.print("LargeInteger (1024 bits) multiplication: ");
+        startTime();
+        for (int i = 0; i < 10; i++) {
+            PoolContext.enter();
+            for (int j = 0; j < results.length; j++) {
+                results[j] = large.times(large);
+            }
+            PoolContext.exit();
+        }
+        endTime(10 * results.length);
+
+        System.out.print("BigInteger (1024 bits) multiplication: ");
+        startTime();
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < results.length; j++) {
+                results[j] = big.multiply(big);
+            }
+        }
+        endTime(10 * results.length);
 
         System.out.println();
         System.out.println("Matrix<Float64> and Matrix<Complex> versus "
@@ -494,19 +517,21 @@ public final class JScience {
                 values[i][j] = MathLib.random();
             }
         }
-        PrimitiveMatrix PM = new PrimitiveMatrix(values);
+        MatrixDouble PM = new MatrixDouble(values);
+        PM.times(PM); // Warming up.
         startTime();
-        PM.multiply(PM);
+        PM.times(PM);
         endTime(1);
 
-        System.out.print("MatrixFloat64 500x500 multiplication: ");
+        System.out.print("Matrix<Float64> 500x500 multiplication: ");
         double[][] floats = new double[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 floats[i][j] = MathLib.random();
             }
         }
-        MatrixFloat64 FM = Matrix.valueOf(floats);
+        Matrix<Float64> FM = Float64Matrix.valueOf(floats);
+        FM.times(FM); // Warming up.
         startTime();
         FM.times(FM);
         endTime(1);
@@ -519,45 +544,61 @@ public final class JScience {
                         .random());
             }
         }
-        Matrix<Complex> CM = Matrix.valueOf(complexes);
+        Matrix<Complex> CM = ComplexMatrix.valueOf(complexes);
+        CM.times(CM); // Warming up.
         startTime();
         CM.times(CM);
+        endTime(1);
+
+        System.out.print("Matrix<Measure> 500x500 multiplication: ");
+        Measure<?>[][] measures = new Measure<?>[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                measures[i][j] = Measure.valueOf(
+                        MathLib.random(Long.MIN_VALUE, Long.MAX_VALUE), Unit.ONE);
+            }
+        }
+        DenseMatrix<Measure<?>> MM = DenseMatrix.valueOf(measures);
+        startTime();
+        MM.times(MM);
         endTime(1);
 
         System.out.println();
         System.out.println("More performance analysis in future versions...");
     }
 
-    private static final class PrimitiveMatrix {
+    private static final class MatrixDouble {
         double[][] o;
 
-        int m; // Nbr of columns.
+        int m; // Nbr of rows.
 
-        int n; // Nbr of rows.
+        int n; // Nbr of columns.
 
-        PrimitiveMatrix(double[][] elements) {
+        MatrixDouble(double[][] elements) {
             o = elements;
             m = elements.length;
             n = elements[0].length;
         }
 
-        PrimitiveMatrix multiply(PrimitiveMatrix that) {
-            if (this.m == that.n) {
-                PrimitiveMatrix M = new PrimitiveMatrix(
-                        new double[this.n][that.m]);
-                for (int i = 0; i < this.n; i++) {
-                    for (int j = 0; j < that.m; j++) {
-                        double sum = this.o[i][0] * that.o[0][j];
-                        for (int k = 1; k < this.m; k++) {
-                            sum = sum + this.o[i][k] * that.o[k][j];
-                        }
-                        M.o[i][j] = sum;
-                    }
-                }
-                return M;
-            } else {
+        MatrixDouble times(MatrixDouble that) {
+            if (that.m != this.n) 
                 throw new Error("Wrong dimensions");
+            MatrixDouble M = new MatrixDouble(new double[this.m][that.n]);
+            double[] thatColj = new double[n];
+            for (int j = 0; j < that.n; j++) {
+               for (int k = 0; k < n; k++) {
+                  thatColj[k] = that.o[k][j];
+               }
+               for (int i = 0; i < m; i++) {
+                  double[] thisRowi = o[i];
+                  double s = 0;
+                  for (int k = 0; k < n; k++) {
+                     s += thisRowi[k]*thatColj[k];
+                  }
+                  M.o[i][j] = s;
+               }
             }
+            return M;
         }
     }
 

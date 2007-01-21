@@ -8,15 +8,15 @@
  */
 package org.jscience.physics.models;
 
-import static javax.units.Dimension.LENGTH;
-
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.units.BaseUnit;
+import javax.measure.units.Dimension;
 
 /**
  * This class represents the standard model. 
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 3.1, April 22, 2006
  */
 public class StandardModel extends PhysicalModel {
 
@@ -34,14 +34,18 @@ public class StandardModel extends PhysicalModel {
     /**
      * Selects the standard model as the current model.
      */
-    public static void select() {
-        INSTANCE.setDimensions();
+    public static void select() {        
         PhysicalModel.setCurrent(INSTANCE);
     }
 
-    @Override
-    protected void setDimensions() {
-        LENGTH.setEquivalentTo(LENGTH, UnitConverter.IDENTITY); // Resets.
+    // Implements Dimension.Model
+    public Dimension getDimension(BaseUnit unit) {
+        return Dimension.Model.STANDARD.getDimension(unit);
+    }
+
+    // Implements Dimension.Model
+    public UnitConverter getTransform(BaseUnit unit) {
+        return Dimension.Model.STANDARD.getTransform(unit);
     }
 
 }

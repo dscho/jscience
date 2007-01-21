@@ -127,8 +127,8 @@
          <TR>
          <TD CLASS="lineheight1 style5">
          <UL>
-            <LI> <A HREF="api/javax/units/package-summary.html#package_description">Units</A> and 
-             <A HREF="api/javax/quantities/package-summary.html#package_description">quantities</A>    
+            <LI> <A HREF="api/javax/measure/units/package-summary.html#package_description">Units</A> and 
+             <A HREF="api/javax/measure/quantities/package-summary.html#package_description">quantities</A>    
             modules proposed as basis for the <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
             reference implementation.</LI>
             
@@ -177,8 +177,8 @@
              CELLSPACING="0" CELLPADDING="8" WIDTH="86%">
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
-         <DIV ALIGN="center"><SPAN CLASS="style7"><B>J</B>Science version
-            3.1.0 - April 2, 2006</SPAN></DIV></TD>
+         <DIV ALIGN="center"><SPAN CLASS="style7"><IMG SRC="doc/img/new.gif"/>
+         <B>JS</B>cience version 3.3 Beta - January 4, 2007</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -189,13 +189,20 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.1.0-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-3.3.Beta-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.1.0-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-3.3.Beta-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
+         </TR>
+         <TR>
+         <TD BACKGROUND="doc/img/quotebg.gif">
+         <DIV ALIGN="center"><SPAN CLASS="style7">
+         A JRE 1.4 compatible binary is 
+         also available <A HREF="jscience-vm14.jar">here</A> (Version 3.2.0)
+      </SPAN></DIV></TD>
          </TR>
       </TABLE>
       <BR> 
@@ -224,34 +231,38 @@
          
          <TD CLASS="lineheight1 style5">
        <P><A HREF="api/overview-summary.html#TUTORIAL">Tutorial and Code Examples</A></P>
-       <P><B>J</B>Science is <A HREF="http://javolution.org"><IMG
+       <P><B>JS</B>cience is <A HREF="http://javolution.org"><IMG
             HEIGHT="32" SRC="doc/img/javolution.png" WIDTH="144"></A> for: 
          </P>
          <UL>
-            <LI><B>Transparent Object Recycling</B> For example, our <A HREF="doc/benchmark.html">benchmark</A> 
-            indicates that adding immutable
-            <A HREF="api/org/jscience/mathematics/numbers/LargeInteger.html">LargeInteger</A> 
-            is up to <b>8-10x</b> faster than adding <code><b>java.math.BigInteger</b></code></LI>
-            <LI><B>Real-Time Behavior and Compliance</B> The library can safely be used with  
+            <LI><A href="http://javolution.org/api/javolution/context/ConcurrentContext.html">Low-Level Concurrency:</A>
+            To take advantage of multi-core processors automatically. 
+            Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on a dual-processors
+            our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
+            are the fastest around (for a pure Java library).</LI>
+            <LI><A href="http://javolution.org/api/javolution/context/PoolContext.html">Transparent Object Recycling:</A>
+            To reduce garbage collection, decrease memory footprint and increase scalability.</LI>
+            <LI><A href="http://javolution.org/api/javolution/util/package-summary.html#package_description">Real-Time Behavior and Compliance:</A>
+            <B>JS</B>cience can safely be used with  
             <A HREF="http://rtsj.org">RTSJ</A> VMs without resulting into memory clashes or illegal access exceptions.</LI>
-            <LI><B>Low-Level Concurrency</B> Most of our concurrent algorithms are able to
-            take advantage of multi-processors automatically.</LI>
-            <LI><B>Persistency</B> The fastest XML marshalling/unmarshalling around!</LI>
-         </UL><B>J</B>Science binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
+            <LI><A href="http://javolution.org/api/javolution/xml/package-summary.html#package_description">Persistency:</A> 
+            Fastest XML marshalling/unmarshalling around!</LI>
+         </UL>
+         <B>JS</B>cience binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
          </TR>
          <TR>
-         <TD CLASS="lineheight1 style5" VALIGN="top"><B>J</B>Science core library (<B>jscience.jar</B>)
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience core library (<B>jscience.jar</B>)
          ) is self-executable for versioning, testing and benchmark purpose. 
          <H4 CLASS="lineheight1 style10">java -jar jscience.jar version (shows version
          information) 
          <BR> java -jar jscience.jar test (performs self-tests) 
          <BR> java -jar jscience.jar perf (runs benchmark)</H4><I><A
             HREF="doc/benchmark.html">Here </A> are the benchmark results
-         on a Single-CPU Intel Pentium 4 3.4GHz running Windows XP. </I> 
+         on a Dual-Core CPU (T2050) @ 1.60 GHz running Windows XP. </I> 
          </TD>
          </TR>
          <TR>
-         <TD CLASS="lineheight1 style5" VALIGN="top"><B>J</B>Science core modules are 
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience core modules are 
          <A HREF="doc/license.txt">free</A>; permission to use, copy,
          modify, and distribute these modules is freely granted, provided
          that copyright notices are preserved.<BR> Optional modules (none
@@ -268,7 +279,7 @@
                 WIDTH="100%">
             <TR>
             <TD VALIGN="bottom" HEIGHT="27"><SPAN CLASS="style4">Coming in
-            2005: </SPAN></TD>
+            2007: </SPAN></TD>
             </TR>
          </TABLE></TD>
          <TD BGCOLOR="#FFFFFF" WIDTH="2%">
@@ -276,12 +287,12 @@
          </TR>
       </TABLE>
       
-<!-- Coming 2006 -->      
+<!-- Coming 2007 -->      
       <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
              WIDTH="85%">
          <TR>
          <TD CLASS="lineheight1 style5">
-         <P>Additional core modules for 2006: </P>
+         <P>Additional core modules for 2007: </P>
          <UL>
             <LI>org.jscience.mathematics.transforms (FFT) </LI>
             <LI>org.jscience.physics.nuclear </LI>
@@ -304,6 +315,7 @@
             mathematics numbers, functions etc..) </LI>
             <LI>Respect module ownership (changes to others packages than
             yours must be approved). </LI>
+            <LI>Conform to our <A HREF="doc/coding_standard.txt">Coding Standard Addendum</A></LI>
          </UL>To participate: First register as "Observer" to 
          <A HREF="http://jscience.dev.java.net">
          http://jscience.dev.java.net </A>, then send an e-mail with your
@@ -338,12 +350,16 @@
          <TD>
          <UL>
             <LI CLASS="lineheight1 style5">
+            <A href="http://ociweb.com/jnb/jnbJun2006.html">Units and Measures with <B>JS</B>cience</A> -
+            "Java News Brief" Article</LI><BR>
+
+            <LI CLASS="lineheight1 style5">
             <A href="http://www.matheclipse.org"><IMG SRC="doc/img/calculator.png"></A>
-            MathEclipse On-Line Calculator powered by <B>J</B>Science</LI><BR>
+            MathEclipse On-Line Calculator powered by <B>JS</B>cience</LI><BR>
             
             <LI CLASS="lineheight1 style5">
             <A href="http://en.wikipedia.org/wiki/JScience"><IMG SRC="doc/img/wikipedia.png"></A>
-            Wikipedia on <B>J</B>Science</LI><BR>
+            Wikipedia on <B>JS</B>cience</LI><BR>
 
             <LI CLASS="lineheight1 style5">
             <A href="http://geoapi.sourceforge.net/">GeoAPI</A>
@@ -355,9 +371,9 @@
             Standalone quantities/units packages.</LI><BR>
 
             <LI CLASS="lineheight1 style5">
-            <A href="https://jscience.dev.java.net/files/documents/2263/10335/JSciencepackages.zip">JScience Experimental Packages</A>
-            and <A href="https://jscience.dev.java.net/files/documents/2263/22082/Datafilesonly.zip">Data Files</A>
-            maintained by <A HREF="mailto:silvere@digitalbiosphere.com">Silvère Martin-Michiellot</A>.</LI><BR>
+            <A href="http://jade.dev.java.net/">JScience Experimental Packages</A>
+            maintained by <A HREF="mailto:silvere@digitalbiosphere.org">Silvère Martin-Michiellot</A>
+            (<A href="http://jscience.org/experimental/javadoc/">JavaDoc</A>).</LI><BR>
          </UL></TD>
          </TR>
       </TABLE>
@@ -385,7 +401,31 @@
          <TR>
          <TD>
          <UL>
-            <LI CLASS="lineheight1 style5"><B>April 2, 2006 : JScience 3.1</B><BR> 
+            <I><LI CLASS="lineheight1 style5"><B>January 4, 2007: JScience 3.3 Beta</B><BR>
+            Refactored <A HREF="api/org/jscience/mathematics/vectors/package-summary.html">vectors</A> 
+            module (DenseVector&lt;F&gt;, SparseVector&lt;F&gt; ...)
+            Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on a 
+            dual-processors our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
+            are the fastest around (for a pure Java library), by about 2x :)<BR>
+            Improved Real/LargeInteger algorithms (e.g binary GCD, still more to be done)<BR>
+            <B>IN PROGRESS</B> Resolve all pending issues<BR>
+            <B>IN PROGRESS</B> New FloatingPoint number (fixed precision)<BR>
+            <B>IN PROGRESS</B> Investigates parameterization of Measure 
+               (e.g. <code>Measure&lt;Field, Quantity&gt;</code>).<BR>
+            </LI></I>
+
+            <LI CLASS="lineheight1 style5"><B>October 5, 2006: JScience 3.2</B><BR>
+            Based on Javolution 4.0 (faster)<BR>
+            JSR-275 new packaging (javax.measure.*)<BR>
+            Binary for 1.4 (created using <a href="http://retroweaver.sourceforge.net/">Retroweaver</a>) <BR>
+            </LI>
+             
+            <LI CLASS="lineheight1 style5"><B>July 15, 2006 : JScience 3.1.6</B><BR> 
+            Intermediate release (bug fixing) [3.1.5] [3.1.6] <BR>
+            Finalization of <code>javax.measure.units</code> and <code>javax.measure.quantities</code> [3.1.4] <BR>
+            Updated/corrected <A HREF="api/org/jscience/physics/measures/Constants.html">physical constants</a>
+            (<a href="http://physics.nist.gov/cuu/Constants/index.html">CODATA 2002</a>) [3.1.3] <BR>
+            Corrected potential internal overflow with Real.doubleValue() [3.1.1] <BR>
             New <A HREF="api/org/jscience/physics/measures/MeasureVector.html">MeasureVector</A> class
             for multi-dimensional measurements [3.1.0] <BR>
             Added <code>RationalConverter</code> for exact unit conversion. As a consequence
@@ -418,21 +458,22 @@
          </TR>
       </TABLE>
       <BR> 
-      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="4"
+      
+      <TABLE ALIGN="center" BORDER="0" CELLSPACING="0" CELLPADDING="8"
              WIDTH="92%">
          <TR>
-         <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="14%">
-         <DIV ALIGN="center"><A HREF="http://www.opensource.org/"><IMG
-               HEIGHT="60" BORDER="0" SRC="doc/img/osi-certified-72x60.gif"
-               WIDTH="72"></A></DIV></TD>
          <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="31%">
          <DIV ALIGN="center"><A HREF="http://jscience.dev.java.net/"><IMG
                HEIGHT="47" BORDER="0" SRC="doc/img/javanet.gif" WIDTH="170"></A></DIV>
          </TD>
+         <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="14%">
+         <DIV ALIGN="center"><A HREF="http://www.jcp.org/"><IMG
+               BORDER="0" SRC="doc/img/JCPlogoEC.jpg"
+               WIDTH="125" HEIGHT="71"></A></DIV></TD>
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : April 2, 2006<BR>
+          Revision      : January 4, 2007<BR>
          </TD>
          </TR>
          <TR>

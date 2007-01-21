@@ -8,10 +8,10 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.quantities.*;
-import javax.units.SI;
-import javax.units.Unit;
-import javax.units.converters.UnitConverter;
+import javax.measure.converters.UnitConverter;
+import javax.measure.quantities.*;
+import javax.measure.units.SI;
+import javax.measure.units.Unit;
 
 import static org.jscience.geography.coordinates.crs.ReferenceEllipsoid.WGS84;
 
@@ -23,7 +23,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * Earth-Fixed (ECEF) cartesian coordinates used in GPS/GLONASS.
  *
  * @author Paul D. Anderson
-\ * @version 3.0, February 18, 2006
+ * @version 3.0, February 18, 2006
  */
 public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
 
