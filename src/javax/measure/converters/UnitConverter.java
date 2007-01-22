@@ -18,7 +18,7 @@ import java.io.Serializable;
  *     
  * <p> Sub-classes must ensure unicity of the {@link #IDENTITY identity} 
  *     converter. In other words, if the result of an operation is equivalent
- *     to the identity converter, then the unique {@link IDENTITY} instance 
+ *     to the identity converter, then the unique {@link #IDENTITY} instance 
  *     should be returned.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>

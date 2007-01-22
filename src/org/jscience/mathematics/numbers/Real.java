@@ -23,9 +23,9 @@ import javolution.xml.stream.XMLStreamException;
  *     (on the mantissa) and a decimal {@link #getExponent exponent}: 
  *     (<code>(mantissa ± error) · 10<sup>exponent</sup></code>).</p>
  *     
- * <p> Reals number can be {@link #isExact exact}. The minimum precision 
+ * <p> Reals number can be exact. The minimum precision 
  *     for an exact number during calculations is given by 
- *     {@link #getExactMinimumPrecision()} 
+ *     getExactMinimumPrecision() 
  *     ({@link javolution.context.LocalContext context local}).<p>
  * 
  * <p> The actual {@link #getPrecision precision} and {@link #getAccuracy 

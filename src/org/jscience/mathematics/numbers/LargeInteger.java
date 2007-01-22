@@ -12,8 +12,9 @@ import java.io.IOException;
 
 import javolution.context.ConcurrentContext;
 import javolution.context.PoolContext;
+import javolution.context.PoolContext.Reference;
 import javolution.context.ConcurrentContext.Logic;
-import javolution.context.LocalContext.Reference;
+import javolution.context.LocalContext;
 import javolution.lang.Configurable;
 import javolution.lang.MathLib;
 import javolution.text.Text;
@@ -69,7 +70,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * Holds the {@link javolution.context.LocalContext context local} format 
      * for large integers (decimal representation by default).
      */
-    public static final Reference<TextFormat<LargeInteger>> FORMAT = new Reference<TextFormat<LargeInteger>>(
+    public static final LocalContext.Reference<TextFormat<LargeInteger>> FORMAT = new LocalContext.Reference<TextFormat<LargeInteger>>(
             Format.INSTANCE);
 
     /**
@@ -102,7 +103,8 @@ public final class LargeInteger extends Number<LargeInteger> {
     public static final LargeInteger ZERO = new LargeInteger();
     static {
         ZERO._size = 0;
-        // Note: ZERO.copy()._words[0] may have any possible value.
+        ZERO._words[0] = 0;
+        // Note:  _words[0] == 0 for all zero values.
     }
 
     /**
@@ -324,7 +326,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>(this & 1) == ZERO</code>
      */
     public boolean isEven() {
-        return ((_words[0] & 1) == 0) || (_size == 0);
+        return (_words[0] & 1) == 0;
     }
 
     /**
@@ -333,7 +335,61 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>(this & 1) != ZERO</code>
      */
     public boolean isOdd() {
-        return !isEven();
+        return (_words[0] & 1) != 0;
+    }
+
+    /**
+     * Returns the minimal number of bits to represent this large integer
+     * in the minimal two's-complement (sign excluded).
+     * 
+     * @return the length of this integer in bits (sign excluded).
+     */
+    public int bitLength() {
+        if (_size == 0)
+            return 0;
+        final int n = _size - 1;
+        final int bitLength = MathLib.bitLength(_words[n]) + (n << 6) - n;
+        return (this.isNegative() && this.isPowerOfTwo()) ? bitLength - 1
+                : bitLength;
+    }
+
+    /**
+     * Indicates if this number is a power of two (equals to 2<sup>
+     * ({@link #bitLength bitLength()} - 1)</sup>).
+     * 
+     * @return <code>true</code> if this number is a power of two; 
+     *         <code>false</code> otherwise.
+     */
+    public boolean isPowerOfTwo() {
+        if (_size == 0)
+            return false;
+        final int n = _size - 1;
+        for (int j = 0; j < n; j++) {
+            if (_words[j] != 0)
+                return false;
+        }
+        final int bitLength = MathLib.bitLength(_words[n]);
+        return _words[n] == (1L << (bitLength - 1));
+    }
+
+    /**
+     * Returns the index of the lowest-order one bit in this large integer
+     * or <code>-1</code> if <code>this.equals(ZERO)</code>.
+     *
+     * @return the index of the rightmost bit set or <code>-1</code>
+     */
+    public int getLowestSetBit() {
+        if (_size == 0)
+            return -1;
+        for (int i = 0;; i++) {
+            long w = _words[i];
+            if (w == 0)
+                continue;
+            for (int j = 0;; j++) {
+                if (((1L << j) & w) != 0)
+                    return i * 63 + j;
+            }
+        }
     }
 
     /**
@@ -426,30 +482,18 @@ public final class LargeInteger extends Number<LargeInteger> {
     }
 
     /**
-     * Returns the minimal number of bits to represent this large integer
-     * in the minimal two's-complement (sign excluded).
-     * 
-     * @return the length of this integer in bits (sign excluded).
-     */
-    public int bitLength() {
-        final int n = _size - 1;
-        return (n > 0) ? MathLib.bitLength(_words[n]) + (n << 6) - n : 0;
-    }
-
-    /**
      * Returns the opposite of this large integer.
      * 
      * @return <code>-this</code>.
      */
     public LargeInteger opposite() {
-        LargeInteger z = copy();
-        z._isNegative = (!_isNegative) && (_size != 0); // -0 = 0
-        return z;
-    }
-
-    private LargeInteger setOpposite() { // Internal use only.
-        _isNegative = (!_isNegative) && (_size != 0); // -0 = 0
-        return this;
+        if (_size == 0)
+            return this; // ZERO.
+        LargeInteger li = newInstance(_size);
+        System.arraycopy(_words, 0, li._words, 0, _size);
+        li._size = _size;
+        li._isNegative = !_isNegative;
+        return li;
     }
 
     /**
@@ -492,7 +536,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      */
     public LargeInteger minus(LargeInteger that) {
         if (that.isLargerThan(this)) // Always subtract the smallest to the largest. 
-            return that.minus(this).setOpposite();
+            return that.minus(this).opposite();
         if (that._size == 0)
             return this;
         if (this._isNegative != that._isNegative) // Opposite sign.
@@ -516,7 +560,7 @@ public final class LargeInteger extends Number<LargeInteger> {
             return LargeInteger.ZERO;
         if (multiplier < 0)
             return ((multiplier == Long.MIN_VALUE) ? this.shiftLeft(63) : this
-                    .times(-multiplier)).setOpposite();
+                    .times(-multiplier)).opposite();
         LargeInteger li = newInstance(_size + 1);
         li._size = multiply(_words, _size, multiplier, li._words);
         li._isNegative = _isNegative;
@@ -530,48 +574,97 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>this · that</code>.
      */
     public LargeInteger times(LargeInteger that) {
-        if (that._size > this._size) // Always multiply the smallest to the largest.
+        if (that._size > this._size) { // Always multiply the smallest to the largest.
             return that.times(this);
-        if (that._size <= 1) // Direct times(long) multiplication.
+        } else if (that._size <= 1) { // Direct times(long) multiplication.
             return this.times(that.longValue());
-        if (that._size < 50) { // Conventional multiplication.
+        } else if (that._size < 10) { // Conventional multiplication.
             LargeInteger li = newInstance(this._size + that._size);
             li._size = Calculus.multiply(this._words, this._size, that._words,
                     that._size, li._words);
             li._isNegative = (this._isNegative != that._isNegative);
             return li;
-        } // Else concurrent Karatsuba multiplication.
-        PoolContext.enter();
-        try {
-            int bitLength = this.bitLength();
-            int n = (bitLength >> 1) + (bitLength & 1);
-            LargeInteger b = this.shiftRight(n);
-            LargeInteger a = this.minus(b.shiftLeft(n));
-            LargeInteger d = that.shiftRight(n);
-            LargeInteger c = that.minus(d.shiftLeft(n));
-            PoolContext.Reference<LargeInteger> ac = PoolContext.Reference
-                    .newInstance();
-            PoolContext.Reference<LargeInteger> bd = PoolContext.Reference
-                    .newInstance();
-            PoolContext.Reference<LargeInteger> abcd = PoolContext.Reference
-                    .newInstance();
-            ConcurrentContext.enter();
-            try { // this = a + 2^n b,   that = c + 2^n d
-                ConcurrentContext.execute(MULTIPLY, a.plus(b), c.plus(d), abcd); // First because of Javolution Bug - Export not thread-safe - Issue #23
-                ConcurrentContext.execute(MULTIPLY, a, c, ac);
-                ConcurrentContext.execute(MULTIPLY, b, d, bd);
+        } else if (that._size < 20) { // Karatsuba (sequential).
+            int n = (that._size >> 1) + (that._size & 1);
+            // this = a + 2^(n*63) b, that = c + 2^(n*63) d
+            LargeInteger b = this.high(n);
+            LargeInteger a = this.low(n);
+            // Optimization for square (a == c, b == d).
+            LargeInteger d = (this == that) ? b : that.high(n);
+            LargeInteger c = (this == that) ? a : that.low(n);
+            LargeInteger ab = a.plus(b);
+            LargeInteger cd = (this == that) ? ab : c.plus(d);
+            LargeInteger abcd = ab.times(cd);
+            LargeInteger ac = a.times(c);
+            LargeInteger bd = b.times(d);
+            // li = a*c + ((a+b)*(c+d)-(a*c+b*d)) 2^n + b*d 2^2n 
+            return ac.plus(abcd.minus(ac.plus(bd)).shiftWordLeft(n)).plus(
+                    bd.shiftWordLeft(n << 1));
+        } else { // Karatsuba (concurrent).
+            PoolContext.enter();
+            try {
+                int n = (that._size >> 1) + (that._size & 1);
+                // this = a + 2^(63*n) b, that = c + 2^(63*n) d
+                LargeInteger b = this.high(n);
+                LargeInteger a = this.low(n);
+                // Optimization for square (a == c, b == d).
+                LargeInteger d = (this == that) ? b : that.high(n);
+                LargeInteger c = (this == that) ? a : that.low(n);
+                LargeInteger ab = a.plus(b);
+                LargeInteger cd = (this == that) ? ab : c.plus(d);
+                Reference<LargeInteger> ac = Reference.newInstance();
+                Reference<LargeInteger> bd = Reference.newInstance();
+                Reference<LargeInteger> abcd = Reference.newInstance();
+                ConcurrentContext.enter();
+                try { // this = a + 2^n b,   that = c + 2^n d
+                    ConcurrentContext.execute(MULTIPLY, ab, cd, abcd);
+                    ConcurrentContext.execute(MULTIPLY, a, c, ac);
+                    ConcurrentContext.execute(MULTIPLY, b, d, bd);
+                } finally {
+                    ConcurrentContext.exit();
+                }
+                // li = a*c + ((a+b)*(c+d)-(a*c+b*d)) 2^n + b*d 2^2n 
+                LargeInteger li = ac.get()
+                        .plus(abcd.get().minus(ac.get().plus(bd.get())).shiftWordLeft(n))
+                                .plus(bd.get().shiftWordLeft(n << 1));
+                return li.export();
             } finally {
-                ConcurrentContext.exit();
+                PoolContext.exit();
             }
-            // li = a*c + ((a+b)*(c+d)-a*c-b*d) 2^n + b*d 2^2n 
-            LargeInteger li = ac.get().plus(
-                    abcd.get().minus(ac.get()).minus(bd.get()).shiftLeft(n))
-                    .plus(bd.get().shiftLeft(2 * n));
-            return li.export();
-        } finally {
-            PoolContext.exit();
         }
+    }
 
+    private LargeInteger high(int w) { // this.shiftRight(w * 63)
+        LargeInteger li = LargeInteger.newInstance(_size - w);
+        li._isNegative = _isNegative;
+        li._size = _size - w;
+        System.arraycopy(_words, w, li._words, 0, _size - w);
+        return li;
+    }
+
+    private LargeInteger low(int w) { // this.minus(high(w).shiftLeft(w * 63));
+        LargeInteger li = LargeInteger.newInstance(w);
+        li._isNegative = _isNegative;
+        System.arraycopy(_words, 0, li._words, 0, w);
+        for (int i = w; i > 0; i--) {
+            if (_words[i - 1] != 0) {
+                li._size = i;
+                return li;
+            }
+        } // Else zero.
+        li._size = 0;
+        li._isNegative = false;
+        return li;
+    }
+    private LargeInteger shiftWordLeft(int w) { // this.minus(high(w).shiftLeft(w * 63));
+        LargeInteger li = LargeInteger.newInstance(w + _size);
+        li._isNegative = _isNegative;
+        li._size = w + _size;
+        for (int i=0; i < w;) {
+            li._words[i++] = 0;
+        }
+        System.arraycopy(_words, 0, li._words, w, _size);
+        return li;
     }
 
     private static final Logic MULTIPLY = new Logic() {
@@ -628,28 +721,28 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @throws ArithmeticException if <code>that.equals(ZERO)</code>
      */
     public LargeInteger divide(LargeInteger that) {
-        if ((that._size <= 1) && (that.bitLength() <= 31)) {
+        if ((that._size <= 1) && ((that._words[0] >> 31) == 0))
             return divide(that.intValue());
-        } else {
-            PoolContext.enter();
-            try {
-                LargeInteger thisAbs = this.abs();
-                LargeInteger thatAbs = that.abs();
-                int precision = thisAbs.bitLength() - thatAbs.bitLength() + 1;
-                if (precision <= 0) {
-                    LargeInteger result = LargeInteger.valueOf(0);
-                    result._remainder = this;
-                    return result.export();
-                }
+        LargeInteger result;
+        LargeInteger remainder;
+        PoolContext.enter();
+        try {
+            LargeInteger thisAbs = this.abs();
+            LargeInteger thatAbs = that.abs();
+            int precision = thisAbs.bitLength() - thatAbs.bitLength() + 1;
+            if (precision <= 0) {
+                result = LargeInteger.ZERO;
+                remainder = this;
+            } else {
                 LargeInteger thatReciprocal = thatAbs.inverseScaled(precision);
-                LargeInteger result = thisAbs.times(thatReciprocal);
+                result = thisAbs.times(thatReciprocal);
                 result = result.shiftRight(thisAbs.bitLength() + 1);
 
                 // Calculates remainder, corrects for result +/- 1 error. 
-                LargeInteger remainder = thisAbs.minus(thatAbs.times(result));
+                remainder = thisAbs.minus(thatAbs.times(result));
                 if (remainder.compareTo(thatAbs) >= 0) {
                     remainder = remainder.minus(thatAbs);
-                    result = result.plus(ONE);
+                    result = result.plus(LargeInteger.ONE);
                     if (remainder.compareTo(thatAbs) >= 0)
                         throw new Error("Verification error for " + this + "/"
                                 + that + ", please submit a bug report.");
@@ -660,19 +753,17 @@ public final class LargeInteger extends Number<LargeInteger> {
                         throw new Error("Verification error for " + this + "/"
                                 + that + ", please submit a bug report.");
                 }
-
-                // Sets signs for result and remainder.
-                remainder._isNegative = this._isNegative
-                        && (remainder._size != 0);
-                result._isNegative = (this._isNegative != that._isNegative)
-                        && (result._size != 0);
-                result._remainder = remainder.export();
-                return result.export();
-
-            } finally {
-                PoolContext.exit();
             }
+        } finally {
+            PoolContext.exit();
         }
+        // Setups result and remainder.
+        LargeInteger li = result.copy();
+        li._isNegative = (this._isNegative != that._isNegative)
+                && (result._size != 0);
+        li._remainder = remainder.copy();
+        li._remainder._isNegative = this._isNegative && (remainder._size != 0);
+        return li;
     }
 
     /**
@@ -766,10 +857,10 @@ public final class LargeInteger extends Number<LargeInteger> {
                 r = new_r;
                 s = new_s;
             }
-            if ((a._words[0] != 1L) || (a._size != 1)) // (a != 1) || (a != -1)
+            if (!a.abs().equals(ONE)) // (a != 1) || (a != -1)
                 throw new ArithmeticException("GCD(" + this + ", " + m + ") = "
                         + a);
-            if (a._isNegative)
+            if (a.isNegative())
                 return p.opposite().mod(m).export();
             return p.mod(m).export();
         } finally {
@@ -823,8 +914,6 @@ public final class LargeInteger extends Number<LargeInteger> {
      *         <code>(this.isZero() && that.isZero())</code>.
      */
     public LargeInteger gcd(LargeInteger that) {
-        // Binary GCD Implementation adapted from
-        // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
         if (this.isZero())
             return that;
         if (that.isZero())
@@ -833,44 +922,61 @@ public final class LargeInteger extends Number<LargeInteger> {
         u._isNegative = false;
         LargeInteger v = that.copy();
         v._isNegative = false;
-        int shift;
-        PoolContext.enter();
-        try {
-            // Possible Optimization:
-            //    - Determinates the lowest set bit and shift accordingly.
-            for (shift = 0; u.isEven() && v.isEven(); ++shift) {
-                u.div2();
-                v.div2();
-            }
-            while (u.isEven()) {
-                u.div2();
-            }
-            // From here on, u is always odd.
-            do {
-                while (v.isEven()) {
-                    v.div2();
-                }
-                // Now u and v are both odd, so diff(u, v) is even.
-                // Let u = min(u, v), v = diff(u, v)/2.
-                if (u.compareTo(v) < 0) {
-                    v = v.minus(u);
-                } else {
-                    LargeInteger diff = u.minus(v);
-                    u = v;
-                    v = diff;
-                }
-                v.div2();
-            } while (!v.isZero());
-        } finally {
-            PoolContext.exit();
+
+        // Euclidian algorithm until u, v about the same size.
+        while (MathLib.abs(u._size - v._size) > 1) {
+            LargeInteger tmp = u.divide(v);
+            LargeInteger rem = tmp.getRemainder();
+            u = v;
+            v = rem;
+            if (v.isZero())
+                return u;
         }
-        return u.shiftLeft(shift);
-        // No need to export as a new object is always allocated (i != 0). 
+
+        // Binary GCD Implementation adapted from
+        // http://en.wikipedia.org/wiki/Binary_GCD_algorithm
+        final int uShift = u.getLowestSetBit();
+        u.shiftRightSelf(uShift);
+        final int vShift = v.getLowestSetBit();
+        v.shiftRightSelf(vShift);
+
+        // From here on, u is always odd.
+        while (true) {
+            // Now u and v are both odd, so diff(u, v) is even.
+            // Let u = min(u, v), v = diff(u, v)/2.
+            if (u.compareTo(v) < 0) {
+                v.subtract(u);
+            } else {
+                u.subtract(v);
+                LargeInteger tmp = u;
+                u = v;
+                v = tmp; // Swaps. 
+            }
+            v.shiftRightSelf();
+            if (v.isZero())
+                break;
+            v.shiftRightSelf(v.getLowestSetBit());
+        }
+        return u.shiftLeft(MathLib.min(uShift, vShift));
     }
-    private void div2() {
-        if (_size != 0) { 
-            _size = Calculus.shiftRight(0, 1, _words, _size, _words);
-        }
+
+    private void shiftRightSelf() {
+        if (_size == 0)
+            return;
+        _size = Calculus.shiftRight(0, 1, _words, _size, _words);
+    }
+
+    private void shiftRightSelf(int n) {
+        if ((n == 0) || (_size == 0))
+            return;
+        int wordShift = n < 63 ? 0 : n / 63;
+        int bitShift = n - ((wordShift << 6) - wordShift); // n - wordShift * 63
+        _size = Calculus.shiftRight(wordShift, bitShift, _words, _size, _words);
+    }
+
+    private void subtract(LargeInteger that) { // this >= that
+        _size = Calculus.subtract(_words, _size, that._words, that._size,
+                _words);
     }
 
     /**
@@ -1184,7 +1290,11 @@ public final class LargeInteger extends Number<LargeInteger> {
         LargeInteger li = newInstance(_size);
         li._isNegative = _isNegative;
         li._size = _size;
-        System.arraycopy(_words, 0, li._words, 0, _size);
+        if (_size > 1) {
+            System.arraycopy(_words, 0, li._words, 0, _size);
+        } else {
+            li._words[0] = _words[0]; // Ensures zero is correctly copied.
+        }
         return li;
     }
 

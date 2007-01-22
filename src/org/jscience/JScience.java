@@ -37,14 +37,12 @@ import org.jscience.mathematics.vectors.DenseMatrix;
 import org.jscience.mathematics.vectors.DenseVector;
 import org.jscience.mathematics.vectors.Float64Matrix;
 import org.jscience.mathematics.vectors.Matrix;
-import org.jscience.mathematics.vectors.SparseMatrix;
 import org.jscience.mathematics.vectors.Vector;
 import org.jscience.physics.measures.Measure;
 import org.jscience.physics.measures.MeasureFormat;
 import org.jscience.physics.models.RelativisticModel;
 
 import javolution.lang.MathLib;
-import javolution.text.Text;
 import javolution.text.TextBuilder;
 import javolution.context.ConcurrentContext;
 import javolution.context.LocalContext;
@@ -62,7 +60,7 @@ import static org.jscience.economics.money.Currency.*;
  * @version 3.0, February 13, 2006
  */
 public final class JScience {
-    
+
     /**
      * Holds the version information.
      */
@@ -378,7 +376,7 @@ public final class JScience {
      */
     private static void benchmark() throws Exception {
         System.out.println("Benchmark...");
-        ConcurrentContext.setEnabled(false);
+        //ConcurrentContext.setEnabled(false);
         //PoolContext.setEnabled(false);      
  
         Object[] results = new Object[10000];
