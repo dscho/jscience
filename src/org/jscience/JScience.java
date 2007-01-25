@@ -44,7 +44,6 @@ import org.jscience.physics.models.RelativisticModel;
 
 import javolution.lang.MathLib;
 import javolution.text.TextBuilder;
-import javolution.context.ConcurrentContext;
 import javolution.context.LocalContext;
 import javolution.context.PoolContext;
 import static javax.measure.units.NonSI.*;

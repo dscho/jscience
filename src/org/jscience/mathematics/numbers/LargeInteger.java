@@ -15,7 +15,6 @@ import javolution.context.PoolContext;
 import javolution.context.PoolContext.Reference;
 import javolution.context.ConcurrentContext.Logic;
 import javolution.context.LocalContext;
-import javolution.lang.Configurable;
 import javolution.lang.MathLib;
 import javolution.text.Text;
 import javolution.text.TextBuilder;
@@ -33,16 +32,18 @@ import static org.jscience.mathematics.numbers.Calculus.*;
  * <ul>
  *     <li> Optimized for 64 bits architectures. But still runs significantly 
  *          faster on 32 bits processors.</li>
- *     <li> Real-time compliant for improved performance and predictability.
- *          No temporary object allocated on the heap and no garbage collection
- *          if executions are performed within a {@link PoolContext}.</li>
+ *     <li> Real-time compliant for improved performance and predictability
+ *          (no garbage generated when executing in 
+ *          {@link javolution.context.PoolContext PoolContext}).</li>
  *     <li> Improved algorithms (e.g. Concurrent Karabutsa multiplication in 
  *          O(n<sup>Log3</sup>) instead of O(n<sup>2</sup>).</li>
  * </ul></p>
  * 
- * <p> <b>Implementation Note:</b> This class uses {@link ConcurrentContext 
- *     concurrent contexts} to accelerate calculations on multi-processors
- *     systems.</p>
+ * <p> <b>Note:</b> This class uses {@link ConcurrentContext concurrent 
+ *     contexts} to accelerate calculations on multi-processors
+ *     systems. Numbers up to 64 KBits are allocated on the stack when 
+ *     executing in a {@link javolution.context.PoolContext PoolContext},
+ *     larger numbers are heap allocated.</p>
  *     
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.3, January 14, 2007
@@ -50,21 +51,6 @@ import static org.jscience.mathematics.numbers.Calculus.*;
  *      Wikipedia: Arbitrary-precision Arithmetic</a>
  */
 public final class LargeInteger extends Number<LargeInteger> {
-
-    /**
-     * Holds the default bits capacity of LargeInteger instances 
-     * (default 128 bits). This parameter affects the performance of internal
-     * object recycling (to avoid resizing recycled/preallocated objects).
-     */
-    public static final Configurable<Integer> BITS_CAPACITY = new Configurable<Integer>(
-            128) {
-        @Override
-        protected void notifyChange() {
-            _WordLength = (this.get().intValue() / 63) + 2;
-        }
-    };
-
-    private static int _WordLength = (BITS_CAPACITY.get().intValue() / 63) + 2;
 
     /**
      * Holds the {@link javolution.context.LocalContext context local} format 
@@ -100,7 +86,7 @@ public final class LargeInteger extends Number<LargeInteger> {
     /**
      * The large integer representing the additive identity.
      */
-    public static final LargeInteger ZERO = new LargeInteger();
+    public static final LargeInteger ZERO = new LargeInteger(1);
     static {
         ZERO._size = 0;
         ZERO._words[0] = 0;
@@ -110,30 +96,10 @@ public final class LargeInteger extends Number<LargeInteger> {
     /**
      * The large integer representing the multiplicative identity.
      */
-    public static final LargeInteger ONE = new LargeInteger();
+    public static final LargeInteger ONE = new LargeInteger(1);
     static {
         ONE._size = 1;
         ONE._words[0] = 1;
-    }
-
-    /**
-     * The large integer representing the minimum value representable as int.
-     */
-    private static final LargeInteger INT_MIN_VALUE = new LargeInteger();
-    static {
-        INT_MIN_VALUE._size = 1;
-        INT_MIN_VALUE._isNegative = true;
-        INT_MIN_VALUE._words[0] = -((long) Integer.MIN_VALUE);
-    }
-
-    /**
-     * The large integer representing the minimum value representable as long.
-     */
-    private static final LargeInteger LONG_MIN_VALUE = new LargeInteger();
-    static {
-        LONG_MIN_VALUE._size = 2;
-        LONG_MIN_VALUE._isNegative = true;
-        LONG_MIN_VALUE._words[1] = 1;
     }
 
     /**
@@ -156,12 +122,15 @@ public final class LargeInteger extends Number<LargeInteger> {
      * This large integer positive words (63 bits). 
      * Least significant word first (index 0).
      */
-    private long[] _words = new long[_WordLength];
+    private final long[] _words;
 
     /**
-     * Default constructor.
+     * Creates a large integer with the specified 63 bits word capacity.
+     * 
+     * @link wordLength the internal positive <code>long</code> array length.
      */
-    private LargeInteger() {
+    private LargeInteger(int wordLength) {
+        _words = new long[wordLength];
     }
 
     /**
@@ -177,7 +146,7 @@ public final class LargeInteger extends Number<LargeInteger> {
             return LargeInteger.ONE;
         if (value == Long.MIN_VALUE)
             return LargeInteger.LONG_MIN_VALUE;
-        LargeInteger li = FACTORY.object();
+        LargeInteger li = FACTORY_4.object();
         boolean negative = li._isNegative = value < 0;
         li._words[0] = negative ? -value : value;
         li._size = 1;
@@ -204,7 +173,7 @@ public final class LargeInteger extends Number<LargeInteger> {
     public static LargeInteger valueOf(byte[] bytes, int offset, int length) {
         // Ensures result is large enough (takes into account potential
         // extra bits during negative to positive conversion).
-        LargeInteger z = newInstance(((length * 8 + 1) / 63) + 1);
+        LargeInteger z = LargeInteger.newInstance(((length * 8 + 1) / 63) + 1);
         final boolean isNegative = bytes[offset] < 0;
         int wordIndex = 0;
         int bitIndex = 0;
@@ -414,7 +383,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      */
     public boolean isLargerThan(LargeInteger that) {
         return (this._size > that._size)
-                || ((this._size == that._size) && compare(this._words,
+                || ((this._size == that._size) && Calculus.compare(this._words,
                         that._words, this._size) > 0);
     }
 
@@ -488,8 +457,8 @@ public final class LargeInteger extends Number<LargeInteger> {
      */
     public LargeInteger opposite() {
         if (_size == 0)
-            return this; // ZERO.
-        LargeInteger li = newInstance(_size);
+            return LargeInteger.ZERO;
+        LargeInteger li = LargeInteger.newInstance(_size);
         System.arraycopy(_words, 0, li._words, 0, _size);
         li._size = _size;
         li._isNegative = !_isNegative;
@@ -514,13 +483,11 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>this + that</code>.
      */
     public LargeInteger plus(LargeInteger that) {
-        if (that.isLargerThan(this)) // Always add the smallest to the largest. 
+        if (this._size < that._size) // Adds smallest in size to largest. 
             return that.plus(this);
-        if (that._size == 0)
-            return this;
-        if (this._isNegative != that._isNegative) // Opposite sign.
-            return this.minus(that.opposite());
-        LargeInteger li = newInstance(_size + 1);
+        if ((this._isNegative != that._isNegative) && (that._size != 0))
+            return this.minus(that.opposite()); // Switches that sign.
+        LargeInteger li = LargeInteger.newInstance(_size + 1);
         li._size = Calculus.add(_words, _size, that._words, that._size,
                 li._words);
         li._isNegative = _isNegative;
@@ -535,13 +502,11 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>this - that</code>.
      */
     public LargeInteger minus(LargeInteger that) {
+        if ((this._isNegative != that._isNegative) && (that._size != 0))
+            return this.plus(that.opposite()); // Switches that sign.
         if (that.isLargerThan(this)) // Always subtract the smallest to the largest. 
             return that.minus(this).opposite();
-        if (that._size == 0)
-            return this;
-        if (this._isNegative != that._isNegative) // Opposite sign.
-            return this.plus(that.opposite());
-        LargeInteger li = newInstance(this._size);
+        LargeInteger li = LargeInteger.newInstance(this._size);
         li._size = Calculus.subtract(_words, _size, that._words, that._size,
                 li._words);
         li._isNegative = this._isNegative && (li._size != 0);
@@ -561,8 +526,8 @@ public final class LargeInteger extends Number<LargeInteger> {
         if (multiplier < 0)
             return ((multiplier == Long.MIN_VALUE) ? this.shiftLeft(63) : this
                     .times(-multiplier)).opposite();
-        LargeInteger li = newInstance(_size + 1);
-        li._size = multiply(_words, _size, multiplier, li._words);
+        LargeInteger li = LargeInteger.newInstance(_size + 1);
+        li._size = Calculus.multiply(_words, _size, multiplier, li._words);
         li._isNegative = _isNegative;
         return li;
     }
@@ -574,12 +539,12 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>this · that</code>.
      */
     public LargeInteger times(LargeInteger that) {
-        if (that._size > this._size) { // Always multiply the smallest to the largest.
+        if (that._size > this._size) // Always multiply the smallest to the largest.
             return that.times(this);
-        } else if (that._size <= 1) { // Direct times(long) multiplication.
+        if (that._size <= 1) // Direct times(long) multiplication.
             return this.times(that.longValue());
-        } else if (that._size < 10) { // Conventional multiplication.
-            LargeInteger li = newInstance(this._size + that._size);
+        if (that._size < 10) { // Conventional multiplication.
+            LargeInteger li = LargeInteger.newInstance(this._size + that._size);
             li._size = Calculus.multiply(this._words, this._size, that._words,
                     that._size, li._words);
             li._isNegative = (this._isNegative != that._isNegative);
@@ -624,9 +589,10 @@ public final class LargeInteger extends Number<LargeInteger> {
                     ConcurrentContext.exit();
                 }
                 // li = a*c + ((a+b)*(c+d)-(a*c+b*d)) 2^n + b*d 2^2n 
-                LargeInteger li = ac.get()
-                        .plus(abcd.get().minus(ac.get().plus(bd.get())).shiftWordLeft(n))
-                                .plus(bd.get().shiftWordLeft(n << 1));
+                LargeInteger li = ac.get().plus(
+                        abcd.get().minus(ac.get().plus(bd.get()))
+                                .shiftWordLeft(n)).plus(
+                        bd.get().shiftWordLeft(n << 1));
                 return li.export();
             } finally {
                 PoolContext.exit();
@@ -652,15 +618,14 @@ public final class LargeInteger extends Number<LargeInteger> {
                 return li;
             }
         } // Else zero.
-        li._size = 0;
-        li._isNegative = false;
-        return li;
+        return LargeInteger.ZERO;
     }
+
     private LargeInteger shiftWordLeft(int w) { // this.minus(high(w).shiftLeft(w * 63));
         LargeInteger li = LargeInteger.newInstance(w + _size);
         li._isNegative = _isNegative;
         li._size = w + _size;
-        for (int i=0; i < w;) {
+        for (int i = 0; i < w;) {
             li._words[i++] = 0;
         }
         System.arraycopy(_words, 0, li._words, w, _size);
@@ -689,24 +654,21 @@ public final class LargeInteger extends Number<LargeInteger> {
     public LargeInteger divide(int divisor) {
         if (divisor == 0)
             throw new ArithmeticException("Division by zero");
-        if (this._size == 0)
-            return LargeInteger.ZERO;
-        if (divisor > 0) {
-            LargeInteger li = newInstance(_size);
-            long rem = Calculus.divide(_words, _size, divisor, li._words);
-            li._size = (li._words[_size - 1] == 0L) ? _size - 1 : _size;
-            li._isNegative = _isNegative && (li._size != 0);
-            li._remainder = valueOf(_isNegative ? -rem : rem);
-            return li;
-        } // Else divisor < 0
-        if (divisor == Integer.MIN_VALUE) { // Negative would overflow.
-            LargeInteger li = this.times2pow(-31);
-            li._remainder = _isNegative ? valueOf(-(_words[0] & MASK_31))
-                    : valueOf(_words[0] & MASK_31);
+        if (divisor == Integer.MIN_VALUE) { // abs(divisor) would overflow.
+            LargeInteger li = this.times2pow(-31).copy();
+            li._isNegative = !_isNegative && (li._size != 0);
+            li._remainder = _isNegative ? LargeInteger
+                    .valueOf(-(_words[0] & MASK_31)) : LargeInteger
+                    .valueOf(_words[0] & MASK_31);
             return li;
         }
-        LargeInteger li = this.divide(-divisor);
-        li._isNegative = !_isNegative && (li._size != 0);
+        LargeInteger li = LargeInteger.newInstance(_size);
+        long rem = Calculus.divide(_words, _size, MathLib.abs(divisor),
+                li._words);
+        li._size = (_size > 0) && (li._words[_size - 1] == 0L) ? _size - 1
+                : _size;
+        li._isNegative = (_isNegative != (divisor < 0)) && (li._size != 0);
+        li._remainder = LargeInteger.valueOf(_isNegative ? -rem : rem);
         return li;
     }
 
@@ -721,7 +683,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @throws ArithmeticException if <code>that.equals(ZERO)</code>
      */
     public LargeInteger divide(LargeInteger that) {
-        if ((that._size <= 1) && ((that._words[0] >> 31) == 0))
+        if ((that._size <= 1) && ((that._words[0] >> 32) == 0))
             return divide(that.intValue());
         LargeInteger result;
         LargeInteger remainder;
@@ -789,7 +751,6 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @throws ArithmeticException if <code>this.isZero()</code>
      */
     public LargeInteger inverseScaled(int precision) {
-        // TODO: Use faster square() method, shift on place.
         if (precision <= 30) { // Straight calculation.
             long divisor = this.shiftRight(this.bitLength() - precision - 1)._words[0];
             long dividend = 1L << (precision * 2 + 1);
@@ -918,10 +879,11 @@ public final class LargeInteger extends Number<LargeInteger> {
             return that;
         if (that.isZero())
             return this;
+        // Works with local (modifiable) copies of the inputs.
         LargeInteger u = this.copy();
-        u._isNegative = false;
+        u._isNegative = false; // abs()
         LargeInteger v = that.copy();
-        v._isNegative = false;
+        v._isNegative = false; // abs()
 
         // Euclidian algorithm until u, v about the same size.
         while (MathLib.abs(u._size - v._size) > 1) {
@@ -1329,25 +1291,99 @@ public final class LargeInteger extends Number<LargeInteger> {
     ///////////////////////
 
     private static LargeInteger newInstance(int nbrWords) {
-        LargeInteger li = FACTORY.object();
-        if (li._words.length < nbrWords)
-            li.resize(nbrWords);
-        return li;
+        return (nbrWords <= 4) ? FACTORY_4.object()
+                : newLargeInstance(nbrWords);
     }
 
-    private void resize(final int nbrWords) {
-        javax.realtime.MemoryArea.getMemoryArea(this).executeInArea(
-                new Runnable() {
-                    public void run() {
-                        LargeInteger.this._words = new long[nbrWords + 1];
-                    }
-                });
+    private static LargeInteger newLargeInstance(int nbrWords) {
+        if (nbrWords <= 6)
+            return FACTORY_6.object();
+        if (nbrWords <= 10)
+            return FACTORY_10.object();
+        if (nbrWords <= 18)
+            return FACTORY_18.object();
+        if (nbrWords <= 34)
+            return FACTORY_34.object();
+        if (nbrWords <= 67)
+            return FACTORY_67.object();
+        if (nbrWords <= 132)
+            return FACTORY_132.object();
+        if (nbrWords <= 262)
+            return FACTORY_262.object();
+        if (nbrWords <= 522)
+            return FACTORY_522.object();
+        if (nbrWords <= 1042)
+            return FACTORY_1042.object();
+        return new LargeInteger(nbrWords); // Heap allocated.
     }
 
-    private static final Factory<LargeInteger> FACTORY = new Factory<LargeInteger>() {
+    private static final Factory<LargeInteger> FACTORY_4 = new Factory<LargeInteger>() {
         @Override
         protected LargeInteger create() {
-            return new LargeInteger();
+            return new LargeInteger(4); // Ok for 128 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_6 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(6); // Ok for 256 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_10 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(10); // Ok for 512 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_18 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(18); // Ok for 1024 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_34 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(34); // Ok for 2048 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_67 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(67); // Ok for 4096 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_132 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(132); // Ok for 8192 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_262 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(262); // Ok for 16384 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_522 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(522); // Ok for 32768 bits additions.
+        }
+    };
+
+    private static final Factory<LargeInteger> FACTORY_1042 = new Factory<LargeInteger>() {
+        @Override
+        protected LargeInteger create() {
+            return new LargeInteger(1042); // Ok for 65536 bits additions.
         }
     };
 
@@ -1376,7 +1412,6 @@ public final class LargeInteger extends Number<LargeInteger> {
             }
             LargeInteger tmp = li.copy();
             write(tmp, out);
-            FACTORY.recycle(tmp);
             return out;
         }
 
@@ -1408,9 +1443,7 @@ public final class LargeInteger extends Number<LargeInteger> {
                 cursor.setEndIndex(MathLib.min(start + 18, end));
                 long l = TypeFormat.parseLong(csq, 10, cursor);
                 LargeInteger tmp = li.times10pow(cursor.getIndex() - start);
-                LargeInteger.FACTORY.recycle(li);
                 li = tmp.plus(l);
-                LargeInteger.FACTORY.recycle(tmp);
                 if (cursor.getIndex() == end)
                     break; // Reached end.
                 char c = csq.charAt(cursor.getIndex());
@@ -1422,5 +1455,17 @@ public final class LargeInteger extends Number<LargeInteger> {
             return li;
         }
     }
+
+    /**
+     * The large integer representing the minimum value representable as int.
+     */
+    private static final LargeInteger INT_MIN_VALUE = LargeInteger.ONE
+            .shiftLeft(31).opposite().moveHeap();
+
+    /**
+     * The large integer representing the minimum value representable as long.
+     */
+    private static final LargeInteger LONG_MIN_VALUE = LargeInteger.ONE
+            .shiftLeft(63).opposite().moveHeap();
 
 }
