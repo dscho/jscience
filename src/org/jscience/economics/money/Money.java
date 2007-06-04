@@ -8,8 +8,8 @@
  */
 package org.jscience.economics.money;
 
-import javax.measure.quantities.Quantity;
-import javax.measure.units.BaseUnit;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.BaseUnit;
 
 /**
  * This interface represents something generally accepted as a medium of 
@@ -19,7 +19,7 @@ import javax.measure.units.BaseUnit;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public interface Money extends Quantity<Money> {
+public interface Money extends Quantity {
 
     /**
      * Holds the base unit for money quantities (symbol "¤", currency symbol).

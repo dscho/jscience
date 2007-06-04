@@ -8,14 +8,21 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.measure.converters.UnitConverter;
-import javax.measure.quantities.*;
-import javax.measure.units.SI;
-import javax.measure.units.Unit;
+import javax.measure.Measure;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.*;
+import static javax.measure.unit.SI.*;
+import javax.measure.unit.Unit;
+
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import static org.jscience.geography.coordinates.crs.ReferenceEllipsoid.WGS84;
 
 import org.jscience.geography.coordinates.crs.GeocentricCRS;
+import org.jscience.mathematics.vector.DimensionException;
+import org.jscience.mathematics.vector.Float64Vector;
 import org.opengis.referencing.cs.CoordinateSystem;
 
 /**
@@ -25,7 +32,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author Paul D. Anderson
  * @version 3.0, February 18, 2006
  */
-public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
+public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
 
     /**
      * Holds the coordinate reference system for all instances of this class.
@@ -34,9 +41,10 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
 
         @Override
         protected XYZ coordinatesOf(AbsolutePosition position) {
-            double latitude = position.latitudeWGS84.doubleValue(SI.RADIAN);
-            double longitude = position.longitudeWGS84.doubleValue(SI.RADIAN);
-            double height = position.heightWGS84.doubleValue(SI.METER);
+            double latitude = position.latitudeWGS84.doubleValue(RADIAN);
+            double longitude = position.longitudeWGS84.doubleValue(RADIAN);
+            double height = (position.heightWGS84 != null) ?
+                position.heightWGS84.doubleValue(METER) : 0.0;
 
             double cosLat = Math.cos(latitude);
             double sinLat = Math.sin(latitude);
@@ -49,15 +57,15 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
             double z = ((1.0 - WGS84.getEccentricitySquared()) * roc + height)
                     * sinLat;
 
-            return XYZ.valueOf(x, y, z, SI.METER);
+            return XYZ.valueOf(x, y, z, METER);
         }
 
         @Override
         protected AbsolutePosition positionOf(XYZ coordinates,
                 AbsolutePosition position) {
-            final double x = coordinates._xInMeter;
-            final double y = coordinates._yInMeter;
-            final double z = coordinates._zInMeter;
+            final double x = coordinates._x;
+            final double y = coordinates._y;
+            final double z = coordinates._z;
 
             final double longitude = Math.atan2(y, x);
 
@@ -67,9 +75,8 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
             if (xy == 0.0) {
                 latitude = (z >= 0.0) ? Math.PI / 2.0 : -Math.PI / 2.0;
             } else {
-                final double a = WGS84.getSemimajorAxis().doubleValue(SI.METER);
-                final double b = WGS84.getsSemiminorAxis()
-                        .doubleValue(SI.METER);
+                final double a = WGS84.getSemimajorAxis().doubleValue(METER);
+                final double b = WGS84.getsSemiminorAxis().doubleValue(METER);
                 final double ea2 = WGS84.getEccentricitySquared();
                 final double eb2 = WGS84.getSecondEccentricitySquared();
                 final double beta = Math.atan2(a * z, b * xy);
@@ -80,9 +87,9 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
 
             final double height = xy / Math.cos(latitude)
                     - WGS84.verticalRadiusOfCurvature(latitude);
-            position.latitudeWGS84 = new Scalar<Angle>(latitude, SI.RADIAN);
-            position.longitudeWGS84 = new Scalar<Angle>(longitude, SI.RADIAN);
-            position.heightWGS84 = new Scalar<Length>(height, SI.METER);
+            position.latitudeWGS84 = Measure.valueOf(latitude, RADIAN);
+            position.longitudeWGS84 = Measure.valueOf(longitude, RADIAN);
+            position.heightWGS84 = Measure.valueOf(height, METER);
             return position;
         }
 
@@ -99,17 +106,17 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
     /**
      * Holds the x position in meters.
      */
-    private double _xInMeter;
+    private double _x;
 
     /**
      * Holds the y position in meters.
      */
-    private double _yInMeter;
+    private double _y;
 
     /**
      * Holds the z position in meters.
      */
-    private double _zInMeter;
+    private double _z;
 
     /**
      * Returns the spatial position corresponding to the specified coordinates.
@@ -121,28 +128,44 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @return the corresponding 3D position.
      */
     public static XYZ valueOf(double x, double y, double z, Unit<Length> unit) {
-        return new XYZ(x, y, z, unit);
+        XYZ xyz = FACTORY.object();
+        if (unit == METER) {
+            xyz._x = x;
+            xyz._y = y;
+            xyz._z = z;
+        } else {
+            UnitConverter toMeter = unit.getConverterTo(METER);
+            xyz._x = toMeter.convert(x);
+            xyz._y = toMeter.convert(y);
+            xyz._z = toMeter.convert(z);
+        }
+        return xyz;
+    }
+
+    private static final ObjectFactory<XYZ> FACTORY = new ObjectFactory<XYZ>() {
+
+        @Override
+        protected XYZ create() {
+            return new XYZ();
+        }
+    };
+
+    private XYZ() {
     }
 
     /**
-     * Creates a spatial position corresponding to the specified coordinates.
+     * Returns the spatial position corresponding to the specified 
+     * 3-dimensional vector.
      *
-     * @param x the x value stated in the specified unit.
-     * @param y the y value stated in the specified unit.
-     * @param z the z value stated in the specified unit.
+     * @param vector the 3-dimensional vector holding the x/y/z coordinates.
      * @param unit the length unit in which the coordinates are stated.
+     * @return the corresponding 3D position.
      */
-    public XYZ(double x, double y, double z, Unit<Length> unit) {
-        if (unit == SI.METER) {
-            _xInMeter = x;
-            _yInMeter = y;
-            _zInMeter = z;
-        } else {
-            UnitConverter toMeter = unit.getConverterTo(SI.METER);
-            _xInMeter = toMeter.convert(x);
-            _yInMeter = toMeter.convert(y);
-            _zInMeter = toMeter.convert(z);
-        }
+    public static XYZ valueOf(Float64Vector vector, Unit<Length> unit) {
+        if (vector.getDimension() != 3)
+            throw new DimensionException("3-dimensional vector expected");
+        return XYZ.valueOf(vector.getValue(0), vector.getValue(1), vector
+                .getValue(2), unit);
     }
 
     /**
@@ -151,9 +174,8 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @param unit the length unit of the x coordinate value to return.
      * @return the x coordinate stated in the specified unit.
      */
-    public final double xValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _xInMeter : SI.METER
-                .getConverterTo(unit).convert(_xInMeter);
+    public double xValue(Unit<Length> unit) {
+        return (unit == METER) ? _x : METER.getConverterTo(unit).convert(_x);
     }
 
     /**
@@ -162,9 +184,8 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @param unit the length unit of the x coordinate value to return.
      * @return the z coordinate stated in the specified unit.
      */
-    public final double yValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _yInMeter : SI.METER
-                .getConverterTo(unit).convert(_yInMeter);
+    public double yValue(Unit<Length> unit) {
+        return (unit == METER) ? _y : METER.getConverterTo(unit).convert(_y);
     }
 
     /**
@@ -173,9 +194,23 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @param unit the length unit of the x coordinate value to return.
      * @return the z coordinate stated in the specified unit.
      */
-    public final double zValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _zInMeter : SI.METER
-                .getConverterTo(unit).convert(_zInMeter);
+    public double zValue(Unit<Length> unit) {
+        return (unit == METER) ? _z : METER.getConverterTo(unit).convert(_z);
+    }
+
+    /**
+     * Returns the x/y/z coordinates value as a 3-dimensional vector.
+     *
+     * @param unit the length unit of the vector coordinates.
+     * @return a vector holding the x/y/z coordinates stated in the 
+     *         specified unit.
+     */
+    public Float64Vector toVector(Unit<Length> unit) {
+        if (unit == METER)
+            return Float64Vector.valueOf(_x, _y, _z);
+        UnitConverter cvtr = METER.getConverterTo(unit);
+        return Float64Vector.valueOf(cvtr.convert(_x), cvtr.convert(_y), cvtr
+                .convert(_z));
     }
 
     @Override
@@ -192,15 +227,47 @@ public class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
             Unit u = GeocentricCRS.XYZ_CS.getAxis(0).getUnit();
-            return SI.METER.getConverterTo(u).convert(_xInMeter);
+            return METER.getConverterTo(u).convert(_x);
         } else if (dimension == 1) {
             Unit u = GeocentricCRS.XYZ_CS.getAxis(1).getUnit();
-            return SI.METER.getConverterTo(u).convert(_yInMeter);
+            return METER.getConverterTo(u).convert(_y);
         } else if (dimension == 2) {
             Unit u = GeocentricCRS.XYZ_CS.getAxis(2).getUnit();
-            return SI.METER.getConverterTo(u).convert(_zInMeter);
+            return METER.getConverterTo(u).convert(_z);
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
+
+    @Override
+    public XYZ copy() {
+        return XYZ.valueOf(_x, _y, _z, METER);
+    }
+
+    // Default serialization.
+    //
+
+    static final XMLFormat<XYZ> XML = new XMLFormat<XYZ>(XYZ.class) {
+
+        @Override
+        public XYZ newInstance(Class<XYZ> cls, InputElement xml)
+                throws XMLStreamException {
+            return FACTORY.object();
+        }
+
+        public void write(XYZ xyz, OutputElement xml) throws XMLStreamException {
+            xml.setAttribute("x", xyz._x);
+            xml.setAttribute("y", xyz._y);
+            xml.setAttribute("z", xyz._z);
+        }
+
+        public void read(InputElement xml, XYZ xyz) throws XMLStreamException {
+            xyz._x = xml.getAttribute("x", 0.0);
+            xyz._y = xml.getAttribute("y", 0.0);
+            xyz._z = xml.getAttribute("z", 0.0);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
+
 }

@@ -8,8 +8,10 @@
  */
 package org.jscience.geography.coordinates.crs;
 
-import javax.measure.quantities.*;
-import javax.measure.units.SI;
+import javax.measure.Measure;
+import javax.measure.Measurable;
+import javax.measure.quantity.*;
+import javax.measure.unit.SI;
 
 /**
  * <p> The ReferenceEllipsoid class defines a geodetic reference ellipsoid
@@ -76,9 +78,9 @@ public class ReferenceEllipsoid {
 
     private final double eb2;
 
-    private Quantity<Length> _semimajorAxis;
+    private Measurable<Length> _semimajorAxis;
 
-    private Quantity<Length> _semiminorAxis;
+    private Measurable<Length> _semiminorAxis;
 
     /**
      *  Constructs an instance of a reference ellipsoid.
@@ -106,9 +108,9 @@ public class ReferenceEllipsoid {
      *
      * @return The semimajor radius.
      */
-    public Quantity<Length> getSemimajorAxis() {
+    public Measurable<Length> getSemimajorAxis() {
         if (_semimajorAxis == null) {
-            _semimajorAxis = new Scalar<Length>(a, SI.METER);
+            _semimajorAxis = Measure.valueOf(a, SI.METER);
         }
         return _semimajorAxis;
     }
@@ -118,9 +120,9 @@ public class ReferenceEllipsoid {
      *
      * @return  The semiminor radius.
      */
-    public Quantity<Length> getsSemiminorAxis() {
+    public Measurable<Length> getsSemiminorAxis() {
         if (_semiminorAxis == null) {
-            _semiminorAxis = new Scalar<Length>(b, SI.METER);
+            _semiminorAxis = Measure.valueOf(b, SI.METER);
         }
         return _semiminorAxis;
     }
@@ -181,8 +183,8 @@ public class ReferenceEllipsoid {
       * @param latitude The local latitude.
       * @return The radius of curvature in the prime vertical.
       */
-     public Quantity<Length> verticalRadiusOfCurvature(final Quantity<Angle> latitude) {
-         return new Scalar<Length>(verticalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
+     public Measurable<Length> verticalRadiusOfCurvature(final Measurable<Angle> latitude) {
+         return Measure.valueOf(verticalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
      }
 
     /**
@@ -204,8 +206,8 @@ public class ReferenceEllipsoid {
      * @param latitude The local latitude (in radians).
      * @return  The radius of curvature in the meridian (in meters).
      */
-    public Quantity<Length> meridionalRadiusOfCurvature(final Quantity<Angle> latitude) {
-        return new Scalar<Length>(meridionalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
+    public Measurable<Length> meridionalRadiusOfCurvature(final Measurable<Angle> latitude) {
+        return Measure.valueOf(meridionalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
     }
 
     /**
@@ -244,8 +246,8 @@ public class ReferenceEllipsoid {
      * @param latitude   The local latitude.
      * @return  The meridional arc.
      */
-    public Quantity<Length> meridionalArc(final Quantity<Angle> latitude) {
-        return new Scalar<Length>(meridionalArc(latitude.doubleValue(SI.RADIAN)), SI.METER);
+    public Measurable<Length> meridionalArc(final Measurable<Angle> latitude) {
+        return Measure.valueOf(meridionalArc(latitude.doubleValue(SI.RADIAN)), SI.METER);
     }
 
 }

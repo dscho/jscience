@@ -10,9 +10,16 @@ package org.jscience.geography.coordinates;
 
 import static org.jscience.geography.coordinates.crs.ReferenceEllipsoid.WGS84;
 
-import javax.measure.converters.UnitConverter;
-import javax.measure.quantities.*;
-import javax.measure.units.*;
+import javax.measure.Measure;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.*;
+import javax.measure.unit.*;
+import static javax.measure.unit.SI.*;
+import static javax.measure.unit.NonSI.*;
+
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.geography.coordinates.crs.*;
 import org.opengis.referencing.cs.CoordinateSystem;
@@ -37,7 +44,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @see <a href="http://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system">
  *      Wikipedia: Universal Transverse Mercator Coordinate System</a>
  */
-public class UTM extends Coordinates<ProjectedCRS> {
+public final class UTM extends Coordinates<ProjectedCRS> {
 
     /**
      * The UTM scale factor. This the exact scale factor only on a pair of
@@ -51,32 +58,32 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * The UTM "false easting" value. This quantity is added to the true
      * easting to avoid using negative numbers in the coordinates.
      */
-    public static Quantity<Length> UTM_FALSE_EASTING = new Scalar<Length>(
-            500000.0, SI.METER);
+    public static Measure<Integer, Length> UTM_FALSE_EASTING = Measure.valueOf(
+            500000, METER);
 
     /**
      * The UTM "false northing" value. This quantity is added to the true
      * northing for coordinates <b>in the southern hemisphere only</b>
      * to avoid using negative numbers in the coordinates.
      */
-    public static Quantity<Length> UTM_FALSE_NORTHING = new Scalar<Length>(
-            10000000.0, SI.METER);
+    public static Measure<Integer, Length> UTM_FALSE_NORTHING = Measure
+            .valueOf(10000000, METER);
 
     /**
      * The northern limit of the UTM grid. Beyond this limit the distortion
      * introduced by the transverse Mercator projection is impractically
      * large, and the UPS grid is used instead.
      */
-    public static final Quantity<Angle> UTM_NORTHERN_LIMIT = new Scalar<Angle>(
-            84.0, NonSI.DEGREE_ANGLE);
+    public static final Measure<Integer, Angle> UTM_NORTHERN_LIMIT = Measure
+            .valueOf(84, DEGREE_ANGLE);
 
     /**
      * The southern limit of the UTM grid. Beyond this limit the distortion
      * introduced by the transverse Mercator projection is impractically
      * large, and the UPS grid is used instead.
      */
-    public static final Quantity<Angle> UTM_SOUTHERN_LIMIT = new Scalar<Angle>(
-            -80.0, NonSI.DEGREE_ANGLE);
+    public static final Measure<Integer, Angle> UTM_SOUTHERN_LIMIT = Measure
+            .valueOf(-80, DEGREE_ANGLE);
 
     /**
      * The UPS scale factor.
@@ -87,16 +94,16 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * The UPS "false easting" value. This quantity is added to the true
      * easting to avoid using negative numbers in the coordinates.
      */
-    public static Quantity<Length> UPS_FALSE_EASTING = new Scalar<Length>(
-            2000000.0, SI.METER);
+    public static Measure<Integer, Length> UPS_FALSE_EASTING = Measure.valueOf(
+            2000000, METER);
 
     /**
      * The UPS "false northing" value. This quantity is added to the true
      * northing to avoid using negative numbers in the coordinates.
      * The UPS system, unlike the UTM system, always includes the false northing.
      */
-    public static Quantity<Length> UPS_FALSE_NORTHING = new Scalar<Length>(
-            2000000.0, SI.METER);
+    public static Measure<Integer, Length> UPS_FALSE_NORTHING = Measure
+            .valueOf(2000000, METER);
 
     /*
      * NOTE: The calculations in this class use power series expansions.
@@ -157,9 +164,9 @@ public class UTM extends Coordinates<ProjectedCRS> {
             } else {
                 latLong = utmToLatLong(coordinates, WGS84);
             }
-            position.latitudeWGS84 = new Scalar<Angle>(latLong
+            position.latitudeWGS84 = Measure.valueOf(latLong
                     .latitudeValue(SI.RADIAN), SI.RADIAN);
-            position.longitudeWGS84 = new Scalar<Angle>(latLong
+            position.longitudeWGS84 = Measure.valueOf(latLong
                     .longitudeValue(SI.RADIAN), SI.RADIAN);
             return position;
         }
@@ -183,12 +190,12 @@ public class UTM extends Coordinates<ProjectedCRS> {
     /**
      * Holds the easting in meters.
      */
-    private double _eastingInMeter;
+    private double _easting;
 
     /**
      * Holds the northing in meters.
      */
-    private double _northingInMeter;
+    private double _northing;
 
     /**
      * Returns the projected UTM position corresponding to the specified
@@ -203,31 +210,29 @@ public class UTM extends Coordinates<ProjectedCRS> {
      */
     public static UTM valueOf(int longitudeZone, char latitudeZone,
             double easting, double northing, Unit<Length> unit) {
-        return new UTM(longitudeZone, latitudeZone, easting, northing, unit);
+        UTM utm = FACTORY.object();
+        utm._longitudeZone = longitudeZone;
+        utm._latitudeZone = latitudeZone;
+        if (unit == METER) {
+            utm._easting = easting;
+            utm._northing = northing;
+        } else {
+            UnitConverter toMeter = unit.getConverterTo(METER);
+            utm._easting = toMeter.convert(easting);
+            utm._northing = toMeter.convert(northing);
+        }
+        return utm;
     }
 
-    /**
-     * Creates the projected UTM position corresponding to the specified
-     * coordinates.
-     *
-     * @param longitudeZone the longitude zone number.
-     * @param latitudeZone  the longitude zone character.
-     * @param easting       the easting value stated in the specified unit.
-     * @param northing      the northing value stated in the specified unit.
-     * @param unit          the easting/northing length unit.
-     */
-    public UTM(int longitudeZone, char latitudeZone, double easting,
-            double northing, Unit<Length> unit) {
-        _longitudeZone = longitudeZone;
-        _latitudeZone = latitudeZone;
-        if (unit == SI.METER) {
-            _eastingInMeter = easting;
-            _northingInMeter = northing;
-        } else {
-            UnitConverter toMeter = unit.getConverterTo(SI.METER);
-            _eastingInMeter = toMeter.convert(easting);
-            _northingInMeter = toMeter.convert(northing);
+    private static final ObjectFactory<UTM> FACTORY = new ObjectFactory<UTM>() {
+
+        @Override
+        protected UTM create() {
+            return new UTM();
         }
+    };
+
+    private UTM() {
     }
 
     /**
@@ -255,8 +260,8 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * @return the easting stated in the specified unit.
      */
     public final double eastingValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _eastingInMeter : SI.METER
-                .getConverterTo(unit).convert(_eastingInMeter);
+        return unit.equals(METER) ? _easting : METER.getConverterTo(unit)
+                .convert(_easting);
     }
 
     /**
@@ -266,8 +271,8 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * @return the northing stated in the specified unit.
      */
     public final double northingValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _northingInMeter : SI.METER
-                .getConverterTo(unit).convert(_northingInMeter);
+        return unit.equals(METER) ? _northing : METER.getConverterTo(unit)
+                .convert(_northing);
     }
 
     @Override
@@ -284,10 +289,10 @@ public class UTM extends Coordinates<ProjectedCRS> {
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
             Unit u = ProjectedCRS.EASTING_NORTHING_CS.getAxis(0).getUnit();
-            return SI.METER.getConverterTo(u).convert(_eastingInMeter);
+            return METER.getConverterTo(u).convert(_easting);
         } else if (dimension == 1) {
             Unit u = ProjectedCRS.EASTING_NORTHING_CS.getAxis(1).getUnit();
-            return SI.METER.getConverterTo(u).convert(_northingInMeter);
+            return METER.getConverterTo(u).convert(_northing);
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -301,7 +306,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * @return True if the latitude is greater than 84 degrees.
      */
     public static boolean isNorthPolar(final LatLong latLong) {
-        return latLong.latitudeValue(NonSI.DEGREE_ANGLE) > 84.0;
+        return latLong.latitudeValue(DEGREE_ANGLE) > 84.0;
     }
 
     /**
@@ -312,7 +317,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
      * @return True if the latitude is less than -80 degrees.
      */
     public static boolean isSouthPolar(final LatLong latLong) {
-        return latLong.latitudeValue(NonSI.DEGREE_ANGLE) < -80.0;
+        return latLong.latitudeValue(DEGREE_ANGLE) < -80.0;
     }
 
     /**
@@ -323,21 +328,20 @@ public class UTM extends Coordinates<ProjectedCRS> {
      */
     public static char getLatitudeZone(final LatLong latLong) {
         if (isNorthPolar(latLong)) {
-            if (latLong.longitudeValue(SI.RADIAN) < 0) {
+            if (latLong.longitudeValue(RADIAN) < 0) {
                 return 'Y';
             } else {
                 return 'Z';
             }
         }
         if (isSouthPolar(latLong)) {
-            if (latLong.longitudeValue(SI.RADIAN) < 0) {
+            if (latLong.longitudeValue(RADIAN) < 0) {
                 return 'A';
             } else {
                 return 'B';
             }
         }
-        final int degreesLatitude = (int) latLong
-                .latitudeValue(NonSI.DEGREE_ANGLE);
+        final int degreesLatitude = (int) latLong.latitudeValue(DEGREE_ANGLE);
         char zone = (char) ((degreesLatitude + 80) / 8 + 'C');
         if (zone > 'H') {
             zone++;
@@ -360,8 +364,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
      */
     public static int getLongitudeZone(LatLong latLong) {
 
-        final double degreesLongitude = latLong
-                .longitudeValue(NonSI.DEGREE_ANGLE);
+        final double degreesLongitude = latLong.longitudeValue(DEGREE_ANGLE);
 
         // UPS longitude zones
         if (isNorthPolar(latLong) || isSouthPolar(latLong)) {
@@ -398,7 +401,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
             }
         }
 
-        return ((int) degreesLongitude + 180) / 6 + 1;
+        return (int) ((degreesLongitude + 180) / 6) + 1;
     }
 
     /**
@@ -440,7 +443,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final char latitudeZone = getLatitudeZone(latLong);
         final int longitudeZone = getLongitudeZone(latLong);
 
-        final double phi = latLong.latitudeValue(SI.RADIAN);
+        final double phi = latLong.latitudeValue(RADIAN);
 
         final double cosPhi = Math.cos(phi);
         final double cos2Phi = cosPhi * cosPhi;
@@ -493,7 +496,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final double t9 = (kn2 * cos7Phi / 50.40)
                 * (61.0 - 479.0 * tan2Phi + 179.0 * tan4Phi - tan6Phi);
 
-        final double lambda = latLong.longitudeValue(SI.RADIAN);
+        final double lambda = latLong.longitudeValue(RADIAN);
         final double lambda0 = getCentralMeridian(longitudeZone, latitudeZone);
         final double dL = lambda - lambda0;
         final double dL2 = dL * dL;
@@ -507,19 +510,19 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final double falseNorthing;
         if ((phi < 0.0)) {
             // southern hemisphere -- add false northing
-            falseNorthing = UTM_FALSE_NORTHING.doubleValue(SI.METER);
+            falseNorthing = UTM_FALSE_NORTHING.doubleValue(METER);
         } else {
             // northern hemisphere -- no false northing
             falseNorthing = 0.0;
         }
-        final double falseEasting = UTM_FALSE_EASTING.doubleValue(SI.METER);
+        final double falseEasting = UTM_FALSE_EASTING.doubleValue(METER);
         final double northing = falseNorthing + t1 + dL2 * t2 + dL4 * t3 + dL6
                 * t4 + dL8 * t5;
         final double easting = falseEasting + dL * t6 + dL3 * t7 + dL5 * t8
                 + dL7 * t9;
 
         return UTM.valueOf(longitudeZone, latitudeZone, easting, northing,
-                SI.METER);
+                METER);
     }
 
     /**
@@ -535,12 +538,12 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final char latitudeZone = getLatitudeZone(latLong);
         final int longitudeZone = getLongitudeZone(latLong);
 
-        final double latitude = latLong.latitudeValue(SI.RADIAN);
+        final double latitude = latLong.latitudeValue(RADIAN);
         final double sign = Math.signum(latitude);
         final double phi = Math.abs(latitude);
-        final double lambda = latLong.longitudeValue(SI.RADIAN);
+        final double lambda = latLong.longitudeValue(RADIAN);
 
-        final double a = ellipsoid.getSemimajorAxis().doubleValue(SI.METER);
+        final double a = ellipsoid.getSemimajorAxis().doubleValue(METER);
         final double e = ellipsoid.getEccentricity();
         final double e2 = ellipsoid.getEccentricitySquared();
 
@@ -550,18 +553,18 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final double tz = Math.pow((1 + eSinPhi) / (1 - eSinPhi), e / 2.0)
                 * Math.tan(Math.PI / 4.0 - phi / 2.0);
         final double radius = UPS_SCALE_FACTOR * c0 * tz;
-        final double falseNorthing = UPS_FALSE_NORTHING.doubleValue(SI.METER);
+        final double falseNorthing = UPS_FALSE_NORTHING.doubleValue(METER);
         final double northing;
         if (sign > 0) {
             northing = falseNorthing - radius * Math.cos(lambda);
         } else {
             northing = falseNorthing + radius * Math.cos(lambda);
         }
-        final double falseEasting = UPS_FALSE_EASTING.doubleValue(SI.METER);
+        final double falseEasting = UPS_FALSE_EASTING.doubleValue(METER);
         final double easting = falseEasting + radius * Math.sin(lambda);
 
         return UTM.valueOf(longitudeZone, latitudeZone, easting, northing,
-                SI.METER);
+                METER);
     }
 
     /**
@@ -576,11 +579,10 @@ public class UTM extends Coordinates<ProjectedCRS> {
         final double northing;
         if ((utm.latitudeZone() < 'N')) {
             // southern hemisphere
-            northing = utm._northingInMeter
-                    - UTM_FALSE_NORTHING.doubleValue(SI.METER);
+            northing = utm._northing - UTM_FALSE_NORTHING.doubleValue(METER);
         } else {
             // northern hemisphere
-            northing = utm._northingInMeter;
+            northing = utm._northing;
         }
 
         // footpoint latitude
@@ -635,8 +637,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
 
         final double lambda0 = getCentralMeridian(utm.longitudeZone(), utm
                 .latitudeZone());
-        final double dE = utm._eastingInMeter
-                - UTM_FALSE_EASTING.doubleValue(SI.METER);
+        final double dE = utm._easting - UTM_FALSE_EASTING.doubleValue(METER);
         final double dE2 = dE * dE;
         final double dE3 = dE2 * dE;
         final double dE4 = dE3 * dE;
@@ -671,7 +672,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
                 * t13;
         final double longitude = lambda0 + dE * t14 - dE3 * t15 + dE5 * t16
                 - dE7 * t17;
-        return LatLong.valueOf(latitude, longitude, SI.RADIAN);
+        return LatLong.valueOf(latitude, longitude, RADIAN);
     }
 
     /**
@@ -684,16 +685,16 @@ public class UTM extends Coordinates<ProjectedCRS> {
      */
     public static LatLong upsToLatLong(UTM ups, ReferenceEllipsoid ellipsoid) {
         final boolean northernHemisphere = ups.latitudeZone() > 'N';
-        final double dN = ups.northingValue(SI.METER)
-                - UPS_FALSE_NORTHING.doubleValue(SI.METER);
-        final double dE = ups.eastingValue(SI.METER)
-                - UPS_FALSE_EASTING.doubleValue(SI.METER);
+        final double dN = ups.northingValue(METER)
+                - UPS_FALSE_NORTHING.doubleValue(METER);
+        final double dE = ups.eastingValue(METER)
+                - UPS_FALSE_EASTING.doubleValue(METER);
         // check for zeroes (the poles)
         if (dE == 0.0 && dN == 0.0) {
             if (northernHemisphere) {
-                return LatLong.valueOf(90.0, 0.0, NonSI.DEGREE_ANGLE);
+                return LatLong.valueOf(90.0, 0.0, DEGREE_ANGLE);
             } else {
-                return LatLong.valueOf(-90.0, 0.0, NonSI.DEGREE_ANGLE);
+                return LatLong.valueOf(-90.0, 0.0, DEGREE_ANGLE);
             }
         }
         // compute longitude
@@ -705,7 +706,7 @@ public class UTM extends Coordinates<ProjectedCRS> {
         }
 
         // compute latitude
-        final double a = ellipsoid.getSemimajorAxis().doubleValue(SI.METER);
+        final double a = ellipsoid.getSemimajorAxis().doubleValue(METER);
         final double e = ellipsoid.getEccentricity();
         final double e2 = ellipsoid.getEccentricitySquared();
         final double e4 = e2 * e2;
@@ -742,7 +743,41 @@ public class UTM extends Coordinates<ProjectedCRS> {
         } else {
             latitude = -phi;
         }
-        return LatLong.valueOf(latitude, longitude, SI.RADIAN);
+        return LatLong.valueOf(latitude, longitude, RADIAN);
     }
+
+    @Override
+    public UTM copy() {
+        return UTM.valueOf(_longitudeZone, _latitudeZone, _easting, _northing,
+                METER);
+    }
+
+    // Default serialization.
+    //
+
+    static final XMLFormat<UTM> XML = new XMLFormat<UTM>(UTM.class) {
+
+        @Override
+        public UTM newInstance(Class<UTM> cls, InputElement xml)
+                throws XMLStreamException {
+            return FACTORY.object();
+        }
+
+        public void write(UTM utm, OutputElement xml) throws XMLStreamException {
+            xml.setAttribute("latitudeZone", utm._latitudeZone);
+            xml.setAttribute("longitudeZone", utm._longitudeZone);
+            xml.setAttribute("easting", utm._easting);
+            xml.setAttribute("northing", utm._northing);
+        }
+
+        public void read(InputElement xml, UTM UTM) throws XMLStreamException {
+            UTM._latitudeZone = xml.getAttribute("latitudeZone", ' ');
+            UTM._longitudeZone = xml.getAttribute("longitudeZone", 0);
+            UTM._easting = xml.getAttribute("easting", 0.0);
+            UTM._northing = xml.getAttribute("northing", 0.0);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
 
 }

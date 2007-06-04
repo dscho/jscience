@@ -11,11 +11,11 @@ package org.jscience.geography.coordinates.crs;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.measure.quantities.Angle;
-import javax.measure.quantities.Duration;
-import javax.measure.quantities.Length;
-import javax.measure.quantities.Quantity;
-import javax.measure.units.Unit;
+import javax.measure.quantity.Angle;
+import javax.measure.quantity.Duration;
+import javax.measure.quantity.Length;
+import javax.measure.Measurable;
+import javax.measure.unit.Unit;
 
 import javolution.util.FastSet;
 
@@ -47,22 +47,22 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
         /**
          * Holds the Geodetic Latitude (WGS84 Ellipsoid).
          */
-        public Quantity<Angle> latitudeWGS84;
+        public Measurable<Angle> latitudeWGS84;
 
         /**
          * Holds the Geodetic Longitude (WGS84 Ellipsoid).
          */
-        public Quantity<Angle> longitudeWGS84;
+        public Measurable<Angle> longitudeWGS84;
 
         /**
          * Holds the WGS84 Ellipsoidal Height.
          */
-        public Quantity<Length> heightWGS84;
+        public Measurable<Length> heightWGS84;
 
         /**
          * Holds the Time since midnight, January 1, 1970 UTC. 
          */
-        public Quantity<Duration> timeUTC;
+        public Measurable<Duration> timeUTC;
     }
 
     /**

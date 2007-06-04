@@ -8,6 +8,10 @@
  */
 package org.jscience.geography.coordinates;
 
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
+
 import org.jscience.geography.coordinates.crs.CompoundCRS;
 
 /**
@@ -17,30 +21,46 @@ import org.jscience.geography.coordinates.crs.CompoundCRS;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordinates>
-    extends Coordinates<CompoundCRS<C1, C2>> {
+public final class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordinates>
+        extends Coordinates<CompoundCRS<C1, C2>> {
 
     /**
      * Holds the first coordinates. 
      */
-    private final C1 _first;
-    
+    private C1 _first;
+
     /**
      * Holds the next coordinates. 
      */
-    private final C2 _next;
-    
+    private C2 _next;
+
     /**
-     * Creates a compound coordinates made up of the specified coordinates.
+     * Returns a compound coordinates made up of the specified coordinates.
      * 
      * @param first the first coordinates.
      * @param next the next coordinates. 
      */
-    public CompoundCoordinates(C1 first, C2 next) {
-       _first = first;
-       _next = next;
+    @SuppressWarnings("unchecked")
+    public static <T1 extends Coordinates, T2 extends Coordinates> CompoundCoordinates<T1, T2> valueOf(
+            T1 first, T2 next) {
+        CompoundCoordinates<T1, T2> coord = FACTORY.object();
+        coord._first = first;
+        coord._next = next;
+        return coord;
     }
-    
+
+    private static final ObjectFactory<CompoundCoordinates> FACTORY = new ObjectFactory<CompoundCoordinates>() {
+
+        @Override
+        protected CompoundCoordinates create() {
+            return new CompoundCoordinates();
+        }
+
+    };
+
+    private CompoundCoordinates() {
+    }
+
     /**
      * Returns the first coordinates.
      * 
@@ -49,7 +69,7 @@ public class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordinates>
     public C1 getFirst() {
         return _first;
     }
-    
+
     /**
      * Returns the next coordinates.
      * 
@@ -80,5 +100,40 @@ public class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordinates>
             return _next.getOrdinate(dimension - firstDimension);
         }
     }
-        
+
+    @Override
+    public CompoundCoordinates copy() {
+        return CompoundCoordinates.valueOf(_first, _next);
+    }
+
+    // Default serialization.
+    //
+
+    static final XMLFormat<CompoundCoordinates> XML = new XMLFormat<CompoundCoordinates>(
+            CompoundCoordinates.class) {
+
+        @Override
+        public CompoundCoordinates newInstance(Class<CompoundCoordinates> cls,
+                InputElement xml) throws XMLStreamException {
+            return FACTORY.object();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void read(InputElement xml, CompoundCoordinates coord)
+                throws XMLStreamException {
+            coord._first = xml.getNext();
+            coord._next = xml.getNext();
+        }
+
+        @Override
+        public void write(CompoundCoordinates coord, OutputElement xml)
+                throws XMLStreamException {
+            xml.add(coord._first);
+            xml.add(coord._next);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
+
 }

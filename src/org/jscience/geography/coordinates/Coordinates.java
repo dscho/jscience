@@ -8,8 +8,11 @@
  */
 package org.jscience.geography.coordinates;
 
-import javolution.lang.Immutable;
+import javolution.lang.Realtime;
+import javolution.lang.ValueType;
+import javolution.text.Text;
 import javolution.text.TextBuilder;
+import javolution.xml.XMLSerializable;
 
 import org.jscience.geography.coordinates.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.cs.CoordinateSystem;
@@ -21,11 +24,11 @@ import org.opengis.spatialschema.geometry.DirectPosition;
  * This implementation is compatible with OpenGIS&reg; DirectPosition. 
  * 
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.0, February 13, 2006
+ * @version 4.0, April 9, 2007
  * @see <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc.</a>  
  */
 public abstract class Coordinates<R extends CoordinateReferenceSystem>
-        implements DirectPosition, Immutable {
+    implements DirectPosition, Realtime, ValueType, XMLSerializable {
 
     /**
      * Default constructor.
@@ -112,7 +115,7 @@ public abstract class Coordinates<R extends CoordinateReferenceSystem>
      * 
      * @return the coordinates values/units.
      */
-    public String toString() {
+    public Text toText() {
         double[] coordinates = getCoordinates();
         CoordinateSystem cs = this.getCoordinateReferenceSystem().getCoordinateSystem();
         TextBuilder tb = TextBuilder.newInstance();
@@ -126,6 +129,26 @@ public abstract class Coordinates<R extends CoordinateReferenceSystem>
             tb.append(cs.getAxis(i).getUnit());
         }
         tb.append(']');
-        return tb.toString();
+        return tb.toText();
     }
+
+    /**
+     * Returns the text representation of these coordinates as a 
+     * <code>java.lang.String</code>.
+     * 
+     * @return <code>toText().toString()</code>
+     */
+    public final String toString() {
+        return toText().toString();
+    }
+
+    /**
+     * Returns a copy of these coordinates 
+     * {@link javolution.context.AllocatorContext allocated} 
+     * by the calling thread (possibly on the stack).
+     *     
+     * @return an identical and independant copy of these coordinates .
+     */
+    public abstract Coordinates copy();
+    
 }

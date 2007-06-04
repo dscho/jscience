@@ -127,8 +127,8 @@
          <TR>
          <TD CLASS="lineheight1 style5">
          <UL>
-            <LI> <A HREF="api/javax/measure/units/package-summary.html#package_description">Units</A> and 
-             <A HREF="api/javax/measure/quantities/package-summary.html#package_description">quantities</A>    
+            <LI> <A HREF="api/javax/measure/unit/package-summary.html#package_description">Units</A> and 
+             <A HREF="api/javax/measure/quantity/package-summary.html#package_description">quantities</A>    
             modules proposed as basis for the <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
             reference implementation.</LI>
             
@@ -138,31 +138,31 @@
 	        specifications for the development and deployment of geographic applications.</LI>
 
             <LI>A rigourous mapping of mathematical 
-            <A HREF="api/org/jscience/mathematics/structures/package-summary.html#package_description">structures</A>
+            <A HREF="api/org/jscience/mathematics/structure/package-summary.html#package_description">structures</A>
             (e.g. <SPAN CLASS="style6">Group, Ring, Field, VectorSpace </SPAN>) to Java interfaces.</LI>
             
-            <LI>A <A HREF="api/org/jscience/mathematics/vectors/package-summary.html#package_description">
+            <LI>A <A HREF="api/org/jscience/mathematics/vector/package-summary.html#package_description">
             linear algebra</A> module, which includes a first <I>(and I believe unique) </I>  
-            parameterized <A HREF="api/org/jscience/mathematics/vectors/Matrix.html">matrix</A>
+            parameterized <A HREF="api/org/jscience/mathematics/vector/Matrix.html">matrix</A>
             class capable of resolving linear system of equations involving
             any kind of elements (e.g. <SPAN CLASS="style6">Complex, ModuloInteger, RationalFunctions</SPAN>)</LI>
             
-            <LI> A <A HREF="api/org/jscience/mathematics/functions/package-summary.html#package_description">functions</A>
+            <LI> A <A HREF="api/org/jscience/mathematics/function/package-summary.html#package_description">functions</A>
             module for symbolic calculations and analysis.</LI>
             
-            <LI> Different types of  <A HREF="api/org/jscience/mathematics/numbers/package-summary.html#package_description">numbers</A>
-            such as <A HREF="api/org/jscience/mathematics/numbers/Real.html">real</A>
+            <LI> Different types of  <A HREF="api/org/jscience/mathematics/number/package-summary.html#package_description">numbers</A>
+            such as <A HREF="api/org/jscience/mathematics/number/Real.html">real</A>
             numbers of arbitrary and guaranteed precision, or the always
-            exact <A HREF="api/org/jscience/mathematics/numbers/Rational.html">rational</A>
+            exact <A HREF="api/org/jscience/mathematics/number/Rational.html">rational</A>
             numbers.</LI>
             
             <LI> Support for exact or arbitrary precision 
-            <A HREF="api/org/jscience/physics/measures/package-summary.html#package_description">measurements</A>
+            <A HREF="api/org/jscience/physics/amount/package-summary.html#package_description">measurements</A>
             (also strongly typed).</LI>
 
             <LI> Support for <SPAN CLASS="style6">Standard , Relativistic ,
             High-Energy , Quantum and Natural </SPAN>physical 
-            <A HREF="api/org/jscience/physics/models/package-summary.html#package_description">models</A>.
+            <A HREF="api/org/jscience/physics/model/package-summary.html#package_description">models</A>.
             </LI>
             
             <LI> A <A HREF="api/org/jscience/economics/money/package-summary.html#package_description">monetary</A> module
@@ -177,8 +177,8 @@
              CELLSPACING="0" CELLPADDING="8" WIDTH="86%">
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
-         <DIV ALIGN="center"><SPAN CLASS="style7"><IMG SRC="doc/img/new.gif"/>
-         <B>JS</B>cience version 3.3 Beta - January 25, 2007</SPAN></DIV></TD>
+         <DIV ALIGN="center"><SPAN CLASS="style7">
+         <IMG src="doc/img/new.gif" /><B>JS</B>cience version 4.0 - June 4, 2007</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -189,10 +189,10 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.3.Beta-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-4.0.0-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-3.3.Beta-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-4.0.0-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
@@ -240,12 +240,12 @@
             Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on a dual-processors
             our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
             are the fastest around (for a pure Java library).</LI>
-            <LI><A href="http://javolution.org/api/javolution/context/PoolContext.html">Transparent Object Recycling:</A>
+            <LI><A href="http://javolution.org/api/javolution/context/StackContext.html">Stack allocation:</A>
             To reduce garbage collection, decrease memory footprint and increase scalability.</LI>
             <LI><A href="http://javolution.org/api/javolution/util/package-summary.html#package_description">Real-Time Behavior and Compliance:</A>
             <B>JS</B>cience can safely be used with  
             <A HREF="http://rtsj.org">RTSJ</A> VMs without resulting into memory clashes or illegal access exceptions.</LI>
-            <LI><A href="http://javolution.org/api/javolution/xml/package-summary.html#package_description">Persistency:</A> 
+            <LI><A href="http://javolution.org/api/javolution/xml/package-summary.html#package_description">Persistency/Networking:</A> 
             Fastest XML marshalling/unmarshalling around!</LI>
          </UL>
          <B>JS</B>cience binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
@@ -350,6 +350,10 @@
          <TD>
          <UL>
             <LI CLASS="lineheight1 style5">
+            <IMG SRC="doc/img/new.gif"/> Book <A href="http://www.wickedcooljava.com/">"Wicked Cool Java"</A>
+            describes the JScience library; along with some sample code that uses the units API).</LI><BR>
+
+            <LI CLASS="lineheight1 style5">
             <A href="http://ociweb.com/jnb/jnbJun2006.html">Units and Measures with <B>JS</B>cience</A> -
             "Java News Brief" Article</LI><BR>
 
@@ -366,14 +370,15 @@
             Provides neutral, interface-only APIs derived from OGC/ISO Standards.</LI><BR>
 
             <LI CLASS="lineheight1 style5">
-            <A href="http://jscience.org/jsr-275-bin.zip">jsr-275-bin.zip</A> and 
-            <A href="http://jscience.org/jsr-275-src.zip">jsr-275-src.zip</a> 
+            <A href="http://jscience.org/jsr-275/jsr-275-bin.zip">jsr-275-bin.zip</A> and 
+            <A href="http://jscience.org/jsr-275/jsr-275-src.zip">jsr-275-src.zip</a> 
             Standalone quantities/units packages.</LI><BR>
 
             <LI CLASS="lineheight1 style5">
             <A href="http://jade.dev.java.net/">JScience Experimental Packages</A>
             maintained by <A HREF="mailto:silvere@digitalbiosphere.org">Silvère Martin-Michiellot</A>
             (<A href="http://jscience.org/experimental/javadoc/">JavaDoc</A>).</LI><BR>
+
          </UL></TD>
          </TR>
       </TABLE>
@@ -401,45 +406,32 @@
          <TR>
          <TD>
          <UL>
-            <I><LI CLASS="lineheight1 style5"><B>January 4, 2007: JScience 3.3 Beta</B><BR>
-            Refactored <A HREF="api/org/jscience/mathematics/vectors/package-summary.html">vectors</A> 
-            module (DenseVector&lt;F&gt;, SparseVector&lt;F&gt; ...)
+            <I><LI CLASS="lineheight1 style5"><B>June 4, 2007: JScience 4.0</B><BR>
+            Integration with <a href="https://jsr-275.dev.java.net/files/documents/4333/34956/JSR-275.pdf">JSR-275 Early Draft</A>.<BR>
+            Refactored package/classes to use singular form, <code>org.jscience.physics.measure.Measure</code>
+            renamed <code>org.jscience.physics.amount.Amount</code> (to avoid name clash with <code>javax.measure</code>).<BR>
+            Support for dense or sparse <A HREF="api/org/jscience/mathematics/vector/package-summary.html">vectors</A> 
             Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on a 
             dual-processors our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
             are the fastest around (for a pure Java library), by about 2x :)<BR>
-            Improved Real/LargeInteger algorithms (e.g binary GCD, still more to be done)<BR>
-            <B>IN PROGRESS</B> Resolve all pending issues<BR>
-            <B>IN PROGRESS</B> New FloatingPoint number (fixed precision)<BR>
-            <B>IN PROGRESS</B> Investigates parameterization of Measure 
-               (e.g. <code>Measure&lt;Field, Quantity&gt;</code>).<BR>
             </LI></I>
 
             <LI CLASS="lineheight1 style5"><B>October 5, 2006: JScience 3.2</B><BR>
-            Based on Javolution 4.0 (faster)<BR>
             JSR-275 new packaging (javax.measure.*)<BR>
             Binary for 1.4 (created using <a href="http://retroweaver.sourceforge.net/">Retroweaver</a>) <BR>
             </LI>
              
             <LI CLASS="lineheight1 style5"><B>July 15, 2006 : JScience 3.1.6</B><BR> 
-            Intermediate release (bug fixing) [3.1.5] [3.1.6] <BR>
-            Finalization of <code>javax.measure.units</code> and <code>javax.measure.quantities</code> [3.1.4] <BR>
-            Updated/corrected <A HREF="api/org/jscience/physics/measures/Constants.html">physical constants</a>
+            Updated/corrected <A HREF="api/org/jscience/physics/amount/Constants.html">physical constants</a>
             (<a href="http://physics.nist.gov/cuu/Constants/index.html">CODATA 2002</a>) [3.1.3] <BR>
-            Corrected potential internal overflow with Real.doubleValue() [3.1.1] <BR>
-            New <A HREF="api/org/jscience/physics/measures/MeasureVector.html">MeasureVector</A> class
-            for multi-dimensional measurements [3.1.0] <BR>
-            Added <code>RationalConverter</code> for exact unit conversion. As a consequence
-            an exact <A HREF="api/org/jscience/physics/measures/package-summary.html#package_description">measurement</A>
-            may be stated in different units and is still exact [3.1.0] <BR> 
+            Added <code>RationalConverter</code> for exact unit conversion [3.1.0] <BR> 
             Automatic removal of terms with zero coefficients for polynomials [3.1.0] <BR> 
             Fixed defects 27, 28, 29 (<A HREF="http://jscience.dev.java.net/">java.net</A> issues database) [3.1.0] <BR> 
             </LI>
+       
             <LI CLASS="lineheight1 style5"><B>March 2, 2006 : JScience 3.0</B><BR> 
             Major upgrade of the library to leverage JDK 1.5 class paramaterization capabilities.<BR>
             Rigourous mapping of mathematical structures (e.g. Group, Ring, Field, etc.)<BR>
-            A new measure module integrated with the units/quantities and the numbers modules
-            (replace <code>org.jscience.physics.quantities</code> classes).<BR>
-            Optimized implementation for vector/matrices of <code>double</code> type (VectorFloat64, MatrixFloat64).<BR>
             Fixed defects 17, 19, 20, 21, 25 (<A HREF="http://jscience.dev.java.net/">java.net</A>) [3.0.2] <BR> 
             Added new quantities for flow rate and viscosity [3.0.1] <BR> 
             </LI>
@@ -473,7 +465,7 @@
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : January 25, 2007<BR>
+          Revision      : June 4, 2007<BR>
          </TD>
          </TR>
          <TR>

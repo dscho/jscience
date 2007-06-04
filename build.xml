@@ -10,8 +10,8 @@
     <target name="init">
     	<tstamp/>
         <property name="library"   value="jscience" />
-        <property name="version"   value="3.3" />
-        <property name="release"   value="Beta" />
+        <property name="version"   value="4.0" />
+        <property name="release"   value="0" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />
@@ -27,7 +27,9 @@
 
 		<!-- Compile -->
         <javac srcdir="${src}" destdir="${bin}" classpath="${classpath}" target="1.5" source="1.5"
-               debug="${debug}" optimize="${optimize}" encoding="${encoding}"/> 
+               debug="${debug}" optimize="${optimize}" encoding="${encoding}">
+        	<!-- <compilerarg  value="-Xlint"/> -->
+        </javac>	
 
 		<!-- Updates version information (Javolution class) -->
 		<delete file="${bin}/org/jscience/JScience.class"/>

@@ -5,34 +5,33 @@
 <LINK REL ="stylesheet" TYPE="text/css" HREF="javadoc.css" TITLE="Style">
 </HEAD>
 <BODY><PRE>
-<B>C:\jscience-3.3>ant run</B>
+<B>C:\jscience-4.0>ant run</B>
 
      ...
 run:
-     [java] JScience - Java(TM) Tools and Libraries for the Advancement of Sciences
-     [java] Version 3.3.Beta January 4 2007 (http://jscience.org)
+     [java] Version 4.0.0 June 4 2007 (http://jscience.org)
 
      [java] Benchmark...
 
      [java] Numerics Operations
-     [java] Float64 add: 50.95 ns
-     [java] Complex add: 44.84 ns
-     [java] Measure (mass) add: 58.71 ns
-     [java] Float64 multiply: 44.57 ns
-     [java] Complex multiply: 49.09 ns
-     [java] Measure (mass) multiply: 107.9 ns
+     [java] Float64 add: 16.21 ns
+     [java] Float64 multiply: 19.75 ns
+     [java] Complex add: 22.80 ns
+     [java] Complex multiply: 44.37 ns
+     [java] Amount (mass) add: 33.02 ns
+     [java] Amount (mass) multiply: 66.69 ns
 
-     [java] LargeInteger (PoolContext) versus BigInteger
-     [java] LargeInteger (1024 bits) addition: 322.2 ns
-<FONT COLOR="999999">     [java] BigInteger (1024 bits) addition: 828.6 ns</FONT>
-     [java] LargeInteger (1024 bits) multiplication: 18.28 us
-<FONT COLOR="999999">     [java] BigInteger (1024 bits) multiplication: 14.66 us</FONT>
+     [java] LargeInteger (StackContext) versus BigInteger
+     [java] LargeInteger (1024 bits) addition: 235.9 ns
+     [java] LargeInteger (1024 bits) multiplication: 12.87 us
+<FONT COLOR="999999">     [java] BigInteger (1024 bits) addition: 512.5 ns</FONT>
+<FONT COLOR="999999">     [java] BigInteger (1024 bits) multiplication: 9.972 us</FONT>
 
-     [java] Matrix&lt;Float64&gt; and Matrix&lt;Complex&gt; versus non-parameterized matrix (double)
-<FONT COLOR="999999">     [java] Non-parameterized matrix (double based) 500x500 multiplication: 869.7 ms</FONT>
-     [java] Matrix&lt;Float64&gt; 500x500 multiplication: 431.5 ms
-     [java] Matrix&lt;Complex&gt; 500x500 multiplication: 1.702 s
-     [java] Matrix&lt;Measure&gt; 500x500 multiplication: 33.91 s
+     [java] Matrix<Float64> and Matrix<Complex> versus non-parameterized matrix (double)
+<FONT COLOR="999999">     [java] Non-parameterized matrix (double based) 500x500 multiplication: 636.2 ms</FONT>
+     [java] Matrix<Float64> 500x500 multiplication: 230.9 ms
+     [java] Matrix<Complex> 500x500 multiplication: 844.3 ms
+     [java] Matrix<Amount> 500x500 multiplication: 29.02 s
 
      [java] More performance analysis in future versions...
 

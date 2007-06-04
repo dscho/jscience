@@ -11,7 +11,7 @@ package org.jscience.geography.coordinates.crs;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.measure.units.NonSI;
+import javax.measure.unit.NonSI;
 
 import org.jscience.geography.coordinates.Coordinates;
 import org.opengis.metadata.Identifier;

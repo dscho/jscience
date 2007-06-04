@@ -8,11 +8,14 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.measure.converters.UnitConverter;
-import javax.measure.quantities.Length;
-import javax.measure.quantities.Quantity;
-import javax.measure.units.SI;
-import javax.measure.units.Unit;
+import javax.measure.quantity.Length;
+import javax.measure.Measurable;
+import static javax.measure.unit.SI.METER;
+import javax.measure.unit.Unit;
+
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.geography.coordinates.crs.VerticalCRS;
 import org.opengis.referencing.cs.CoordinateSystem;
@@ -28,8 +31,8 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 26, 2006
  */
-public class Altitude extends Coordinates<VerticalCRS> implements
-        Quantity<Length> {
+public final class Altitude extends Coordinates<VerticalCRS> implements
+        Measurable<Length> {
 
     /**
      * Holds the coordinate reference system for all instances of this class. 
@@ -38,8 +41,8 @@ public class Altitude extends Coordinates<VerticalCRS> implements
 
         @Override
         protected Altitude coordinatesOf(AbsolutePosition position) {
-            return Altitude.valueOf(position.heightWGS84.doubleValue(SI.METER),
-                    SI.METER);
+            return Altitude.valueOf(position.heightWGS84.doubleValue(METER),
+                    METER);
         }
 
         @Override
@@ -56,9 +59,9 @@ public class Altitude extends Coordinates<VerticalCRS> implements
     };
 
     /**
-     * Holds the altitude in meters. 
+     * Holds the altitude value in meters. 
      */
-    private double _altitudeInMeter;
+    private double _meters;
 
     /**
      * Returns the vertical position corresponding to the specified coordinates.
@@ -68,22 +71,20 @@ public class Altitude extends Coordinates<VerticalCRS> implements
      * @return the corresponding vertical position.
      */
     public static Altitude valueOf(double value, Unit<Length> unit) {
-        return new Altitude(value, unit);
+        Altitude altitude = FACTORY.object();
+        altitude._meters = (unit == METER) ? value : 
+            unit.getConverterTo(METER).convert(value);
+        return altitude;
     }
+    
+    private static final ObjectFactory<Altitude> FACTORY = new ObjectFactory<Altitude>() {
 
-    /**
-     * Creates a vertical position corresponding to the specified coordinates.
-     * 
-     * @param value the mean sea level altitude stated in the specified unit.
-     * @param unit the length unit in which the altitude is stated.
-     */
-    public Altitude(double value, Unit<Length> unit) {
-        if (unit == SI.METER) {
-            _altitudeInMeter = value;
-        } else {
-            UnitConverter toMeter = unit.getConverterTo(SI.METER);
-            _altitudeInMeter = toMeter.convert(value);
-        }
+        @Override
+        protected Altitude create() {
+            return new Altitude();
+        } };
+    
+    private Altitude() {
     }
 
     @Override
@@ -100,28 +101,54 @@ public class Altitude extends Coordinates<VerticalCRS> implements
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
             Unit u = VerticalCRS.HEIGHT_CS.getAxis(0).getUnit();
-            return SI.METER.getConverterTo(u).convert(_altitudeInMeter);
+            return METER.getConverterTo(u).convert(_meters);
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
 
-    // Implements Quantity<Length>
+    // Implements Measurable<Length>
     public final double doubleValue(Unit<Length> unit) {
-        return unit.equals(SI.METER) ? _altitudeInMeter : SI.METER
-                .getConverterTo(unit).convert(_altitudeInMeter);
+        return (unit == METER) ? _meters : 
+            METER.getConverterTo(unit).convert(_meters);
     }
 
-    // Implements Quantity<Length>
+    // Implements Measurable<Length>
     public final long longValue(Unit<Length> unit) {
         return Math.round(doubleValue(unit));
     }
 
-    // Implements Quantity<Length>
-    public int compareTo(Quantity<Length> arg0) {
-        double arg0InMeter = arg0.doubleValue(SI.METER);
-        return (_altitudeInMeter > arg0InMeter) ? 1
-                : (_altitudeInMeter < arg0InMeter) ? -1 : 0;
+    // Implements Measurable<Length>
+    public int compareTo(Measurable<Length> measure) {
+        double meters = measure.doubleValue(METER);
+        return (_meters  > meters) ? 1
+                : (_meters < meters) ? -1 : 0;
     }
+
+    @Override
+    public Altitude copy() {
+        return Altitude.valueOf(_meters, METER);
+    }
+         
+    // Default serialization.
+    //
+    
+    static final XMLFormat<Altitude> XML = new XMLFormat<Altitude>(Altitude.class) {
+        
+        @Override
+        public Altitude newInstance(Class<Altitude> cls, InputElement xml) throws XMLStreamException {
+            return FACTORY.object();
+        }
+        
+        public void write(Altitude altitude, OutputElement xml) throws XMLStreamException {
+             xml.setAttribute("meters", altitude._meters);
+         }
+
+         public void read(InputElement xml, Altitude altitude) throws XMLStreamException {
+             altitude._meters = xml.getAttribute("meters", 0.0);
+         }
+     };
+
+     private static final long serialVersionUID = 1L;
 
 }

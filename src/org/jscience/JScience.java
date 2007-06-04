@@ -12,8 +12,8 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Random;
 
-import javax.measure.quantities.*;
-import javax.measure.units.*;
+import javax.measure.quantity.*;
+import javax.measure.unit.*;
 
 import org.jscience.economics.money.Currency;
 import org.jscience.economics.money.Money;
@@ -24,30 +24,30 @@ import org.jscience.geography.coordinates.Time;
 import org.jscience.geography.coordinates.UTM;
 import org.jscience.geography.coordinates.XYZ;
 import org.jscience.geography.coordinates.crs.CoordinatesConverter;
-import org.jscience.mathematics.functions.Polynomial;
-import org.jscience.mathematics.functions.Variable;
-import org.jscience.mathematics.numbers.Complex;
-import org.jscience.mathematics.numbers.Float64;
-import org.jscience.mathematics.numbers.LargeInteger;
-import org.jscience.mathematics.numbers.ModuloInteger;
-import org.jscience.mathematics.numbers.Rational;
-import org.jscience.mathematics.numbers.Real;
-import org.jscience.mathematics.vectors.ComplexMatrix;
-import org.jscience.mathematics.vectors.DenseMatrix;
-import org.jscience.mathematics.vectors.DenseVector;
-import org.jscience.mathematics.vectors.Float64Matrix;
-import org.jscience.mathematics.vectors.Matrix;
-import org.jscience.mathematics.vectors.Vector;
-import org.jscience.physics.measures.Measure;
-import org.jscience.physics.measures.MeasureFormat;
-import org.jscience.physics.models.RelativisticModel;
+import org.jscience.mathematics.function.Polynomial;
+import org.jscience.mathematics.function.Variable;
+import org.jscience.mathematics.number.Complex;
+import org.jscience.mathematics.number.Float64;
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.ModuloInteger;
+import org.jscience.mathematics.number.Rational;
+import org.jscience.mathematics.number.Real;
+import org.jscience.mathematics.vector.ComplexMatrix;
+import org.jscience.mathematics.vector.DenseMatrix;
+import org.jscience.mathematics.vector.DenseVector;
+import org.jscience.mathematics.vector.Float64Matrix;
+import org.jscience.mathematics.vector.Matrix;
+import org.jscience.mathematics.vector.Vector;
+import org.jscience.physics.amount.Amount;
+import org.jscience.physics.amount.AmountFormat;
+import org.jscience.physics.model.RelativisticModel;
 
 import javolution.lang.MathLib;
 import javolution.text.TextBuilder;
 import javolution.context.LocalContext;
-import javolution.context.PoolContext;
-import static javax.measure.units.NonSI.*;
-import static javax.measure.units.SI.*;
+import javolution.context.StackContext;
+import static javax.measure.unit.NonSI.*;
+import static javax.measure.unit.SI.*;
 import static org.jscience.economics.money.Currency.*;
 
 /**
@@ -87,8 +87,6 @@ public final class JScience {
      * @throws Exception if a problem occurs.
      */
     public static void main(String[] args) throws Exception {
-        System.out.println("JScience - Java(TM) Tools and Libraries for"
-                + " the Advancement of Sciences");
         System.out.println("Version " + VERSION + " (http://jscience.org)");
         System.out.println("");
         if (args.length > 0) {
@@ -121,9 +119,9 @@ public final class JScience {
         {
             System.out.println("");
             System.out.println("Exact Measurements");
-            Measure<Mass> m0 = Measure.valueOf(100, POUND);
-            Measure<Mass> m1 = m0.times(33).divide(2);
-            Measure<ElectricCurrent> m2 = Measure.valueOf("234 mA").to(
+            Amount<Mass> m0 = Amount.valueOf(100, POUND);
+            Amount<Mass> m1 = m0.times(33).divide(2);
+            Amount<ElectricCurrent> m2 = Amount.valueOf("234 mA").to(
                     MICRO(AMPERE));
             System.out.println("m0 = " + m0);
             System.out.println("m1 = " + m1);
@@ -131,10 +129,10 @@ public final class JScience {
 
             System.out.println("");
             System.out.println("Inexact Measurements");
-            Measure<Mass> m3 = Measure.valueOf(100.0, POUND);
-            Measure<Mass> m4 = m0.divide(3);
-            Measure<ElectricCurrent> m5 = Measure.valueOf("234 mA").to(AMPERE);
-            Measure<Temperature> t0 = Measure.valueOf(-7.3, 0.5, CELSIUS);
+            Amount<Mass> m3 = Amount.valueOf(100.0, POUND);
+            Amount<Mass> m4 = m0.divide(3);
+            Amount<ElectricCurrent> m5 = Amount.valueOf("234 mA").to(AMPERE);
+            Amount<Temperature> t0 = Amount.valueOf(-7.3, 0.5, CELSIUS);
             System.out.println("m3 = " + m3);
             System.out.println("m4 = " + m4);
             System.out.println("m5 = " + m5);
@@ -142,17 +140,17 @@ public final class JScience {
 
             System.out.println("");
             System.out.println("Interval measurements");
-            Measure<Volume> m6 = Measure.valueOf(20, 0.1, LITER);
-            Measure<Frequency> m7 = Measure.rangeOf(10, 11, KILO(HERTZ));
+            Amount<Volume> m6 = Amount.valueOf(20, 0.1, LITER);
+            Amount<Frequency> m7 = Amount.rangeOf(10, 11, KILO(HERTZ));
             System.out.println("m6 = " + m6);
             System.out.println("m7 = " + m7);
 
             System.out.println("");
-            System.out.println("Measure.equals (identical) / Measure.approximates " +
+            System.out.println("Amount.equals (identical) / Amount.approximates " +
                     "(takes into account errors such as numeric errors)");
-            Measure<Frequency> m8 = Measure.valueOf(9000, HERTZ);
-            Measure<Frequency> m10 = m8.divide(3).times(3); // Still exact.
-            Measure<Frequency> m11 = m8.divide(7).times(7); // No more exact.
+            Amount<Frequency> m8 = Amount.valueOf(9000, HERTZ);
+            Amount<Frequency> m10 = m8.divide(3).times(3); // Still exact.
+            Amount<Frequency> m11 = m8.divide(7).times(7); // No more exact.
             System.out.println("m8 = " + m8);
             System.out.println("m10 = " + m10);
             System.out.println("m11 = " + m11);
@@ -162,23 +160,23 @@ public final class JScience {
             System.out.println("(m11 ≅ m8) = " + m11.approximates(m8));
 
             System.out.println("");
-            System.out.println("MeasureFormat - Plus/Minus Error (3 digits error)");
-            MeasureFormat.setInstance(MeasureFormat
+            System.out.println("AmountFormat - Plus/Minus Error (3 digits error)");
+            AmountFormat.setInstance(AmountFormat
                     .getPlusMinusErrorInstance(3));
             System.out.println("m3 = " + m3);
             System.out.println("m4 = " + m4);
             System.out.println("m5 = " + m5);
 
             System.out.println("");
-            System.out.println("MeasureFormat - Bracket Error (2 digits error)");
-            MeasureFormat.setInstance(MeasureFormat.getBracketErrorInstance(2));
+            System.out.println("AmountFormat - Bracket Error (2 digits error)");
+            AmountFormat.setInstance(AmountFormat.getBracketErrorInstance(2));
             System.out.println("m3 = " + m3);
             System.out.println("m4 = " + m4);
             System.out.println("m5 = " + m5);
 
             System.out.println("");
-            System.out.println("MeasureFormat - Exact Digits Only");
-            MeasureFormat.setInstance(MeasureFormat.getExactDigitsInstance());
+            System.out.println("AmountFormat - Exact Digits Only");
+            AmountFormat.setInstance(AmountFormat.getExactDigitsInstance());
             System.out.println("m3 = " + m3);
             System.out.println("m4 = " + m4);
             System.out.println("m5 = " + m5);
@@ -186,19 +184,19 @@ public final class JScience {
             System.out.println("");
             System.out.println("Numeric Errors");
             {
-                Measure<Length> x = Measure.valueOf(1.0, METER);
-                Measure<Velocity> v = Measure.valueOf(0.01, METER_PER_SECOND);
-                Measure<Duration> t = Measure.valueOf(1.0, MICRO(SECOND));
+                Amount<Length> x = Amount.valueOf(1.0, METER);
+                Amount<Velocity> v = Amount.valueOf(0.01, METER_PER_SECOND);
+                Amount<Duration> t = Amount.valueOf(1.0, MICRO(SECOND));
                 long ns = System.nanoTime();
                 for (int i = 0; i < 10000000; i++) {
                     x = x.plus(v.times(t));
                 }
                 ns = System.nanoTime() - ns;
-                MeasureFormat.setInstance(MeasureFormat
+                AmountFormat.setInstance(AmountFormat
                         .getExactDigitsInstance());
                 System.out.println(x
                         + " ("
-                        + Measure.valueOf(ns, 0.5, NANO(SECOND)).to(
+                        + Amount.valueOf(ns, 0.5, NANO(SECOND)).to(
                                 MILLI(SECOND)) + ")");
             }
             {
@@ -210,7 +208,7 @@ public final class JScience {
                 }
                 System.out.println(x);
             }
-            MeasureFormat.setInstance(MeasureFormat
+            AmountFormat.setInstance(AmountFormat
                     .getPlusMinusErrorInstance(2));
         }
         {
@@ -220,12 +218,12 @@ public final class JScience {
             RelativisticModel.select(); 
 
             // Length and Duration can be added.
-            Measure<Length> x = Measure.valueOf(100, NonSI.INCH);
-            x = x.plus(Measure.valueOf("2.3 µs")).to(METER); 
+            Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
+            x = x.plus(Amount.valueOf("2.3 µs")).to(METER); 
             System.out.println(x); 
                
             // Energy is compatible with mass (E=mc2)
-            Measure<Mass> m = Measure.valueOf("12 GeV").to(KILOGRAM); 
+            Amount<Mass> m = Amount.valueOf("12 GeV").to(KILOGRAM); 
             System.out.println(m); 
         }
 
@@ -245,11 +243,11 @@ public final class JScience {
             EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
 
             // Calculates trip cost.
-            Measure<?> carMileage = Measure.valueOf(20, MILE
+            Amount<?> carMileage = Amount.valueOf(20, MILE
                     .divide(GALLON_LIQUID_US)); // 20 mi/gal.
-            Measure<?> gazPrice = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-            Measure<Length> tripDistance = Measure.valueOf(400, KILO(SI.METER)); // 400 km
-            Measure<Money> tripCost = tripDistance.divide(carMileage).times(
+            Amount<?> gazPrice = Amount.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+            Amount<Length> tripDistance = Amount.valueOf(400, KILO(SI.METER)); // 400 km
+            Amount<Money> tripCost = tripDistance.divide(carMileage).times(
                     gazPrice).to(USD);
             // Displays cost.
             System.out.println("Trip cost = " + tripCost + " ("
@@ -259,9 +257,9 @@ public final class JScience {
             System.out.println("");
             System.out.println("Matrices/Vectors");
 
-            Measure<ElectricResistance> R1 = Measure.valueOf(100, 1, OHM); // 1% precision. 
-            Measure<ElectricResistance> R2 = Measure.valueOf(300, 3, OHM); // 1% precision.
-            Measure<ElectricPotential> U0 = Measure.valueOf(28, 0.01, VOLT); // ±0.01 V fluctuation.
+            Amount<ElectricResistance> R1 = Amount.valueOf(100, 1, OHM); // 1% precision. 
+            Amount<ElectricResistance> R2 = Amount.valueOf(300, 3, OHM); // 1% precision.
+            Amount<ElectricPotential> U0 = Amount.valueOf(28, 0.01, VOLT); // ±0.01 V fluctuation.
 
             // Equations:  U0 = U1 + U2       |1  1  0 |   |U1|   |U0|
             //             U1 = R1 * I    =>  |-1 0  R1| * |U2| = |0 |
@@ -269,13 +267,13 @@ public final class JScience {
             //
             //                                    A      *  X   =  B
             //
-            DenseMatrix<Measure<?>> A = DenseMatrix.valueOf(new Measure<?>[][] {
-                    { Measure.ONE, Measure.ONE, Measure.valueOf(0, OHM) },
-                    { Measure.ONE.opposite(), Measure.ZERO, R1 },
-                    { Measure.ZERO, Measure.ONE.opposite(), R2 } });
-            DenseVector<Measure<?>> B = DenseVector.valueOf(new Measure<?>[] { U0, Measure.valueOf(0,
-                    VOLT), Measure.valueOf(0, VOLT)});
-            Vector<Measure<?>> X = A.solve(B);
+            DenseMatrix<Amount<?>> A = DenseMatrix.valueOf(new Amount<?>[][] {
+                    { Amount.ONE, Amount.ONE, Amount.valueOf(0, OHM) },
+                    { Amount.ONE.opposite(), Amount.ZERO, R1 },
+                    { Amount.ZERO, Amount.ONE.opposite(), R2 } });
+            DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] { U0, Amount.valueOf(0,
+                    VOLT), Amount.valueOf(0, VOLT)});
+            Vector<Amount<?>> X = A.solve(B);
             System.out.println(X);
             System.out.println(X.get(2).to(MILLI(AMPERE)));
         }
@@ -313,28 +311,24 @@ public final class JScience {
             UTM utm = latLongToUTM.convert(latLong);
             System.out.println(utm);
 
-            // Converts any projected coordinates to Latitude/Longitude.
-            //Coordinates<ProjectedCRS> coord2d = utm;
-            //ProjectedCRS<Coordinates> crs = coord2d.getCoordinateReferenceSystem();
-            //CoordinatesConverter<Coordinates, LatLong> cvtr = crs.getConverterTo(LatLong.CRS);
-            //latLong = cvtr.convert(coord2d);
-            //System.out.println(latLong);
+            // Lat/Long to XYZ conversion (assume height of zero).
+            CoordinatesConverter<LatLong, XYZ> latLongToXYZ = LatLong.CRS
+                    .getConverterTo(XYZ.CRS);
+            XYZ xyz = latLongToXYZ.convert(latLong);
+            System.out.println(xyz);
 
-            // Compound coordinates.
+            // Compound coordinates - Lat/Long/Alt to XYZ conversion.
             Altitude alt = Altitude.valueOf(2000, FOOT);
-            CompoundCoordinates<LatLong, Altitude> latLongAlt = new CompoundCoordinates<LatLong, Altitude>(
-                    latLong, alt);
-            System.out.println(latLongAlt);
-
-            // Converts compound coordinates (3-D) to XYZ (GPS).
-            XYZ xyz = latLongAlt.getCoordinateReferenceSystem().getConverterTo(
+            CompoundCoordinates<LatLong, Altitude> latLongAlt = 
+                CompoundCoordinates.valueOf(latLong, alt);
+            xyz = latLongAlt.getCoordinateReferenceSystem().getConverterTo(
                     XYZ.CRS).convert(latLongAlt);
             System.out.println(xyz);
 
             // Even more compounding...
             Time time = Time.valueOf(new Date());
-            CompoundCoordinates<CompoundCoordinates, Time> latLongAltTime = new CompoundCoordinates<CompoundCoordinates, Time>(
-                    latLongAlt, time);
+            CompoundCoordinates<CompoundCoordinates<LatLong, Altitude>, Time> 
+                latLongAltTime = CompoundCoordinates.valueOf(latLongAlt, time);
             System.out.println(latLongAltTime);
         }
 
@@ -342,7 +336,11 @@ public final class JScience {
             System.out.println("");
             System.out.println("Numbers");
 
-            Real two = Real.valueOf(2); // 2.0000..00 (100 zeros after decimal point).
+            Real two = Real.valueOf(2); // 2.0000..00 
+            Real three = Real.valueOf(3);
+            Real.setExactPrecision(100); // Assumes 100 exact digits for exact numbers.
+
+            System.out.println("2/3       = " + two.divide(three));
             Real sqrt2 = two.sqrt();
             System.out.println("sqrt(2)   = " + sqrt2);
             System.out.println("Precision = " + sqrt2.getPrecision()
@@ -385,121 +383,121 @@ public final class JScience {
 
         System.out.print("Float64 add: ");
         startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
             Float64 x = Float64.ONE;
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.plus(x);
             }
-            PoolContext.exit();
+            StackContext.exit();
         }
-        endTime(1000 * results.length);
-
-        System.out.print("Complex add: ");
-        startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
-            Complex x = Complex.valueOf(1.0, 2.0);
-            for (int j = 0; j < results.length; j++) {
-                results[j] = x.plus(x);
-            }
-            PoolContext.exit();
-        }
-        endTime(1000 * results.length);
-
-        System.out.print("Measure (mass) add: ");
-        startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
-            Measure<Mass> x = Measure.valueOf(1.0, SI.KILOGRAM);
-            for (int j = 0; j < results.length; j++) {
-                results[j] = x.plus(x);
-            }
-            PoolContext.exit();
-        }
-        endTime(1000 * results.length);
+        endTime(10000 * results.length);
 
         System.out.print("Float64 multiply: ");
         startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
             Float64 x = Float64.valueOf(1.0);
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.times(x);
             }
-            PoolContext.exit();
+            StackContext.exit();
         }
-        endTime(1000 * results.length);
+        endTime(10000 * results.length);
+
+        System.out.print("Complex add: ");
+        startTime();
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
+            Complex x = Complex.valueOf(1.0, 2.0);
+            for (int j = 0; j < results.length; j++) {
+                results[j] = x.plus(x);
+            }
+            StackContext.exit();
+        }
+        endTime(10000 * results.length);
 
         System.out.print("Complex multiply: ");
         startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
             Complex x = Complex.valueOf(1.0, 2.0);
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.times(x);
             }
-            PoolContext.exit();
+            StackContext.exit();
         }
-        endTime(1000 * results.length);
+        endTime(10000 * results.length);
 
-        System.out.print("Measure (mass) multiply: ");
+        System.out.print("Amount (mass) add: ");
         startTime();
-        for (int i = 0; i < 1000; i++) {
-            PoolContext.enter();
-            Measure<Mass> x = Measure.valueOf(1.0, SI.KILOGRAM);
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
+            Amount<Mass> x = Amount.valueOf(1.0, SI.KILOGRAM);
+            for (int j = 0; j < results.length; j++) {
+                results[j] = x.plus(x);
+            }
+            StackContext.exit();
+        }
+        endTime(10000 * results.length);
+
+        System.out.print("Amount (mass) multiply: ");
+        startTime();
+        for (int i = 0; i < 10000; i++) {
+            StackContext.enter();
+            Amount<Mass> x = Amount.valueOf(1.0, SI.KILOGRAM);
             for (int j = 0; j < results.length; j++) {
                 results[j] = x.times(x);
             }
-            PoolContext.exit();
+            StackContext.exit();
         }
-        endTime(1000 * results.length);
+        endTime(10000 * results.length);
 
         System.out.println();
-        System.out.println("LargeInteger (PoolContext) versus BigInteger");
+        System.out.println("LargeInteger (StackContext) versus BigInteger");
         BigInteger big = BigInteger.probablePrime(1024, new Random());
         byte[] bytes = big.toByteArray();
         LargeInteger large = LargeInteger.valueOf(bytes, 0, bytes.length);
 
         System.out.print("LargeInteger (1024 bits) addition: ");
         startTime();
-        for (int i = 0; i < 100; i++) {
-            PoolContext.enter();
+        for (int i = 0; i < 1000; i++) {
+            StackContext.enter();
             for (int j = 0; j < results.length; j++) {
                 results[j] = large.plus(large);
             }
-            PoolContext.exit();
+            StackContext.exit();
+        }
+        endTime(1000 * results.length);
+
+        System.out.print("LargeInteger (1024 bits) multiplication: ");
+        startTime();
+        for (int i = 0; i < 100; i++) {
+            StackContext.enter();
+            for (int j = 0; j < results.length; j++) {
+                results[j] = large.times(large);
+            }
+            StackContext.exit();
         }
         endTime(100 * results.length);
 
         System.out.print("BigInteger (1024 bits) addition: ");
         startTime();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             for (int j = 0; j < results.length; j++) {
                 results[j] = big.add(big);
             }
         }
-        endTime(100 * results.length);
-
-        System.out.print("LargeInteger (1024 bits) multiplication: ");
-        startTime();
-        for (int i = 0; i < 10; i++) {
-            PoolContext.enter();
-            for (int j = 0; j < results.length; j++) {
-                results[j] = large.times(large);
-            }
-            PoolContext.exit();
-        }
-        endTime(10 * results.length);
+        endTime(1000 * results.length);
 
         System.out.print("BigInteger (1024 bits) multiplication: ");
         startTime();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             for (int j = 0; j < results.length; j++) {
                 results[j] = big.multiply(big);
             }
         }
-        endTime(10 * results.length);
+        endTime(100 * results.length);
 
         System.out.println();
         System.out.println("Matrix<Float64> and Matrix<Complex> versus "
@@ -547,15 +545,15 @@ public final class JScience {
         CM.times(CM);
         endTime(1);
 
-        System.out.print("Matrix<Measure> 500x500 multiplication: ");
-        Measure<?>[][] measures = new Measure<?>[size][size];
+        System.out.print("Matrix<Amount> 500x500 multiplication: ");
+        Amount<?>[][] measures = new Amount<?>[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                measures[i][j] = Measure.valueOf(
+                measures[i][j] = Amount.valueOf(
                         MathLib.random(Long.MIN_VALUE, Long.MAX_VALUE), Unit.ONE);
             }
         }
-        DenseMatrix<Measure<?>> MM = DenseMatrix.valueOf(measures);
+        DenseMatrix<Amount<?>> MM = DenseMatrix.valueOf(measures);
         startTime();
         MM.times(MM);
         endTime(1);

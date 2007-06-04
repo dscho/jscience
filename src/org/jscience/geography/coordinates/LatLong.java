@@ -8,11 +8,16 @@
  */
 package org.jscience.geography.coordinates;
 
-import javax.measure.converters.UnitConverter;
-import javax.measure.quantities.Angle;
-import javax.measure.quantities.Scalar;
-import javax.measure.units.SI;
-import javax.measure.units.Unit;
+import javax.measure.Measure;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.Angle;
+import static javax.measure.unit.NonSI.DEGREE_ANGLE;
+import static javax.measure.unit.SI.RADIAN;
+import javax.measure.unit.Unit;
+
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.geography.coordinates.crs.GeographicCRS;
 import org.opengis.referencing.cs.CoordinateSystem;
@@ -24,7 +29,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public class LatLong extends Coordinates<GeographicCRS> {
+public final class LatLong extends Coordinates<GeographicCRS> {
 
     /**
      * Holds the coordinate reference system for all instances of this class. 
@@ -33,14 +38,17 @@ public class LatLong extends Coordinates<GeographicCRS> {
 
         @Override
         protected LatLong coordinatesOf(AbsolutePosition position) {
-            return LatLong.valueOf(position.latitudeWGS84.doubleValue(SI.RADIAN),
-                    position.longitudeWGS84.doubleValue(SI.RADIAN), SI.RADIAN);
+            return LatLong.valueOf(position.latitudeWGS84.doubleValue(RADIAN),
+                    position.longitudeWGS84.doubleValue(RADIAN), RADIAN);
         }
 
         @Override
-        protected AbsolutePosition positionOf(LatLong coordinates, AbsolutePosition position) {
-            position.latitudeWGS84 = new Scalar<Angle>(coordinates._latitudeInRadian, SI.RADIAN);
-            position.longitudeWGS84 = new Scalar<Angle>(coordinates._longitudeInRadian, SI.RADIAN); 
+        protected AbsolutePosition positionOf(LatLong coordinates,
+                AbsolutePosition position) {
+            position.latitudeWGS84 = Measure.valueOf(coordinates._latitude,
+                    RADIAN);
+            position.longitudeWGS84 = Measure.valueOf(coordinates._longitude,
+                    RADIAN);
             return position;
         }
 
@@ -50,46 +58,64 @@ public class LatLong extends Coordinates<GeographicCRS> {
         }
 
     };
-    
-    /**
-     * Holds the latitude in radians. 
-     */
-    private double _latitudeInRadian;
 
     /**
-     * Holds the longitude in radians. 
+     * Holds converter from degree to radian. 
      */
-    private double _longitudeInRadian;
+    private static final UnitConverter DEGREE_TO_RADIAN = DEGREE_ANGLE
+            .getConverterTo(RADIAN);
+
+    /**
+     * Holds converter from radian to degree. 
+     */
+    private static final UnitConverter RADIAN_TO_DEGREE = DEGREE_TO_RADIAN
+            .inverse();
+
+    /**
+     * Holds the latitude in degrees. 
+     */
+    private double _latitude;
+
+    /**
+     * Holds the longitude in degrees. 
+     */
+    private double _longitude;
 
     /**
      * Returns the surface position corresponding to the specified coordinates.
      * 
      * @param latitude the latitude value stated in the specified unit.
      * @param longitude the longitude value stated in the specified unit.
-     * @param unit the angle unit in which the coordinates are stated.
+     * @param unit the angle unit in which the coordinates are stated
+     *        ({@link javax.measure.unit.NonSI#DEGREE_ANGLE Degree} typically).
      * @return the corresponding surface position.
      */
     public static LatLong valueOf(double latitude, double longitude,
             Unit<Angle> unit) {
-        return new LatLong(latitude, longitude, unit);
+        LatLong latLong = FACTORY.object();
+        if (unit == DEGREE_ANGLE) {
+            latLong._latitude = latitude;
+            latLong._longitude = longitude;
+        } else if (unit == RADIAN) {
+            latLong._latitude = RADIAN_TO_DEGREE.convert(latitude);
+            latLong._longitude = RADIAN_TO_DEGREE.convert(longitude);
+        } else { // Other angle unit.
+            UnitConverter toDegree = unit.getConverterTo(DEGREE_ANGLE);
+            latLong._latitude = toDegree.convert(latitude);
+            latLong._longitude = toDegree.convert(longitude);
+        }
+        return latLong;
     }
 
-    /**
-     * Creates the surface position corresponding to the specified coordinates.
-     * 
-     * @param latitude the latitude value stated in the specified unit.
-     * @param longitude the longitude value stated in the specified unit.
-     * @param unit the angle unit in which the coordinates are stated.
-     */
-    public LatLong(double latitude, double longitude, Unit<Angle> unit) {
-        if (unit == SI.RADIAN) {
-            _latitudeInRadian = latitude;
-            _longitudeInRadian = longitude;
-        } else {
-            UnitConverter toRadian = unit.getConverterTo(SI.RADIAN);
-            _latitudeInRadian = toRadian.convert(latitude);
-            _longitudeInRadian = toRadian.convert(longitude);
+    private static final ObjectFactory<LatLong> FACTORY = new ObjectFactory<LatLong>() {
+
+        @Override
+        protected LatLong create() {
+            return new LatLong();
         }
+    };
+
+    private LatLong() {
     }
 
     /**
@@ -99,8 +125,9 @@ public class LatLong extends Coordinates<GeographicCRS> {
      * @return the latitude stated in the specified unit.
      */
     public final double latitudeValue(Unit<Angle> unit) {
-        return unit.equals(SI.RADIAN) ? _latitudeInRadian : SI.RADIAN
-                .getConverterTo(unit).convert(_latitudeInRadian);
+        return (unit == DEGREE_ANGLE) ? _latitude
+                : (unit == RADIAN) ? DEGREE_TO_RADIAN.convert(_latitude)
+                        : DEGREE_ANGLE.getConverterTo(unit).convert(_latitude);
     }
 
     /**
@@ -110,10 +137,11 @@ public class LatLong extends Coordinates<GeographicCRS> {
      * @return the longitude stated in the specified unit.
      */
     public final double longitudeValue(Unit<Angle> unit) {
-        return unit.equals(SI.RADIAN) ? _longitudeInRadian : SI.RADIAN
-                .getConverterTo(unit).convert(_longitudeInRadian);
+        return (unit == DEGREE_ANGLE) ? _longitude
+                : (unit == RADIAN) ? DEGREE_TO_RADIAN.convert(_longitude)
+                        : DEGREE_ANGLE.getConverterTo(unit).convert(_longitude);
     }
-    
+
     @Override
     public GeographicCRS<LatLong> getCoordinateReferenceSystem() {
         return CRS;
@@ -128,13 +156,43 @@ public class LatLong extends Coordinates<GeographicCRS> {
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
             Unit u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(0).getUnit();
-            return SI.RADIAN.getConverterTo(u).convert(_latitudeInRadian);
+            return DEGREE_ANGLE.getConverterTo(u).convert(_latitude);
         } else if (dimension == 1) {
             Unit u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(1).getUnit();
-            return SI.RADIAN.getConverterTo(u).convert(_longitudeInRadian);
+            return DEGREE_ANGLE.getConverterTo(u).convert(_longitude);
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
 
+    // Implements Realtime.
+    public LatLong copy() {
+        return LatLong.valueOf(_latitude, _longitude, DEGREE_ANGLE);
+    }
+
+    // Default serialization.
+    //
+
+    static final XMLFormat<LatLong> XML = new XMLFormat<LatLong>(LatLong.class) {
+
+        @Override
+        public LatLong newInstance(Class<LatLong> cls, InputElement xml)
+                throws XMLStreamException {
+            return FACTORY.object();
+        }
+
+        public void write(LatLong latLong, OutputElement xml)
+                throws XMLStreamException {
+            xml.setAttribute("latitude", latLong._latitude);
+            xml.setAttribute("longitude", latLong._longitude);
+        }
+
+        public void read(InputElement xml, LatLong latLong)
+                throws XMLStreamException {
+            latLong._latitude = xml.getAttribute("latitude", 0.0);
+            latLong._longitude = xml.getAttribute("longitude", 0.0);
+        }
+    };
+
+    private static final long serialVersionUID = 1L;
 }

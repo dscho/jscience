@@ -24,10 +24,10 @@
         EUR.setExchangeRate(1.17); // 1.0 € = 1.17 $
 
         // Calculates trip cost.
-        Measure<?> carMileage        = Measure.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
-        Measure<?> gazPrice          = Measure.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-        Measure<Length> tripDistance = Measure.valueOf(400, KILO(METER)); // 400 km
-        Measure<Money>  tripCost     = tripDistance.divide(carMileage).times(gazPrice).to(USD);
+        Amount<?> carMileage        = Amount.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
+        Amount<?> gazPrice          = Amount.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
+        Amount<Length> tripDistance = Amount.valueOf(400, KILO(METER)); // 400 km
+        Amount<Money>  tripCost     = tripDistance.divide(carMileage).times(gazPrice).to(USD);
 
         // Displays cost.
         System.out.println("Trip cost = " + tripCost + " (" + tripCost.to(EUR) + ")");
@@ -42,7 +42,7 @@
         LocalContext.enter(); 
         try {
             EUR.setExchangeRate(1.22);  // Buying rate.
-            Measure<Money> price = Measure.valueOf(9.99, EUR);
+            Amount<Money> price = Amount.valueOf(9.99, EUR);
             System.out.println("Price: " + price.to(USD);
         } finally {
             LocalContext.exit();
@@ -51,17 +51,18 @@
         LocalContext.enter(); 
         try {
             EUR.setExchangeRate(1.18);  // Selling rate.
-            Measure<Money> price = Measure.valueOf(14.99, USD);
+            Amount<Money> price = Amount.valueOf(14.99, USD);
             System.out.println("Price: " + price.to(EUR);
         } finally {
             LocalContext.exit();
         }[/code]</p>
         
-<p> Like any {@link org.jscience.physics.measures.Measure measure}, 
-    money quantities can be exact or approximate (with an error known and guaranteed).
+<p> Like any {@link org.jscience.physics.amount.Amount amount}, 
+    money quantities can be exact or approximate (with an error known 
+    and guaranteed).
     [code]
          Unit<Money> CENTS = Currency.USD.times(100);
-         Measure<Money> exactPrice = Measure.valueOf(1499, CENTS); // Integer value.
-         Measure<Money> apprxPrice = Measure.valueOf(14.99, USD);  // Floating-Point IEEE 754 accuracy.
+         Amount<Money> exactPrice = Amount.valueOf(1499, CENTS); // Integer value.
+         Amount<Money> apprxPrice = Amount.valueOf(14.99, USD);  // Floating-Point IEEE 754 accuracy.
     [/code]</p>         
 </body>

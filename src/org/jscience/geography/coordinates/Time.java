@@ -10,11 +10,15 @@ package org.jscience.geography.coordinates;
 
 import java.util.Date;
 
-import javax.measure.converters.UnitConverter;
-import javax.measure.quantities.Duration;
-import javax.measure.quantities.Quantity;
-import javax.measure.units.SI;
-import javax.measure.units.Unit;
+import javax.measure.Measurable;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.Duration;
+import static javax.measure.unit.SI.*;
+import javax.measure.unit.Unit;
+
+import javolution.context.ObjectFactory;
+import javolution.xml.XMLFormat;
+import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.geography.coordinates.crs.TemporalCRS;
 import org.opengis.referencing.cs.CoordinateSystem;
@@ -25,7 +29,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 6, 2006
  */
-public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration> {
+public final class Time extends Coordinates<TemporalCRS> implements Measurable<Duration> {
 
     /**
      * Holds the coordinate reference system for all instances of this class. 
@@ -36,8 +40,8 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
         protected Time coordinatesOf(AbsolutePosition position) {
             if (position.timeUTC instanceof Time)
                 return (Time) position.timeUTC;
-            return Time.valueOf(position.timeUTC.doubleValue(SI.SECOND),
-                    SI.SECOND);
+            return Time.valueOf(position.timeUTC.doubleValue(SECOND),
+                    SECOND);
         }
 
         @Override
@@ -56,7 +60,7 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
     /**
      * Holds the time in second since midnight, January 1, 1970 UTC. 
      */
-    private double _timeInSecond;
+    private double _seconds;
 
     /**
      * Returns the temporal position corresponding to the specified coordinates.
@@ -67,9 +71,28 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
      * @return the corresponding temporal position.
      */
     public static Time valueOf(double value, Unit<Duration> unit) {
-        return new Time(value, unit);
+        Time time = FACTORY.object();
+        if (unit == SECOND) {
+            time._seconds = value;
+        } else {
+            UnitConverter toSecond = unit.getConverterTo(SECOND);
+            time._seconds = toSecond.convert(value);
+        }
+        return time;
     }
 
+    private static final ObjectFactory<Time> FACTORY = new ObjectFactory<Time>() {
+
+        @Override
+        protected Time create() {
+            return new Time();
+        }
+    };
+   
+    private Time() {    
+    }
+   
+        
     /**
      * Returns the temporal position corresponding to the specified date.
      * 
@@ -77,7 +100,7 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
      * @return the corresponding temporal position.
      */
     public static Time valueOf(Date date) {
-        return new Time(date.getTime(), SI.MILLI(SI.SECOND));
+        return Time.valueOf(date.getTime(), MILLI(SECOND));
     }
 
     /**
@@ -88,12 +111,6 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
      * @param unit the duration unit in which the time value is stated.
      */
     public Time(double value, Unit<Duration> unit) {
-        if (unit == SI.SECOND) {
-            _timeInSecond = value;
-        } else {
-            UnitConverter toSecond = unit.getConverterTo(SI.SECOND);
-            _timeInSecond = toSecond.convert(value);
-        }
     }
 
     @Override
@@ -110,28 +127,54 @@ public class Time extends Coordinates<TemporalCRS> implements Quantity<Duration>
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
             Unit u = TemporalCRS.TIME_CS.getAxis(0).getUnit();
-            return SI.SECOND.getConverterTo(u).convert(_timeInSecond);
+            return SECOND.getConverterTo(u).convert(_seconds);
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
 
-    // Implements Quantity<Duration>
+    // Implements Measurable<Duration>
     public final double doubleValue(Unit<Duration> unit) {
-        return unit.equals(SI.SECOND) ? _timeInSecond : SI.SECOND
-                .getConverterTo(unit).convert(_timeInSecond);
+        return unit.equals(SECOND) ? _seconds : SECOND
+                .getConverterTo(unit).convert(_seconds);
     }
 
-    // Implements Quantity<Duration>
+    // Implements Measurable<Duration>
     public final long longValue(Unit<Duration> unit) {
         return Math.round(doubleValue(unit));
     }
 
-    // Implements Quantity<Duration>
-    public int compareTo(Quantity<Duration> arg0) {
-        double arg0InSecond = arg0.doubleValue(SI.SECOND);
-        return (_timeInSecond > arg0InSecond) ? 1
-                : (_timeInSecond < arg0InSecond) ? -1 : 0;
+    // Implements Measurable<Duration>
+    public int compareTo(Measurable<Duration> arg0) {
+        double arg0InSecond = arg0.doubleValue(SECOND);
+        return (_seconds > arg0InSecond) ? 1
+                : (_seconds < arg0InSecond) ? -1 : 0;
     }
+
+    // Implements Realtime.
+    public Time copy() {
+        return Time.valueOf(_seconds, SECOND);
+    }
+    
+    // Default serialization.
+    //
+    
+    static final XMLFormat<Time> XML = new XMLFormat<Time>(Time.class) {
+        
+        @Override
+        public Time newInstance(Class<Time> cls, InputElement xml) throws XMLStreamException {
+            return FACTORY.object();
+        }
+        
+        public void write(Time time, OutputElement xml) throws XMLStreamException {
+             xml.setAttribute("seconds", time._seconds);
+         }
+
+         public void read(InputElement xml, Time time) throws XMLStreamException {
+             time._seconds = xml.getAttribute("seconds", 0.0);
+         }
+     };
+
+    private static final long serialVersionUID = 1L;
 
 }

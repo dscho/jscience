@@ -75,7 +75,7 @@ public class CompoundCRS<C1 extends Coordinates, C2 extends Coordinates>
     protected CompoundCoordinates<C1, C2> coordinatesOf(AbsolutePosition position) {
         C1 c1 = _first.coordinatesOf(position);
         C2 c2 = _next.coordinatesOf(position);
-        return new CompoundCoordinates<C1, C2>(c1, c2);
+        return CompoundCoordinates.valueOf(c1, c2);
     }
 
     @Override
