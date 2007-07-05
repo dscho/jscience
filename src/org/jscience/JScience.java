@@ -42,6 +42,7 @@ import org.jscience.physics.amount.Amount;
 import org.jscience.physics.amount.AmountFormat;
 import org.jscience.physics.model.RelativisticModel;
 
+import javolution.lang.Configurable;
 import javolution.lang.MathLib;
 import javolution.text.TextBuilder;
 import javolution.context.LocalContext;
@@ -65,6 +66,9 @@ public final class JScience {
      */
     public final static String VERSION = "@VERSION@";
 
+    public static Configurable<Character> MODULO = new Configurable<Character>('w');
+
+    
     /**
      * Default constructor.
      */
@@ -268,11 +272,11 @@ public final class JScience {
             //                                    A      *  X   =  B
             //
             DenseMatrix<Amount<?>> A = DenseMatrix.valueOf(new Amount<?>[][] {
-                    { Amount.ONE, Amount.ONE, Amount.valueOf(0, OHM) },
-                    { Amount.ONE.opposite(), Amount.ZERO, R1 },
-                    { Amount.ZERO, Amount.ONE.opposite(), R2 } });
-            DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] { U0, Amount.valueOf(0,
-                    VOLT), Amount.valueOf(0, VOLT)});
+                { Amount.ONE,            Amount.ONE,            Amount.valueOf(0, OHM) },
+                { Amount.ONE.opposite(), Amount.ZERO,           R1 },
+                { Amount.ZERO,           Amount.ONE.opposite(), R2 } });
+            DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] 
+                { U0, Amount.valueOf(0, VOLT), Amount.valueOf(0, VOLT) });
             Vector<Amount<?>> X = A.solve(B);
             System.out.println(X);
             System.out.println(X.get(2).to(MILLI(AMPERE)));
@@ -429,7 +433,7 @@ public final class JScience {
         }
         endTime(10000 * results.length);
 
-        System.out.print("Amount (mass) add: ");
+        System.out.print("Amount<Mass> add: ");
         startTime();
         for (int i = 0; i < 10000; i++) {
             StackContext.enter();
@@ -441,7 +445,7 @@ public final class JScience {
         }
         endTime(10000 * results.length);
 
-        System.out.print("Amount (mass) multiply: ");
+        System.out.print("Amount<Mass> multiply: ");
         startTime();
         for (int i = 0; i < 10000; i++) {
             StackContext.enter();

@@ -127,10 +127,9 @@
          <TR>
          <TD CLASS="lineheight1 style5">
          <UL>
-            <LI> <A HREF="api/javax/measure/unit/package-summary.html#package_description">Units</A> and 
-             <A HREF="api/javax/measure/quantity/package-summary.html#package_description">quantities</A>    
-            modules proposed as basis for the <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>
-            reference implementation.</LI>
+            <LI> Reference Implementation (RI) for <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>:
+                 <B>javax.measure.*</B>    
+                 (<A href="https://jsr-275.dev.java.net/files/documents/4333/34956/jsr-275.pdf">Latest Draft Specification</A>).</LI>
             
             <LI> A<A HREF="api/org/jscience/geography/coordinates/package-summary.html#package_description">
             coordinates</A> module compliant with 
@@ -178,7 +177,7 @@
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
          <DIV ALIGN="center"><SPAN CLASS="style7">
-         <IMG src="doc/img/new.gif" /><B>JS</B>cience version 4.0 - June 4, 2007</SPAN></DIV></TD>
+         <IMG src="doc/img/new.gif" /><B>JS</B>cience version 4.1 - June 12, 2007</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -189,10 +188,10 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-4.0.0-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-4.1.1-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-4.0.0-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-4.1.1-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
@@ -247,6 +246,7 @@
             <A HREF="http://rtsj.org">RTSJ</A> VMs without resulting into memory clashes or illegal access exceptions.</LI>
             <LI><A href="http://javolution.org/api/javolution/xml/package-summary.html#package_description">Persistency/Networking:</A> 
             Fastest XML marshalling/unmarshalling around!</LI>
+            <LI>Easy and type-safe configuration management with the <A href="http://javolution.org/api/javolution/lang/Configurable.html">Configurable</A> class</LI>
          </UL>
          <B>JS</B>cience binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
          </TR>
@@ -350,7 +350,7 @@
          <TD>
          <UL>
             <LI CLASS="lineheight1 style5">
-            <IMG SRC="doc/img/new.gif"/> Book <A href="http://www.wickedcooljava.com/">"Wicked Cool Java"</A>
+            Book <A href="http://www.wickedcooljava.com/">"Wicked Cool Java"</A>
             describes the JScience library; along with some sample code that uses the units API).</LI><BR>
 
             <LI CLASS="lineheight1 style5">
@@ -406,15 +406,17 @@
          <TR>
          <TD>
          <UL>
-            <I><LI CLASS="lineheight1 style5"><B>June 4, 2007: JScience 4.0</B><BR>
-            Integration with <a href="https://jsr-275.dev.java.net/files/documents/4333/34956/JSR-275.pdf">JSR-275 Early Draft</A>.<BR>
+            <LI CLASS="lineheight1 style5"><B>June 12, 2007: JScience 4.1</B><BR>
+            Upgraded to the latest <a href="http://javolution.org">Javolution</a> V5.1 [4.1.1]<BR>
+            Added <a href="api/org/jscience/mathematics/number/FloatingPoint.html">FloatingPoint</a> numbers of fixed arbitrary precision<BR>
+            Reference implementation for the <A href="https://jsr-275.dev.java.net/files/documents/4333/34956/jsr-275.pdf">JSR-275 : Measures and Units</A><BR>
             Refactored package/classes to use singular form, <code>org.jscience.physics.measure.Measure</code>
             renamed <code>org.jscience.physics.amount.Amount</code> (to avoid name clash with <code>javax.measure</code>).<BR>
-            Support for dense or sparse <A HREF="api/org/jscience/mathematics/vector/package-summary.html">vectors</A> 
-            Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on a 
-            dual-processors our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
-            are the fastest around (for a pure Java library), by about 2x :)<BR>
-            </LI></I>
+            Support for dense or sparse <A HREF="api/org/jscience/mathematics/vector/package-summary.html">vectors</A>. 
+            Our <A HREF="doc/benchmark.html">benchmark</A> indicates that on 
+            dual-core processors our <code>Matrix&lt;Float64&gt;</code> or <code>Matrix&lt;Complex&gt;</code> multiplications
+            are the fastest around (for a pure Java library), by about 2x!<BR>
+            </LI>
 
             <LI CLASS="lineheight1 style5"><B>October 5, 2006: JScience 3.2</B><BR>
             JSR-275 new packaging (javax.measure.*)<BR>
@@ -465,7 +467,7 @@
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : June 4, 2007<BR>
+          Revision      : July 4, 2007<BR>
          </TD>
          </TR>
          <TR>

@@ -134,6 +134,15 @@ public final class Float64 extends Number<Float64> implements Field<Float64> {
     }
 
     /**
+     * Returns the closest integer value to this 64 bits floating point number.
+     * 
+     * @return this number rounded to the nearest integer.
+     */
+    public long round() {
+        return MathLib.round(_value);
+    }
+
+    /**
      * Returns the opposite of this number.
      *
      * @return <code>-this</code>.

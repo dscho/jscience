@@ -15,7 +15,6 @@ import javolution.context.ConcurrentContext;
 import javolution.context.ObjectFactory;
 import javolution.lang.MathLib;
 import javolution.util.FastTable;
-import javolution.util.Index;
 
 import org.jscience.mathematics.number.Float64;
 
@@ -249,58 +248,82 @@ public final class Float64Matrix extends Matrix<Float64> {
             throw new DimensionException();
         // Creates a mxp matrix in transposed form (p columns vectors of size m)
         Float64Matrix M = Float64Matrix.newInstance(m, true); // Transposed.
-        multiply(this.getRows(), that, Index.valueOf(0), Index.valueOf(p),
-                M._rows);
+        M._rows.setSize(p);
+        Multiply multiply = Multiply.valueOf(this, that, 0, p, M._rows);
+        Multiply.recycle(multiply);
         return M;
     }
 
-    // Multiplies this row matrix with the columns of the specified matrix.
-    private static void multiply(FastTable<Float64Vector> rows,
-            Matrix<Float64> that, Index startColumn, Index endColumn,
-            FastTable<Float64Vector> columnsResult) {
-        final int start = startColumn.intValue();
-        final int end = endColumn.intValue();
-        if (end - start < 32) { // Direct calculation.
-            final int m = rows.size();
-            for (int j = start; j < end; j++) {
-                Vector<Float64> thatColj = that.getColumn(j);
-                Float64Vector column = Float64Vector.newInstance(m);
-                columnsResult.add(column);
-                for (int i = 0; i < m; i++) {
-                    column.set(i, rows.get(i).times(thatColj).doubleValue());
+    // Logic to multiply two matrices. 
+    private static class Multiply implements Runnable {
+        private static final ObjectFactory<Multiply> FACTORY = new ObjectFactory<Multiply>() {
+
+            @Override
+            protected Multiply create() {
+                return new Multiply();
+            }
+        };
+
+        private Float64Matrix _left;
+
+        private Matrix<Float64> _right;
+
+        private int _rightColumnStart;
+
+        private int _rightColumnEnd;
+
+        private FastTable<Float64Vector> _columnsResult;
+
+        static Multiply valueOf(Float64Matrix left, Matrix<Float64> right,
+                int rightColumnStart, int rightColumnEnd,
+                FastTable<Float64Vector> columnsResult) {
+            Multiply multiply = Multiply.FACTORY.object();
+            multiply._left = left;
+            multiply._right = right;
+            multiply._rightColumnStart = rightColumnStart;
+            multiply._rightColumnEnd = rightColumnEnd;
+            multiply._columnsResult = columnsResult;
+            return multiply;
+        }
+
+        static void recycle(Multiply multiply) {
+            multiply._left = null;
+            multiply._right = null;
+            multiply._columnsResult = null;
+            Multiply.FACTORY.recycle(multiply);
+        }
+
+        public void run() {
+            if (_rightColumnEnd - _rightColumnEnd < 32) { // Direct calculation.
+                FastTable<Float64Vector> rows = _left.getRows();
+                final int m = rows.size();
+                for (int j = _rightColumnStart; j < _rightColumnEnd; j++) {
+                    Vector<Float64> thatColj = _right.getColumn(j);
+                    Float64Vector column = Float64Vector.newInstance(m);
+                    _columnsResult.set(j, column);
+                    for (int i = 0; i < m; i++) {
+                        column.set(i, rows.get(i).times(thatColj)
+                                        .doubleValue());
+                    }
                 }
+            } else { // Concurrent/Recursive calculation.
+                int halfIndex = (_rightColumnStart + _rightColumnEnd) >> 1;
+                Multiply firstHalf = Multiply.valueOf(_left, _right,
+                        _rightColumnStart, halfIndex, _columnsResult);
+                Multiply secondHalf = Multiply.valueOf(_left, _right,
+                        halfIndex, _rightColumnEnd, _columnsResult);
+                ConcurrentContext.enter();
+                try {
+                    ConcurrentContext.execute(firstHalf);
+                    ConcurrentContext.execute(secondHalf);
+                } finally {
+                    ConcurrentContext.exit();
+                }
+                Multiply.recycle(firstHalf);
+                Multiply.recycle(secondHalf);
             }
-        } else { // Concurrent execution.
-            FastTable<Float64Vector> r1 = FastTable.newInstance();
-            FastTable<Float64Vector> r2 = FastTable.newInstance();
-            Index half = Index.valueOf((start + end) >> 1);
-            ConcurrentContext.enter();
-            try {
-                ConcurrentContext.execute(MULTIPLY, rows, that, startColumn,
-                        half, r1);
-                ConcurrentContext.execute(MULTIPLY, rows, that, half,
-                        endColumn, r2);
-            } finally {
-                ConcurrentContext.exit();
-            }
-            columnsResult.addAll(r1);
-            columnsResult.addAll(r2);
-            FastTable.recycle(r1);
-            FastTable.recycle(r2);
         }
     }
-
-    private static ConcurrentContext.Logic MULTIPLY = new ConcurrentContext.Logic() {
-        @SuppressWarnings("unchecked")
-        public void run() {
-            FastTable<Float64Vector> rows = getArgument(0);
-            Matrix that = getArgument(1);
-            Index startColumn = getArgument(2);
-            Index endColumn = getArgument(3);
-            FastTable columnsResult = getArgument(4);
-            multiply(rows, that, startColumn, endColumn, columnsResult);
-        }
-    };
 
     private FastTable<Float64Vector> getRows() {
         if (!_transposed)
@@ -365,7 +388,8 @@ public final class Float64Matrix extends Matrix<Float64> {
             for (int j = 0; j < _n; j++) {
                 Float64 cofactor = _transposed ? cofactor(j, i)
                         : cofactor(i, j);
-                row.set(j, ((i + j) % 2 == 0) ? cofactor.doubleValue() : cofactor.opposite().doubleValue());
+                row.set(j, ((i + j) % 2 == 0) ? cofactor.doubleValue()
+                        : cofactor.opposite().doubleValue());
             }
         }
         return M.transpose();
@@ -380,7 +404,7 @@ public final class Float64Matrix extends Matrix<Float64> {
     public Float64Vector vectorization() {
         return Float64Vector.valueOf(DenseMatrix.valueOf(this).vectorization());
     }
-    
+
     @Override
     public Float64Matrix copy() {
         Float64Matrix M = Float64Matrix.newInstance(_n, _transposed);
@@ -389,7 +413,7 @@ public final class Float64Matrix extends Matrix<Float64> {
         }
         return M;
     }
-    
+
     ///////////////////////
     // Factory creation. //
     ///////////////////////

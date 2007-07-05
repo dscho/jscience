@@ -159,11 +159,11 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
      //                                    A      *  X   =  B
      //
      DenseMatrix<Amount<?>> A = DenseMatrix.valueOf(new Amount<?>[][] {
-         { Amount.ONE, Amount.ONE, Amount.valueOf(0, OHM) },
-         { Amount.ONE.opposite(), Amount.ZERO, R1 },
-         { Amount.ZERO, Amount.ONE.opposite(), R2 } });
-     DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] { U0, Amount.valueOf(0,
-         VOLT), Amount.valueOf(0, VOLT)});
+         { Amount.ONE,            Amount.ONE,            Amount.valueOf(0, OHM) },
+         { Amount.ONE.opposite(), Amount.ZERO,           R1 },
+         { Amount.ZERO,           Amount.ONE.opposite(), R2 } });
+     DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] 
+         { U0, Amount.valueOf(0, VOLT), Amount.valueOf(0, VOLT) });
      Vector<Amount<?>> X = A.solve(B);
      System.out.println(X);
      System.out.println(X.get(2).to(MILLI(AMPERE)));

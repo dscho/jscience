@@ -107,18 +107,18 @@ public final class Altitude extends Coordinates<VerticalCRS> implements
         }
     }
 
-    // Implements Measurable<Length>
+    // Implements Scalar<Length>
     public final double doubleValue(Unit<Length> unit) {
         return (unit == METER) ? _meters : 
             METER.getConverterTo(unit).convert(_meters);
     }
 
-    // Implements Measurable<Length>
+    // Implements Scalar<Length>
     public final long longValue(Unit<Length> unit) {
         return Math.round(doubleValue(unit));
     }
 
-    // Implements Measurable<Length>
+    // Implements Scalar<Length>
     public int compareTo(Measurable<Length> measure) {
         double meters = measure.doubleValue(METER);
         return (_meters  > meters) ? 1

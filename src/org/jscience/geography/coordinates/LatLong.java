@@ -38,17 +38,17 @@ public final class LatLong extends Coordinates<GeographicCRS> {
 
         @Override
         protected LatLong coordinatesOf(AbsolutePosition position) {
-            return LatLong.valueOf(position.latitudeWGS84.doubleValue(RADIAN),
-                    position.longitudeWGS84.doubleValue(RADIAN), RADIAN);
+            return LatLong.valueOf(position.latitudeWGS84.doubleValue(DEGREE_ANGLE),
+                    position.longitudeWGS84.doubleValue(DEGREE_ANGLE), DEGREE_ANGLE);
         }
 
         @Override
         protected AbsolutePosition positionOf(LatLong coordinates,
                 AbsolutePosition position) {
             position.latitudeWGS84 = Measure.valueOf(coordinates._latitude,
-                    RADIAN);
+                    DEGREE_ANGLE);
             position.longitudeWGS84 = Measure.valueOf(coordinates._longitude,
-                    RADIAN);
+                    DEGREE_ANGLE);
             return position;
         }
 

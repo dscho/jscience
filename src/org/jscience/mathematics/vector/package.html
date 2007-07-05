@@ -10,7 +10,7 @@
     {@link org.jscience.mathematics.number.ModuloInteger ModuloInteger} (modulo operations),
     {@link org.jscience.mathematics.number.Complex Complex},
     {@link org.jscience.mathematics.function.RationalFunction RationalFunction}, etc.
-    The main requirement being that your class implements the mathematical
+    The main requirement being that your element class implements the mathematical
     {@link org.jscience.mathematics.structure.Field Field} interface.</p>
     
 <p> Most {@link org.jscience.mathematics.number numbers} and even invertible matrices
@@ -18,7 +18,7 @@
     allows for the resolution of systems of equations with invertible matrix coefficients (matrices of matrices).</p>
 
 <p> For classes embedding automatic error calculation (e.g.
-    {@link org.jscience.mathematics.number.Real Real} or physical {@link org.jscience.physics.amount.Amount amount}),
+    {@link org.jscience.mathematics.number.Real Real} or {@link org.jscience.physics.amount.Amount Amount}),
     the error on the solution obtained tells you if can trust that solution or not 
     (e.g. system close to singularity). The following example illustrates this point.</p>
     
@@ -38,11 +38,11 @@
             //                                    A      *  X   =  B
             //
             DenseMatrix<Amount<?>> A = DenseMatrix.valueOf(new Amount<?>[][] {
-                    { Amount.ONE, Amount.ONE, Amount.valueOf(0, OHM) },
-                    { Amount.ONE.opposite(), Amount.ZERO, R1 },
-                    { Amount.ZERO, Amount.ONE.opposite(), R2 } });
-            DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] { U0, Amount.valueOf(0,
-                    VOLT), Amount.valueOf(0, VOLT)});
+                { Amount.ONE,            Amount.ONE,            Amount.valueOf(0, OHM) },
+                { Amount.ONE.opposite(), Amount.ZERO,           R1 },
+                { Amount.ZERO,           Amount.ONE.opposite(), R2 } });
+            DenseVector<Amount<?>> B = DenseVector.valueOf(new Amount<?>[] 
+                { U0, Amount.valueOf(0, VOLT), Amount.valueOf(0, VOLT) });
             Vector<Amount<?>> X = A.solve(B);
             System.out.println(X);
             System.out.println(X.get(2).to(MILLI(AMPERE)));

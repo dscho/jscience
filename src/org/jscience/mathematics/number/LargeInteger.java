@@ -12,7 +12,6 @@ import java.io.IOException;
 
 import javolution.context.ArrayFactory;
 import javolution.context.ConcurrentContext;
-import javolution.context.LocalContext;
 import javolution.context.ObjectFactory;
 import javolution.context.StackContext;
 import javolution.lang.Configurable;
@@ -60,13 +59,12 @@ public final class LargeInteger extends Number<LargeInteger> {
             100);
 
     /**
-     * Holds the {@link javolution.context.LocalContext local} format 
-     * for large integers (decimal representation by default).
+     * Holds the format for large integers (decimal representation by default).
      * 
      * @see #parse(CharSequence, int, TextFormat.Cursor)
      * @see #format(LargeInteger, int, Appendable)
      */
-    public static final LocalContext.Reference<TextFormat<LargeInteger>> FORMAT = new LocalContext.Reference<TextFormat<LargeInteger>>(
+    static final TextFormat<LargeInteger> DECIMAL_FORMAT =
             new TextFormat<LargeInteger>() {
 
                 @Override
@@ -79,7 +77,10 @@ public final class LargeInteger extends Number<LargeInteger> {
                 public LargeInteger parse(CharSequence csq, Cursor cursor) {
                     return LargeInteger.parse(csq, 10, cursor);
                 }
-            });
+            };
+    static {
+        TextFormat.setInstance(LargeInteger.class, DECIMAL_FORMAT);
+    }
 
     /**
      * Holds factory for LargeInteger with variable size arrays.
@@ -146,10 +147,19 @@ public final class LargeInteger extends Number<LargeInteger> {
     /**
      * Holds Long.MIN_VALUE
      */
-    private static final LargeInteger LONG_MIN_VALUE = new LargeInteger(2);
+    static final LargeInteger LONG_MIN_VALUE = new LargeInteger(2);
     static {
         LONG_MIN_VALUE._words[1] = 1;
         LONG_MIN_VALUE._size = 2;
+    }
+
+    /**
+     * Holds five.
+     */
+    static final LargeInteger FIVE = new LargeInteger(1);
+    static {
+        LONG_MIN_VALUE._words[1] = 5;
+        LONG_MIN_VALUE._size = 1;
     }
 
     /**
@@ -315,14 +325,14 @@ public final class LargeInteger extends Number<LargeInteger> {
 
     /**
      * Returns the large integer for the specified character sequence 
-     * using the local {@link #FORMAT format}.
+     * using the current {@link TextFormat#getInstance(Class) format}.
      * 
      * @param  csq the character sequence to parse.
-     * @return <code>FORMAT.get().parse(csq)</code>
+     * @return <code>TextFormat.getInstance(LargeInteger.class).parse(csq)</code>
      * @throws NumberFormatException if error when parsing.
      */
     public static LargeInteger valueOf(CharSequence csq) {
-        return FORMAT.get().parse(csq);
+        return TextFormat.getInstance(LargeInteger.class).parse(csq);
     }
 
     /**
@@ -1150,7 +1160,7 @@ public final class LargeInteger extends Number<LargeInteger> {
             li._size = Calculus.shiftRight(wordShift, bitShift, _words, _size,
                     li._words);
             for (int j = n; j != 0;) { // Divides by 5^n
-                int i = (n >= INT_POW_5.length) ? INT_POW_5.length - 1 : n;
+                int i = (j >= INT_POW_5.length) ? INT_POW_5.length - 1 : j;
                 Calculus.divide(li._words, li._size, INT_POW_5[i], li._words);
                 if ((li._size > 0) && (li._words[li._size - 1] == 0L)) {
                     li._size--;
@@ -1315,13 +1325,13 @@ public final class LargeInteger extends Number<LargeInteger> {
     ////////////////////////
 
     /**
-     * Returns the text representation of this number using the local 
-     * {@link #FORMAT format}.
+     * Returns the text representation of this number using the current  
+     * {@link TextFormat#getInstance(Class) format}.
      *
-     * @return <code>FORMAT.get().format(this)</code>
+     * @return <code>TextFormat.getInstance(LargeInteger.class).format(this)</code>
      */
     public Text toText() {
-        return FORMAT.get().format(this);
+        return TextFormat.getInstance(LargeInteger.class).format(this);
     }
 
     /**

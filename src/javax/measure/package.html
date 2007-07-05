@@ -66,10 +66,10 @@
          sea.setTemperature(Average.valueOf(new double[] { 33.4, 44.55, 32.33} , CELCIUS));
          
          // Measurement with uncertainty (and additional operations).
-         public class Estimate<Q extends Quantity> extends Measure<Double, Q>  {
-              public Estimate(double value, double error, Unit<Q> unit) { ... }
-              public Estimate<Q> plus(Estimate<Q> that) {...}
-              public Estimate<?> times(Estimate<?> that) {...} 
+         public class Amount<Q extends Quantity> extends Measurable<Q>  {
+              public Amount(double value, double error, Unit<Q> unit) { ... }
+              public Amount<Q> plus(Amount<Q> that) {...}
+              public Amount<?> times(Amount<?> that) {...} 
               ... // doubleValue(Unit) returns estimated value.
          }  
     [/code]</p>

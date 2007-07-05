@@ -1,6 +1,6 @@
 /*
  * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2006 - JScience (http://jscience.org/)
+ * Copyright (C) 2007 - JScience (http://jscience.org/)
  * All rights reserved.
  * 
  * Permission to use, copy, modify, and distribute this software is
@@ -12,11 +12,36 @@ import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
 /**
- * This interface represents the measurable, countable, or comparable property 
- * or aspect of a thing.
+ * <p> This interface represents the measurable, countable, or comparable 
+ *     property or aspect of a thing.</p>
+ *     
+ * <p> Implementing instances are typically the result of a measurement:[code]
+ *         Measurable<Mass> weight = Measure.valueOf(180.0, POUND);
+ *     [/code]
+ *     They can also be created from custom classes:[code]
+ *     class Delay implements Measurable<Duration> {
+ *          private long nanoSeconds; // Implicit internal unit.
+ *          public double doubleValue(Unit<Velocity> unit) { ... }
+ *          public long longValue(Unit<Velocity> unit) { ... }
+ *     }
+ *     Thread.wait(new Delay(24, HOUR)); // Assuming Thread.wait(Measurable<Duration>) method.
+ *     [/code]</p>
+ *     
+ * <p> Although measurable instances are for the most part scalar quantities; 
+ *     more complex implementations (e.g. vectors, data set) are allowed as 
+ *     long as an aggregate magnitude can be determined. For example:[code]
+ *     class Velocity3D implements Measurable<Velocity> {
+ *          private double x, y, z; // Meter per seconds.
+ *          public double doubleValue(Unit<Velocity> unit) { ... } // Returns vector norm.
+ *          ... 
+ *     }
+ *     class Sensors<Q extends Quantity> extends Measure<double[], Q> {
+ *          public doubleValue(Unit<Q> unit) { ... } // Returns median value. 
+ *          ...
+ *     } [/code]</p>
  * 
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 4.0, February 25, 2007
+ * @version 4.1, June 8, 2007
  */
 public interface Measurable<Q extends Quantity> extends Comparable<Measurable<Q>> {
     

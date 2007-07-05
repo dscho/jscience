@@ -133,18 +133,18 @@ public final class Time extends Coordinates<TemporalCRS> implements Measurable<D
         }
     }
 
-    // Implements Measurable<Duration>
+    // Implements Scalar<Duration>
     public final double doubleValue(Unit<Duration> unit) {
         return unit.equals(SECOND) ? _seconds : SECOND
                 .getConverterTo(unit).convert(_seconds);
     }
 
-    // Implements Measurable<Duration>
+    // Implements Scalar<Duration>
     public final long longValue(Unit<Duration> unit) {
         return Math.round(doubleValue(unit));
     }
 
-    // Implements Measurable<Duration>
+    // Implements Scalar<Duration>
     public int compareTo(Measurable<Duration> arg0) {
         double arg0InSecond = arg0.doubleValue(SECOND);
         return (_seconds > arg0InSecond) ? 1

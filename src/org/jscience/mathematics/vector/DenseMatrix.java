@@ -15,8 +15,6 @@ import javolution.context.ConcurrentContext;
 import javolution.context.ObjectFactory;
 import javolution.lang.MathLib;
 import javolution.util.FastTable;
-import javolution.util.Index;
-
 import org.jscience.mathematics.structure.Field;
 
 /**
@@ -106,7 +104,7 @@ public final class DenseMatrix<F extends Field<F>> extends Matrix<F> {
         }
         return M;
     }
-
+    
     /**
      * Returns a dense matrix holding the row vectors from the specified 
      * collection (column vectors if {@link #transpose transposed}).
@@ -263,58 +261,82 @@ public final class DenseMatrix<F extends Field<F>> extends Matrix<F> {
             throw new DimensionException();
         // Creates a mxp matrix in transposed form (p columns vectors of size m)
         DenseMatrix<F> M = DenseMatrix.newInstance(m, true); // Transposed.
-        multiply(this.getRows(), that, Index.valueOf(0), Index.valueOf(p),
-                M._rows);
+        M._rows.setSize(p);
+        Multiply<F> multiply = Multiply.valueOf(this, that, 0, p, M._rows);
+        Multiply.recycle(multiply);
         return M;
     }
 
-    // Multiplies this row matrix with the columns of the specified matrix.
-    private static <F extends Field<F>> void multiply(
-            FastTable<DenseVector<F>> rows, Matrix<F> that, Index startColumn,
-            Index endColumn, FastTable<DenseVector<F>> columnsResult) {
-        final int start = startColumn.intValue();
-        final int end = endColumn.intValue();
-        if (end - start < 32) { // Direct calculation.
-            final int m = rows.size();
-            for (int j = start; j < end; j++) {
-                Vector<F> thatColj = that.getColumn(j);
-                DenseVector<F> column = DenseVector.newInstance();
-                columnsResult.add(column);
-                for (int i = 0; i < m; i++) {
-                    column._elements.add(rows.get(i).times(thatColj));
+    // Logic to multiply two matrices. 
+    private static class Multiply<F extends Field<F>> implements Runnable {
+        private static final ObjectFactory<Multiply> FACTORY = new ObjectFactory<Multiply>() {
+
+            @Override
+            protected Multiply create() {
+                return new Multiply();
+            }
+        };
+
+        private DenseMatrix<F> _left;
+
+        private Matrix<F> _right;
+
+        private int _rightColumnStart;
+
+        private int _rightColumnEnd;
+
+        private FastTable<DenseVector<F>> _columnsResult;
+
+        @SuppressWarnings("unchecked")
+        static <F extends Field<F>> Multiply<F> valueOf(DenseMatrix<F> left, Matrix<F> right,
+                int rightColumnStart, int rightColumnEnd,
+                FastTable<DenseVector<F>> columnsResult) {
+            Multiply<F> multiply = Multiply.FACTORY.object();
+            multiply._left = left;
+            multiply._right = right;
+            multiply._rightColumnStart = rightColumnStart;
+            multiply._rightColumnEnd = rightColumnEnd;
+            multiply._columnsResult = columnsResult;
+            return multiply;
+        }
+
+        static <F extends Field<F>> void recycle(Multiply<F> multiply) {
+            multiply._left = null;
+            multiply._right = null;
+            multiply._columnsResult = null;
+            Multiply.FACTORY.recycle(multiply);
+        }
+
+        public void run() {
+            if (_rightColumnEnd - _rightColumnEnd < 32) { // Direct calculation.
+                FastTable<DenseVector<F>> rows = _left.getRows();
+                final int m = rows.size();
+                for (int j = _rightColumnStart; j < _rightColumnEnd; j++) {
+                    Vector<F> thatColj = _right.getColumn(j);
+                    DenseVector<F> column = DenseVector.newInstance();
+                    _columnsResult.set(j, column);
+                    for (int i = 0; i < m; i++) {
+                        column._elements.add(rows.get(i).times(thatColj));
+                    }
                 }
+            } else { // Concurrent/Recursive calculation.
+                int halfIndex = (_rightColumnStart + _rightColumnEnd) >> 1;
+                Multiply<F> firstHalf = Multiply.valueOf(_left, _right,
+                        _rightColumnStart, halfIndex, _columnsResult);
+                Multiply<F> secondHalf = Multiply.valueOf(_left, _right,
+                        halfIndex, _rightColumnEnd, _columnsResult);
+                ConcurrentContext.enter();
+                try {
+                    ConcurrentContext.execute(firstHalf);
+                    ConcurrentContext.execute(secondHalf);
+                } finally {
+                    ConcurrentContext.exit();
+                }
+                Multiply.recycle(firstHalf);
+                Multiply.recycle(secondHalf);
             }
-        } else { // Concurrent execution.
-            FastTable<DenseVector<F>> r1 = FastTable.newInstance();
-            FastTable<DenseVector<F>> r2 = FastTable.newInstance();
-            Index half = Index.valueOf((start + end) >> 1);
-            ConcurrentContext.enter();
-            try {
-                ConcurrentContext.execute(MULTIPLY, rows, that, startColumn,
-                        half, r1);
-                ConcurrentContext.execute(MULTIPLY, rows, that, half,
-                        endColumn, r2);
-            } finally {
-                ConcurrentContext.exit();
-            }
-            columnsResult.addAll(r1);
-            columnsResult.addAll(r2);
-            FastTable.recycle(r1);
-            FastTable.recycle(r2);
         }
     }
-
-    private static ConcurrentContext.Logic MULTIPLY = new ConcurrentContext.Logic() {
-        @SuppressWarnings("unchecked")
-        public void run() {
-            FastTable rows = getArgument(0);
-            Matrix that = getArgument(1);
-            Index startColumn = getArgument(2);
-            Index endColumn = getArgument(3);
-            FastTable columnsResult = getArgument(4);
-            multiply(rows, that, startColumn, endColumn, columnsResult);
-        }
-    };
 
     private FastTable<DenseVector<F>> getRows() {
         if (!_transposed)

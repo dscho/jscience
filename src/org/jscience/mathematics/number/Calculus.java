@@ -9,7 +9,6 @@
 package org.jscience.mathematics.number;
 
 import javolution.context.ObjectFactory;
-import javolution.context.ConcurrentContext.Logic;
 
 /**
  * <p> This class holds utilities upon arrays of positive <code>long</code>.</p>
@@ -267,7 +266,7 @@ final class Calculus {
     /**
      * Multiplication logic (for concurrent context)
      */
-    static final class MultiplyLogic extends Logic {
+    static final class MultiplyLogic implements Runnable {
         private static final ObjectFactory<MultiplyLogic> FACTORY =
             new ObjectFactory<MultiplyLogic>() {
                 @Override

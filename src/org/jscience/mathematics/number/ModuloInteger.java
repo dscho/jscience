@@ -114,7 +114,7 @@ public final class ModuloInteger extends Number<ModuloInteger> implements Field<
      * for modular arithmetic.
      * 
      * @param modulus the new modulus or <code>null</code> to unset the modulus.
-     * @throws IllegalArgumentException if <code>modulus <= 0</code>
+     * @throws IllegalArgumentException if <code>modulus &lt;= 0</code>
      */
     public static void setModulus(LargeInteger modulus) {
         if ((modulus != null) && (!modulus.isPositive()))

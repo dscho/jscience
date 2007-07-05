@@ -17,9 +17,9 @@ import javolution.text.Text;
 import javolution.text.TextFormat;
 import javolution.text.TypeFormat;
 import javolution.context.ObjectFactory;
-import javolution.context.LocalContext.Reference;
 import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
+
 //@RETROWEAVER import javolution.text.Appendable;
 
 /**
@@ -36,41 +36,43 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      * Holds the local text format for complex numbers (cartesian form 
      * by default, e.g.<code> "2.34 - 0.4i"</code>).
      */
-    public static final Reference<TextFormat<Complex>> FORMAT = new Reference<TextFormat<Complex>>(
-            new TextFormat<Complex>() {
-                public Appendable format(Complex complex, Appendable appendable)
-                        throws IOException {
-                    TypeFormat.format(complex._real, appendable);
-                    if (complex._imaginary < 0.0) {
-                        appendable.append(" - ");
-                        TypeFormat.format(-complex._imaginary, appendable);
-                    } else {
-                        appendable.append(" + ");
-                        TypeFormat.format(complex._imaginary, appendable);
-                    }
-                    return appendable.append('i');
-                }
+    private static final TextFormat<Complex> CARTESIAN_FORMAT = new TextFormat<Complex>() {
+        public Appendable format(Complex complex, Appendable appendable)
+                throws IOException {
+            TypeFormat.format(complex._real, appendable);
+            if (complex._imaginary < 0.0) {
+                appendable.append(" - ");
+                TypeFormat.format(-complex._imaginary, appendable);
+            } else {
+                appendable.append(" + ");
+                TypeFormat.format(complex._imaginary, appendable);
+            }
+            return appendable.append('i');
+        }
 
-                public Complex parse(CharSequence csq, Cursor cursor) {
-                    // Reads real part.
-                    double real = TypeFormat.parseDouble(csq, cursor);
+        public Complex parse(CharSequence csq, Cursor cursor) {
+            // Reads real part.
+            double real = TypeFormat.parseDouble(csq, cursor);
 
-                    // Reads separator.
-                    cursor.skip(' ', csq);
-                    char op = cursor.next(csq);
-                    if ((op != '+') && (op != '-'))
-                        throw new NumberFormatException("'+' or '-' expected");
-                    cursor.skip(' ', csq);
+            // Reads separator.
+            cursor.skip(' ', csq);
+            char op = cursor.next(csq);
+            if ((op != '+') && (op != '-'))
+                throw new NumberFormatException("'+' or '-' expected");
+            cursor.skip(' ', csq);
 
-                    // Reads imaginary part.
-                    double imaginary = TypeFormat.parseDouble(csq, cursor);
-                    char i = cursor.next(csq);
-                    if (i != 'i')
-                        throw new NumberFormatException("'i' expected");
-                    return Complex.valueOf(real, op == '-' ? -imaginary
-                            : imaginary);
-                }
-            });
+            // Reads imaginary part.
+            double imaginary = TypeFormat.parseDouble(csq, cursor);
+            char i = cursor.next(csq);
+            if (i != 'i')
+                throw new NumberFormatException("'i' expected");
+            return Complex.valueOf(real, op == '-' ? -imaginary : imaginary);
+        }
+    };
+    static { // Sets default format to cartesian, users can always change it to polar.
+        TextFormat.setInstance(Complex.class, CARTESIAN_FORMAT);
+    }
+
     /**
      * The complex number zero.
      */
@@ -86,22 +88,23 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      */
     public static final Complex I = new Complex(0.0, 1.0);
 
-
     /**
      * Holds the default XML representation for complex numbers.
      * This representation consists of <code>real</code> and  
      * <code>imaginary</code> attributes (e.g. 
      * <code>&lt;Complex real="2.34" imaginary="-0.4"/&gt;</code>).
      */
-   static final XMLFormat<Complex> XML = new XMLFormat<Complex>(Complex.class) {
-       
-       @Override
-       public Complex newInstance(Class<Complex> cls, InputElement xml) throws XMLStreamException {
-           return Complex.valueOf(xml.getAttribute("real", 0.0), xml
-                   .getAttribute("imaginary", 0.0));
-       }
-       
-       public void write(Complex complex, OutputElement xml) throws XMLStreamException {
+    static final XMLFormat<Complex> XML = new XMLFormat<Complex>(Complex.class) {
+
+        @Override
+        public Complex newInstance(Class<Complex> cls, InputElement xml)
+                throws XMLStreamException {
+            return Complex.valueOf(xml.getAttribute("real", 0.0), xml
+                    .getAttribute("imaginary", 0.0));
+        }
+
+        public void write(Complex complex, OutputElement xml)
+                throws XMLStreamException {
             xml.setAttribute("real", complex._real);
             xml.setAttribute("imaginary", complex._imaginary);
         }
@@ -169,13 +172,13 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
      * Returns the complex number for the specified character sequence.
      *
      * @param  csq the character sequence.
-     * @return <code>Complex.FORMAT.get().parse(csq)</code>
+     * @return <code>TextFormat.getInstance(Complex.class).parse(csq)</code>
      * @throws IllegalArgumentException if the character sequence does not 
      *         contain a parsable complex number.
-     * @see    Complex#FORMAT
+     * @see TextFormat#getInstance(Class)
      */
     public static Complex valueOf(CharSequence csq) {
-        return Complex.FORMAT.get().parse(csq);
+        return TextFormat.getInstance(Complex.class).parse(csq);
     }
 
     /**
@@ -481,11 +484,11 @@ public final class Complex extends Number<Complex> implements Field<Complex> {
     /**
      * Returns the text representation of this complex number.
      *
-     * @return <code>Complex.FORMAT.get().format(this)</code>
-     * @see Complex#FORMAT
+     * @return <code>TextFormat.getInstance(Complex.class).format(this)</code>
+     * @see TextFormat#getInstance(Class)
      */
     public Text toText() {
-        return Complex.FORMAT.get().format(this);
+        return TextFormat.getInstance(Complex.class).format(this);
     }
 
     /**

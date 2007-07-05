@@ -10,13 +10,13 @@
     <target name="init">
     	<tstamp/>
         <property name="library"   value="jscience" />
-        <property name="version"   value="4.0" />
-        <property name="release"   value="0" />
+        <property name="version"   value="4.1" />
+        <property name="release"   value="1" />
         <property name="src"       value="src" />
         <property name="bin"       value="bin" />
         <property name="lib"       value="lib" />
         <property name="api"       value="api" />
-        <property name="debug"     value="false" />
+        <property name="debug"     value="true" />
         <property name="optimize"  value="true" />
         <property name="encoding"  value="UTF-8" />
         <property name="classpath"  value="${bin};${lib}/javolution.jar;${lib}/geoapi.jar" />

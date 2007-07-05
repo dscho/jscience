@@ -102,6 +102,11 @@ public final class SI {
     public static final BaseUnit<Length> METER = si(new BaseUnit<Length>("m"));
 
     /**
+     * Equivalent to {@link #METER}.
+     */
+    public static final BaseUnit<Length> METRE = METER;
+
+    /**
      * The base unit for amount of substance quantities (<code>mol</code>).
      * The mole is the amount of substance of a system which contains as many
      * elementary entities as there are atoms in 0.012 kilogram of carbon 12.
@@ -337,26 +342,46 @@ public final class SI {
     /**
      * The metric unit for velocity quantities (<code>m/s</code>).
      */
-    public static final Unit<Velocity> METER_PER_SECOND 
-        = si(new ProductUnit<Velocity>(METER.divide(SECOND)));
+    public static final Unit<Velocity> METER_PER_SECOND = si(new ProductUnit<Velocity>(
+            METER.divide(SECOND)));
+
+    /**
+     * Equivalent to {@link #METER_PER_SECOND}.
+     */
+    public static final Unit<Velocity> METRE_PER_SECOND = METER_PER_SECOND;
 
     /**
      * The metric unit for acceleration quantities (<code>m/s²</code>).
      */
-    public static final Unit<Acceleration> METER_PER_SQUARE_SECOND 
-       = si(new ProductUnit<Acceleration>(METER_PER_SECOND.divide(SECOND)));
+    public static final Unit<Acceleration> METER_PER_SQUARE_SECOND = si(new ProductUnit<Acceleration>(
+            METER_PER_SECOND.divide(SECOND)));
+
+    /**
+     * Equivalent to {@link #METER_PER_SQUARE_SECOND}.
+     */
+    public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = METER_PER_SQUARE_SECOND;
 
     /**
      * The metric unit for area quantities (<code>m²</code>).
      */
-    public static final Unit<Area> SQUARE_METER = 
-        si(new ProductUnit<Area>(METER.times(METER)));
+    public static final Unit<Area> SQUARE_METER = si(new ProductUnit<Area>(
+            METER.times(METER)));
+
+    /**
+     * Equivalent to {@link #SQUARE_METER}.
+     */
+    public static final Unit<Area> SQUARE_METRE = SQUARE_METER;
 
     /**
      * The metric unit for volume quantities (<code>m³</code>).
      */
-    public static final Unit<Volume> CUBIC_METER 
-       = si(new ProductUnit<Volume>(SQUARE_METER.times(METER)));
+    public static final Unit<Volume> CUBIC_METER = si(new ProductUnit<Volume>(
+            SQUARE_METER.times(METER)));
+
+    /**
+     * Equivalent to {@link #CUBIC_METER}.
+     */
+    public static final Unit<Volume> CUBIC_METRE = CUBIC_METER;
 
     /////////////////
     // SI PREFIXES //

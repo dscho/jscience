@@ -174,12 +174,14 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
     }
 
     /**
-     * Returns the closest integer to this rational number.
+     * Returns the closest integer value to this rational number.
      * 
      * @return this rational rounded to the nearest integer.
      */
     public LargeInteger round() {
-        return _dividend.divide(_divisor);
+        LargeInteger halfDivisor = _divisor.times2pow(-1);
+        return isNegative() ? _dividend.minus(halfDivisor).divide(_divisor) :
+            _dividend.plus(halfDivisor).divide(_divisor);
     }
 
     /**
@@ -216,6 +218,17 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
                 this._dividend.times(that._divisor).minus(
                         this._divisor.times(that._dividend)),
                 this._divisor.times(that._divisor)).normalize();
+    }
+
+    /**
+     * Returns the product of this rational number with the specified 
+     * <code>long</code> multiplier.
+     * 
+     * @param multiplier the <code>long</code> multiplier.
+     * @return <code>this · multiplier</code>.
+     */
+    public Rational times(long multiplier) {
+        return this.times(Rational.valueOf(multiplier, 1));
     }
 
     /**
@@ -262,6 +275,34 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
      */
     public Rational abs() {
         return Rational.valueOf(_dividend.abs(), _divisor);
+    }
+
+    /**
+     * Indicates if this rational number is equal to zero.
+     * 
+     * @return <code>this == 0</code>
+     */
+    public boolean isZero() {
+        return _dividend.isZero();
+    }
+
+
+    /**
+     * Indicates if this rational number is greater than zero.
+     * 
+     * @return <code>this > 0</code>
+     */
+    public boolean isPositive() {
+        return _dividend.isPositive();
+    }
+
+    /**
+     * Indicates if this rational number is less than zero.
+     * 
+     * @return <code>this < 0</code>
+     */
+    public boolean isNegative() {
+        return _dividend.isNegative();
     }
 
     /**
