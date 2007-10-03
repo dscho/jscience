@@ -39,12 +39,12 @@ public class StandardModel extends PhysicalModel {
     }
 
     // Implements Dimension.Model
-    public Dimension getDimension(BaseUnit unit) {
+    public Dimension getDimension(BaseUnit<?> unit) {
         return Dimension.Model.STANDARD.getDimension(unit);
     }
 
     // Implements Dimension.Model
-    public UnitConverter getTransform(BaseUnit unit) {
+    public UnitConverter getTransform(BaseUnit<?> unit) {
         return Dimension.Model.STANDARD.getTransform(unit);
     }
 

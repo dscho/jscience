@@ -547,7 +547,7 @@ public final class FloatingPoint extends Number<FloatingPoint> implements
     }
 
     @Override
-    public Number copy() {
+    public FloatingPoint copy() {
         if (this == NaN)
             return NaN; // Maintains unicity.
         FloatingPoint r = FACTORY.object();

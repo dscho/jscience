@@ -26,7 +26,7 @@ import org.opengis.util.InternationalString;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public abstract class GeocentricCRS<C extends Coordinates> extends
+public abstract class GeocentricCRS<C extends Coordinates<?>> extends
         CoordinateReferenceSystem<C> {
 
     /**
@@ -34,13 +34,13 @@ public abstract class GeocentricCRS<C extends Coordinates> extends
      */
     public static final CoordinateSystem XYZ_CS = new CoordinateSystem() {
 
-        Axis xAxis = new Axis("Geocentric X", "X", SI.METER,
+        Axis xAxis = new Axis("Geocentric X", "X", SI.METRE,
                 AxisDirection.GEOCENTRIC_X);
 
-        Axis yAxis = new Axis("Geocentric Y", "Y", SI.METER,
+        Axis yAxis = new Axis("Geocentric Y", "Y", SI.METRE,
                 AxisDirection.GEOCENTRIC_Y);
 
-        Axis zAxis = new Axis("Geocentric Z", "Z", SI.METER,
+        Axis zAxis = new Axis("Geocentric Z", "Z", SI.METRE,
                 AxisDirection.GEOCENTRIC_Z);
 
         public int getDimension() {
@@ -64,11 +64,11 @@ public abstract class GeocentricCRS<C extends Coordinates> extends
             throw new UnsupportedOperationException();
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 

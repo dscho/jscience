@@ -12,6 +12,7 @@ import java.io.Serializable;
 
 import javax.measure.converter.RationalConverter;
 import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.Dimensionless;
 
 /**
  * <p> This class represents the dimension of an unit. Two units <code>u1</code>
@@ -71,7 +72,7 @@ public final class Dimension implements Serializable {
     /**
      * Holds the pseudo unit associated to this dimension.
      */
-    private final Unit _pseudoUnit;
+    private final Unit<?> _pseudoUnit;
 
     /**
      * Creates a new dimension associated to the specified symbol.
@@ -79,7 +80,7 @@ public final class Dimension implements Serializable {
      * @param symbol the associated symbol.
      */
     public Dimension(char symbol) {
-        _pseudoUnit = new BaseUnit("[" + symbol + "]");
+        _pseudoUnit = new BaseUnit<Dimensionless>("[" + symbol + "]");
     }
 
     /**
@@ -88,7 +89,7 @@ public final class Dimension implements Serializable {
      * 
      * @param pseudoUnit the pseudo-unit identifying this dimension.
      */
-    private Dimension(Unit pseudoUnit) {
+    private Dimension(Unit<?> pseudoUnit) {
         _pseudoUnit = pseudoUnit;
     }
 
@@ -217,18 +218,18 @@ public final class Dimension implements Serializable {
          */
         public Model STANDARD = new Model() {
 
-            public Dimension getDimension(BaseUnit unit) {
-                if (unit.equals(SI.METER)) return Dimension.LENGTH;
+            public Dimension getDimension(BaseUnit<?> unit) {
+                if (unit.equals(SI.METRE)) return Dimension.LENGTH;
                 if (unit.equals(SI.KILOGRAM)) return Dimension.MASS;
                 if (unit.equals(SI.KELVIN)) return Dimension.TEMPERATURE;
                 if (unit.equals(SI.SECOND)) return Dimension.TIME;
                 if (unit.equals(SI.AMPERE)) return Dimension.ELECTRIC_CURRENT;
                 if (unit.equals(SI.MOLE)) return Dimension.AMOUNT_OF_SUBSTANCE;
                 if (unit.equals(SI.CANDELA)) return SI.WATT.getDimension();
-                return new Dimension(new BaseUnit("[" + unit.getSymbol() + "]"));
+                return new Dimension(new BaseUnit<Dimensionless>("[" + unit.getSymbol() + "]"));
             }
             
-            public UnitConverter getTransform(BaseUnit unit) {
+            public UnitConverter getTransform(BaseUnit<?> unit) {
                 if (unit.equals(SI.CANDELA)) return new RationalConverter(1, 683);
                 return UnitConverter.IDENTITY;
             }
@@ -241,7 +242,7 @@ public final class Dimension implements Serializable {
          * @param unit the base unit for which the dimension is returned.
          * @return the dimension of the specified unit.
          */
-        Dimension getDimension(BaseUnit unit);
+        Dimension getDimension(BaseUnit<?> unit);
 
         /**
          * Returns the normalization transform of the specified base unit
@@ -251,7 +252,7 @@ public final class Dimension implements Serializable {
          * @param unit the base unit for which the transform is returned.
          * @return the normalization transform.
          */
-        UnitConverter getTransform(BaseUnit unit);
+        UnitConverter getTransform(BaseUnit<?> unit);
     }
 
     private static final long serialVersionUID = 1L;

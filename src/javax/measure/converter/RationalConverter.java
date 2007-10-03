@@ -83,24 +83,6 @@ public final class RationalConverter extends UnitConverter {
     }
 
     @Override
-    public boolean equals(Object cvtr) {
-        if (!(cvtr instanceof RationalConverter))
-            return false;
-        RationalConverter rc = (RationalConverter) cvtr;
-        return (_dividend == rc._dividend) && (_divisor == rc._divisor);
-    }
-
-    @Override
-    public int hashCode() {
-        long value = _dividend - _divisor;
-        int h = (int) (value ^ (value >>> 32));
-        h += ~(h << 9);
-        h ^= (h >>> 14);
-        h += (h << 4);
-        return h ^ (h >>> 10);
-    }
-
-    @Override
     public UnitConverter concatenate(UnitConverter converter) {
         if (converter instanceof RationalConverter) {
             RationalConverter that = (RationalConverter) converter;

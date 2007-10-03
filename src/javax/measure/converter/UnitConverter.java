@@ -28,7 +28,7 @@ public abstract class UnitConverter implements Serializable {
 
     /**
      * Holds the identity converter (unique). This converter does nothing
-     * (<code>IDENTITY.convert(x) == x</code>).
+     * (<code>ONE.convert(x) == x</code>).
      */
     public static final UnitConverter IDENTITY = new Identity();
 
@@ -72,13 +72,17 @@ public abstract class UnitConverter implements Serializable {
 
     /**
      * Indicates whether this converter is considered the same as the  
-     * converter specified (they must be of same types).
+     * converter specified. To be considered equal this converter 
+     * concatenated with the one specified must returns the {@link #IDENTITY}.
      *
      * @param  cvtr the converter with which to compare.
      * @return <code>true</code> if the specified object is a converter 
      *         considered equals to this converter;<code>false</code> otherwise.
      */
-    public abstract boolean equals(Object cvtr);
+    public boolean equals(Object cvtr) {
+        if (!(cvtr instanceof UnitConverter)) return false;
+        return this.concatenate(((UnitConverter)cvtr).inverse()) == IDENTITY;        
+    }
 
     /**
      * Returns a hash code value for this converter. Equals object have equal
@@ -87,7 +91,9 @@ public abstract class UnitConverter implements Serializable {
      * @return this converter hash code value.
      * @see    #equals
      */
-    public abstract int hashCode();
+    public int hashCode() {
+        return Float.floatToIntBits((float)convert(1.0));
+    }
 
     /**
      * Concatenates this converter with another converter. The resulting
@@ -128,16 +134,6 @@ public abstract class UnitConverter implements Serializable {
         @Override
         public UnitConverter concatenate(UnitConverter converter) {
             return converter;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return this == obj;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
         }
 
         private static final long serialVersionUID = 1L;
@@ -184,18 +180,6 @@ public abstract class UnitConverter implements Serializable {
         @Override
         public boolean isLinear() {
             return _first.isLinear() && _second.isLinear();
-        }
-
-        @Override
-        public boolean equals(Object cvtr) {
-            return (cvtr instanceof Compound)
-                    && _first.equals(((Compound) cvtr)._first)
-                    && _second.equals(((Compound) cvtr)._second);
-        }
-
-        @Override
-        public int hashCode() {
-            return _first.hashCode() + _second.hashCode();
         }
 
         private static final long serialVersionUID = 1L;

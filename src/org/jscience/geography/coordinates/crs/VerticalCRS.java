@@ -26,14 +26,14 @@ import org.opengis.util.InternationalString;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public abstract class VerticalCRS<C extends Coordinates> extends CoordinateReferenceSystem<C> {
+public abstract class VerticalCRS<C extends Coordinates<?>> extends CoordinateReferenceSystem<C> {
     
     /**
      * Holds the gravity-related height coordinate system.
      */
     public static final CoordinateSystem HEIGHT_CS = new CoordinateSystem() {
 
-        Axis heightAxis = new Axis("Gravity-related height", "Height", SI.METER,
+        Axis heightAxis = new Axis("Gravity-related height", "Height", SI.METRE,
                 AxisDirection.UP);
 
         public int getDimension() {
@@ -53,11 +53,11 @@ public abstract class VerticalCRS<C extends Coordinates> extends CoordinateRefer
             throw new UnsupportedOperationException();
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 

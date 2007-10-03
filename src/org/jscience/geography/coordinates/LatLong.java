@@ -29,7 +29,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public final class LatLong extends Coordinates<GeographicCRS> {
+public final class LatLong extends Coordinates<GeographicCRS<?>> {
 
     /**
      * Holds the coordinate reference system for all instances of this class. 
@@ -155,10 +155,10 @@ public final class LatLong extends Coordinates<GeographicCRS> {
     // OpenGIS Interface.
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
-            Unit u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(0).getUnit();
+            Unit<?> u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(0).getUnit();
             return DEGREE_ANGLE.getConverterTo(u).convert(_latitude);
         } else if (dimension == 1) {
-            Unit u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(1).getUnit();
+            Unit<?> u = GeographicCRS.LATITUDE_LONGITUDE_CS.getAxis(1).getUnit();
             return DEGREE_ANGLE.getConverterTo(u).convert(_longitude);
         } else {
             throw new IndexOutOfBoundsException();

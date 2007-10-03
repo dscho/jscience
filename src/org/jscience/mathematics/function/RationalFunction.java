@@ -78,6 +78,7 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F>
         return rf;
     }
 
+    @SuppressWarnings("unchecked")
     private static final ObjectFactory<RationalFunction> FACTORY = new ObjectFactory<RationalFunction>() {
 
         protected RationalFunction create() {
@@ -178,7 +179,7 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F>
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof RationalFunction) {
-            RationalFunction that = (RationalFunction) obj;
+            RationalFunction<?> that = (RationalFunction<?>) obj;
             return this._dividend.equals(this._dividend)
                     && this._divisor.equals(that._divisor);
         } else {
@@ -202,30 +203,35 @@ public class RationalFunction<F extends Field<F>> extends Function<F, F>
                 _dividend.pow(2));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<F, F> plus(Function<F, F> that) {
         return (that instanceof RationalFunction) ?
                 this.plus((RationalFunction<F>)that) : super.plus(that);       
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<F, F> minus(Function<F, F> that) {
         return (that instanceof RationalFunction) ?
                 this.minus((RationalFunction<F>)that) : super.minus(that);       
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<F, F> times(Function<F, F> that) {
         return (that instanceof RationalFunction) ?
                 this.times((RationalFunction<F>)that) : super.times(that);       
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public Function<F, F> divide(Function<F, F> that) {
         return (that instanceof RationalFunction) ?
                 this.divide((RationalFunction<F>)that) : super.divide(that);       
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public RationalFunction<F> pow(int n) {
         return (RationalFunction<F>) super.pow(n);

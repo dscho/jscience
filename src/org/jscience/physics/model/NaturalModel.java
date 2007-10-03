@@ -32,7 +32,7 @@ public  class NaturalModel extends PhysicalModel {
     /**
      * Holds the meter to time transform.
      */
-    private static RationalConverter METER_TO_TIME 
+    private static RationalConverter METRE_TO_TIME 
         = new RationalConverter(1, 299792458);
     
     /**
@@ -43,24 +43,24 @@ public  class NaturalModel extends PhysicalModel {
     }
 
     // Implements Dimension.Model
-    public Dimension getDimension(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return Dimension.TIME;
+    public Dimension getDimension(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return Dimension.TIME;
         return Dimension.Model.STANDARD.getDimension(unit);
     }
 
     // Implements Dimension.Model
-    public UnitConverter getTransform(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return METER_TO_TIME;
+    public UnitConverter getTransform(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return METRE_TO_TIME;
         return Dimension.Model.STANDARD.getTransform(unit);
     }
 //		// H_BAR (SECOND * JOULE = SECOND * (KILOGRAM / C^2 )) = 1
-//		// SPEED_OF_LIGHT (METER / SECOND) = 1
+//		// SPEED_OF_LIGHT (METRE / SECOND) = 1
 //		// BOLTZMANN (JOULE / KELVIN = (KILOGRAM / C^2 ) / KELVIN) = 1
 //		// MAGNETIC CONSTANT (NEWTON / AMPERE^2) = 1
-//		// GRAVITATIONAL CONSTANT (METER^3 / KILOGRAM / SECOND^2) = 1
+//		// GRAVITATIONAL CONSTANT (METRE^3 / KILOGRAM / SECOND^2) = 1
 //		SI.SECOND.setDimension(NONE, new MultiplyConverter((c * c)
 //				* MathLib.sqrt(c / (hBar * G))));
-//		SI.METER.setDimension(NONE, new MultiplyConverter(c
+//		SI.METRE.setDimension(NONE, new MultiplyConverter(c
 //				* MathLib.sqrt(c / (hBar * G))));
 //		SI.KILOGRAM.setDimension(NONE, new MultiplyConverter(MathLib.sqrt(G
 //				/ (hBar * c))));

@@ -29,7 +29,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 6, 2006
  */
-public final class Time extends Coordinates<TemporalCRS> implements Measurable<Duration> {
+public final class Time extends Coordinates<TemporalCRS<?>> implements Measurable<Duration> {
 
     /**
      * Holds the coordinate reference system for all instances of this class. 
@@ -114,7 +114,7 @@ public final class Time extends Coordinates<TemporalCRS> implements Measurable<D
     }
 
     @Override
-    public TemporalCRS getCoordinateReferenceSystem() {
+    public TemporalCRS<?> getCoordinateReferenceSystem() {
         return CRS;
     }
 
@@ -126,7 +126,7 @@ public final class Time extends Coordinates<TemporalCRS> implements Measurable<D
     // OpenGIS Interface.
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
-            Unit u = TemporalCRS.TIME_CS.getAxis(0).getUnit();
+            Unit<?> u = TemporalCRS.TIME_CS.getAxis(0).getUnit();
             return SECOND.getConverterTo(u).convert(_seconds);
         } else {
             throw new IndexOutOfBoundsException();

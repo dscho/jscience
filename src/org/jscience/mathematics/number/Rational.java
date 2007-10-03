@@ -238,8 +238,10 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
      * @return <code>this · that</code>.
      */
     public Rational times(Rational that) {
+        
         Rational r = Rational.valueOf(this._dividend.times(that._dividend),
                 this._divisor.times(that._divisor)).normalize();
+        
         return r;
     }
 
@@ -427,7 +429,7 @@ public final class Rational extends Number<Rational> implements Field<Rational>{
     }
 
     @Override
-    public Number copy() {
+    public Rational copy() {
         Rational r = FACTORY.object();
         r._dividend = _dividend.copy();
         r._divisor = _divisor.copy();

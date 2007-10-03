@@ -27,53 +27,48 @@ import javax.measure.quantity.Quantity;
 public final class CompoundUnit<Q extends Quantity> extends DerivedUnit<Q> {
 
     /**
-     * Holds the first unit (cannot be a compound unit)
+     * Holds the higher unit.
      */
-    private final Unit<Q> _first;
+    private final Unit<Q> _high;
 
     /**
-     * Holds the next units.
+     * Holds the lower unit.
      */
-    private final Unit<Q> _next;
+    private final Unit<Q> _low;
 
     /**
      * Creates a compound unit from the specified units. 
      *
-     * @param  unit the first unit.
-     * @param  next the next unit(s)
+     * @param  high the high unit.
+     * @param  low the lower unit(s)
      * @throws IllegalArgumentException if both units do not the same system
      *         unit.
      */
-    CompoundUnit(Unit<Q> first, Unit<Q> next) {
-        if (!first.getSystemUnit().equals(next.getSystemUnit()))
+    CompoundUnit(Unit<Q> high, Unit<Q> low) {
+        if (!high.getStandardUnit().equals(low.getStandardUnit()))
             throw new IllegalArgumentException(
                     "Both units do not have the same system unit");
-        if (first instanceof CompoundUnit) {
-            CompoundUnit<Q> firstUnit = (CompoundUnit<Q>) first;
-            _first = firstUnit._first;
-            _next = new CompoundUnit<Q>(firstUnit._next, next);
-        } else {
-            _first = first;
-            _next = next;
-        }
+        _high = high;
+        _low = low;
+        
     }
 
     /**
-     * Returns the first unit of this compound unit (never a compound unit)
+     * Returns the lower unit of this compound unit.
      *
-     * @return the first unit.
+     * @return the lower unit.
      */
-    public Unit<Q> getFirst() {
-        return _first;
+    public Unit<Q> getLower() {
+        return _low;
     }
 
     /**
-     * Returns the next unit(s) of this compound unit (can be a compound unit).
+     * Returns the higher unit of this compound unit.
      *
-     * @return the next units.
+     * @return the higher unit.
      */
-    public Unit<Q> getNext() {
-        return _next;
+    public Unit<Q> getHigher() {
+        return _high;
     }
 
     /**
@@ -90,24 +85,24 @@ public final class CompoundUnit<Q extends Quantity> extends DerivedUnit<Q> {
             return true;
         if (!(that instanceof CompoundUnit))
             return false;
-        CompoundUnit thatUnit = (CompoundUnit) that;
-        return this._first.equals(thatUnit._first)
-                && this._next.equals(thatUnit._next);
+        CompoundUnit<?> thatUnit = (CompoundUnit<?>) that;
+        return this._high.equals(thatUnit._high)
+                && this._low.equals(thatUnit._low);
     }
 
     @Override
     public int hashCode() {
-        return _first.hashCode() ^ _next.hashCode();
+        return _high.hashCode() ^ _low.hashCode();
     }
 
     @Override
-    public Unit<? super Q> getSystemUnit() {
-        return _first.getSystemUnit(); // equals(_next.getSystemUnit())
+    public Unit<? super Q> getStandardUnit() {
+        return _low.getStandardUnit(); 
     }
 
     @Override
-    public UnitConverter toSystemUnit() {
-        return _first.toSystemUnit();
+    public UnitConverter toStandardUnit() {
+        return _low.toStandardUnit();
     }
 
     private static final long serialVersionUID = 1L;

@@ -62,23 +62,6 @@ public final class MultiplyConverter extends UnitConverter {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof MultiplyConverter))
-            return false;
-        MultiplyConverter mc = (MultiplyConverter) obj;
-        return (float) _factor == (float) mc._factor;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = Float.floatToIntBits((float) _factor);
-        h += ~(h << 9);
-        h ^= (h >>> 14);
-        h += (h << 4);
-        return h ^ (h >>> 10);
-    }
-
-    @Override
     public UnitConverter concatenate(UnitConverter converter) {
         if (converter instanceof MultiplyConverter) {
             double factor = _factor * ((MultiplyConverter) converter)._factor;

@@ -78,23 +78,6 @@ public final class LogConverter extends UnitConverter {
         return false;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof LogConverter))
-            return false;
-        LogConverter lc = (LogConverter) obj;
-        return (float) _base == (float) lc._base;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = Float.floatToIntBits((float) _base);
-        h += ~(h << 9);
-        h ^= (h >>> 14);
-        h += (h << 4);
-        return h ^ (h >>> 10);
-    }
-
     /**
      * This inner class represents the inverse of the logarithmic converter
      * (exponentiation converter).
@@ -115,17 +98,6 @@ public final class LogConverter extends UnitConverter {
         @Override
         public boolean isLinear() {
             return false;
-        }
-
-        @Override
-        public boolean equals(Object cvtr) {
-            return (cvtr instanceof Inverse)
-            && LogConverter.this.equals(((Inverse) cvtr).inverse());
-        }
-
-        @Override
-        public int hashCode() {
-            return - LogConverter.this.hashCode();
         }
 
         private static final long serialVersionUID = 1L;

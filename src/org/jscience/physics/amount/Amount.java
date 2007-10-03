@@ -118,6 +118,7 @@ public final class Amount<Q extends Quantity> implements
      * &lt;Amount value="12" unit="µA"/&gt;</pre>
      * represents an electric current measurement.
      */
+    @SuppressWarnings("unchecked")
     protected static final XMLFormat<Amount> XML = new XMLFormat<Amount>(
             Amount.class) {
         
@@ -759,9 +760,9 @@ public final class Amount<Q extends Quantity> implements
     public boolean equals(Object that) {
         if (this == that)
             return true;
-        if (!(that instanceof Amount))
+        if (!(that instanceof Amount<?>))
             return false;
-        Amount<?> m = (Amount) that;
+        Amount<?> m = (Amount<?>) that;
         if (!_unit.equals(m._unit))
             return false;
         if (_isExact != m._isExact)
@@ -876,36 +877,36 @@ public final class Amount<Q extends Quantity> implements
     // Lookup tables //
     ///////////////////
 
-    static final FastMap<Unit, FastMap<Unit, Unit>> MULT_LOOKUP = new FastMap<Unit, FastMap<Unit, Unit>>(
+    static final FastMap<Unit<?>, FastMap<Unit<?>, Unit<?>>> MULT_LOOKUP = new FastMap<Unit<?>, FastMap<Unit<?>, Unit<?>>>(
             "UNITS_MULT_LOOKUP").setKeyComparator(FastComparator.DIRECT);
 
-    static final FastMap<Unit, Unit> INV_LOOKUP = new FastMap<Unit, Unit>(
+    static final FastMap<Unit<?>, Unit<?>> INV_LOOKUP = new FastMap<Unit<?>, Unit<?>>(
             "UNITS_INV_LOOKUP").setKeyComparator(FastComparator.DIRECT);
 
-    static final FastMap<Unit, FastMap<Unit, UnitConverter>> CVTR_LOOKUP = new FastMap<Unit, FastMap<Unit, UnitConverter>>(
+    static final FastMap<Unit<?>, FastMap<Unit<?>, UnitConverter>> CVTR_LOOKUP = new FastMap<Unit<?>, FastMap<Unit<?>, UnitConverter>>(
             "UNITS_CVTR_LOOKUP").setKeyComparator(FastComparator.DIRECT);
 
-    private static Unit productOf(Unit left, Unit right) {
-        FastMap<Unit, Unit> leftTable = MULT_LOOKUP.get(left);
+    private static Unit<?> productOf(Unit<?> left, Unit<?> right) {
+        FastMap<Unit<?>, Unit<?>> leftTable = MULT_LOOKUP.get(left);
         if (leftTable == null)
             return calculateProductOf(left, right);
-        Unit result = leftTable.get(right);
+        Unit<?> result = leftTable.get(right);
         if (result == null)
             return calculateProductOf(left, right);
         return result;
     }
 
-    private static synchronized Unit calculateProductOf(final Unit left, final Unit right) {
+    private static synchronized Unit<?> calculateProductOf(final Unit<?> left, final Unit<?> right) {
         MemoryArea memoryArea = MemoryArea.getMemoryArea(MULT_LOOKUP);
         memoryArea.executeInArea(new Runnable() {
             public void run() {
-                FastMap<Unit, Unit> leftTable = MULT_LOOKUP.get(left);
+                FastMap<Unit<?>, Unit<?>> leftTable = MULT_LOOKUP.get(left);
                 if (leftTable == null) {
-                    leftTable = new FastMap<Unit, Unit>().setKeyComparator(
+                    leftTable = new FastMap<Unit<?>, Unit<?>>().setKeyComparator(
                             FastComparator.DIRECT);
                     MULT_LOOKUP.put(left, leftTable);
                 }
-                Unit result = leftTable.get(right);
+                Unit<?> result = leftTable.get(right);
                 if (result == null) {
                     result = left.times(right);
                     leftTable.put(right, result);
@@ -915,18 +916,18 @@ public final class Amount<Q extends Quantity> implements
         return MULT_LOOKUP.get(left).get(right);
     }
 
-    private static Unit inverseOf(Unit unit) {
-        Unit inverse = INV_LOOKUP.get(unit);
+    private static Unit<?> inverseOf(Unit<?> unit) {
+        Unit<?> inverse = INV_LOOKUP.get(unit);
         if (inverse == null)
             return calculateInverseOf(unit);
         return inverse;
     }
 
-    private static synchronized Unit calculateInverseOf(final Unit unit) {
+    private static synchronized Unit<?> calculateInverseOf(final Unit<?> unit) {
         MemoryArea memoryArea = MemoryArea.getMemoryArea(INV_LOOKUP);
         memoryArea.executeInArea(new Runnable() {
             public void run() {
-                Unit inverse = INV_LOOKUP.get(unit);
+                Unit<?> inverse = INV_LOOKUP.get(unit);
                 if (inverse == null) {
                     inverse = unit.inverse();
                     INV_LOOKUP.put(unit, inverse);
@@ -936,8 +937,8 @@ public final class Amount<Q extends Quantity> implements
         return INV_LOOKUP.get(unit);
     }
 
-    private static UnitConverter converterOf(Unit left, Unit right) {
-        FastMap<Unit, UnitConverter> leftTable = CVTR_LOOKUP.get(left);
+    private static UnitConverter converterOf(Unit<?> left, Unit<?> right) {
+        FastMap<Unit<?>, UnitConverter> leftTable = CVTR_LOOKUP.get(left);
         if (leftTable == null)
             return calculateConverterOf(left, right);
         UnitConverter result = leftTable.get(right);
@@ -946,14 +947,14 @@ public final class Amount<Q extends Quantity> implements
         return result;
     }
 
-    private static synchronized UnitConverter calculateConverterOf(final Unit left,
-            final Unit right) {
+    private static synchronized UnitConverter calculateConverterOf(final Unit<?> left,
+            final Unit<?> right) {
         MemoryArea memoryArea = MemoryArea.getMemoryArea(CVTR_LOOKUP);
         memoryArea.executeInArea(new Runnable() {
             public void run() {
-                FastMap<Unit, UnitConverter> leftTable = CVTR_LOOKUP.get(left);
+                FastMap<Unit<?>, UnitConverter> leftTable = CVTR_LOOKUP.get(left);
                 if (leftTable == null) {
-                    leftTable = new FastMap<Unit, UnitConverter>()
+                    leftTable = new FastMap<Unit<?>, UnitConverter>()
                             .setKeyComparator(FastComparator.DIRECT);
                     synchronized (CVTR_LOOKUP) {
                         CVTR_LOOKUP.put(left, leftTable);
@@ -985,9 +986,9 @@ public final class Amount<Q extends Quantity> implements
     //////////////////////
 
     @SuppressWarnings("unchecked")
-    private static <Q extends Quantity> Amount<Q> newInstance(Unit unit) {
+    private static <Q extends Quantity> Amount<Q> newInstance(Unit<?> unit) {
         Amount<Q> measure = FACTORY.object();
-        measure._unit = unit;
+        measure._unit = (Unit<Q>)unit;
         return measure;
     }
 
@@ -1002,6 +1003,7 @@ public final class Amount<Q extends Quantity> implements
         return measure;
     }
 
+    @SuppressWarnings("unchecked")
     private static final ObjectFactory<Amount> FACTORY = new ObjectFactory<Amount>() {
 
         @Override

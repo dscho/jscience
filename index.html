@@ -177,7 +177,7 @@
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
          <DIV ALIGN="center"><SPAN CLASS="style7">
-         <IMG src="doc/img/new.gif" /><B>JS</B>cience version 4.1 - June 12, 2007</SPAN></DIV></TD>
+         <IMG src="doc/img/new.gif" /><B>JS</B>cience version 4.3.0 - October 3, 2007</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -188,10 +188,10 @@
             <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="jscience-4.1.1-src.zip">Get Source 
+            <DIV ALIGN="center"> <A HREF="jscience-4.3.0-src.zip">Get Source 
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-4.1.1-bin.zip">Get
+            <DIV ALIGN="center"> <A HREF="jscience-4.3.0-bin.zip">Get
                Library </A></DIV></TD>
             </TR>
          </TABLE></TD>
@@ -256,9 +256,14 @@
          <H4 CLASS="lineheight1 style10">java -jar jscience.jar version (shows version
          information) 
          <BR> java -jar jscience.jar test (performs self-tests) 
-         <BR> java -jar jscience.jar perf (runs benchmark)</H4><I><A
+         <BR> java -jar jscience.jar perf (runs benchmark)</H4>
+         <I>Note: <A HREF="http://javolution.org/api/javolution/lang/Configurable.html">Configuration</a>
+         parameters are loaded from system properties at start-up (e.g. 
+         <code>-Djavolution.context.ConcurrentContext#MAXIMUM_CONCURRENCY=0</code>
+         would disable concurrency).</I><BR><BR>
+         <A
             HREF="doc/benchmark.html">Here </A> are the benchmark results
-         on a Dual-Core CPU (T2050) @ 1.60 GHz running Windows XP. </I> 
+         on a Dual-Core CPU (T2050) @ 1.60 GHz running Windows XP. 
          </TD>
          </TR>
          <TR>
@@ -350,6 +355,9 @@
          <TD>
          <UL>
             <LI CLASS="lineheight1 style5">
+            <IMG src="doc/img/new.gif" /> JavaWorld Article: <A href="http://www.javaworld.com/javaworld/jw-10-2007/jw-10-jsr275.html">"Introduction to JSR-275: Measures and Units"</A></LI><BR>
+
+            <LI CLASS="lineheight1 style5">
             Book <A href="http://www.wickedcooljava.com/">"Wicked Cool Java"</A>
             describes the JScience library; along with some sample code that uses the units API).</LI><BR>
 
@@ -406,7 +414,42 @@
          <TR>
          <TD>
          <UL>
+            <LI CLASS="lineheight1 style5"><B>October 3, 2007: JScience 4.3</B><BR>
+           JavaWorld Article: <A href="http://www.javaworld.com/javaworld/jw-10-2007/jw-10-jsr275.html">Introduction to JSR-275: Measures and Units</A>
+            <OL>
+            <LI> Added <A HREF="api/javax/measure/DecimalMeasure.html">DecimalMeasure</A> [4.3.0] </LI>
+            <LI> Added <A HREF="api/javax/measure/VectorMeasure.html">VectorMeasure</A> [4.3.0] </LI>
+            <LI> Fixed issues: 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=32">32</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=33">33</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=34">34</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=38">38</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=39">39</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=41">41</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=55">55</A>, 
+            <A HREF="https://jscience.dev.java.net/issues/show_bug.cgi?id=58">58</A>, 
+            [4.3.0] </LI>
+            </OL>
+            </LI>
+
+            <LI CLASS="lineheight1 style5"><B>August 27, 2007: JScience 4.2</B><BR>
+            
+            <b>JSR-275 Draft Review Actions:</b>
+            <OL>
+            <LI> Add conversion method to Measure class:<CODE>Measure<V, Q>.to(Unit&lt;Q> unit)</CODE></LI>
+            <LI> Add Measure factory method for <CODE>double[]</CODE> and <CODE>BigDecimal</CODE></LI>
+            <LI> Add <CODE>SystemOfUnits</CODE> class.</LI>
+            <LI> Rename <CODE>Unit.getSystemUnit()</CODE> to <CODE>Unit.getStandardUnit()</CODE></LI>
+            <LI> Provide convenience method <CODE>Unit.alternate(String)</CODE></LI>
+            <LI> Add <CODE>MeasureFormat</CODE> (with direct support for CompoundUnit) </LI>
+            <LI> Provide <CODE>UnitFormat.getInstance()</CODE> and <CODE>UnitFormat.getUCUMInstance()</CODE> </LI>
+            <LI> Unit converters A and B are equals if <CODE>A.concatenate(B.inverse())</CODE> is identity.</LI>
+            <LI> Unit.asType(Class) raises a ClassCastException when dimensions mismatch.</LI>
+            </OL>
+            </LI>
+             
             <LI CLASS="lineheight1 style5"><B>June 12, 2007: JScience 4.1</B><BR>
+            Fixed <a href="https://jscience.dev.java.net/issues/show_bug.cgi?id=52">Issue 52</a> (matrix multiplication) [4.1.2]<BR>
             Upgraded to the latest <a href="http://javolution.org">Javolution</a> V5.1 [4.1.1]<BR>
             Added <a href="api/org/jscience/mathematics/number/FloatingPoint.html">FloatingPoint</a> numbers of fixed arbitrary precision<BR>
             Reference implementation for the <A href="https://jsr-275.dev.java.net/files/documents/4333/34956/jsr-275.pdf">JSR-275 : Measures and Units</A><BR>
@@ -467,7 +510,7 @@
          <TD CLASS="lineheight1 style5" WIDTH="55%">
           Comments      : <A HREF="https://jscience.dev.java.net/servlets/ProjectMailingListList">Mailing Lists</A><BR> 
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : July 4, 2007<BR>
+          Revision      : October 3, 2007<BR>
          </TD>
          </TR>
          <TR>

@@ -29,7 +29,7 @@ public final class QuantumModel extends PhysicalModel {
     /**
      * Holds the meter to time transform.
      */
-    private static RationalConverter METER_TO_TIME 
+    private static RationalConverter METRE_TO_TIME 
         = new RationalConverter(1, 299792458);
     
     /**
@@ -40,14 +40,14 @@ public final class QuantumModel extends PhysicalModel {
     }
 
     // Implements Dimension.Model
-    public Dimension getDimension(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return Dimension.TIME;
+    public Dimension getDimension(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return Dimension.TIME;
         return Dimension.Model.STANDARD.getDimension(unit);
     }
 
     // Implements Dimension.Model
-    public UnitConverter getTransform(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return METER_TO_TIME;
+    public UnitConverter getTransform(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return METRE_TO_TIME;
         return Dimension.Model.STANDARD.getTransform(unit);
     }
     
@@ -59,8 +59,8 @@ public final class QuantumModel extends PhysicalModel {
 //        SI.SECOND.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
 //                new MultiplyConverter(1E9 * ePlus / hBar));
 //
-//        // SPEED_OF_LIGHT (METER / SECOND) = 1
-//        SI.METER.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
+//        // SPEED_OF_LIGHT (METRE / SECOND) = 1
+//        SI.METRE.setDimension(Unit.ONE.divide(SI.GIGA(NonSI.ELECTRON_VOLT)),
 //                new MultiplyConverter(1E9 * ePlus / (c * hBar)));
 //
 //        // BOLTZMANN (JOULE / KELVIN = (KILOGRAM / C^2 ) / KELVIN) = 1

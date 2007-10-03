@@ -19,7 +19,7 @@ public class Main {
     public void main(String[] args) { 
 
         // Conversion between units.
-        System.out.println(KILO(METER).getConverterTo(MILE).convert(10));
+        System.out.println(KILO(METRE).getConverterTo(MILE).convert(10));
             
         // Retrieval of the system unit (identifies the measurement type).    
         System.out.println(REVOLUTION.divide(MINUTE).getSystemUnit());
@@ -44,7 +44,7 @@ public class Main {
     enforce compile-time checks of units/measures consistency, for example:[code]
 
     Unit<Duration> MINUTE = SECONDS.times(60); // Ok.
-    Unit<Duration> MINUTE = METER.times(60); // Compile error.
+    Unit<Duration> MINUTE = METRE.times(60); // Compile error.
     
     Unit<Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
     Unit<Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
@@ -57,5 +57,5 @@ public class Main {
     [/code]</p>
    
 <h3>UML Diagram</h3>
-        <IMG alt="UML Diagram" src="doc-files/units.gif">
+        <IMG alt="UML Diagram" src="doc-files/unit.png">
 </body>

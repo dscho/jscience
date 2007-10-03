@@ -85,6 +85,7 @@ public abstract class Matrix<F extends Field<F>>
      *        <Complex real="-5.0" imaginary="-1.0" />
      *    </DenseMatrix>[/code]
      */
+    @SuppressWarnings("unchecked")
     protected static final XMLFormat<Matrix> XML = new XMLFormat<Matrix>(
             Matrix.class) {
 
@@ -482,7 +483,7 @@ public abstract class Matrix<F extends Field<F>>
             return false;
         final int m = this.getNumberOfRows();
         final int n = this.getNumberOfColumns();
-        Matrix M = (Matrix) that;
+        Matrix<?> M = (Matrix<?>) that;
         if ((M.getNumberOfRows() != m) || (M.getNumberOfColumns() != n))
             return false;
         for (int i = m; --i >= 0;) {

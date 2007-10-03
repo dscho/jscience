@@ -25,7 +25,7 @@ import org.opengis.util.InternationalString;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public class CompoundCRS<C1 extends Coordinates, C2 extends Coordinates>
+public class CompoundCRS<C1 extends Coordinates<?>, C2 extends Coordinates<?>>
         extends CoordinateReferenceSystem<CompoundCoordinates<C1, C2>> {
     
     final CoordinateReferenceSystem<C1> _first;
@@ -49,11 +49,11 @@ public class CompoundCRS<C1 extends Coordinates, C2 extends Coordinates>
             throw new UnsupportedOperationException();
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 
@@ -64,8 +64,8 @@ public class CompoundCRS<C1 extends Coordinates, C2 extends Coordinates>
         public String toWKT() throws UnsupportedOperationException {
             throw new UnsupportedOperationException();
         }};
-    
-    
+
+
     public CompoundCRS(CoordinateReferenceSystem<C1> first, CoordinateReferenceSystem<C2> next) {
         _first = first;
         _next = next;        

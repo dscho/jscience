@@ -9,6 +9,8 @@
 package org.jscience.physics.amount;
 
 import java.io.IOException;
+import java.text.ParseException;
+
 import org.jscience.economics.money.Currency;
 import org.jscience.economics.money.Money;
 
@@ -21,6 +23,7 @@ import javolution.text.TextBuilder;
 import javolution.text.TextFormat;
 import javolution.text.TypeFormat;
 import javolution.context.LocalContext;
+
 //@RETROWEAVER import javolution.text.Appendable;
 
 /**
@@ -43,7 +46,7 @@ import javolution.context.LocalContext;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 21, 2006
  */
-public abstract class AmountFormat extends TextFormat<Amount> {
+public abstract class AmountFormat extends TextFormat<Amount<?>> {
 
     /**
      * Holds current format.
@@ -140,16 +143,16 @@ public abstract class AmountFormat extends TextFormat<Amount> {
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
-                        arg1);
+                return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
             }
             double value = arg0.getEstimatedValue();
             double error = arg0.getAbsoluteError();
-            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib
+                    .abs(value)));
             int log10Error = (int) MathLib.floor(MathLib.log10(error));
             int digits = log10Value - log10Error - 1; // Exact digits.
             digits = MathLib.max(1, digits + _errorDigits);
- 
+
             boolean scientific = (MathLib.abs(value) >= 1E6)
                     || (MathLib.abs(value) < 1E-6);
             boolean showZeros = false;
@@ -161,34 +164,40 @@ public abstract class AmountFormat extends TextFormat<Amount> {
             showZeros = true;
             TypeFormat.format(error, _errorDigits, scientific, showZeros, arg1);
             arg1.append(") ");
-            return UnitFormat.getStandardInstance()
-                    .format(arg0.getUnit(), arg1);
+            return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
         }
 
         @Override
-        public Amount parse(CharSequence arg0, Cursor arg1) {
-            arg1.skip('(', arg0);
+        public Amount<?> parse(CharSequence arg0, Cursor arg1) {
             int start = arg1.getIndex();
-            long value = TypeFormat.parseLong(arg0, 10, arg1);
-            if (arg0.charAt(arg1.getIndex()) == ' ') { // Exact! 
+            try {
+                arg1.skip('(', arg0);
+                long value = TypeFormat.parseLong(arg0, 10, arg1);
+                if (arg0.charAt(arg1.getIndex()) == ' ') { // Exact! 
+                    arg1.skip(' ', arg0);
+                    Unit<?> unit = UnitFormat.getInstance().parseProductUnit(
+                            arg0, arg1);
+                    return Amount.valueOf(value, unit);
+                }
+                arg1.setIndex(start);
+                double amount = TypeFormat.parseDouble(arg0, arg1);
                 arg1.skip(' ', arg0);
-                Unit<?> unit = UnitFormat.getStandardInstance().parse(arg0,
+                double error = 0;
+                if (arg0.charAt(arg1.getIndex()) == '±') { // Error specified. 
+                    arg1.skip('±', arg0);
+                    arg1.skip(' ', arg0);
+                    error = TypeFormat.parseDouble(arg0, arg1);
+                }
+                arg1.skip(')', arg0);
+                arg1.skip(' ', arg0);
+                Unit<?> unit = UnitFormat.getInstance().parseProductUnit(arg0,
                         arg1);
-                return Amount.valueOf(value, unit);
+                return Amount.valueOf(amount, error, unit);
+            } catch (ParseException e) {
+                arg1.setIndex(start);
+                arg1.setErrorIndex(e.getErrorOffset());
+                return null;
             }
-            arg1.setIndex(start);
-            double amount = TypeFormat.parseDouble(arg0, arg1);
-            arg1.skip(' ', arg0);
-            double error = 0;
-            if (arg0.charAt(arg1.getIndex()) == '±') { // Error specified. 
-                arg1.skip('±', arg0);
-                arg1.skip(' ', arg0);
-                error = TypeFormat.parseDouble(arg0, arg1);
-            }
-            arg1.skip(')', arg0);
-            arg1.skip(' ', arg0);
-            Unit<?> unit = UnitFormat.getStandardInstance().parse(arg0, arg1);
-            return Amount.valueOf(amount, error, unit);
         }
     }
 
@@ -221,16 +230,16 @@ public abstract class AmountFormat extends TextFormat<Amount> {
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
-                        arg1);
+                return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
             }
             double value = arg0.getEstimatedValue();
             double error = arg0.getAbsoluteError();
-            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib
+                    .abs(value)));
             int log10Error = (int) MathLib.floor(MathLib.log10(error));
             int digits = log10Value - log10Error - 1; // Exact digits.
             digits = MathLib.max(1, digits + _errorDigits);
- 
+
             boolean scientific = (MathLib.abs(value) >= 1E6)
                     || (MathLib.abs(value) < 1E-6);
             boolean showZeros = true;
@@ -241,17 +250,17 @@ public abstract class AmountFormat extends TextFormat<Amount> {
                 if (tb.charAt(endMantissa) == 'E')
                     break;
             }
-            int bracketError = (int) (error * MathLib.toDoublePow10(1, -log10Error + _errorDigits - 1));
-            tb.insert(endMantissa, Text.valueOf('[').plus(Text.valueOf(bracketError))
-                    .plus(']'));
+            int bracketError = (int) (error * MathLib.toDoublePow10(1,
+                    -log10Error + _errorDigits - 1));
+            tb.insert(endMantissa, Text.valueOf('[').plus(
+                    Text.valueOf(bracketError)).plus(']'));
             arg1.append(tb);
             arg1.append(' ');
-            return UnitFormat.getStandardInstance()
-                    .format(arg0.getUnit(), arg1);
+            return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
         }
 
         @Override
-        public Amount parse(CharSequence arg0, Cursor arg1) {
+        public Amount<?> parse(CharSequence arg0, Cursor arg1) {
             // TBD
             throw new UnsupportedOperationException("Not supported yet");
         }
@@ -277,26 +286,25 @@ public abstract class AmountFormat extends TextFormat<Amount> {
             if (arg0.isExact()) {
                 TypeFormat.format(arg0.getExactValue(), arg1);
                 arg1.append(' ');
-                return UnitFormat.getStandardInstance().format(arg0.getUnit(),
-                        arg1);
+                return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
             }
             double value = arg0.getEstimatedValue();
             double error = arg0.getAbsoluteError();
-            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib.abs(value)));
+            int log10Value = (int) MathLib.floor(MathLib.log10(MathLib
+                    .abs(value)));
             int log10Error = (int) MathLib.floor(MathLib.log10(error));
             int digits = log10Value - log10Error - 1; // Exact digits.
- 
+
             boolean scientific = (MathLib.abs(value) >= 1E6)
                     || (MathLib.abs(value) < 1E-6);
             boolean showZeros = true;
             TypeFormat.format(value, digits, scientific, showZeros, arg1);
             arg1.append(' ');
-            return UnitFormat.getStandardInstance()
-                    .format(arg0.getUnit(), arg1);
+            return UnitFormat.getInstance().format(arg0.getUnit(), arg1);
         }
 
         @Override
-        public Amount parse(CharSequence arg0, Cursor arg1) {
+        public Amount<?> parse(CharSequence arg0, Cursor arg1) {
             throw new UnsupportedOperationException(
                     "This format should not be used for parsing "
                             + "(not enough information on the error");
@@ -323,7 +331,7 @@ public abstract class AmountFormat extends TextFormat<Amount> {
             throw new UnsupportedOperationException();
         }
         arg1.append(' ');
-        return UnitFormat.getStandardInstance().format(currency, arg1);
+        return UnitFormat.getInstance().format(currency, arg1);
     }
 
 }

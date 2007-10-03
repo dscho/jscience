@@ -90,7 +90,7 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> implements
         return p;
     }
 
-    private static boolean isZero(GroupAdditive coefficient) {
+    private static boolean isZero(GroupAdditive<?> coefficient) {
         return coefficient.equals(coefficient.opposite());
     }
     
@@ -332,24 +332,28 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> implements
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<R, R> plus(Function<R, R> that) {
         return (that instanceof Polynomial) ?
                 this.plus((Polynomial<R>)that) : super.plus(that);       
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<R, R> minus(Function<R, R> that) {
         return (that instanceof Polynomial) ?
                 this.minus((Polynomial<R>)that) : super.minus(that);       
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Function<R, R> times(Function<R, R> that) {
         return (that instanceof Polynomial) ?
                 this.times((Polynomial<R>)that) : super.times(that);       
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public Polynomial<R> pow(int n) {
         return (Polynomial<R>) super.pow(n);
@@ -390,7 +394,7 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> implements
     public boolean equals(Object obj) {
         if (!(obj instanceof Polynomial))
             return false;
-        Polynomial that = (Polynomial) obj;
+        Polynomial<?> that = (Polynomial<?>) obj;
         return this._termToCoef.equals(that._termToCoef);
     }
 
@@ -437,6 +441,8 @@ public class Polynomial<R extends Ring<R>> extends Function<R, R> implements
         p._termToCoef.clear();
         return p;
     }
+    
+    @SuppressWarnings("unchecked")
     private static final ObjectFactory<Polynomial> FACTORY = new ObjectFactory<Polynomial>() {
         protected Polynomial create() {
             return new Polynomial();

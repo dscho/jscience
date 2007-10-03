@@ -62,22 +62,6 @@ public final class AddConverter extends UnitConverter {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AddConverter)) return false;
-        AddConverter ac = (AddConverter) obj;
-        return (float)_offset == (float) ac._offset;
-    }
-
-    @Override
-    public int hashCode() {
-        int h = Float.floatToIntBits((float)_offset);
-        h += ~(h << 9);
-        h ^= (h >>> 14);
-        h += (h << 4);
-        return h ^ (h >>> 10);
-    }
-    
-    @Override
     public UnitConverter concatenate(UnitConverter converter) {
         if (converter instanceof AddConverter) {
             double offset = _offset + ((AddConverter)converter)._offset;

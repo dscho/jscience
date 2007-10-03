@@ -26,7 +26,7 @@ public class RelativisticModel extends PhysicalModel {
     /**
      * Holds the meter to time transform.
      */
-    private static RationalConverter METER_TO_TIME 
+    private static RationalConverter METRE_TO_TIME 
         = new RationalConverter(1, 299792458);
     
     /**
@@ -42,14 +42,14 @@ public class RelativisticModel extends PhysicalModel {
     }
 
     // Implements Dimension.Model
-    public Dimension getDimension(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return Dimension.TIME;
+    public Dimension getDimension(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return Dimension.TIME;
         return Dimension.Model.STANDARD.getDimension(unit);
     }
 
     // Implements Dimension.Model
-    public UnitConverter getTransform(BaseUnit unit) {
-        if (unit.equals(SI.METER)) return METER_TO_TIME;
+    public UnitConverter getTransform(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return METRE_TO_TIME;
         return Dimension.Model.STANDARD.getTransform(unit);
     }
 }

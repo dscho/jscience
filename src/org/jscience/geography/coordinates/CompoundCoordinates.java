@@ -13,6 +13,7 @@ import javolution.xml.XMLFormat;
 import javolution.xml.stream.XMLStreamException;
 
 import org.jscience.geography.coordinates.crs.CompoundCRS;
+import org.jscience.geography.coordinates.crs.CoordinateReferenceSystem;
 
 /**
  * This class represents a coordinates made up by combining 
@@ -21,7 +22,7 @@ import org.jscience.geography.coordinates.crs.CompoundCRS;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public final class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordinates>
+public final class CompoundCoordinates<C1 extends Coordinates<?>, C2 extends Coordinates<?>>
         extends Coordinates<CompoundCRS<C1, C2>> {
 
     /**
@@ -41,14 +42,15 @@ public final class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordi
      * @param next the next coordinates. 
      */
     @SuppressWarnings("unchecked")
-    public static <T1 extends Coordinates, T2 extends Coordinates> CompoundCoordinates<T1, T2> valueOf(
+    public static <T1 extends Coordinates<?>, T2 extends Coordinates<?>> CompoundCoordinates<T1, T2> valueOf(
             T1 first, T2 next) {
-        CompoundCoordinates<T1, T2> coord = FACTORY.object();
+        CompoundCoordinates coord = FACTORY.object();
         coord._first = first;
         coord._next = next;
         return coord;
     }
 
+    @SuppressWarnings("unchecked")
     private static final ObjectFactory<CompoundCoordinates> FACTORY = new ObjectFactory<CompoundCoordinates>() {
 
         @Override
@@ -82,8 +84,8 @@ public final class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordi
     @SuppressWarnings("unchecked")
     @Override
     public CompoundCRS<C1, C2> getCoordinateReferenceSystem() {
-        return new CompoundCRS<C1, C2>(_first.getCoordinateReferenceSystem(),
-                _next.getCoordinateReferenceSystem());
+        return new CompoundCRS<C1, C2>((CoordinateReferenceSystem<C1>) _first.getCoordinateReferenceSystem(),
+                (CoordinateReferenceSystem<C2>) _next.getCoordinateReferenceSystem());
     }
 
     // OpenGIS Interface.
@@ -102,13 +104,14 @@ public final class CompoundCoordinates<C1 extends Coordinates, C2 extends Coordi
     }
 
     @Override
-    public CompoundCoordinates copy() {
+    public CompoundCoordinates<?, ?> copy() {
         return CompoundCoordinates.valueOf(_first, _next);
     }
 
     // Default serialization.
     //
 
+    @SuppressWarnings("unchecked")
     static final XMLFormat<CompoundCoordinates> XML = new XMLFormat<CompoundCoordinates>(
             CompoundCoordinates.class) {
 

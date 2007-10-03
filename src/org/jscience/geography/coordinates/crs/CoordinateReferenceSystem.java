@@ -35,7 +35,7 @@ import org.opengis.referencing.cs.CoordinateSystemAxis;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public abstract class CoordinateReferenceSystem<C extends Coordinates>
+public abstract class CoordinateReferenceSystem<C extends Coordinates<?>>
         implements org.opengis.referencing.crs.CoordinateReferenceSystem {
 
     
@@ -74,13 +74,13 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
      * @throws ConversionException if the conversion is not possible
      *         (e.g. geographic to temporal).
      */
-    public <T extends Coordinates> CoordinatesConverter<C, T> getConverterTo(
+    public <T extends Coordinates<?>> CoordinatesConverter<C, T> getConverterTo(
             CoordinateReferenceSystem<T> that) {
         return new GeneralConverter<T>(that);
     }
 
     // General implementation using absolute position as intermediary.
-    private class GeneralConverter<T extends Coordinates> implements
+    private class GeneralConverter<T extends Coordinates<?>> implements
             CoordinatesConverter<C, T> {
         private final CoordinateReferenceSystem<T> _toCRS;
 
@@ -165,7 +165,7 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
      *
      * @return The aliases, or an empty collection if there is none.
      */
-    public Collection getAlias() {
+    public Collection<String> getAlias() {
         return EMPTY_SET;
     }
 
@@ -175,7 +175,7 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
      *
      * @return This object identifiers, or an empty set if there is none.
      */
-    public Set getIdentifiers() {
+    public Set<String> getIdentifiers() {
         return EMPTY_SET;
     }
 
@@ -210,11 +210,11 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
 
         private final String _abbreviation;
 
-        private final Unit _unit;
+        private final Unit<?> _unit;
 
         private final AxisDirection _direction;
 
-        public Axis(final String name, String abbreviation, Unit unit,
+        public Axis(final String name, String abbreviation, Unit<?> unit,
                 AxisDirection direction) {
             _name = new Name(name);
             _abbreviation = abbreviation;
@@ -230,7 +230,7 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
             return _abbreviation;
         }
 
-        public final Unit getUnit() {
+        public final Unit<?> getUnit() {
             return _unit;
         }
 
@@ -238,11 +238,11 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
             return _direction;
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 
@@ -277,5 +277,5 @@ public abstract class CoordinateReferenceSystem<C extends Coordinates>
         }
     }
 
-    static final FastSet<?> EMPTY_SET = new FastSet<Object>();
+    static final FastSet<String> EMPTY_SET = new FastSet<String>();
 }

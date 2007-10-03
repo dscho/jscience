@@ -39,6 +39,7 @@ public final class Constant<R extends Ring<R>> extends Polynomial<R> {
         return cst;
     }
 
+    @SuppressWarnings("unchecked")
     private static final ObjectFactory<Constant> FACTORY = new ObjectFactory<Constant>() {
         protected Constant create() {
             return new Constant();

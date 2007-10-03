@@ -38,7 +38,7 @@ public final class Constants {
      *      Wikipedia: Acceleration due to gravity</a>
      */
     public final static Amount<Acceleration> g = 
-        Amount.valueOf(980665, SI.METER_PER_SQUARE_SECOND).divide(100000); 
+        Amount.valueOf(980665, SI.METRES_PER_SQUARE_SECOND).divide(100000); 
 
     /**
      * Holds the electron rest mass.
@@ -98,13 +98,13 @@ public final class Constants {
     /**
      * Holds the speed of light in vacuum (exact).
      */
-    public final static Amount<Velocity>  c = Amount.valueOf(299792458, SI.METER_PER_SECOND);
+    public final static Amount<Velocity>  c = Amount.valueOf(299792458, SI.METRES_PER_SECOND);
     
     /**
      * Holds {@link #c}².
      */
     public final static Amount<?> c_square = 
-        Amount.valueOf(299792458L * 299792458L, SI.METER_PER_SECOND.pow(2));
+        Amount.valueOf(299792458L * 299792458L, SI.METRES_PER_SECOND.pow(2));
 
     /**
      * Holds the Boltzmann constant.
@@ -172,7 +172,7 @@ public final class Constants {
      */
     public final static Amount<?> G = Amount.valueOf(
         6.6742E-11, 0.001E-11,
-        SI.METER.pow(3).divide(SI.KILOGRAM).divide(SI.SECOND.pow(2)));
+        SI.METRE.pow(3).divide(SI.KILOGRAM).divide(SI.SECOND.pow(2)));
 
     /**
      * Holds the Avogadro constant.
@@ -216,13 +216,13 @@ public final class Constants {
      */
     public final static Amount<?> Rinf 
         // Do not use formala as experimental incertainty is very low. 
-        = Amount.valueOf(10973731.568525, 0.000073, SI.METER.inverse());
+        = Amount.valueOf(10973731.568525, 0.000073, SI.METRE.inverse());
     
     /**
      * Holds the Bohr radius (α/(4π·Rinf))
      */
     public final static Amount<Length> a0
-        = α.divide(π.times(Rinf).times(4)).to(SI.METER);
+        = α.divide(π.times(Rinf).times(4)).to(SI.METRE);
 
     /**
      * Holds the Hartree energy (2Rinf·h·c)
@@ -262,7 +262,7 @@ public final class Constants {
     /**
      * Holds the Planck length (ℏ/(mP·c))
      */
-    public final static Amount<Length> lP = ℏ.divide(mP.times(c)).to(SI.METER);
+    public final static Amount<Length> lP = ℏ.divide(mP.times(c)).to(SI.METRE);
 
     /**
      * Holds the Planck time (lP/c)

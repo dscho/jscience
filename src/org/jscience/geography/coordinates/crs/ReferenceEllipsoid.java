@@ -110,7 +110,7 @@ public class ReferenceEllipsoid {
      */
     public Measurable<Length> getSemimajorAxis() {
         if (_semimajorAxis == null) {
-            _semimajorAxis = Measure.valueOf(a, SI.METER);
+            _semimajorAxis = Measure.valueOf(a, SI.METRE);
         }
         return _semimajorAxis;
     }
@@ -122,7 +122,7 @@ public class ReferenceEllipsoid {
      */
     public Measurable<Length> getsSemiminorAxis() {
         if (_semiminorAxis == null) {
-            _semiminorAxis = Measure.valueOf(b, SI.METER);
+            _semiminorAxis = Measure.valueOf(b, SI.METRE);
         }
         return _semiminorAxis;
     }
@@ -184,7 +184,7 @@ public class ReferenceEllipsoid {
       * @return The radius of curvature in the prime vertical.
       */
      public Measurable<Length> verticalRadiusOfCurvature(final Measurable<Angle> latitude) {
-         return Measure.valueOf(verticalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
+         return Measure.valueOf(verticalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METRE);
      }
 
     /**
@@ -207,7 +207,7 @@ public class ReferenceEllipsoid {
      * @return  The radius of curvature in the meridian (in meters).
      */
     public Measurable<Length> meridionalRadiusOfCurvature(final Measurable<Angle> latitude) {
-        return Measure.valueOf(meridionalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METER);
+        return Measure.valueOf(meridionalRadiusOfCurvature(latitude.doubleValue(SI.RADIAN)), SI.METRE);
     }
 
     /**
@@ -247,7 +247,7 @@ public class ReferenceEllipsoid {
      * @return  The meridional arc.
      */
     public Measurable<Length> meridionalArc(final Measurable<Angle> latitude) {
-        return Measure.valueOf(meridionalArc(latitude.doubleValue(SI.RADIAN)), SI.METER);
+        return Measure.valueOf(meridionalArc(latitude.doubleValue(SI.RADIAN)), SI.METRE);
     }
 
 }

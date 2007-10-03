@@ -119,7 +119,7 @@ public class Currency extends DerivedUnit<Money> {
      */
     public Currency(String code) {
         _toBaseUnit = new Converter(code, false);
-        UnitFormat.getStandardInstance().label(this, code);
+        UnitFormat.getInstance().label(this, code);
     }
 
     /**
@@ -219,12 +219,12 @@ public class Currency extends DerivedUnit<Money> {
     }    
     
     @Override
-    public Unit<? super Money> getSystemUnit() {
+    public Unit<? super Money> getStandardUnit() {
         return Money.BASE_UNIT;
     }
 
     @Override
-    public UnitConverter toSystemUnit() {
+    public UnitConverter toStandardUnit() {
         return _toBaseUnit;
     }
 

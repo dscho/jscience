@@ -9,9 +9,11 @@
 package javax.measure.unit;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.HashMap;
 
+import javax.measure.MeasureFormat;
 import javax.measure.converter.AddConverter;
 import javax.measure.converter.ConversionException;
 import javax.measure.converter.MultiplyConverter;
@@ -33,7 +35,7 @@ import javax.measure.quantity.Quantity;
  *     {@link #ONE} and not "kg/kg" due to automatic unit factorization.</p>
  *
  * <p> This class supports the multiplication of offsets units. The result is
- *     usually a unit not convertible to its {@link #getSystemUnit system unit}.
+ *     usually a unit not convertible to its {@link #getStandardUnit standard unit}.
  *     Such units may appear in derivative quantities. For example °C/m is an 
  *     unit of gradient, which is common in atmospheric and oceanographic
  *     research.</p>
@@ -60,13 +62,12 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     /**
      * Holds the unique symbols collection (base unit or alternate units).
      */
-    static final HashMap<String, Unit> SYMBOL_TO_UNIT = new HashMap<String, Unit>();
+    static final HashMap<String, Unit<?>> SYMBOL_TO_UNIT = new HashMap<String, Unit<?>>();
 
     /**
-     * Default constructor (applications should sub-class either 
-     * {@link BaseUnit} or {@link DerivedUnit} but not {@link Unit}).
+     * Default constructor.
      */
-    Unit() {
+    protected Unit() {
     }
 
     //////////////////////////////////////////////////////
@@ -76,11 +77,11 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     /**
      * Returns the {@link BaseUnit base unit}, {@link AlternateUnit alternate
      * unit} or product of base units and alternate units this unit is derived
-     * from. The system unit identifies the "type" of 
+     * from. The standard unit identifies the "type" of 
      * {@link javax.measure.quantity.Quantity quantity} for which this unit is employed.
      * For example:[code]
      *    boolean isAngularVelocity(Unit<?> u) {
-     *       return u.getSystemUnit().equals(RADIAN.divide(SECOND));
+     *       return u.getStandardUnit().equals(RADIAN.divide(SECOND));
      *    }
      *    assert(REVOLUTION.divide(MINUTE).isAngularVelocity());  
      * [/code]
@@ -90,14 +91,15 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      *              (e.g. °C/m and K/m).</i></p>
      * @return the system unit this unit is derived from.
      */
-    public abstract Unit<? super Q> getSystemUnit();
+    public abstract Unit<? super Q> getStandardUnit();
 
+    
     /**
      * Returns the converter from this unit to its system unit.
      * 
      * @return <code>this.getConverterTo(this.getSystemUnit())</code>
      */
-    public abstract UnitConverter toSystemUnit();
+    public abstract UnitConverter toStandardUnit();
 
     /**
      * Returns the hash code for this unit.
@@ -117,6 +119,18 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
     public abstract boolean equals(Object that);
 
     /**
+     * Indicates if this unit is a standard unit (base units and 
+     * alternate units are standard units). The standard unit identifies 
+     * the "type" of {@link javax.measure.quantity.Quantity quantity} for 
+     * which the unit is employed.
+     * 
+     * @return <code>getStandardUnit().equals(this)</code>
+     */
+    public boolean isStandardUnit() {
+        return getStandardUnit().equals(this);
+    }
+
+    /**
      * Indicates if this unit is compatible with the unit specified.
      * Units don't need to be equals to be compatible. For example:[code]
      *     RADIAN.equals(ONE) == false
@@ -126,23 +140,40 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @return <code>this.getDimension().equals(that.getDimension())</code>
      * @see #getDimension()
      */
-    public final boolean isCompatible(Unit that) {
+    public final boolean isCompatible(Unit<?> that) {
         return (this == that)
-                || this.getSystemUnit().equals(that.getSystemUnit())
+                || this.getStandardUnit().equals(that.getStandardUnit())
                 || this.getDimension().equals(that.getDimension());
     }
 
     /**
-     * Casts this unit to a parameterized unit of specified nature.
+     * Casts this unit to a parameterized unit of specified nature or 
+     * throw a <code>ClassCastException</code> if the dimension of the 
+     * specified quantity and this unit's dimension do not match.
      * For example:[code]
      * Unit<Length> LIGHT_YEAR = NonSI.C.times(NonSI.YEAR).asType(Length.class);
      * [/code]
      * 
      * @param  type the quantity class identifying the nature of the unit.
      * @return this unit parameterized with the specified type.
+     * @throws ClassCastException if the dimension of this unit is different 
+     *         from the specified quantity dimension.
+     * @throws UnsupportedOperationException if the specified quantity class
+     *         does not have a public static field named "UNIT" holding the 
+     *         standard unit for the quantity.
      */
     @SuppressWarnings("unchecked")
-    public final <T extends Quantity> Unit<T> asType(Class<T> type) {
+    public final <T extends Quantity> Unit<T> asType(Class<T> type) throws ClassCastException {
+        Dimension dim1 = this.getDimension();
+        Unit<T> u = null;
+        try {
+            u = (Unit<T>)type.getField("UNIT").get(null);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+        Dimension dim2 = u.getDimension();
+        if (!dim1.equals(dim2))
+            throw new ClassCastException();
         return (Unit<T>)this;
     }
    
@@ -153,16 +184,16 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @return the dimension of this unit for the current model.
      */
     public final Dimension getDimension() {
-        Unit systemUnit = this.getSystemUnit();
+        Unit<?> systemUnit = this.getStandardUnit();
         if (systemUnit instanceof BaseUnit)
-            return Dimension.getModel().getDimension((BaseUnit) systemUnit);
+            return Dimension.getModel().getDimension((BaseUnit<?>) systemUnit);
         if (systemUnit instanceof AlternateUnit)
-            return ((AlternateUnit) systemUnit).getParent().getDimension();
+            return ((AlternateUnit<?>) systemUnit).getParent().getDimension();
         // Product of units.
-        ProductUnit productUnit = (ProductUnit) systemUnit;
+        ProductUnit<?> productUnit = (ProductUnit<?>) systemUnit;
         Dimension dimension = Dimension.NONE;
         for (int i = 0; i < productUnit.getUnitCount(); i++) {
-            Unit unit = productUnit.getUnit(i);
+            Unit<?> unit = productUnit.getUnit(i);
             Dimension d = unit.getDimension().pow(productUnit.getUnitPow(i))
                     .root(productUnit.getUnitRoot(i));
             dimension = dimension.times(d);
@@ -178,38 +209,38 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @throws ConversionException if the conveter cannot be constructed
      *         (e.g. <code>!this.isCompatible(that)</code>).
      */
-    public final UnitConverter getConverterTo(Unit that)
+    public final UnitConverter getConverterTo(Unit<?> that)
             throws ConversionException {
         if (this.equals(that))
             return UnitConverter.IDENTITY;
-        Unit thisSystemUnit = this.getSystemUnit();
-        Unit thatSystemUnit = that.getSystemUnit();
+        Unit<?> thisSystemUnit = this.getStandardUnit();
+        Unit<?> thatSystemUnit = that.getStandardUnit();
         if (thisSystemUnit.equals(thatSystemUnit))
-            return that.toSystemUnit().inverse().concatenate(
-                    this.toSystemUnit());
+            return that.toStandardUnit().inverse().concatenate(
+                    this.toStandardUnit());
         // Use dimensional transforms.
         if (!thisSystemUnit.getDimension()
                 .equals(thatSystemUnit.getDimension()))
             throw new ConversionException(this + " is not compatible with "
                     + that);
         // Transform between SystemUnit and BaseUnits is Identity. 
-        UnitConverter thisTransform = this.toSystemUnit().concatenate(
+        UnitConverter thisTransform = this.toStandardUnit().concatenate(
                 transformOf(this.getBaseUnits()));
-        UnitConverter thatTransform = that.toSystemUnit().concatenate(
+        UnitConverter thatTransform = that.toStandardUnit().concatenate(
                 transformOf(that.getBaseUnits()));
         return thatTransform.inverse().concatenate(thisTransform);
     }
 
-    private Unit getBaseUnits() {
-        Unit systemUnit = this.getSystemUnit();
+    private Unit<?> getBaseUnits() {
+        Unit<?> systemUnit = this.getStandardUnit();
         if (systemUnit instanceof BaseUnit) return systemUnit;
         if (systemUnit instanceof AlternateUnit) 
-            return ((AlternateUnit)systemUnit).getParent().getBaseUnits();
+            return ((AlternateUnit<?>)systemUnit).getParent().getBaseUnits();
         if (systemUnit instanceof ProductUnit) {
-            ProductUnit productUnit = (ProductUnit)systemUnit;
-            Unit baseUnits = ONE;
+            ProductUnit<?> productUnit = (ProductUnit<?>)systemUnit;
+            Unit<?> baseUnits = ONE;
             for (int i = 0; i < productUnit.getUnitCount(); i++) {
-                Unit unit = productUnit.getUnit(i).getBaseUnits();
+                Unit<?> unit = productUnit.getUnit(i).getBaseUnits();
                 unit = unit.pow(productUnit.getUnitPow(i));
                 unit = unit.root(productUnit.getUnitRoot(i));
                 baseUnits = baseUnits.times(unit);
@@ -220,14 +251,14 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
                     "System Unit cannot be an instance of " + this.getClass());            
         }        
     }
-    private static UnitConverter transformOf(Unit baseUnits) {
+    private static UnitConverter transformOf(Unit<?> baseUnits) {
         if (baseUnits instanceof BaseUnit)
-            return Dimension.getModel().getTransform((BaseUnit) baseUnits);
+            return Dimension.getModel().getTransform((BaseUnit<?>) baseUnits);
         // Product of units.
-        ProductUnit productUnit = (ProductUnit) baseUnits;
+        ProductUnit<?> productUnit = (ProductUnit<?>) baseUnits;
         UnitConverter converter = UnitConverter.IDENTITY;
         for (int i = 0; i < productUnit.getUnitCount(); i++) {
-            Unit unit = productUnit.getUnit(i);
+            Unit<?> unit = productUnit.getUnit(i);
             UnitConverter cvtr = transformOf(unit);
             if (!cvtr.isLinear())
                 throw new ConversionException(baseUnits
@@ -245,6 +276,27 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
             }
         }
         return converter;
+    }
+
+    /**
+     * Returns a unit equivalent to this unit but used in expressions to 
+     * distinguish between quantities of a different nature but of the same
+     * dimensions.
+     *     
+     * <p> Examples of alternate units:[code]
+     *     Unit<Angle> RADIAN = ONE.alternate("rad");
+     *     Unit<Force> NEWTON = METER.times(KILOGRAM).divide(SECOND.pow(2)).alternate("N");
+     *     Unit<Pressure> PASCAL = NEWTON.divide(METER.pow(2)).alternate("Pa");
+     *     [/code]</p>
+     *
+     * @param symbol the new symbol for the alternate unit.
+     * @return the alternate unit.
+     * @throws UnsupportedOperationException if this unit is not a standard unit.
+     * @throws IllegalArgumentException if the specified symbol is already 
+     *         associated to a different unit.
+     */
+    public final <A extends Quantity> AlternateUnit<A> alternate(String symbol) {
+        return new AlternateUnit<A>(symbol, this);
     }
 
     /**
@@ -327,7 +379,7 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @param  that the unit multiplicand.
      * @return <code>this * that</code>
      */
-    public final Unit<? extends Quantity> times(Unit that) {
+    public final Unit<? extends Quantity> times(Unit<?> that) {
         return ProductUnit.getProductInstance(this, that);
     }
 
@@ -367,7 +419,7 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      * @param  that the unit divisor.
      * @return <code>this / that</code>
      */
-    public final Unit<? extends Quantity> divide(Unit that) {
+    public final Unit<? extends Quantity> divide(Unit<?> that) {
         return this.times(that.inverse());
     }
 
@@ -406,7 +458,7 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
 
     /**
      * Returns a unit instance that is defined from the specified
-     * character sequence using the {@link UnitFormat#getStandardInstance()
+     * character sequence using the {@link UnitFormat#getInstance()
      * standard unit format}.
      * <p> Examples of valid entries (all for meters per second squared) are:
      *     <code><ul>
@@ -423,8 +475,12 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
      *         cannot be correctly parsed (e.g. symbol unknown).
      */
     public static Unit<? extends Quantity> valueOf(CharSequence csq) {
-        return UnitFormat.getStandardInstance()
-                .parse(csq, new ParsePosition(0));
+        try {
+            return UnitFormat.getInstance()
+                    .parseProductUnit(csq, new ParsePosition(0));
+        } catch (ParseException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     //////////////////////
@@ -433,10 +489,13 @@ public abstract class Unit<Q extends Quantity> implements Serializable {
 
     /**
      * Returns the standard <code>String</code> representation of this unit.
-     *
+     * This representation is not affected by locale. Locale-sensitive
+     * unit formatting and parsing is handled by the {@link MeasureFormat} 
+     * class and its subclasses.    
+     *  
      * @return <code>UnitFormat.getStandardInstance().format(this)</code>
      */
     public final String toString() {
-        return UnitFormat.getStandardInstance().format(this);
+        return UnitFormat.getInstance().format(this);
     }
 }

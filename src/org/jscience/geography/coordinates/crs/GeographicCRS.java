@@ -27,7 +27,7 @@ import org.opengis.util.InternationalString;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public abstract class GeographicCRS<C extends Coordinates> extends CoordinateReferenceSystem<C> {
+public abstract class GeographicCRS<C extends Coordinates<?>> extends CoordinateReferenceSystem<C> {
 
     /**
      * Holds the Geodetic Latitude/Longitude coordinate system.
@@ -59,11 +59,11 @@ public abstract class GeographicCRS<C extends Coordinates> extends CoordinateRef
             throw new UnsupportedOperationException();
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 

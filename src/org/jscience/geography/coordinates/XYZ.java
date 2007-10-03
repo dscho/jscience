@@ -44,7 +44,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
             double latitude = position.latitudeWGS84.doubleValue(RADIAN);
             double longitude = position.longitudeWGS84.doubleValue(RADIAN);
             double height = (position.heightWGS84 != null) ?
-                position.heightWGS84.doubleValue(METER) : 0.0;
+                position.heightWGS84.doubleValue(METRE) : 0.0;
 
             double cosLat = Math.cos(latitude);
             double sinLat = Math.sin(latitude);
@@ -57,7 +57,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
             double z = ((1.0 - WGS84.getEccentricitySquared()) * roc + height)
                     * sinLat;
 
-            return XYZ.valueOf(x, y, z, METER);
+            return XYZ.valueOf(x, y, z, METRE);
         }
 
         @Override
@@ -75,8 +75,8 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
             if (xy == 0.0) {
                 latitude = (z >= 0.0) ? Math.PI / 2.0 : -Math.PI / 2.0;
             } else {
-                final double a = WGS84.getSemimajorAxis().doubleValue(METER);
-                final double b = WGS84.getsSemiminorAxis().doubleValue(METER);
+                final double a = WGS84.getSemimajorAxis().doubleValue(METRE);
+                final double b = WGS84.getsSemiminorAxis().doubleValue(METRE);
                 final double ea2 = WGS84.getEccentricitySquared();
                 final double eb2 = WGS84.getSecondEccentricitySquared();
                 final double beta = Math.atan2(a * z, b * xy);
@@ -89,7 +89,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
                     - WGS84.verticalRadiusOfCurvature(latitude);
             position.latitudeWGS84 = Measure.valueOf(latitude, RADIAN);
             position.longitudeWGS84 = Measure.valueOf(longitude, RADIAN);
-            position.heightWGS84 = Measure.valueOf(height, METER);
+            position.heightWGS84 = Measure.valueOf(height, METRE);
             return position;
         }
 
@@ -129,12 +129,12 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      */
     public static XYZ valueOf(double x, double y, double z, Unit<Length> unit) {
         XYZ xyz = FACTORY.object();
-        if (unit == METER) {
+        if (unit == METRE) {
             xyz._x = x;
             xyz._y = y;
             xyz._z = z;
         } else {
-            UnitConverter toMeter = unit.getConverterTo(METER);
+            UnitConverter toMeter = unit.getConverterTo(METRE);
             xyz._x = toMeter.convert(x);
             xyz._y = toMeter.convert(y);
             xyz._z = toMeter.convert(z);
@@ -175,7 +175,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @return the x coordinate stated in the specified unit.
      */
     public double xValue(Unit<Length> unit) {
-        return (unit == METER) ? _x : METER.getConverterTo(unit).convert(_x);
+        return (unit == METRE) ? _x : METRE.getConverterTo(unit).convert(_x);
     }
 
     /**
@@ -185,7 +185,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @return the z coordinate stated in the specified unit.
      */
     public double yValue(Unit<Length> unit) {
-        return (unit == METER) ? _y : METER.getConverterTo(unit).convert(_y);
+        return (unit == METRE) ? _y : METRE.getConverterTo(unit).convert(_y);
     }
 
     /**
@@ -195,7 +195,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      * @return the z coordinate stated in the specified unit.
      */
     public double zValue(Unit<Length> unit) {
-        return (unit == METER) ? _z : METER.getConverterTo(unit).convert(_z);
+        return (unit == METRE) ? _z : METRE.getConverterTo(unit).convert(_z);
     }
 
     /**
@@ -206,9 +206,9 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
      *         specified unit.
      */
     public Float64Vector toVector(Unit<Length> unit) {
-        if (unit == METER)
+        if (unit == METRE)
             return Float64Vector.valueOf(_x, _y, _z);
-        UnitConverter cvtr = METER.getConverterTo(unit);
+        UnitConverter cvtr = METRE.getConverterTo(unit);
         return Float64Vector.valueOf(cvtr.convert(_x), cvtr.convert(_y), cvtr
                 .convert(_z));
     }
@@ -226,14 +226,14 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
     // OpenGIS Interface.
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
-            Unit u = GeocentricCRS.XYZ_CS.getAxis(0).getUnit();
-            return METER.getConverterTo(u).convert(_x);
+            Unit<?> u = GeocentricCRS.XYZ_CS.getAxis(0).getUnit();
+            return METRE.getConverterTo(u).convert(_x);
         } else if (dimension == 1) {
-            Unit u = GeocentricCRS.XYZ_CS.getAxis(1).getUnit();
-            return METER.getConverterTo(u).convert(_y);
+            Unit<?> u = GeocentricCRS.XYZ_CS.getAxis(1).getUnit();
+            return METRE.getConverterTo(u).convert(_y);
         } else if (dimension == 2) {
-            Unit u = GeocentricCRS.XYZ_CS.getAxis(2).getUnit();
-            return METER.getConverterTo(u).convert(_z);
+            Unit<?> u = GeocentricCRS.XYZ_CS.getAxis(2).getUnit();
+            return METRE.getConverterTo(u).convert(_z);
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -241,7 +241,7 @@ public final class XYZ extends Coordinates<GeocentricCRS<XYZ>> {
 
     @Override
     public XYZ copy() {
-        return XYZ.valueOf(_x, _y, _z, METER);
+        return XYZ.valueOf(_x, _y, _z, METRE);
     }
 
     // Default serialization.

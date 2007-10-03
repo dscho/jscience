@@ -8,7 +8,7 @@
  */
 package org.jscience.geography.coordinates;
 
-import static javax.measure.unit.SI.METER;
+import static javax.measure.unit.SI.METRE;
 
 import javax.measure.quantity.Length;
 import javax.measure.Measurable;
@@ -28,7 +28,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 6, 2006
  */
-public final class Height extends Coordinates<VerticalCRS> implements
+public final class Height extends Coordinates<VerticalCRS<?>> implements
         Measurable<Length> {
 
     /**
@@ -40,8 +40,8 @@ public final class Height extends Coordinates<VerticalCRS> implements
         protected Height coordinatesOf(AbsolutePosition position) {
             if (position.heightWGS84 instanceof Height)
                 return (Height) position.heightWGS84;
-            return Height.valueOf(position.heightWGS84.doubleValue(METER),
-                    METER);
+            return Height.valueOf(position.heightWGS84.doubleValue(METRE),
+                    METRE);
         }
 
         @Override
@@ -72,8 +72,8 @@ public final class Height extends Coordinates<VerticalCRS> implements
      */
     public static Height valueOf(double value, Unit<Length> unit) {
         Height height = FACTORY.object();
-        height._meters = (unit == METER) ? value : 
-            unit.getConverterTo(METER).convert(value);
+        height._meters = (unit == METRE) ? value : 
+            unit.getConverterTo(METRE).convert(value);
         return height;
     }
     
@@ -88,7 +88,7 @@ public final class Height extends Coordinates<VerticalCRS> implements
     }
 
     @Override
-    public VerticalCRS getCoordinateReferenceSystem() {
+    public VerticalCRS<?> getCoordinateReferenceSystem() {
         return Height.CRS;
     }
 
@@ -100,8 +100,8 @@ public final class Height extends Coordinates<VerticalCRS> implements
     // OpenGIS Interface.
     public double getOrdinate(int dimension) throws IndexOutOfBoundsException {
         if (dimension == 0) {
-            Unit u = VerticalCRS.HEIGHT_CS.getAxis(0).getUnit();
-            return METER.getConverterTo(u).convert(_meters);
+            Unit<?> u = VerticalCRS.HEIGHT_CS.getAxis(0).getUnit();
+            return METRE.getConverterTo(u).convert(_meters);
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -109,7 +109,7 @@ public final class Height extends Coordinates<VerticalCRS> implements
 
     // Implements Scalar<Length>
     public final double doubleValue(Unit<Length> unit) {
-        return unit.equals(METER) ? _meters : METER
+        return unit.equals(METRE) ? _meters : METRE
                 .getConverterTo(unit).convert(_meters);
     }
 
@@ -120,7 +120,7 @@ public final class Height extends Coordinates<VerticalCRS> implements
 
     // Implements Scalar<Length>
     public int compareTo(Measurable<Length> arg0) {
-        double arg0InMeter = arg0.doubleValue(METER);
+        double arg0InMeter = arg0.doubleValue(METRE);
         return (_meters > arg0InMeter) ? 1
                 : (_meters < arg0InMeter) ? -1 : 0;
     }
@@ -128,7 +128,7 @@ public final class Height extends Coordinates<VerticalCRS> implements
     
     @Override
     public Height copy() {
-        return Height.valueOf(_meters, METER);
+        return Height.valueOf(_meters, METRE);
     }
 
     // Default serialization.

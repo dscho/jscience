@@ -77,8 +77,8 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
     > m5 = 2.34000000000000E-1 A
 
     // Numeric Errors
-    Amount<Length> x = Amount.valueOf(1.0, METER);
-    Amount<Velocity> v = Amount.valueOf(0.01, METER_PER_SECOND);
+    Amount<Length> x = Amount.valueOf(1.0, METRE);
+    Amount<Velocity> v = Amount.valueOf(0.01, METRE_PER_SECOND);
     Amount<Duration> t = Amount.valueOf(1.0, MICRO(SECOND));
     for (int i = 0; i < 10000000; i++) {
           x = x.plus(v.times(t));
@@ -106,7 +106,7 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
 
      // Length and Duration can be added.
      Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
-     x = x.plus(Amount.valueOf("2.3 µs")).to(METER); 
+     x = x.plus(Amount.valueOf("2.3 µs")).to(METRE); 
      System.out.println(x); 
 
      > (692.06265340000008 ± 5.1E-13) m
@@ -135,8 +135,8 @@ These examples can be executed through the command: <code>"java -jar jscience.ja
             
      // Calculates trip cost.
      Amount<?> carMileage = Amount.valueOf(20, MILE.divide(GALLON_LIQUID_US)); // 20 mi/gal.
-     Amount<?> gazPrice = Amount.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-     Amount<Length> tripDistance = Amount.valueOf(400, KILO(SI.METER)); // 400 km
+     Amount<?> gazPrice = Amount.valueOf(1.2, EUR.divide(LITRE)); // 1.2 €/L
+     Amount<Length> tripDistance = Amount.valueOf(400, KILO(SI.METRE)); // 400 km
      Amount<Money> tripCost = tripDistance.divide(carMileage).times(gazPrice).to(USD);
 
      // Displays cost.

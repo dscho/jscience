@@ -46,11 +46,11 @@ public abstract class PhysicalModel implements Dimension.Model {
     private static final Dimension.Model DIMENSIONAL_MODEL 
         = new Dimension.Model() {
 
-            public Dimension getDimension(BaseUnit unit) {
+            public Dimension getDimension(BaseUnit<?> unit) {
                 return PhysicalModel.Current.get().getDimension(unit);
             }
 
-            public UnitConverter getTransform(BaseUnit unit) {
+            public UnitConverter getTransform(BaseUnit<?> unit) {
                 return PhysicalModel.Current.get().getTransform(unit);
             }};
     

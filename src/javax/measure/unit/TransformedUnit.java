@@ -10,7 +10,7 @@ package javax.measure.unit;
 
 import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
-
+        
 /**
  * <p> This class represents the units derived from other units using
  *     {@link UnitConverter converters}.</p>
@@ -96,7 +96,7 @@ public final class TransformedUnit<Q extends Quantity> extends DerivedUnit<Q> {
     public boolean equals(Object that) {
         if (this == that) return true;
         if (!(that instanceof TransformedUnit)) return false;
-        TransformedUnit thatUnit = (TransformedUnit) that; 
+        TransformedUnit<?> thatUnit = (TransformedUnit<?>) that; 
         return this._parentUnit.equals(thatUnit._parentUnit) &&
                  this._toParentUnit.equals(thatUnit._toParentUnit);
     }
@@ -107,13 +107,13 @@ public final class TransformedUnit<Q extends Quantity> extends DerivedUnit<Q> {
     }
 
     // Implements abstract method.
-    public Unit<? super Q> getSystemUnit() {
-        return _parentUnit.getSystemUnit();
+    public Unit<? super Q> getStandardUnit() {
+        return _parentUnit.getStandardUnit();
     }
 
     // Implements abstract method.
-    public UnitConverter toSystemUnit() {
-        return _parentUnit.toSystemUnit().concatenate(_toParentUnit);
+    public UnitConverter toStandardUnit() {
+        return _parentUnit.toStandardUnit().concatenate(_toParentUnit);
     }
 
     private static final long serialVersionUID = 1L;

@@ -105,16 +105,12 @@ public abstract class Number<T extends Number<T>> extends java.lang.Number
         if (exp <= 0)
             throw new IllegalArgumentException("exp: " + exp
                     + " should be a positive number");
-        T pow2 = (T) this;
-        T result = null;
-        while (exp >= 1) { // Iteration.
-            if ((exp & 1) == 1) {
-                result = (result == null) ? pow2 : result.times(pow2);
-            }
-            pow2 = pow2.times(pow2);
-            exp >>>= 1;
-        }
-        return result;
+        final T t = (T) this;
+        if (exp == 1) return t;
+        if (exp == 2) return t.times(t);
+        if (exp == 3) return t.times(t).times(t);
+        int halfExp = exp >> 1;
+        return this.pow(halfExp).times(this.pow(exp - halfExp));
     }
 
     /**
@@ -193,7 +189,7 @@ public abstract class Number<T extends Number<T>> extends java.lang.Number
      *     
      * @return an identical and independant copy of this number.
      */
-    public abstract Number copy();
+    public abstract Number<T> copy();
 
     /**
      * Returns the text representation of this number as a 

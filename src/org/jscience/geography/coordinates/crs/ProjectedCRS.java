@@ -27,17 +27,17 @@ import org.opengis.util.InternationalString;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public abstract class ProjectedCRS<C extends Coordinates> extends CoordinateReferenceSystem<C> {
+public abstract class ProjectedCRS<C extends Coordinates<?>> extends CoordinateReferenceSystem<C> {
 
     /**
      * Holds the Easting/Northing coordinate system.
      */
     public static final CoordinateSystem EASTING_NORTHING_CS = new CoordinateSystem() {
 
-        Axis eastingAxis = new Axis("Easting", "E", SI.METER,
+        Axis eastingAxis = new Axis("Easting", "E", SI.METRE,
                 AxisDirection.EAST);
 
-        Axis northingAxis = new Axis("Northing", "N", SI.METER,
+        Axis northingAxis = new Axis("Northing", "N", SI.METRE,
                 AxisDirection.NORTH);
         
         public int getDimension() {
@@ -59,11 +59,11 @@ public abstract class ProjectedCRS<C extends Coordinates> extends CoordinateRefe
             throw new UnsupportedOperationException();
         }
 
-        public Collection getAlias() {
+        public Collection<String> getAlias() {
             return EMPTY_SET;
         }
 
-        public Set getIdentifiers() {
+        public Set<String> getIdentifiers() {
             return EMPTY_SET;
         }
 

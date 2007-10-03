@@ -263,6 +263,7 @@ public final class DenseMatrix<F extends Field<F>> extends Matrix<F> {
         DenseMatrix<F> M = DenseMatrix.newInstance(m, true); // Transposed.
         M._rows.setSize(p);
         Multiply<F> multiply = Multiply.valueOf(this, that, 0, p, M._rows);
+        multiply.run();
         Multiply.recycle(multiply);
         return M;
     }
@@ -308,7 +309,7 @@ public final class DenseMatrix<F extends Field<F>> extends Matrix<F> {
         }
 
         public void run() {
-            if (_rightColumnEnd - _rightColumnEnd < 32) { // Direct calculation.
+            if (_rightColumnEnd - _rightColumnStart < 32) { // Direct calculation.
                 FastTable<DenseVector<F>> rows = _left.getRows();
                 final int m = rows.size();
                 for (int j = _rightColumnStart; j < _rightColumnEnd; j++) {

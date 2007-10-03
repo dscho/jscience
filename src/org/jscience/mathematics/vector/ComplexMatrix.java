@@ -249,6 +249,7 @@ public final class ComplexMatrix extends Matrix<Complex> {
         ComplexMatrix M = ComplexMatrix.newInstance(m, true); // Transposed.
         M._rows.setSize(p);
         Multiply multiply = Multiply.valueOf(this, that, 0, p, M._rows);
+        multiply.run();
         Multiply.recycle(multiply);
         return M;
     }
@@ -293,7 +294,7 @@ public final class ComplexMatrix extends Matrix<Complex> {
         }
 
         public void run() {
-            if (_rightColumnEnd - _rightColumnEnd < 32) { // Direct calculation.
+            if (_rightColumnEnd - _rightColumnStart < 32) { // Direct calculation.
                 FastTable<ComplexVector> rows = _left.getRows();
                 final int m = rows.size();
                 for (int j = _rightColumnStart; j < _rightColumnEnd; j++) {

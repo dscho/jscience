@@ -47,7 +47,7 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
     /**
      * Holds the variables (ordered).
      */
-    private final Variable[] _variables;
+    private final Variable<?>[] _variables;
 
     /**
      * Holds the corresponding powers (positive and different from zero).
@@ -78,7 +78,7 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
      * @return the term for <code>v<sup>n</sup></code>
      * @throws IllegalArgumentException if <code>n &lt; 0</code> 
      */
-    public static Term valueOf(Variable v, int n) {
+    public static Term valueOf(Variable<?> v, int n) {
         if (n == 0)
             return ONE;
         if (n < 0)
@@ -109,7 +109,7 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
      * @throws IndexOutOfBoundsException if  
      *         <code>(index < 0) || (index >= size())</code>
      */
-    public Variable getVariable(int index) {
+    public Variable<?> getVariable(int index) {
         if (index > _size)
             throw new IllegalArgumentException();
         return _variables[index];
@@ -136,7 +136,7 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
      * @return the power of the corresponding variable or <code>0</code> if 
      *         this term does not hold the specified variable.
      */
-    public int getPower(Variable v) {
+    public int getPower(Variable<?> v) {
         for (int i = 0; i < _size; i++) {
             if (_variables[i] == v)
                 return _powers[i];
@@ -159,8 +159,8 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
         Term result = FACTORY.array(thisSize + thatSize);
         result._size = 0;
         for (int i = 0, j = 0;;) {
-            Variable left = (i < thisSize) ? this._variables[i] : null;
-            Variable right = (j < thatSize) ? that._variables[j] : null;
+            Variable<?> left = (i < thisSize) ? this._variables[i] : null;
+            Variable<?> right = (j < thatSize) ? that._variables[j] : null;
             if (left == null) {
                 if (right == null)
                     return result;
@@ -211,8 +211,8 @@ public final class Term implements Serializable, Comparable<Term>, ValueType,
         Term result = FACTORY.array(MathLib.max(thisSize, thatSize));
         result._size = 0;
         for (int i = 0, j = 0;;) {
-            Variable left = (i < thisSize) ? this._variables[i] : null;
-            Variable right = (j < thatSize) ? that._variables[j] : null;
+            Variable<?> left = (i < thisSize) ? this._variables[i] : null;
+            Variable<?> right = (j < thatSize) ? that._variables[j] : null;
             if (left == null) {
                 if (right == null)
                     return result;

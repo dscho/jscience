@@ -39,26 +39,34 @@ import javax.measure.unit.Unit;
  *          public doubleValue(Unit<Q> unit) { ... } // Returns median value. 
  *          ...
  *     } [/code]</p>
- * 
+ *     
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 4.1, June 8, 2007
  */
 public interface Measurable<Q extends Quantity> extends Comparable<Measurable<Q>> {
     
     /**
-     * Returns the estimated value of this measurable quantity stated 
-     * in the specified unit as a <code>double</code>.
+     * Returns the value of this measurable stated in the specified unit as 
+     * a <code>double</code>. If the measurable has too great a magnitude to 
+     * be represented as a <code>double</code>, it will be converted to 
+     * <code>Double.NEGATIVE_INFINITY</code> or
+     * <code>Double.POSITIVE_INFINITY</code> as appropriate.
      * 
-     * @param unit the unit in which the measurement value is stated.
+     * @param unit the unit in which this measurable value is stated.
      * @return the numeric value after conversion to type <code>double</code>.
      */
     double doubleValue(Unit<Q> unit);
 
     /**
-     * Returns the estimated value of this quantity stated in the specified 
-     * unit as a <code>long</code>.
+     * Returns the estimated integral value of this measurable stated in 
+     * the specified unit as a <code>long</code>. 
      * 
-     * @param unit the unit in which the measurement value is stated.
+     * <p> Note: This method differs from the <code>Number.longValue()</code>
+     *           in the sense that the closest integer value is returned 
+     *           and an ArithmeticException is raised instead
+     *           of a bit truncation in case of overflow (safety critical).</p> 
+     * 
+     * @param unit the unit in which the measurable value is stated.
      * @return the numeric value after conversion to type <code>long</code>.
      * @throws ArithmeticException if this quantity cannot be represented 
      *         as a <code>long</code> number in the specified unit.

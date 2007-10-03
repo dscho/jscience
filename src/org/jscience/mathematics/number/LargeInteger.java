@@ -402,7 +402,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>(this & 1) == ZERO</code>
      */
     public boolean isEven() {
-        return (_words[0] & 1) == 0;
+        return (_size == 0) || ((_words[0] & 1) == 0);
     }
 
     /**
@@ -411,7 +411,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      * @return <code>(this & 1) != ZERO</code>
      */
     public boolean isOdd() {
-        return (_words[0] & 1) != 0;
+        return !isEven();
     }
 
     /**
@@ -1210,6 +1210,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      *          <code>false</code> otherwise.
      */
     public boolean equals(long value) {
+        if (_size == 0) return value == 0;
         return ((_size <= 1) && (_isNegative ? -_words[0] == value
                 : _words[0] == value))
                 || ((value == Long.MIN_VALUE) && (_isNegative) && (_size == 2)
@@ -1240,6 +1241,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      *         to type <code>long</code>.
      */
     public long longValue() {
+        if (_size == 0) return 0;
         return (_size <= 1) ? (_isNegative ? -_words[0] : _words[0])
                 : (_isNegative ? -((_words[1] << 63) | _words[0])
                         : (_words[1] << 63) | _words[0]); // bitLength > 63 bits.
@@ -1252,6 +1254,7 @@ public final class LargeInteger extends Number<LargeInteger> {
      *         to type <code>double</code>.
      */
     public double doubleValue() {
+        if (_size == 0) return 0;
         if (_size <= 1) 
             return _isNegative ? -_words[0] : _words[0];
             
@@ -1447,7 +1450,7 @@ public final class LargeInteger extends Number<LargeInteger> {
     private static Appendable write(LargeInteger li, int radix, int divisor,
             Appendable out) throws IOException {
         if (li._size <= 1) // Direct long formatting.
-            return TypeFormat.format(li._words[0], radix, out);
+            return TypeFormat.format(li._size == 0 ? 0 : li._words[0], radix, out);
         int rem = (int) Calculus
                 .divide(li._words, li._size, divisor, li._words);
         if (li._words[li._size - 1] == 0L) {

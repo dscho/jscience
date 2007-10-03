@@ -27,7 +27,11 @@ import javax.measure.quantity.Quantity;
  *     > [L]
  *     > [L]²·[M]/[T]³
  *     [/code]</p>
- *
+ * <p> This class represents the "standard base units" which includes SI base 
+ *     units and possibly others user-defined base units. It does not represent 
+ *     the base units of any specific {@link SystemOfUnits} (they would have 
+ *     be base units accross all possible systems otherwise).</p> 
+ *           
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.1, April 22, 2006
  * @see <a href="http://en.wikipedia.org/wiki/SI_base_unit">
@@ -51,7 +55,7 @@ public class BaseUnit<Q extends Quantity> extends Unit<Q> {
         _symbol = symbol;
         // Checks if the symbol is associated to a different unit.
         synchronized (Unit.SYMBOL_TO_UNIT) {
-            Unit unit = Unit.SYMBOL_TO_UNIT.get(symbol);
+            Unit<?> unit = Unit.SYMBOL_TO_UNIT.get(symbol);
             if (unit == null) {
                 Unit.SYMBOL_TO_UNIT.put(symbol, this);
                 return;
@@ -85,7 +89,7 @@ public class BaseUnit<Q extends Quantity> extends Unit<Q> {
             return true;
         if (!(that instanceof BaseUnit))
             return false;
-        BaseUnit thatUnit = (BaseUnit) that;
+        BaseUnit<?> thatUnit = (BaseUnit<?>) that;
         return this._symbol.equals(thatUnit._symbol); 
     }
         
@@ -95,12 +99,12 @@ public class BaseUnit<Q extends Quantity> extends Unit<Q> {
     }
 
     @Override
-    public Unit<? super Q> getSystemUnit() {
+    public Unit<? super Q> getStandardUnit() {
         return this;
     }
 
     @Override
-    public UnitConverter toSystemUnit() {
+    public UnitConverter toStandardUnit() {
         return UnitConverter.IDENTITY;
     }
 

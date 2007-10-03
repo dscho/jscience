@@ -17,7 +17,7 @@ import org.jscience.geography.coordinates.Coordinates;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 3.0, February 13, 2006
  */
-public interface CoordinatesConverter<S extends Coordinates, T extends Coordinates> {
+public interface CoordinatesConverter<S extends Coordinates<?>, T extends Coordinates<?>> {
 
     /**
      * Converts the specified coordinates.

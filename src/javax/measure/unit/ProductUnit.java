@@ -56,8 +56,8 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
      * @throws ClassCastException if the specified unit is not 
      *         a product unit.
      */
-    public ProductUnit(Unit productUnit) {
-        _elements = ((ProductUnit)productUnit)._elements;        
+    public ProductUnit(Unit<?> productUnit) {
+        _elements = ((ProductUnit<?>)productUnit)._elements;        
     }
 
     /**
@@ -140,16 +140,16 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
      * @param  right the right unit operand.
      * @return <code>left * right</code>
      */
-    static Unit<? extends Quantity> getProductInstance(Unit left, Unit right) {
+    static Unit<? extends Quantity> getProductInstance(Unit<?> left, Unit<?> right) {
         Element[] leftElems;
         if (left instanceof ProductUnit) {
-            leftElems = ((ProductUnit) left)._elements;
+            leftElems = ((ProductUnit<?>) left)._elements;
         } else {
             leftElems = new Element[] { new Element(left, 1, 1) };
         }
         Element[] rightElems;
         if (right instanceof ProductUnit) {
-            rightElems = ((ProductUnit) right)._elements;
+            rightElems = ((ProductUnit<?>) right)._elements;
         } else {
             rightElems = new Element[] { new Element(right, 1, 1) };
         }
@@ -163,16 +163,16 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
      * @param  right the divisor unit operand.
      * @return <code>dividend / divisor</code>
      */
-    static Unit<? extends Quantity> getQuotientInstance(Unit left, Unit right) {
+    static Unit<? extends Quantity> getQuotientInstance(Unit<?> left, Unit<?> right) {
         Element[] leftElems;
         if (left instanceof ProductUnit) {
-            leftElems = ((ProductUnit) left)._elements;
+            leftElems = ((ProductUnit<?>) left)._elements;
         } else {
             leftElems = new Element[] { new Element(left, 1, 1) };
         }
         Element[] rightElems;
         if (right instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit) right)._elements;
+            Element[] elems = ((ProductUnit<?>) right)._elements;
             rightElems = new Element[elems.length];
             for (int i = 0; i < elems.length; i++) {
                 rightElems[i] = new Element(elems[i]._unit, -elems[i]._pow,
@@ -193,10 +193,10 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
      * @return <code>unit^(1/nn)</code>
      * @throws ArithmeticException if <code>n == 0</code>.
      */
-    static Unit<? extends Quantity> getRootInstance(Unit unit, int n) {
+    static Unit<? extends Quantity> getRootInstance(Unit<?> unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit) unit)._elements;
+            Element[] elems = ((ProductUnit<?>) unit)._elements;
             unitElems = new Element[elems.length];
             for (int i = 0; i < elems.length; i++) {
                 int gcd = gcd(Math.abs(elems[i]._pow), elems[i]._root * n);
@@ -217,10 +217,10 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
      * @param  nn the exponent (nn &gt; 0).
      * @return <code>unit^n</code>
      */
-    static Unit<? extends Quantity> getPowInstance(Unit unit, int n) {
+    static Unit<? extends Quantity> getPowInstance(Unit<?> unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit) {
-            Element[] elems = ((ProductUnit) unit)._elements;
+            Element[] elems = ((ProductUnit<?>) unit)._elements;
             unitElems = new Element[elems.length];
             for (int i = 0; i < elems.length; i++) {
                 int gcd = gcd(Math.abs(elems[i]._pow * n), elems[i]._root);
@@ -293,7 +293,7 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
         if (that instanceof ProductUnit) {
             // Two products are equals if they have the same elements
             // regardless of the elements' order.
-            Element[] elems = ((ProductUnit) that)._elements;
+            Element[] elems = ((ProductUnit<?>) that)._elements;
             if (_elements.length == elems.length) {
                 for (int i = 0; i < _elements.length; i++) {
                     boolean unitFound = false;
@@ -334,12 +334,12 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Unit<? super Q> getSystemUnit() {
-        if (isSystemUnit())
+    public Unit<? super Q> getStandardUnit() {
+        if (hasOnlyStandardUnit())
             return this;
         Unit systemUnit = ONE;
         for (int i = 0; i < _elements.length; i++) {
-            Unit unit = _elements[i]._unit.getSystemUnit();
+            Unit unit = _elements[i]._unit.getStandardUnit();
             unit = unit.pow(_elements[i]._pow);
             unit = unit.root(_elements[i]._root);
             systemUnit = systemUnit.times(unit);
@@ -348,12 +348,12 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
     }
 
     @Override
-    public UnitConverter toSystemUnit() {
-        if (isSystemUnit())
+    public UnitConverter toStandardUnit() {
+        if (hasOnlyStandardUnit())
             return UnitConverter.IDENTITY;
         UnitConverter converter = UnitConverter.IDENTITY;
         for (int i = 0; i < _elements.length; i++) {
-            UnitConverter cvtr = _elements[i]._unit.toSystemUnit();
+            UnitConverter cvtr = _elements[i]._unit.toStandardUnit();
             if (!cvtr.isLinear())
                 throw new ConversionException(_elements[i]._unit
                         + " is non-linear, cannot convert");
@@ -373,15 +373,15 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
     }
 
     /**
-     * Indicates if this product unit is a system unit.
+     * Indicates if this product unit is a standard unit.
      *
-     * @return <code>true</code> if all elements are system units;
+     * @return <code>true</code> if all elements are standard units;
      *         <code>false</code> otherwise.
      */
-    private boolean isSystemUnit() {
+    private boolean hasOnlyStandardUnit() {
         for (int i = 0; i < _elements.length; i++) {
-            Unit u = _elements[i]._unit;
-            if (!u.getSystemUnit().equals(u))
+            Unit<?> u = _elements[i]._unit;
+            if (!u.isStandardUnit())
                 return false;
         }
         return true;
@@ -410,7 +410,7 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
         /**
          * Holds the single unit.
          */
-        private final Unit _unit;
+        private final Unit<?> _unit;
 
         /**
          * Holds the power exponent.
@@ -429,7 +429,7 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
          * @param  pow the power exponent.
          * @param  root the root exponent.
          */
-        private Element(Unit unit, int pow, int root) {
+        private Element(Unit<?> unit, int pow, int root) {
             _unit = unit;
             _pow = pow;
             _root = root;
@@ -440,7 +440,7 @@ public final class ProductUnit<Q extends Quantity> extends DerivedUnit<Q> {
          *
          * @return the single unit.
          */
-        public Unit getUnit() {
+        public Unit<?> getUnit() {
             return _unit;
         }
 

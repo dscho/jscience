@@ -28,5 +28,5 @@ public interface VolumetricFlowRate extends Quantity {
      */
     @SuppressWarnings("unchecked")
     public final static Unit<VolumetricFlowRate> UNIT 
-       = (Unit<VolumetricFlowRate>) SI.METER.pow(3).divide(SI.SECOND);
+       = (Unit<VolumetricFlowRate>) SI.METRE.pow(3).divide(SI.SECOND);
 }

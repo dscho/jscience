@@ -45,6 +45,7 @@ import org.jscience.physics.model.RelativisticModel;
 import javolution.lang.Configurable;
 import javolution.lang.MathLib;
 import javolution.text.TextBuilder;
+import javolution.context.ConcurrentContext;
 import javolution.context.LocalContext;
 import javolution.context.StackContext;
 import static javax.measure.unit.NonSI.*;
@@ -60,7 +61,7 @@ import static org.jscience.economics.money.Currency.*;
  * @version 3.0, February 13, 2006
  */
 public final class JScience {
-
+  
     /**
      * Holds the version information.
      */
@@ -74,7 +75,7 @@ public final class JScience {
      */
     private JScience() {// Forbids derivation.
     }
-
+    
     /**
      * The library {@link #main} method. The archive <codejscience.jar</code>
      * is auto-executable.
@@ -119,6 +120,10 @@ public final class JScience {
      * @throws Exception if a problem occurs.
      */
     private static void testing() throws Exception {
+        System.out.println("Load Configurable Parameters from System.getProperties()...");
+        Configurable.read(System.getProperties());
+        System.out.println("");
+        
         System.out.println("Testing...");   
         {
             System.out.println("");
@@ -144,7 +149,7 @@ public final class JScience {
 
             System.out.println("");
             System.out.println("Interval measurements");
-            Amount<Volume> m6 = Amount.valueOf(20, 0.1, LITER);
+            Amount<Volume> m6 = Amount.valueOf(20, 0.1, LITRE);
             Amount<Frequency> m7 = Amount.rangeOf(10, 11, KILO(HERTZ));
             System.out.println("m6 = " + m6);
             System.out.println("m7 = " + m7);
@@ -188,8 +193,8 @@ public final class JScience {
             System.out.println("");
             System.out.println("Numeric Errors");
             {
-                Amount<Length> x = Amount.valueOf(1.0, METER);
-                Amount<Velocity> v = Amount.valueOf(0.01, METER_PER_SECOND);
+                Amount<Length> x = Amount.valueOf(1.0, METRE);
+                Amount<Velocity> v = Amount.valueOf(0.01, METRES_PER_SECOND);
                 Amount<Duration> t = Amount.valueOf(1.0, MICRO(SECOND));
                 long ns = System.nanoTime();
                 for (int i = 0; i < 10000000; i++) {
@@ -223,7 +228,7 @@ public final class JScience {
 
             // Length and Duration can be added.
             Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
-            x = x.plus(Amount.valueOf("2.3 µs")).to(METER); 
+            x = x.plus(Amount.valueOf("2.3 µs")).to(METRE); 
             System.out.println(x); 
                
             // Energy is compatible with mass (E=mc2)
@@ -239,8 +244,8 @@ public final class JScience {
             ///////////////////////////////////////////////////////////////////////
 
             // Use currency symbols instead of ISO-4217 codes.
-            UnitFormat.getStandardInstance().label(USD, "$"); // Use "$" symbol instead of currency code ("USD")
-            UnitFormat.getStandardInstance().label(EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
+            UnitFormat.getInstance().label(USD, "$"); // Use "$" symbol instead of currency code ("USD")
+            UnitFormat.getInstance().label(EUR, "€"); // Use "€" symbol instead of currency code ("EUR")
 
             // Sets exchange rates.
             Currency.setReferenceCurrency(USD);
@@ -249,8 +254,8 @@ public final class JScience {
             // Calculates trip cost.
             Amount<?> carMileage = Amount.valueOf(20, MILE
                     .divide(GALLON_LIQUID_US)); // 20 mi/gal.
-            Amount<?> gazPrice = Amount.valueOf(1.2, EUR.divide(LITER)); // 1.2 €/L
-            Amount<Length> tripDistance = Amount.valueOf(400, KILO(SI.METER)); // 400 km
+            Amount<?> gazPrice = Amount.valueOf(1.2, EUR.divide(LITRE)); // 1.2 €/L
+            Amount<Length> tripDistance = Amount.valueOf(400, KILO(SI.METRE)); // 400 km
             Amount<Money> tripCost = tripDistance.divide(carMileage).times(
                     gazPrice).to(USD);
             // Displays cost.
@@ -376,9 +381,11 @@ public final class JScience {
      * Measures performance.
      */
     private static void benchmark() throws Exception {
+        System.out.println("Load Configurable Parameters from System.getProperties()...");
+        Configurable.read(System.getProperties());
+        System.out.println("");
+
         System.out.println("Benchmark...");
-        //ConcurrentContext.setEnabled(false);
-        //PoolContext.setEnabled(false);      
  
         Object[] results = new Object[10000];
 
@@ -507,33 +514,56 @@ public final class JScience {
         System.out.println("Matrix<Float64> and Matrix<Complex> versus "
                 + "non-parameterized matrix (double)");
         final int size = 500;
-
-        System.out.print("Non-parameterized matrix (double based)"
-                + " 500x500 multiplication: ");
         double[][] values = new double[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 values[i][j] = MathLib.random();
             }
         }
+
+        System.out.println("Javolution Concurrency Disabled");
+        LocalContext.enter(); // Local setting.
+        try {
+            ConcurrentContext.setConcurrency(0);
+            multiplyMatrices(values);
+        } finally {
+            LocalContext.exit();
+        }
+        
+        System.out.println("Javolution Concurrency: " + ConcurrentContext.getConcurrency());
+        multiplyMatrices(values);
+
+        System.out.println();
+        System.out.println("More performance analysis in future versions...");
+    }
+    
+    private static void multiplyMatrices(double[][] values) {
+        
+        int size = values.length;
+        
+        System.out.print("Non-parameterized matrix (double based)"
+                + " 500x500 multiplication: ");
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                values[i][j] = MathLib.random();
+            }
+        }
         MatrixDouble PM = new MatrixDouble(values);
-        PM.times(PM); // Warming up.
+        for (int i=0; i < 5; i++) PM.times(PM); // Warming up.
         startTime();
-        PM.times(PM);
+        MatrixDouble R1 = PM.times(PM);
         endTime(1);
 
         System.out.print("Matrix<Float64> 500x500 multiplication: ");
-        double[][] floats = new double[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                floats[i][j] = MathLib.random();
-            }
-        }
-        Matrix<Float64> FM = Float64Matrix.valueOf(floats);
-        FM.times(FM); // Warming up.
+        Matrix<Float64> FM = Float64Matrix.valueOf(values);
+        for (int i=0; i < 5; i++) FM.times(FM); // Warming up.
         startTime();
-        FM.times(FM);
+        Matrix<Float64> R2 = FM.times(FM);
         endTime(1);
+        
+        // Checks results.
+        if (!R2.equals(Float64Matrix.valueOf(R1.o))) 
+                throw new Error("Error in matrix multiplication");
 
         System.out.print("Matrix<Complex> 500x500 multiplication: ");
         Complex[][] complexes = new Complex[size][size];
@@ -544,7 +574,7 @@ public final class JScience {
             }
         }
         Matrix<Complex> CM = ComplexMatrix.valueOf(complexes);
-        CM.times(CM); // Warming up.
+        for (int i=0; i < 5; i++) CM.times(CM); // Warming up.
         startTime();
         CM.times(CM);
         endTime(1);
@@ -561,9 +591,7 @@ public final class JScience {
         startTime();
         MM.times(MM);
         endTime(1);
-
-        System.out.println();
-        System.out.println("More performance analysis in future versions...");
+        
     }
 
     private static final class MatrixDouble {

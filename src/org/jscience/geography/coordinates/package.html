@@ -33,7 +33,7 @@
 <p> Conversion between coordinates is achieved through  their coordinates
     reference system. For example:[code]
     // Converts UTM coordinates to Latitude/Longitude.
-    UTM utm = UTM.valueOf(17, 'E', 444.5, 556.44, METER);
+    UTM utm = UTM.valueOf(17, 'E', 444.5, 556.44, METRE);
     CoordinatesConverter<UTM, LatLong> utmToLatLong = UTM.CRS.getConverterTo(LatLong.CRS);
     LatLong latLong = utmToLatLong.convert(utm);
     

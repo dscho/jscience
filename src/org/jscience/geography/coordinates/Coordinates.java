@@ -27,7 +27,7 @@ import org.opengis.spatialschema.geometry.DirectPosition;
  * @version 4.0, April 9, 2007
  * @see <a href="http://www.opengeospatial.org">Open Geospatial Consortium, Inc.</a>  
  */
-public abstract class Coordinates<R extends CoordinateReferenceSystem>
+public abstract class Coordinates<R extends CoordinateReferenceSystem<?>>
     implements DirectPosition, Realtime, ValueType, XMLSerializable {
 
     /**
@@ -149,6 +149,6 @@ public abstract class Coordinates<R extends CoordinateReferenceSystem>
      *     
      * @return an identical and independant copy of these coordinates .
      */
-    public abstract Coordinates copy();
+    public abstract Coordinates<?> copy();
     
 }

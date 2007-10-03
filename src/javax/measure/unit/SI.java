@@ -28,20 +28,17 @@ import javax.measure.quantity.*;
  *     Unit<Length> KILO_METER = KILO(METER);
  *     [/code]</p>
  *     
- * <p> A collection of all the SI units defined can be retrieved using the 
- *     {@link #units() SI.units()} static method.</p>
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 3.1, April 19, 2006
+ * @version 4.2, August 26, 2006
  * @see <a href="http://en.wikipedia.org/wiki/SI">Wikipedia: SI</a>
  * @see <a href="http://en.wikipedia.org/wiki/SI_prefix">Wikipedia: SI prefix</a>
  */
-public final class SI {
+public final class SI extends SystemOfUnits {
 
     /**
      * Holds collection of SI units.
      */
-    private static HashSet<Unit<?>> INSTANCES = new HashSet<Unit<?>>();
+    private static HashSet<Unit<?>> UNITS = new HashSet<Unit<?>>();
 
     /**
      * Default constructor (prevents this class from being instantiated).
@@ -49,6 +46,17 @@ public final class SI {
     private SI() {
     }
 
+
+    /**
+     * Returns the unique instance of this class.
+     *
+     * @return the SI instance.
+     */
+    public static SI getInstance() {
+        return INSTANCE;
+    }
+    private static final SI INSTANCE = new SI();
+    
     ////////////////
     // BASE UNITS //
     ////////////////
@@ -99,12 +107,12 @@ public final class SI {
      * One meter was redefined in 1983 as the distance traveled by light in
      * a vacuum in 1/299,792,458 of a second.
      */
-    public static final BaseUnit<Length> METER = si(new BaseUnit<Length>("m"));
+    public static final BaseUnit<Length> METRE = si(new BaseUnit<Length>("m"));
 
     /**
-     * Equivalent to {@link #METER}.
+     * Equivalent to {@link #METRE} (American spelling).
      */
-    public static final BaseUnit<Length> METRE = METER;
+    public static final Unit<Length> METER = METRE;
 
     /**
      * The base unit for amount of substance quantities (<code>mol</code>).
@@ -172,7 +180,7 @@ public final class SI {
      * mathematician and physicist Sir Isaac Newton (1642-1727).
      */
     public static final AlternateUnit<Force> NEWTON = si(new AlternateUnit<Force>(
-            "N", METER.times(KILOGRAM).divide(SECOND.pow(2))));
+            "N", METRE.times(KILOGRAM).divide(SECOND.pow(2))));
 
     /**
      * The derived unit for pressure, stress (<code>Pa</code>).
@@ -180,7 +188,7 @@ public final class SI {
      * the French philosopher and mathematician Blaise Pascal (1623-1662).
      */
     public static final AlternateUnit<Pressure> PASCAL = si(new AlternateUnit<Pressure>(
-            "Pa", NEWTON.divide(METER.pow(2))));
+            "Pa", NEWTON.divide(METRE.pow(2))));
 
     /**
      * The derived unit for energy, work, quantity of heat (<code>J</code>).
@@ -189,7 +197,7 @@ public final class SI {
      * It is named after the English physicist James Prescott Joule (1818-1889).
      */
     public static final AlternateUnit<Energy> JOULE = si(new AlternateUnit<Energy>(
-            "J", NEWTON.times(METER)));
+            "J", NEWTON.times(METRE)));
 
     /**
      * The derived unit for power, radiant, flux (<code>W</code>).
@@ -265,7 +273,7 @@ public final class SI {
      * Nikola Tesla (1856-1943).
      */
     public static final AlternateUnit<MagneticFluxDensity> TESLA = si(new AlternateUnit<MagneticFluxDensity>(
-            "T", WEBER.divide(METER.pow(2))));
+            "T", WEBER.divide(METRE.pow(2))));
 
     /**
      * The derived unit for inductance (<code>H</code>).
@@ -298,7 +306,7 @@ public final class SI {
      * One Lux is equal to one lumen per square meter.
      */
     public static final AlternateUnit<Illuminance> LUX = si(new AlternateUnit<Illuminance>(
-            "lx", LUMEN.divide(METER.pow(2))));
+            "lx", LUMEN.divide(METRE.pow(2))));
 
     /**
      * The derived unit for activity of a radionuclide (<code>Bq</code>).
@@ -342,46 +350,66 @@ public final class SI {
     /**
      * The metric unit for velocity quantities (<code>m/s</code>).
      */
-    public static final Unit<Velocity> METER_PER_SECOND = si(new ProductUnit<Velocity>(
-            METER.divide(SECOND)));
+    public static final Unit<Velocity> METRES_PER_SECOND = si(new ProductUnit<Velocity>(
+            METRE.divide(SECOND)));
 
     /**
-     * Equivalent to {@link #METER_PER_SECOND}.
+     * Equivalent to {@link #METRES_PER_SECOND}.
      */
-    public static final Unit<Velocity> METRE_PER_SECOND = METER_PER_SECOND;
+    public static final Unit<Velocity> METERS_PER_SECOND = METRES_PER_SECOND;
 
     /**
      * The metric unit for acceleration quantities (<code>m/s²</code>).
      */
-    public static final Unit<Acceleration> METER_PER_SQUARE_SECOND = si(new ProductUnit<Acceleration>(
-            METER_PER_SECOND.divide(SECOND)));
+    public static final Unit<Acceleration> METRES_PER_SQUARE_SECOND = si(new ProductUnit<Acceleration>(
+            METRES_PER_SECOND.divide(SECOND)));
 
     /**
-     * Equivalent to {@link #METER_PER_SQUARE_SECOND}.
+     * Equivalent to {@link #METRES_PER_SQUARE_SECOND}.
      */
-    public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = METER_PER_SQUARE_SECOND;
+    public static final Unit<Acceleration> METERS_PER_SQUARE_SECOND = METRES_PER_SQUARE_SECOND;
 
     /**
      * The metric unit for area quantities (<code>m²</code>).
      */
-    public static final Unit<Area> SQUARE_METER = si(new ProductUnit<Area>(
-            METER.times(METER)));
-
-    /**
-     * Equivalent to {@link #SQUARE_METER}.
-     */
-    public static final Unit<Area> SQUARE_METRE = SQUARE_METER;
+    public static final Unit<Area> SQUARE_METRE = si(new ProductUnit<Area>(
+            METRE.times(METRE)));
 
     /**
      * The metric unit for volume quantities (<code>m³</code>).
      */
-    public static final Unit<Volume> CUBIC_METER = si(new ProductUnit<Volume>(
-            SQUARE_METER.times(METER)));
+    public static final Unit<Volume> CUBIC_METRE = si(new ProductUnit<Volume>(
+            SQUARE_METRE.times(METRE)));
 
     /**
-     * Equivalent to {@link #CUBIC_METER}.
+     * Equivalent to <code>KILO(METRE)</code>.
      */
-    public static final Unit<Volume> CUBIC_METRE = CUBIC_METER;
+    public static final Unit<Length> KILOMETRE = METER.times(1000);
+
+    /**
+     * Equivalent to {@link #KILOMETRE}.
+     */
+    public static final Unit<Length> KILOMETER = KILOMETRE;
+
+    /**
+     * Equivalent to <code>CENTI(METRE)</code>.
+     */
+    public static final Unit<Length> CENTIMETRE = METRE.divide(100);
+
+    /**
+     * Equivalent to {@link #CENTIMETRE}.
+     */
+    public static final Unit<Length> CENTIMETER = CENTIMETRE;
+
+    /**
+     * Equivalent to <code>MILLI(METRE)</code>.
+     */
+    public static final Unit<Length> MILLIMETRE = METRE.divide(1000);
+
+    /**
+     * Equivalent to {@link #MILLIMETRE}.
+     */
+    public static final Unit<Length> MILLIMETER = MILLIMETRE;
 
     /////////////////
     // SI PREFIXES //
@@ -612,12 +640,12 @@ public final class SI {
     /////////////////////
 
     /**
-     * Returns a read only view over the SI units defined in this class.
+     * Returns a read only view over theunits defined in this class.
      *
      * @return the collection of SI units.
      */
-    public static Set<Unit<?>> units() {
-        return Collections.unmodifiableSet(INSTANCES);
+    public Set<Unit<?>> getUnits() {
+        return Collections.unmodifiableSet(UNITS);
     }
 
     /**
@@ -626,8 +654,8 @@ public final class SI {
      * @param  unit the unit being added.
      * @return <code>unit</code>.
      */
-    private static <U extends Unit> U si(U unit) {
-        INSTANCES.add(unit);
+    private static <U extends Unit<?>> U si(U unit) {
+        UNITS.add(unit);
         return unit;
     }
 
@@ -678,4 +706,14 @@ public final class SI {
     static final MultiplyConverter Em21 = new MultiplyConverter(1E-21);
 
     static final MultiplyConverter Em24 = new MultiplyConverter(1E-24);
+
+    /**
+     * @deprecated replaced by  {@link #METRES_PER_SECOND}.
+     */
+    public static final Unit<Velocity> METRE_PER_SECOND = METRES_PER_SECOND;
+
+    /**
+     * @deprecated replaced by  {@link #METRES_PER_SQUARE_SECOND}.
+     */
+    public static final Unit<Acceleration> METRE_PER_SQUARE_SECOND = METRES_PER_SQUARE_SECOND;
 }

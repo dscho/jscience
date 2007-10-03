@@ -22,6 +22,6 @@ public interface Acceleration extends Quantity {
     /**
      * Holds the SI unit (Système International d'Unités) for this quantity.
      */
-    public final static Unit<Acceleration> UNIT = SI.METER_PER_SQUARE_SECOND;
+    public final static Unit<Acceleration> UNIT = SI.METRES_PER_SQUARE_SECOND;
 
 }
