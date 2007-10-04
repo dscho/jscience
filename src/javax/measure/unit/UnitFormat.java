@@ -291,11 +291,14 @@ public abstract class UnitFormat extends Format {
         }
 
         static boolean isUnitIdentifierPart(char ch) {
-            return !Character.isWhitespace(ch) && 
-               !Character.isDigit(ch) && (ch != '¹') && (ch != '²') 
-                    && (ch != '³') && (ch != '·');
+            return Character.isLetter(ch) || 
+               (!Character.isWhitespace(ch) && !Character.isDigit(ch)
+                  && (ch != '·') && (ch != '*') && (ch != '/')
+                  && (ch != '(') && (ch != ')') && (ch != '[') && (ch != ']')    
+                  && (ch != '¹') && (ch != '²') && (ch != '³') 
+                  && (ch != '^') && (ch != '+') && (ch != '-'));
         }
-
+        
         // Returns the name for the specified unit or null if product unit.
         public String nameFor(Unit<?> unit) {
             // Searches label database.
