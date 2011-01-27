@@ -204,7 +204,9 @@
     <!--     List of modules                                  -->
     <!-- ==================================================== -->
     <modules>
+        <module>economics</module>
         <module>mathematics</module>
+        <module>physics</module>
     </modules>
 
 </project>
