@@ -8,7 +8,7 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.USCustomary;
 import org.unitsofmeasurement.unit.UnitConverter;
 import static org.jscience.physics.util.TestUtil.*;
@@ -24,9 +24,9 @@ import org.junit.Test;
  * @author  <a href="mailto:jsr275@catmedia.us">Werner Keil</a>
  */
 public class UnitConversionTest {
-    static final PhysicalUnit<Length> unit1 = SI.METRE;
-    static final PhysicalUnit<Length> unit2 = SI.CENTI(METRE);
-    static final PhysicalUnit<Length> unit3 = USCustomary.FOOT;
+    static final PhysicsUnit<Length> unit1 = SI.METRE;
+    static final PhysicsUnit<Length> unit2 = SI.CENTI(METRE);
+    static final PhysicsUnit<Length> unit3 = USCustomary.FOOT;
     
     protected void setUp() throws Exception {
 //        super.setUp();

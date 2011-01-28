@@ -8,7 +8,7 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.format.UnitFormatImpl;
 import static org.jscience.physics.unit.SI.*;
 import static org.jscience.physics.unit.USCustomary.*;
@@ -33,9 +33,9 @@ public class UnitFormatTest {
     private static final Locale COMPARISON_LOCALE = Locale.UK;
 
     UnitFormatImpl format;
-    PhysicalUnit<Length> cm;
-    PhysicalUnit<Length> mm;
-    PhysicalUnit<Length> foot;
+    PhysicsUnit<Length> cm;
+    PhysicsUnit<Length> mm;
+    PhysicsUnit<Length> foot;
     
     @Before
     public void setUp() throws Exception {
@@ -86,12 +86,12 @@ public class UnitFormatTest {
     
     @Test
     public void testSubMultiples() {
-    	PhysicalUnit<Length> u = CENTI(METRE);
+    	PhysicsUnit<Length> u = CENTI(METRE);
     	print(u.toString());
     }
 
     /**
-     * Tests the {@link PhysicalUnit#toString()} method, which is backed by {@link UnitFormatImpl}.
+     * Tests the {@link PhysicsUnit#toString()} method, which is backed by {@link UnitFormatImpl}.
      *
      * @see http://kenai.com/jira/browse/JSR_275-43
      */

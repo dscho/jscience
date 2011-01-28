@@ -8,7 +8,7 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.SI;
 import org.unitsofmeasurement.unit.UnitConverter;
 import static org.junit.Assert.*;
@@ -26,7 +26,7 @@ import org.junit.Test;
  * @author  <a href="mailto:jsr275@catmedia.us">Werner Keil</a>
  */
 public class UnitTest {
-    PhysicalUnit<Dimensionless> one;
+    PhysicsUnit<Dimensionless> one;
 
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
@@ -35,7 +35,7 @@ public class UnitTest {
     public void setUp() throws Exception {
 //      super.setUp();
 
-        one = PhysicalUnit.ONE;
+        one = PhysicsUnit.ONE;
     }
 
     /* (non-Javadoc)
@@ -49,16 +49,16 @@ public class UnitTest {
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#toMetric()}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#toMetric()}.
      */
     @Test
     public void testToMetric() {
-        PhysicalUnit<? extends Quantity> su = one.toMetric();
+        PhysicsUnit<? extends Quantity> su = one.toMetric();
         assertTrue(su.isUnscaledMetric());
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#getConverterTo}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#getConverterTo}.
      */
     @Test
     public void testConverterToSI() {
@@ -70,7 +70,7 @@ public class UnitTest {
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#isMetric()}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#isMetric()}.
      */
     @Test
     public void testIsMetric() {
@@ -79,7 +79,7 @@ public class UnitTest {
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#asType(java.lang.Class)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#asType(java.lang.Class)}.
      */
   @Test
   public void testAsType() {
@@ -93,7 +93,7 @@ public class UnitTest {
   }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#getDimension()}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#getDimension()}.
      */
     @Test
     public void testGetDimension() {
@@ -101,119 +101,119 @@ public class UnitTest {
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#alternate(java.lang.String)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#alternate(java.lang.String)}.
      */
     @Test
     public void testAlternate() {
-        PhysicalUnit<? extends Quantity> alternate = one.alternate(null);
+        PhysicsUnit<? extends Quantity> alternate = one.alternate(null);
         assertNotNull(alternate);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#compound(org.jscience.physics.unit.PhysicalUnit)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#compound(org.jscience.physics.unit.PhysicsUnit)}.
      */
     /*public void testCompound() {
-        PhysicalUnit<? extends Quantity> compound = one.compound(one);
+        PhysicsUnit<? extends Quantity> compound = one.compound(one);
         assertNotNull(compound);
     }*/
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#transform}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#transform}.
      */
     @Test
     public void testTransform() {
-        PhysicalUnit<? extends Quantity> result = one.transform(UnitConverter.IDENTITY);
+        PhysicsUnit<? extends Quantity> result = one.transform(UnitConverter.IDENTITY);
         assertEquals(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#add(double)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#add(double)}.
      */
     @Test
     public void testAdd() {
-        PhysicalUnit<? extends Quantity> result = one.add(10);
+        PhysicsUnit<? extends Quantity> result = one.add(10);
         assertNotSame(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#multiply(long)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#multiply(long)}.
      */
     @SuppressWarnings("unchecked")
 	@Test
     public void testMultiplyLong() {
-        PhysicalUnit<? extends Quantity> result = one.multiply(2L);
+        PhysicsUnit<? extends Quantity> result = one.multiply(2L);
         assertNotSame(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#multiply(double)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#multiply(double)}.
      */
     @Test
     public void testMultiplyDouble() {
-        PhysicalUnit<? extends Quantity> result = one.multiply(2.1);
+        PhysicsUnit<? extends Quantity> result = one.multiply(2.1);
         assertNotSame(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#multiply(org.jscience.physics.unit.PhysicalUnit)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#multiply(org.jscience.physics.unit.PhysicsUnit)}.
      */
     @Test
     public void testMultiplyUnitOfQ() {
-        PhysicalUnit<? extends Quantity> result = one.multiply(one);
+        PhysicsUnit<? extends Quantity> result = one.multiply(one);
         assertEquals(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#inverse()}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#inverse()}.
      */
     @Test
     public void testInverse() {
-        PhysicalUnit<? extends Quantity> result = one.inverse();
+        PhysicsUnit<? extends Quantity> result = one.inverse();
         assertEquals(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#divide(long)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#divide(long)}.
      */
     @Test
     public void testDivideLong() {
-        PhysicalUnit<? extends Quantity> result = one.divide(2L);
+        PhysicsUnit<? extends Quantity> result = one.divide(2L);
         assertNotSame(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#divide(double)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#divide(double)}.
      */
     @Test
     public void testDivideDouble() {
-        PhysicalUnit<? extends Quantity> result = one.divide(3.2);
+        PhysicsUnit<? extends Quantity> result = one.divide(3.2);
         assertNotSame(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#divide(org.jscience.physics.unit.PhysicalUnit)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#divide(org.jscience.physics.unit.PhysicsUnit)}.
      */
     @Test
     public void testDivideUnitOfQ() {
-        PhysicalUnit<? extends Quantity> result = one.divide(one);
+        PhysicsUnit<? extends Quantity> result = one.divide(one);
         assertEquals(result, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#root(int)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#root(int)}.
      */
     @Test
     public void testRoot() {
-        PhysicalUnit<? extends Quantity> root = one.root(2);
+        PhysicsUnit<? extends Quantity> root = one.root(2);
         assertEquals(root, one);
     }
 
     /**
-     * Test method for {@link org.jscience.physics.unit.PhysicalUnit#pow(int)}.
+     * Test method for {@link org.jscience.physics.unit.PhysicsUnit#pow(int)}.
      */
     @Test
     public void testPow() {
-        PhysicalUnit<? extends Quantity> result = one.pow(10);
+        PhysicsUnit<? extends Quantity> result = one.pow(10);
         assertEquals(result, one);
     }
 }

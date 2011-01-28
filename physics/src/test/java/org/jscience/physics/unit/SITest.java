@@ -8,7 +8,7 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import java.util.Map;
 import static org.jscience.physics.util.TestUtil.print;
 import static org.jscience.physics.unit.SI.SI;
@@ -23,7 +23,7 @@ import org.junit.Test;
 import junit.framework.TestCase;
 
 /**
- * PhysicalUnit test for class org.jscience.physics.unit.SI
+ * PhysicsUnit test for class org.jscience.physics.unit.SI
  * @author  <a href="mailto:jsr275@catmedia.us">Werner Keil</a>
  */
 public class SITest extends TestCase {
@@ -55,15 +55,15 @@ public class SITest extends TestCase {
         SI result = SI.getInstance();
 
         // Checks SI contains the 7 SI base units.
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("m")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("kg")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("s")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("mol")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("K")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("cd")));
-        assertTrue(result.getUnits().contains(PhysicalUnit.valueOf("A")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("m")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("kg")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("s")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("mol")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("K")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("cd")));
+        assertTrue(result.getUnits().contains(PhysicsUnit.valueOf("A")));
 
-        print(PhysicalUnit.valueOf("m").getDimension().toString());
+        print(PhysicsUnit.valueOf("m").getDimension().toString());
     }
 
     @Test
@@ -73,7 +73,7 @@ public class SITest extends TestCase {
     
 	public void testVolume() {
 		print("ML: ");
-		PhysicalUnit<Volume> MILLILITER = MILLI(LITER);
+		PhysicsUnit<Volume> MILLILITER = MILLI(LITER);
 		print(MILLILITER);
 	}
 }

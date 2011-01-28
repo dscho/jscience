@@ -11,7 +11,7 @@ package org.jscience.physics.util;
 import java.util.Random;
 import org.jscience.physics.quantity.Mass;
 import org.jscience.physics.quantity.QuantityFactory;
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.unit.UnitConverter;
 import static org.jscience.physics.unit.SI.*;
 
@@ -19,7 +19,7 @@ public class Benchmark {
     private static final int N = 100000;
 
     @SuppressWarnings({"unchecked","rawtypes"}) // Because of generic array creation.
-    private static final PhysicalUnit<Mass>[] UNITS = new PhysicalUnit[] {
+    private static final PhysicsUnit<Mass>[] UNITS = new PhysicsUnit[] {
         MEGA(GRAM),
         KILOGRAM,
         GRAM,
@@ -37,7 +37,7 @@ public class Benchmark {
             m[i] = factory.create(r.nextGaussian(), KILOGRAM);
         }
         // Now perform some computation in a random unit.
-        final PhysicalUnit<Mass> targetUnit = UNITS[r.nextInt(UNITS.length)];
+        final PhysicsUnit<Mass> targetUnit = UNITS[r.nextInt(UNITS.length)];
         double sum = 0;
         for (int i=0; i<N; i++) {
             sum += m[i].doubleValue(targetUnit);
@@ -55,8 +55,8 @@ public class Benchmark {
             m[i] = r.nextGaussian();
         }
         // Now perform some computation in a random unit.
-        final PhysicalUnit<Mass> sourceUnit = KILOGRAM;
-        final PhysicalUnit<Mass> targetUnit = UNITS[r.nextInt(UNITS.length)];
+        final PhysicsUnit<Mass> sourceUnit = KILOGRAM;
+        final PhysicsUnit<Mass> targetUnit = UNITS[r.nextInt(UNITS.length)];
         final UnitConverter cv = sourceUnit.getConverterTo(targetUnit);
         double sum = 0;
         for (int i=0; i<N; i++) {

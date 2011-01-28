@@ -63,11 +63,11 @@ public enum Planet {
                 G * m / (r * r), METRES_PER_SQUARE_SECOND);
     }
 
-    private static Mass newMass(double value, PhysicalUnit<Mass> unit) {
+    private static Mass newMass(double value, PhysicsUnit<Mass> unit) {
         return QuantityFactory.getInstance(Mass.class).create(value, unit);
     }
 
-    private static Length newLength(double value, PhysicalUnit<Length> unit) {
+    private static Length newLength(double value, PhysicsUnit<Length> unit) {
         return QuantityFactory.getInstance(Length.class).create(value, unit);
     }
 
