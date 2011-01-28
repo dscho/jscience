@@ -8,11 +8,12 @@
  */
 package org.jscience.physics.model;
 
+import org.jscience.physics.unit.PhysicsDimension;
 import javolution.context.LocalContext;
 import org.jscience.physics.unit.BaseUnit;
-import org.jscience.physics.unit.PhysicalSystemOfUnits;
 import org.jscience.physics.unit.SI;
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.unitsofmeasurement.unit.SystemOfUnits;
 
 /**
  * <p> This class represents the model defining the properties of physical
@@ -34,17 +35,17 @@ import org.jscience.physics.unit.converter.PhysicalUnitConverter;
  * <p> Applications may set their own physical model.
  *     [code]
  *     public static void main(String[] args) {
- *          PhysicalModel relativistic = new PhysicalModel() {
- *              public PhysicalDimension getDimension(BaseUnit<?> baseUnit) {
- *                  if (baseUnit.equals(SI.METRE)) return PhysicalDimension.TIME;
+ *          PhysicsModel relativistic = new PhysicsModel() {
+ *              public PhysicsDimension getDimension(BaseUnit<?> baseUnit) {
+ *                  if (baseUnit.equals(SI.METRE)) return PhysicsDimension.TIME;
  *                  return super.getDimension(baseUnit);
  *              }
- *              public PhysicalUnitConverter getDimensionalTransform(BaseUnit<?> baseUnit) {
+ *              public AbstractUnitConverter getDimensionalTransform(BaseUnit<?> baseUnit) {
  *                  if (baseUnit.equals(SI.METRE)) return new MultiplyConverter(1 / c)); // Converter to TIME.
  *                  return super.getDimensionalTransform(baseUnit);
  *              }
  *          };
- *          PhysicalModel.setInstance(relativistic); // Global (LocalContext should be used for thread-local settings).
+ *          PhysicsModel.setInstance(relativistic); // Global (LocalContext should be used for thread-local settings).
  *          SI.KILOGRAM.getConverterToAny(SI.JOULE); // Allowed.
  *          ...
  *     }
@@ -54,12 +55,12 @@ import org.jscience.physics.unit.converter.PhysicalUnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public abstract class PhysicalModel {
+public abstract class PhysicsModel {
 
     /**
      * Holds the currentPhysicalModel model.
      */
-    private static LocalContext.Reference<PhysicalModel> Current = new LocalContext.Reference<PhysicalModel>(new StandardModel());
+    private static LocalContext.Reference<PhysicsModel> Current = new LocalContext.Reference<PhysicsModel>(new StandardModel());
 
     /**
      * Returns the physical model used by the currentPhysicalModel thread
@@ -68,8 +69,8 @@ public abstract class PhysicalModel {
      * @return the currentPhysicalModel physical model.
      * @see LocalContext
      */
-    public static PhysicalModel currentPhysicalModel() {
-        return PhysicalModel.Current.get();
+    public static PhysicsModel currentPhysicalModel() {
+        return PhysicsModel.Current.get();
     }
 
     /**
@@ -79,20 +80,20 @@ public abstract class PhysicalModel {
      * @param  model the context-local physical model.
      * @see    #currentPhysicalModel
      */
-    protected static void setCurrentPhysicalModel(PhysicalModel model) {
-        PhysicalModel.Current.set(model);
+    protected static void setCurrentPhysicalModel(PhysicsModel model) {
+        PhysicsModel.Current.set(model);
     }
 
     /**
      * Default constructor (allows for derivation).
      */
-    protected PhysicalModel() {
+    protected PhysicsModel() {
     }
 
     /**
      * Returns the system of units used with this model (default {@link SI}).
      */
-    public PhysicalSystemOfUnits getSystemOfUnits() {
+    public SystemOfUnits getSystemOfUnits() {
         return SI.getInstance();
     }
 
@@ -103,15 +104,15 @@ public abstract class PhysicalModel {
      * @param unit the base unit for which the dimension is returned.
      * @return the physical dimension for the unit.
      */
-    public PhysicalDimension getDimension(BaseUnit<?> unit) {
-        if (unit.equals(SI.METRE)) return PhysicalDimension.LENGTH;
-        if (unit.equals(SI.KILOGRAM)) return PhysicalDimension.MASS;
-        if (unit.equals(SI.SECOND)) return PhysicalDimension.TIME;
-        if (unit.equals(SI.AMPERE)) return PhysicalDimension.ELECTRIC_CURRENT;
-        if (unit.equals(SI.KELVIN)) return PhysicalDimension.TEMPERATURE;
-        if (unit.equals(SI.MOLE)) return PhysicalDimension.AMOUNT_OF_SUBSTANCE;
-        if (unit.equals(SI.CANDELA)) return PhysicalDimension.LUMINOUS_INTENSITY;
-        return PhysicalDimension.NONE;
+    public PhysicsDimension getDimension(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return PhysicsDimension.LENGTH;
+        if (unit.equals(SI.KILOGRAM)) return PhysicsDimension.MASS;
+        if (unit.equals(SI.SECOND)) return PhysicsDimension.TIME;
+        if (unit.equals(SI.AMPERE)) return PhysicsDimension.ELECTRIC_CURRENT;
+        if (unit.equals(SI.KELVIN)) return PhysicsDimension.TEMPERATURE;
+        if (unit.equals(SI.MOLE)) return PhysicsDimension.AMOUNT_OF_SUBSTANCE;
+        if (unit.equals(SI.CANDELA)) return PhysicsDimension.LUMINOUS_INTENSITY;
+        return PhysicsDimension.NONE;
     }
 
     /**
@@ -120,8 +121,8 @@ public abstract class PhysicalModel {
      * @param unit the base unit for which the dimensional transform is returned.
      * @return the dimensional transform of the specified base unit.
      */
-    public PhysicalUnitConverter getDimensionalTransform(BaseUnit<?> unit) {
-        return PhysicalUnitConverter.IDENTITY;
+    public AbstractUnitConverter getDimensionalTransform(BaseUnit<?> unit) {
+        return AbstractUnitConverter.IDENTITY;
     }
 
 }

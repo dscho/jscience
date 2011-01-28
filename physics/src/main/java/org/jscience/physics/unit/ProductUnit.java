@@ -8,7 +8,6 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.model.PhysicalDimension;
 import org.unitsofmeasurement.unit.UnitConverter;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import org.jscience.physics.quantity.Quantity;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
+public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     /**
 	 * For cross-version compatibility.
@@ -59,7 +58,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @param productUnit the product unit source.
      * @throws ClassCastException if the specified unit is not a product unit.
      */
-    public ProductUnit(PhysicalUnit<?> productUnit) {
+    public ProductUnit(PhysicsUnit<?> productUnit) {
         this.elements = ((ProductUnit<?>) productUnit).elements;
     }
 
@@ -80,14 +79,14 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @return the corresponding unit.
      */
     @SuppressWarnings("unchecked")
-    private static PhysicalUnit<? extends Quantity<?>> getInstance(Element[] leftElems,
+    private static PhysicsUnit<? extends Quantity<?>> getInstance(Element[] leftElems,
             Element[] rightElems) {
 
         // Merges left elements with right elements.
         Element[] result = new Element[leftElems.length + rightElems.length];
         int resultIndex = 0;
         for (int i = 0; i < leftElems.length; i++) {
-            PhysicalUnit<?> unit = leftElems[i].unit;
+            PhysicsUnit<?> unit = leftElems[i].unit;
             int p1 = leftElems[i].pow;
             int r1 = leftElems[i].root;
             int p2 = 0;
@@ -109,7 +108,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
 
         // Appends remaining right elements not merged.
         for (int i = 0; i < rightElems.length; i++) {
-            PhysicalUnit<?> unit = rightElems[i].unit;
+            PhysicsUnit<?> unit = rightElems[i].unit;
             boolean hasBeenMerged = false;
             for (int j = 0; j < leftElems.length; j++) {
                 if (unit.equals(leftElems[j].unit)) {
@@ -142,8 +141,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @param right the right unit operand.
      * @return <code>left * right</code>
      */
-    public static PhysicalUnit<? extends Quantity<?>> getProductInstance(PhysicalUnit<?> left,
-            PhysicalUnit<?> right) {
+    public static PhysicsUnit<? extends Quantity<?>> getProductInstance(PhysicsUnit<?> left,
+            PhysicsUnit<?> right) {
         Element[] leftElems;
         if (left instanceof ProductUnit<?>)
             leftElems = ((ProductUnit<?>) left).elements;
@@ -164,8 +163,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @param right the divisor unit operand.
      * @return <code>dividend / divisor</code>
      */
-    public static PhysicalUnit<? extends Quantity<?>> getQuotientInstance(PhysicalUnit<?> left,
-            PhysicalUnit<?> right) {
+    public static PhysicsUnit<? extends Quantity<?>> getQuotientInstance(PhysicsUnit<?> left,
+            PhysicsUnit<?> right) {
         Element[] leftElems;
         if (left instanceof ProductUnit<?>)
             leftElems = ((ProductUnit<?>) left).elements;
@@ -193,7 +192,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @return <code>unit^(1/nn)</code>
      * @throws ArithmeticException if <code>n == 0</code>.
      */
-    public static PhysicalUnit<? extends Quantity<?>> getRootInstance(PhysicalUnit<?> unit, int n) {
+    public static PhysicsUnit<? extends Quantity<?>> getRootInstance(PhysicsUnit<?> unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit<?>) {
             Element[] elems = ((ProductUnit<?>) unit).elements;
@@ -216,7 +215,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @param nn the exponent (nn &gt; 0).
      * @return <code>unit^n</code>
      */
-    static PhysicalUnit<? extends Quantity<?>> getPowInstance(PhysicalUnit<?> unit, int n) {
+    static PhysicsUnit<? extends Quantity<?>> getPowInstance(PhysicsUnit<?> unit, int n) {
         Element[] unitElems;
         if (unit instanceof ProductUnit<?>) {
             Element[] elems = ((ProductUnit<?>) unit).elements;
@@ -247,7 +246,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @throws IndexOutOfBoundsException if index is out of range
      *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
      */
-    public PhysicalUnit<? extends Quantity<?>> getUnit(int index) {
+    public PhysicsUnit<? extends Quantity<?>> getUnit(int index) {
         return elements[index].getUnit();
     }
 
@@ -276,8 +275,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
     }
 
     @Override
-    public Map<PhysicalUnit<?>, Integer> getProductUnits() {
-        HashMap<PhysicalUnit<?>, Integer> units = new HashMap<PhysicalUnit<?>, Integer>();
+    public Map<PhysicsUnit<?>, Integer> getProductUnits() {
+        HashMap<PhysicsUnit<?>, Integer> units = new HashMap<PhysicsUnit<?>, Integer>();
         for (int i = 0; i < getUnitCount(); i++) {
             units.put(getUnit(i), getUnitPow(i));
         }
@@ -327,17 +326,17 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public PhysicalUnit<Q> toMetric() {
+    public PhysicsUnit<Q> toMetric() {
         if (hasOnlyUnscaledMetricUnits())
             return this;
-        PhysicalUnit<?> systemUnit = ONE;
+        PhysicsUnit<?> systemUnit = ONE;
         for (int i = 0; i < elements.length; i++) {
-            PhysicalUnit<?> unit = elements[i].unit.toMetric();
+            PhysicsUnit<?> unit = elements[i].unit.toMetric();
             unit = unit.pow(elements[i].pow);
             unit = unit.root(elements[i].root);
             systemUnit = systemUnit.multiply(unit);
         }
-        return (PhysicalUnit<Q>) systemUnit;
+        return (PhysicsUnit<Q>) systemUnit;
     }
 
     @Override
@@ -372,7 +371,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      */
     private boolean hasOnlyUnscaledMetricUnits() {
         for (int i = 0; i < elements.length; i++) {
-            PhysicalUnit<?> u = elements[i].unit;
+            PhysicsUnit<?> u = elements[i].unit;
             if (!u.isUnscaledMetric())
                 return false;
         }
@@ -380,11 +379,11 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
     }
 
     @Override
-    public PhysicalDimension getDimension() {
-        PhysicalDimension dimension = PhysicalDimension.NONE;
+    public PhysicsDimension getDimension() {
+        PhysicsDimension dimension = PhysicsDimension.NONE;
         for (int i = 0; i < this.getUnitCount(); i++) {
-            PhysicalUnit<?> unit = this.getUnit(i);
-            PhysicalDimension d = unit.getDimension().pow(this.getUnitPow(i)).root(this.getUnitRoot(i));
+            PhysicsUnit<?> unit = this.getUnit(i);
+            PhysicsDimension d = unit.getDimension().pow(this.getUnitPow(i)).root(this.getUnitRoot(i));
             dimension = dimension.multiply(d);
         }
         return dimension;
@@ -394,7 +393,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
     public UnitConverter getDimensionalTransform() {
         UnitConverter converter = UnitConverter.IDENTITY;
         for (int i = 0; i < this.getUnitCount(); i++) {
-            PhysicalUnit<?> unit = this.getUnit(i);
+            PhysicsUnit<?> unit = this.getUnit(i);
             UnitConverter cvtr = unit.getDimensionalTransform();
             if (!(cvtr.isLinear()))
                 throw new UnsupportedOperationException(cvtr.getClass() + " is non-linear, cannot convert product unit");
@@ -439,7 +438,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
         /**
          * Holds the single unit.
          */
-        private final PhysicalUnit<?> unit;
+        private final PhysicsUnit<?> unit;
 
         /**
          * Holds the power exponent.
@@ -458,7 +457,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
          * @param pow the power exponent.
          * @param root the root exponent.
          */
-        private Element(PhysicalUnit<?> unit, int pow, int root) {
+        private Element(PhysicsUnit<?> unit, int pow, int root) {
             this.unit = unit;
             this.pow = pow;
             this.root = root;
@@ -469,7 +468,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
          *
          * @return the single unit.
          */
-        public PhysicalUnit<?> getUnit() {
+        public PhysicsUnit<?> getUnit() {
             return unit;
         }
 

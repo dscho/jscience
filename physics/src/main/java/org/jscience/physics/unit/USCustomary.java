@@ -47,13 +47,13 @@ public final class USCustomary extends PhysicalSystemOfUnits {
     /**
      * Holds the units.
      */
-    private final FastSet<PhysicalUnit> units = new FastSet<PhysicalUnit>();
+    private final FastSet<PhysicsUnit> units = new FastSet<PhysicsUnit>();
 
     /**
      * Holds the mapping quantity to unit.
      */
-    private final FastMap<Class<? extends Quantity>, PhysicalUnit>
-            quantityToUnit = new FastMap<Class<? extends Quantity>, PhysicalUnit>();
+    private final FastMap<Class<? extends Quantity>, PhysicsUnit>
+            quantityToUnit = new FastMap<Class<? extends Quantity>, PhysicsUnit>();
 
     /**
      * The singleton instance.
@@ -78,12 +78,12 @@ public final class USCustomary extends PhysicalSystemOfUnits {
     /**
      * US name for {@link SI#METRE}.
      */
-    public static final PhysicalUnit<Length> METER = METRE;
+    public static final PhysicsUnit<Length> METER = METRE;
 
     /**
      * US name for {@link SI#LITRE}.
      */
-    public static final PhysicalUnit<Volume> LITER = LITRE;
+    public static final PhysicsUnit<Volume> LITER = LITRE;
 
     //
     // International customary units
@@ -210,19 +210,19 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A unit of mass equal to <code>453.59237 grams</code> (avoirdupois pound,
      * standard name <code>lb</code>).
      */
-    public static final PhysicalUnit<Mass> POUND = addUnit(KILOGRAM.multiply(
+    public static final PhysicsUnit<Mass> POUND = addUnit(KILOGRAM.multiply(
             45359237).divide(100000000), Mass.class);
 
     /**
      * A unit of mass equal to <code>1 / 16 {@link #POUND}</code> (standard name <code>oz</code>).
      */
-    public static final PhysicalUnit<Mass> OUNCE = addUnit(POUND.divide(16));
+    public static final PhysicsUnit<Mass> OUNCE = addUnit(POUND.divide(16));
 
     /**
      * A unit of mass equal to <code>2000 {@link #POUND}</code> (short ton, standard name
      * <code>ton</code>).
      */
-    public static final PhysicalUnit<Mass> TON = addUnit(POUND.multiply(2000));
+    public static final PhysicsUnit<Mass> TON = addUnit(POUND.multiply(2000));
 
 
     // ///////////////
@@ -233,7 +233,7 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A unit of temperature equal to <code>5/9 °K</code> (standard name
      * <code>°R</code>).
      */
-    public static final PhysicalUnit<Temperature> RANKINE = addUnit(KELVIN.multiply(5).divide(9));
+    public static final PhysicsUnit<Temperature> RANKINE = addUnit(KELVIN.multiply(5).divide(9));
 
     /**
      * A unit of temperature equal to degree Rankine minus
@@ -241,7 +241,7 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      *
      * @see #RANKINE
      */
-    public static final PhysicalUnit<Temperature> FAHRENHEIT = addUnit(RANKINE.add(459.67), Temperature.class);
+    public static final PhysicsUnit<Temperature> FAHRENHEIT = addUnit(RANKINE.add(459.67), Temperature.class);
 
     // ////////////
     // Velocity //
@@ -251,14 +251,14 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A unit of velocity expressing the number of {@link #FOOT feet} per
      * {@link SI#SECOND second}.
      */
-    public static final PhysicalUnit<Velocity> FEET_PER_SECOND = addUnit(
+    public static final PhysicsUnit<Velocity> FEET_PER_SECOND = addUnit(
             FOOT.divide(SECOND)).asType(Velocity.class);
 
     /**
      * A unit of velocity expressing the number of international {@link #NAUTICAL_MILE
      * miles} per {@link #HOUR hour} (abbreviation <code>mph</code>).
      */
-    public static final PhysicalUnit<Velocity> MILES_PER_HOUR = addUnit(
+    public static final PhysicsUnit<Velocity> MILES_PER_HOUR = addUnit(
             NAUTICAL_MILE.divide(HOUR), Velocity.class).asType(Velocity.class);
 
     // ////////
@@ -269,12 +269,12 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A unit of area equal to <code>43 560 square feet </code> 
      * (standard name <code>[acr_us]</code>).
      */
-    public static final PhysicalUnit<Area> ACRE = addUnit(SQUARE_FOOT.multiply(43560));
+    public static final PhysicsUnit<Area> ACRE = addUnit(SQUARE_FOOT.multiply(43560));
 
     /**
      * A unit of area equal to <code>100 m²</code> (standard name <code>a</code>).
      */
-    public static final PhysicalUnit<Area> ARE = addUnit(SQUARE_METRE.multiply(100));
+    public static final PhysicsUnit<Area> ARE = addUnit(SQUARE_METRE.multiply(100));
 
 
     // //////////
@@ -285,52 +285,52 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A unit of volume equal to one US dry gallon. (standard name
      * <code>gallon_dry_us</code>).
      */
-    public static final PhysicalUnit<Volume> GALLON_DRY = addUnit(CUBIC_INCH.multiply(
+    public static final PhysicsUnit<Volume> GALLON_DRY = addUnit(CUBIC_INCH.multiply(
             2688025).divide(10000));
     
     /**
-     * A unit of volume equal to one US gallon, Liquid PhysicalUnit. The U.S. liquid
+     * A unit of volume equal to one US gallon, Liquid PhysicsUnit. The U.S. liquid
      * gallon is based on the Queen Anne or Wine gallon occupying 231 cubic
      * inches (standard name <code>gal</code>).
      */
-    public static final PhysicalUnit<Volume> GALLON_LIQUID = addUnit(CUBIC_INCH.multiply(231));
+    public static final PhysicsUnit<Volume> GALLON_LIQUID = addUnit(CUBIC_INCH.multiply(231));
 
     /**
      * A unit of volume equal to <code>1 / 128 {@link #GALLON_LIQUID}</code> (standard name
      * <code>oz_fl</code>).
      */
-    public static final PhysicalUnit<Volume> OUNCE_LIQUID = addUnit(GALLON_LIQUID.divide(128));
+    public static final PhysicsUnit<Volume> OUNCE_LIQUID = addUnit(GALLON_LIQUID.divide(128));
 
     /**
      * A unit of volume <code>~ 1 drop or 0.95 grain of water </code> (standard name
      * <code>min</code>).
      */
-    public static final PhysicalUnit<Volume> MINIM = addUnit(SIPrefix.MICRO(LITER).multiply(61.61152d));
+    public static final PhysicsUnit<Volume> MINIM = addUnit(SIPrefix.MICRO(LITER).multiply(61.61152d));
 
     /**
      * A unit of volume equal to <code>60 {@link #MINIM}</code> (standard name
      * <code>fl dr</code>).
      */
-    public static final PhysicalUnit<Volume> FLUID_DRAM = addUnit(MINIM.multiply(60));
+    public static final PhysicsUnit<Volume> FLUID_DRAM = addUnit(MINIM.multiply(60));
 
     /**
      * A unit of volume equal to <code>80 {@link #MINIM}</code> (standard name
      * <code>tsp</code>).
      */
-    public static final PhysicalUnit<Volume> TEASPOON = addUnit(MINIM.multiply(80));
+    public static final PhysicsUnit<Volume> TEASPOON = addUnit(MINIM.multiply(80));
 
     /**
      * A unit of volume equal to <code>3 {@link #TEASPOON}</code> (standard name
      * <code>Tbsp</code>).
      */
-    public static final PhysicalUnit<Volume> TABLESPOON = addUnit(TEASPOON.multiply(3));
+    public static final PhysicsUnit<Volume> TABLESPOON = addUnit(TEASPOON.multiply(3));
 
     
     /**
      * A unit of volume equal to <code>238.4810 {@link #LITER}</code> (standard name
      * <code>bbl</code>).
      */
-    public static final PhysicalUnit<Volume> OIL_BARREL = addUnit(LITER.multiply(238.4810d));
+    public static final PhysicsUnit<Volume> OIL_BARREL = addUnit(LITER.multiply(238.4810d));
 
 
     /////////////////////
@@ -343,13 +343,13 @@ public final class USCustomary extends PhysicalSystemOfUnits {
     }
 
     @Override
-    public Set<? extends PhysicalUnit> getUnits() {
+    public Set<? extends PhysicsUnit> getUnits() {
         return units.unmodifiable();
     }
 
     @Override
-    public <Q extends Quantity<Q>> PhysicalUnit<Q> getUnit(Class<Q> quantityType) {
-        PhysicalUnit<Q> unit = quantityToUnit.get(quantityType);
+    public <Q extends Quantity<Q>> PhysicsUnit<Q> getUnit(Class<Q> quantityType) {
+        PhysicsUnit<Q> unit = quantityToUnit.get(quantityType);
         // If not found, returns the SI one.
         return (unit == null) ? SI.getInstance().getUnit(quantityType) : unit;
     }
@@ -360,7 +360,7 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * @param  unit the unit being added.
      * @return <code>unit</code>.
      */
-    private static <U extends PhysicalUnit<?>>  U addUnit(U unit) {
+    private static <U extends PhysicsUnit<?>>  U addUnit(U unit) {
         INSTANCE.units.add(unit);
         return unit;
     }
@@ -372,7 +372,7 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * @param type the quantity type.
      * @return <code>unit</code>.
      */
-    private static <U extends PhysicalUnit<?>>  U addUnit(U unit, Class<? extends Quantity> type) {
+    private static <U extends PhysicsUnit<?>>  U addUnit(U unit, Class<? extends Quantity> type) {
         INSTANCE.units.add(unit);
         INSTANCE.quantityToUnit.put(type, unit);
         return unit;

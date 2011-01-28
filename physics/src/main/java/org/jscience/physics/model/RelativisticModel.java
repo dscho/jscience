@@ -8,7 +8,8 @@
  */
 package org.jscience.physics.model;
 
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
+import org.jscience.physics.unit.PhysicsDimension;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import org.jscience.physics.unit.SI;
 import java.math.BigInteger;
 import org.jscience.physics.unit.converter.RationalConverter;
@@ -37,7 +38,7 @@ public class RelativisticModel extends StandardModel {
      * Selects the relativistic model as the currentPhysicalModel model.
      */
     public static void select() {
-        PhysicalModel.setCurrent(INSTANCE);
+        PhysicsModel.setCurrent(INSTANCE);
     }
 
     /**
@@ -47,13 +48,13 @@ public class RelativisticModel extends StandardModel {
     }
 
     @Override
-    public PhysicalDimension getDimension(BaseUnit<?> unit) {
-        if (unit.equals(SI.METRE)) return PhysicalDimension.TIME;
+    public PhysicsDimension getDimension(BaseUnit<?> unit) {
+        if (unit.equals(SI.METRE)) return PhysicsDimension.TIME;
         return super.getDimension(unit);
     }
 
     @Override
-    public PhysicalUnitConverter getDimensionalTransform(BaseUnit<?> unit) {
+    public AbstractUnitConverter getDimensionalTransform(BaseUnit<?> unit) {
         if (unit.equals(SI.METRE)) return METRE_TO_TIME;
         return super.getDimensionalTransform(unit);
     }

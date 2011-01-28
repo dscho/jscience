@@ -10,7 +10,7 @@ package org.jscience.physics.unit;
 
 import java.util.Map;
 import org.jscience.physics.quantity.Quantity;
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -19,12 +19,12 @@ import org.unitsofmeasurement.unit.UnitConverter;
  *        public class Size implements Length {
  *             private double meters;
  *             ...
- *             public static class PhysicalUnit extends AnnotatedUnit<Length> {
- *                  private PhysicalUnit(org.jscience.physics.PhysicalUnit<Length> realUnit, String annotation) {
+ *             public static class PhysicsUnit extends AnnotatedUnit<Length> {
+ *                  private PhysicsUnit(org.jscience.physics.PhysicsUnit<Length> realUnit, String annotation) {
  *                      super(actualUnit, annotation);
  *                  }
- *                  public static Size.PhysicalUnit METER = new Size.PhysicalUnit(SI.METRE, "size"); // Equivalent to SI.METRE
- *                  public static Size.PhysicalUnit INCH = new Size.PhysicalUnit(NonSI.INCH, "size"); // Equivalent to NonSI.INCH
+ *                  public static Size.PhysicsUnit METER = new Size.PhysicsUnit(SI.METRE, "size"); // Equivalent to SI.METRE
+ *                  public static Size.PhysicsUnit INCH = new Size.PhysicsUnit(NonSI.INCH, "size"); // Equivalent to NonSI.INCH
  *             }
  *        }[/code]</p>
  * <p> Annotation are often written between curly braces behind units
@@ -41,7 +41,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
+public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     /**
      *
@@ -56,9 +56,9 @@ public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
     /**
      * Holds the actual unit, never an annotated unit.
      */
-    private final PhysicalUnit<Q> actualUnit;
+    private final PhysicsUnit<Q> actualUnit;
 
-    public PhysicalUnit<Q> getActualUnit() {
+    public PhysicsUnit<Q> getActualUnit() {
 		return actualUnit;
 	}
 
@@ -68,7 +68,7 @@ public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @param actualUnit the real unit.
      * @param annotation the annotation.
      */
-    public AnnotatedUnit(PhysicalUnit<Q> actualUnit, String annotation) {
+    public AnnotatedUnit(PhysicsUnit<Q> actualUnit, String annotation) {
         this.actualUnit = (actualUnit instanceof AnnotatedUnit<?>)
                 ? ((AnnotatedUnit<Q>) actualUnit).actualUnit : actualUnit;
         this.annotation = annotation;
@@ -87,7 +87,7 @@ public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
      * @throws IllegalArgumentException if the specified symbol is already
      *         associated to a different unit.
      */
-    public final PhysicalUnit<Q> annotate(String annotation) {
+    public final PhysicsUnit<Q> annotate(String annotation) {
         return new AnnotatedUnit<Q>(this, annotation);
     }
     
@@ -108,12 +108,12 @@ public class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
     }
 
     @Override
-    public Map<PhysicalUnit<?>, Integer> getProductUnits() {
+    public Map<PhysicsUnit<?>, Integer> getProductUnits() {
         return actualUnit.getProductUnits();
     }
   
    @Override
-    public PhysicalUnit<Q> toMetric() {
+    public PhysicsUnit<Q> toMetric() {
         return actualUnit.toMetric();
     }
 

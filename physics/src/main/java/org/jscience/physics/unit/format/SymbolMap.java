@@ -13,14 +13,14 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import javolution.util.FastMap;
-import org.jscience.physics.unit.PhysicalUnit;
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
 
 /**
  * <p> This class provides a set of mappings between
- *     {@link PhysicalUnit physical units} and symbols (both ways),
+ *     {@link PhysicsUnit physical units} and symbols (both ways),
  *     between {@link Prefix prefixes} and symbols
- *     (both ways), and from {@link PhysicalUnitConverter
+ *     (both ways), and from {@link AbstractUnitConverter
  *     physical unit converters} to {@link Prefix prefixes} (one way).
  *     No attempt is made to verify the uniqueness of the mappings.</p>
  *
@@ -30,9 +30,9 @@ import org.jscience.physics.unit.converter.PhysicalUnitConverter;
  *     to that class, followed optionally by another dot and a number.
  *     If the trailing dot and number are not present, the value
  *     associated with the key is treated as a
- *     {@link SymbolMap#label(PhysicalUnit, String) label},
+ *     {@link SymbolMap#label(PhysicsUnit, String) label},
  *     otherwise if the trailing dot and number are present, the value
- *     is treated as an {@link SymbolMap#alias(PhysicalUnit,String) alias}.
+ *     is treated as an {@link SymbolMap#alias(PhysicsUnit,String) alias}.
  *     Aliases map from String to Unit only, whereas labels map in both
  *     directions. A given unit may have any number of aliases, but may
  *     have only one label.</p>
@@ -42,21 +42,21 @@ import org.jscience.physics.unit.converter.PhysicalUnitConverter;
  */
 public class SymbolMap {
     
-    private FastMap<String, PhysicalUnit<?>> _symbolToUnit;
-    private FastMap<PhysicalUnit<?>, String> _unitToSymbol;
+    private FastMap<String, PhysicsUnit<?>> _symbolToUnit;
+    private FastMap<PhysicsUnit<?>, String> _unitToSymbol;
     private FastMap<String, Object> _symbolToPrefix;
     private FastMap<Object, String> _prefixToSymbol;
-    private FastMap<PhysicalUnitConverter, Prefix> _converterToPrefix;
+    private FastMap<AbstractUnitConverter, Prefix> _converterToPrefix;
     
     /**
      * Creates an empty mapping.
      */
     public SymbolMap () {
-        _symbolToUnit = new FastMap<String, PhysicalUnit<?>>();
-        _unitToSymbol = new FastMap<PhysicalUnit<?>, String>();
+        _symbolToUnit = new FastMap<String, PhysicsUnit<?>>();
+        _unitToSymbol = new FastMap<PhysicsUnit<?>, String>();
         _symbolToPrefix = new FastMap<String, Object>();
         _prefixToSymbol = new FastMap<Object, String>();
-        _converterToPrefix = new FastMap<PhysicalUnitConverter, Prefix>();
+        _converterToPrefix = new FastMap<AbstractUnitConverter, Prefix>();
     }
 
     /** 
@@ -84,11 +84,11 @@ public class SymbolMap {
                 Class<?> c = Class.forName(className);
                 Field field = c.getField(fieldName);
                 Object value = field.get(null);
-                if (value instanceof PhysicalUnit<?>) {
+                if (value instanceof PhysicsUnit<?>) {
                     if (isAlias) {
-                        alias((PhysicalUnit<?>)value, symbol);
+                        alias((PhysicsUnit<?>)value, symbol);
                     } else {
-                        label((PhysicalUnit<?>)value, symbol);
+                        label((PhysicsUnit<?>)value, symbol);
                     }
                 } else if (value instanceof Prefix) {
                     label((Prefix)value, symbol);
@@ -110,7 +110,7 @@ public class SymbolMap {
      * @param unit the unit to label.
      * @param symbol the new symbol for the unit.
      */
-    public void label (PhysicalUnit<?> unit, String symbol) {
+    public void label (PhysicsUnit<?> unit, String symbol) {
         _symbolToUnit.put(symbol, unit);
         _unitToSymbol.put(unit, symbol);
     }
@@ -128,7 +128,7 @@ public class SymbolMap {
      * @param unit the unit to label.
      * @param symbol the new symbol for the unit.
      */
-    public void alias (PhysicalUnit<?> unit, String symbol) {
+    public void alias (PhysicsUnit<?> unit, String symbol) {
         _symbolToUnit.put(symbol, unit);
     }
     
@@ -150,7 +150,7 @@ public class SymbolMap {
      * @param symbol the symbol.
      * @return the corresponding unit or <code>null</code> if none.
      */
-    public PhysicalUnit<?> getUnit (String symbol) {
+    public PhysicsUnit<?> getUnit (String symbol) {
         return _symbolToUnit.get(symbol);
     }
     
@@ -160,7 +160,7 @@ public class SymbolMap {
      * @param unit the corresponding symbol.
      * @return the corresponding symbol or <code>null</code> if none.
      */
-    public String getSymbol (PhysicalUnit<?> unit) {
+    public String getSymbol (PhysicsUnit<?> unit) {
         return _unitToSymbol.get(unit);
     }
     
@@ -186,7 +186,7 @@ public class SymbolMap {
      * @param converter the unit converter.
      * @return the corresponding prefix or <code>null</code> if none.
      */
-    public Prefix getPrefix (PhysicalUnitConverter converter) {
+    public Prefix getPrefix (AbstractUnitConverter converter) {
         return (Prefix)_converterToPrefix.get(converter);
     }
     

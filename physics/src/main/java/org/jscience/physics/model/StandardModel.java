@@ -14,7 +14,7 @@ package org.jscience.physics.model;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public class StandardModel extends PhysicalModel {
+public class StandardModel extends PhysicsModel {
 
     /**
      * Holds the single instance of this class.
@@ -25,7 +25,7 @@ public class StandardModel extends PhysicalModel {
      * Selects the standard model as the currentPhysicalModel model.
      */
     public static void select() {
-        PhysicalModel.setCurrent(INSTANCE);
+        PhysicsModel.setCurrent(INSTANCE);
     }
 
     /**

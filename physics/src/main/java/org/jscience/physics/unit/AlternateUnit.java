@@ -8,7 +8,6 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.model.PhysicalDimension;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -16,19 +15,19 @@ import org.unitsofmeasurement.unit.UnitConverter;
  *     between quantities of a different nature but of the same dimensions.</p>
  *
  * <p> Instances of this class are created through the
- *     {@link PhysicalUnit#alternate(String)} method.</p>
+ *     {@link PhysicsUnit#alternate(String)} method.</p>
  *
  * @param <Q> The type of the quantity measured by this unit.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
+public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
 	/**
      * Holds the parent unit (a system unit).
      */
-    private final PhysicalUnit<?> parent;
+    private final PhysicsUnit<?> parent;
 
     /**
      * Holds the symbol for this unit.
@@ -47,16 +46,16 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> 
      * @throws IllegalArgumentException if the specified symbol is
      *         associated to a different unit.
      */
-    AlternateUnit(String symbol, PhysicalUnit<?> parent) {
+    AlternateUnit(String symbol, PhysicsUnit<?> parent) {
         if (!parent.isUnscaledMetric())
             throw new UnsupportedOperationException(parent + " is not an unscaled metric unit");
         this.parent = parent;
         this.symbol = symbol;
         // Checks if the symbol is associated to a different unit.
-        synchronized (PhysicalUnit.SYMBOL_TO_UNIT) {
-            PhysicalUnit<?> unit = PhysicalUnit.SYMBOL_TO_UNIT.get(symbol);
+        synchronized (PhysicsUnit.SYMBOL_TO_UNIT) {
+            PhysicsUnit<?> unit = PhysicsUnit.SYMBOL_TO_UNIT.get(symbol);
             if (unit == null) {
-                PhysicalUnit.SYMBOL_TO_UNIT.put(symbol, this);
+                PhysicsUnit.SYMBOL_TO_UNIT.put(symbol, this);
                 return;
             }
             if (unit instanceof AlternateUnit<?>) {
@@ -74,7 +73,7 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> 
     }
 
     @Override
-    public final PhysicalUnit<Q> toMetric() {
+    public final PhysicsUnit<Q> toMetric() {
         return this;
     }
 
@@ -94,7 +93,7 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> 
     }
 
     @Override
-    public PhysicalDimension getDimension() {
+    public PhysicsDimension getDimension() {
         return parent.getDimension();
     }
 

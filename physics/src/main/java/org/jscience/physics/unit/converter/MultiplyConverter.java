@@ -23,7 +23,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class MultiplyConverter extends PhysicalUnitConverter {
+public final class MultiplyConverter extends AbstractUnitConverter {
 
     /**
      * Holds the scale factor.

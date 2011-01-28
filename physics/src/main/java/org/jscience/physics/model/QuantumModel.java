@@ -25,7 +25,7 @@ public class QuantumModel extends HighEnergyModel {
      * Selects the quantum model as the currentPhysicalModel model.
      */
     public static void select() {
-        PhysicalModel.setCurrent(INSTANCE);
+        PhysicsModel.setCurrent(INSTANCE);
     }
 
     /**

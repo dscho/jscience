@@ -17,8 +17,8 @@ import java.util.ResourceBundle;
 import org.jscience.physics.unit.AlternateUnit;
 import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.BaseUnit;
-import org.jscience.physics.unit.PhysicalUnit;
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.SI;
 import org.jscience.physics.unit.TransformedUnit;
@@ -31,7 +31,7 @@ import org.unitsofmeasurement.unit.UnitFormat;
 /**
  * <p>
  * This class provides the interface for formatting and parsing
- * {@link PhysicalUnit units} according to the <a
+ * {@link PhysicsUnit units} according to the <a
  * href="http://unitsofmeasure.org/">Uniform Code for Units of Measure</a>
  * (UCUM).
  * </p>
@@ -110,7 +110,7 @@ public abstract class UCUMFormat implements UnitFormat {
 
 	/**
 	 * The symbol map used by this instance to map between
-	 * {@link PhysicalUnit Unit}s and <code>String</code>s.
+	 * {@link PhysicsUnit Unit}s and <code>String</code>s.
 	 */
 	final SymbolMap _symbolMap;
 
@@ -129,16 +129,16 @@ public abstract class UCUMFormat implements UnitFormat {
 	/////////////
     
     @Override
-    public abstract PhysicalUnit<? extends Quantity> parse(CharSequence csq,
+    public abstract PhysicsUnit<? extends Quantity> parse(CharSequence csq,
 				ParsePosition cursor) throws IllegalArgumentException;
 
     ////////////////
 	// Formatting //
 	// //////////////
 	public Appendable format(Unit<?> unknownUnit, Appendable appendable) throws IOException {
-        if (!(unknownUnit instanceof PhysicalUnit))
+        if (!(unknownUnit instanceof PhysicsUnit))
             throw new UnsupportedOperationException("The UCUM format supports only physical units (PhysicsUnit instances)");
-        PhysicalUnit unit = (PhysicalUnit) unknownUnit;
+        PhysicsUnit unit = (PhysicsUnit) unknownUnit;
 		CharSequence symbol;
 		CharSequence annotation = null;
 		if (unit instanceof AnnotatedUnit<?>) {
@@ -186,7 +186,7 @@ public abstract class UCUMFormat implements UnitFormat {
 		} else if ((unit instanceof TransformedUnit<?>)
 				|| unit.equals(SI.KILOGRAM)) {
 			StringBuffer temp = new StringBuffer();
-			PhysicalUnitConverter converter;
+			AbstractUnitConverter converter;
 			boolean printSeparator;
 			if (unit.equals(SI.KILOGRAM)) {
 				// A special case because KILOGRAM is a BaseUnit instead of
@@ -197,7 +197,7 @@ public abstract class UCUMFormat implements UnitFormat {
 				printSeparator = true;
 			} else {
 				TransformedUnit<?> transformedUnit = (TransformedUnit<?>) unit;
-				PhysicalUnit<?> parentUnits = transformedUnit.getParentUnit();
+				PhysicsUnit<?> parentUnits = transformedUnit.getParentUnit();
 				converter = transformedUnit.toParentUnit();
 				if (parentUnits.equals(SI.KILOGRAM)) {
 					// More special-case hackery to work around gram/kilogram
@@ -207,7 +207,7 @@ public abstract class UCUMFormat implements UnitFormat {
 							.getConverter());
 				}
 				format(parentUnits, temp);
-				printSeparator = !parentUnits.equals(PhysicalUnit.ONE);
+				printSeparator = !parentUnits.equals(PhysicsUnit.ONE);
 			}
 			formatConverter(converter, printSeparator, temp);
 			symbol = temp;
@@ -231,7 +231,7 @@ public abstract class UCUMFormat implements UnitFormat {
 		return appendable;
 	}
 
-	void appendAnnotation(PhysicalUnit<?> unit, CharSequence symbol,
+	void appendAnnotation(PhysicsUnit<?> unit, CharSequence symbol,
 			CharSequence annotation, Appendable appendable) throws IOException {
 		appendable.append('{');
 		appendable.append(annotation);
@@ -256,14 +256,14 @@ public abstract class UCUMFormat implements UnitFormat {
 	 *            the <code>StringBuffer</code> to append to. Contains the
 	 *            already-formatted unit being modified by the given converter.
 	 */
-	void formatConverter(PhysicalUnitConverter converter, boolean continued,
+	void formatConverter(AbstractUnitConverter converter, boolean continued,
 			StringBuffer buffer) {
 		boolean unitIsExpression = ((buffer.indexOf(".") >= 0) || (buffer
 				.indexOf("/") >= 0));
 		Prefix prefix = _symbolMap.getPrefix(converter);
 		if ((prefix != null) && (!unitIsExpression)) {
 			buffer.insert(0, _symbolMap.getSymbol(prefix));
-		} else if (converter == PhysicalUnitConverter.IDENTITY) {
+		} else if (converter == AbstractUnitConverter.IDENTITY) {
 			// do nothing
 		} else if (converter instanceof MultiplyConverter) {
 			if (unitIsExpression) {
@@ -330,14 +330,14 @@ public abstract class UCUMFormat implements UnitFormat {
 		}
 
 		@Override
-		public PhysicalUnit<? extends Quantity> parse(CharSequence csq,
+		public PhysicsUnit<? extends Quantity> parse(CharSequence csq,
 				ParsePosition pos) throws IllegalArgumentException {
 			throw new UnsupportedOperationException(
 					"The print format is for pretty-printing of units only. Parsing is not supported.");
 		}
 
 		@Override
-		void appendAnnotation(PhysicalUnit<?> unit, CharSequence symbol,
+		void appendAnnotation(PhysicsUnit<?> unit, CharSequence symbol,
 				CharSequence annotation, Appendable appendable)
 				throws IOException {
 			if (symbol != null && symbol.length() > 0) {
@@ -375,24 +375,24 @@ public abstract class UCUMFormat implements UnitFormat {
 		}
 
 		@Override
-		public PhysicalUnit<? extends Quantity> parse(CharSequence csq,
+		public PhysicsUnit<? extends Quantity> parse(CharSequence csq,
 				ParsePosition cursor) throws IllegalArgumentException {
 			// Parsing reads the whole character sequence from the parse
 			// position.
 			int start = cursor.getIndex();
 			int end = csq.length();
 			if (end <= start)
-				return PhysicalUnit.ONE;
+				return PhysicsUnit.ONE;
 			String source = csq.subSequence(start, end).toString().trim();
 			if (source.length() == 0)
-				return PhysicalUnit.ONE;
+				return PhysicsUnit.ONE;
 			if (!_caseSensitive) {
 				source = source.toUpperCase();
 			}
 			UCUMParser parser = new UCUMParser(_symbolMap,
 					new ByteArrayInputStream(source.getBytes()));
 			try {
-				PhysicalUnit<?> result = parser.parseUnit();
+				PhysicsUnit<?> result = parser.parseUnit();
 				cursor.setIndex(end);
 				return result;
 			} catch (ParseException e) {

@@ -10,11 +10,11 @@
 package org.jscience.physics.unit.format;
 
 import org.jscience.physics.unit.AnnotatedUnit;
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.PhysicsUnit;
 
 /**
  * <p> 
- * Parser definition for parsing {@link PhysicalUnit Unit}s
+ * Parser definition for parsing {@link PhysicsUnit Unit}s
  * according to the <a href="http://aurora.regenstrief.org/UCUM/ucum.html">
  * Uniform Code for Units of Measure</a>.
  * 
@@ -34,8 +34,8 @@ class UCUMParser implements UCUMParserConstants {
 //
 // Parser productions
 //
-    final public PhysicalUnit parseUnit() throws ParseException {
-        PhysicalUnit u;
+    final public PhysicsUnit parseUnit() throws ParseException {
+        PhysicsUnit u;
         u = Term();
         jj_consume_token(0);
         {
@@ -45,9 +45,9 @@ class UCUMParser implements UCUMParserConstants {
         throw new Error("Missing return statement in function");
     }
 
-    final public PhysicalUnit Term() throws ParseException {
-        PhysicalUnit result = PhysicalUnit.ONE;
-        PhysicalUnit temp = PhysicalUnit.ONE;
+    final public PhysicsUnit Term() throws ParseException {
+        PhysicsUnit result = PhysicsUnit.ONE;
+        PhysicsUnit temp = PhysicsUnit.ONE;
         result = Component();
         label_1:
         while (true) {
@@ -84,8 +84,8 @@ class UCUMParser implements UCUMParserConstants {
         throw new Error("Missing return statement in function");
     }
 
-    final public PhysicalUnit Component() throws ParseException {
-        PhysicalUnit result = PhysicalUnit.ONE;
+    final public PhysicsUnit Component() throws ParseException {
+        PhysicsUnit result = PhysicsUnit.ONE;
         Token token = null;
         if (jj_2_1(2147483647)) {
             result = Annotatable();
@@ -119,7 +119,7 @@ class UCUMParser implements UCUMParserConstants {
                     jj_consume_token(SOLIDUS);
                     result = Component(); {
                     if (true)
-                        return PhysicalUnit.ONE.divide(result);
+                        return PhysicsUnit.ONE.divide(result);
                 }
                 break;
                 case 14:
@@ -139,8 +139,8 @@ class UCUMParser implements UCUMParserConstants {
         throw new Error("Missing return statement in function");
     }
 
-    final public PhysicalUnit Annotatable() throws ParseException {
-        PhysicalUnit result = PhysicalUnit.ONE;
+    final public PhysicsUnit Annotatable() throws ParseException {
+        PhysicsUnit result = PhysicsUnit.ONE;
         Token token1 = null;
         Token token2 = null;
         if (jj_2_2(2147483647)) {
@@ -183,10 +183,10 @@ class UCUMParser implements UCUMParserConstants {
         throw new Error("Missing return statement in function");
     }
 
-    final public PhysicalUnit SimpleUnit() throws ParseException {
+    final public PhysicsUnit SimpleUnit() throws ParseException {
         Token token = null;
         token = jj_consume_token(ATOM);
-        PhysicalUnit unit = _symbols.getUnit(token.image);
+        PhysicsUnit unit = _symbols.getUnit(token.image);
         if (unit == null) {
             Prefix prefix = _symbols.getPrefix(token.image);
             if (prefix != null) {

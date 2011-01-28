@@ -17,8 +17,8 @@ import java.util.ResourceBundle;
 import org.jscience.physics.unit.AlternateUnit;
 import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.BaseUnit;
-import org.jscience.physics.unit.PhysicalUnit;
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.SI;
 import org.jscience.physics.unit.TransformedUnit;
@@ -172,7 +172,7 @@ public class LocalUnitFormat implements UnitFormat {
     ////////////////////////
     /** 
      * The symbol map used by this instance to map between 
-     * {@link PhysicalUnit Unit}s and <code>String</code>s, etc...
+     * {@link PhysicsUnit Unit}s and <code>String</code>s, etc...
      */
     private transient SymbolMap symbolMap;
 
@@ -193,7 +193,7 @@ public class LocalUnitFormat implements UnitFormat {
     ////////////////////////
     /** 
      * Get the symbol map used by this instance to map between 
-     * {@link PhysicalUnit Unit}s and <code>String</code>s, etc...
+     * {@link PhysicsUnit Unit}s and <code>String</code>s, etc...
      * @return SymbolMap the current symbol map
      */
     public SymbolMap getSymbols() {
@@ -206,27 +206,27 @@ public class LocalUnitFormat implements UnitFormat {
 
     @Override
     public Appendable format(Unit<?> unit, Appendable appendable) throws IOException {
-        if (!(unit instanceof PhysicalUnit))
+        if (!(unit instanceof PhysicsUnit))
             return appendable.append(unit.toString()); // Unknown unit (use intrinsic toString() method)
-        formatInternal((PhysicalUnit)unit, appendable);
+        formatInternal((PhysicsUnit)unit, appendable);
         return appendable;
     }
 
     @Override
-    public PhysicalUnit<?> parse(CharSequence csq, ParsePosition cursor) throws IllegalArgumentException {
+    public PhysicsUnit<?> parse(CharSequence csq, ParsePosition cursor) throws IllegalArgumentException {
         // Parsing reads the whole character sequence from the parse position.
         int start = cursor.getIndex();
         int end = csq.length();
         if (end <= start) {
-            return PhysicalUnit.ONE;
+            return PhysicsUnit.ONE;
         }
         String source = csq.subSequence(start, end).toString().trim();
         if (source.length() == 0) {
-            return PhysicalUnit.ONE;
+            return PhysicsUnit.ONE;
         }
         try {
             UnitParser parser = new UnitParser(symbolMap, new StringReader(source));
-            PhysicalUnit<?> result = parser.parseUnit();
+            PhysicsUnit<?> result = parser.parseUnit();
             cursor.setIndex(end);
             return result;
         } catch (ParseException e) {
@@ -252,7 +252,7 @@ public class LocalUnitFormat implements UnitFormat {
      * @return the operator precedence of the outermost operator in the unit 
      *   expression that was output
      */
-    private int formatInternal(PhysicalUnit<?> unit, Appendable buffer) throws IOException {
+    private int formatInternal(PhysicsUnit<?> unit, Appendable buffer) throws IOException {
         if (unit instanceof AnnotatedUnit<?>) {
             unit = ((AnnotatedUnit<?>) unit).getActualUnit();
         }
@@ -297,7 +297,7 @@ public class LocalUnitFormat implements UnitFormat {
             }
             return PRODUCT_PRECEDENCE;
         } else if ((unit instanceof TransformedUnit<?>) || unit.equals(SI.KILOGRAM)) {
-            PhysicalUnitConverter converter = null;
+            AbstractUnitConverter converter = null;
             boolean printSeparator = false;
             StringBuffer temp = new StringBuffer();
             int unitPrecedence = NOOP_PRECEDENCE;
@@ -309,7 +309,7 @@ public class LocalUnitFormat implements UnitFormat {
                 printSeparator = true;
             } else {
                 TransformedUnit<?> transformedUnit = (TransformedUnit<?>) unit;
-                PhysicalUnit<?> parentUnits = transformedUnit.getParentUnit();
+                PhysicsUnit<?> parentUnits = transformedUnit.getParentUnit();
                 converter = transformedUnit.toParentUnit();
                 if (parentUnits.equals(SI.KILOGRAM)) {
                     // More special-case hackery to work around gram/kilogram 
@@ -318,7 +318,7 @@ public class LocalUnitFormat implements UnitFormat {
                     converter = converter.concatenate(Prefix.KILO.getConverter());
                 }
                 unitPrecedence = formatInternal(parentUnits, temp);
-                printSeparator = !parentUnits.equals(PhysicalUnit.ONE);
+                printSeparator = !parentUnits.equals(PhysicsUnit.ONE);
             }
             int result = formatConverter(converter, printSeparator, unitPrecedence, temp);
             buffer.append(temp);
@@ -346,7 +346,7 @@ public class LocalUnitFormat implements UnitFormat {
      * @param buffer StringBuffer the buffer to append to. No assumptions should
      *    be made about its content.
      */
-    private void formatExponent(PhysicalUnit<?> unit, int pow, int root, boolean continued, Appendable buffer) throws IOException {
+    private void formatExponent(PhysicsUnit<?> unit, int pow, int root, boolean continued, Appendable buffer) throws IOException {
         if (continued) {
             buffer.append(MIDDLE_DOT);
         }
@@ -423,7 +423,7 @@ public class LocalUnitFormat implements UnitFormat {
      * @param buffer the <code>StringBuffer</code> to append to.
      * @return the operator precedence of the given UnitConverter
      */
-    private int formatConverter(PhysicalUnitConverter converter,
+    private int formatConverter(AbstractUnitConverter converter,
             boolean continued,
             int unitPrecedence,
             StringBuffer buffer) {

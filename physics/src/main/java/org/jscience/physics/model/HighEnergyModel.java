@@ -25,7 +25,7 @@ public class HighEnergyModel extends RelativisticModel {
      * Selects the high energy model as the currentPhysicalModel model.
      */
     public static void select() {
-        PhysicalModel.setCurrent(INSTANCE);
+        PhysicsModel.setCurrent(INSTANCE);
     }
 
     /**

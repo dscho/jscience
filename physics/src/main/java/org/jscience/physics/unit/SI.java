@@ -78,13 +78,13 @@ public final class SI implements SystemOfUnits {
     /**
      * Holds the units.
      */
-    private final FastSet<PhysicalUnit> units = new FastSet<PhysicalUnit>();
+    private final FastSet<PhysicsUnit> units = new FastSet<PhysicsUnit>();
 
     /**
      * Holds the mapping quantity to unit.
      */
-    private final FastMap<Class<? extends Quantity>, PhysicalUnit>
-            quantityToUnit = new FastMap<Class<? extends Quantity>, PhysicalUnit>();
+    private final FastMap<Class<? extends Quantity>, PhysicsUnit>
+            quantityToUnit = new FastMap<Class<? extends Quantity>, PhysicsUnit>();
 
     /**
      * The singleton instance.
@@ -194,7 +194,7 @@ public final class SI implements SystemOfUnits {
      * length of the arc between them is equal to the radius.
      */
     public static final AlternateUnit<Angle> RADIAN
-            = addUnit(new AlternateUnit<Angle>("rad", PhysicalUnit.ONE), Angle.class);
+            = addUnit(new AlternateUnit<Angle>("rad", PhysicsUnit.ONE), Angle.class);
 
     /**
      * The SI unit for solid angle quantities (standard name <code>sr</code>).
@@ -203,13 +203,13 @@ public final class SI implements SystemOfUnits {
      * The total solid angle of a sphere is 4*Pi steradians.
      */
     public static final AlternateUnit<SolidAngle> STERADIAN
-            = addUnit(new AlternateUnit<SolidAngle>("sr", PhysicalUnit.ONE), SolidAngle.class);
+            = addUnit(new AlternateUnit<SolidAngle>("sr", PhysicsUnit.ONE), SolidAngle.class);
 
     /**
      * The SI unit for binary information (standard name <code>bit</code>).
      */
     public static final AlternateUnit<Information> BIT
-            = addUnit(new AlternateUnit<Information>("bit", PhysicalUnit.ONE), Information.class);
+            = addUnit(new AlternateUnit<Information>("bit", PhysicsUnit.ONE), Information.class);
 
     /**
      * The SI unit for frequency (standard name <code>Hz</code>).
@@ -218,7 +218,7 @@ public final class SI implements SystemOfUnits {
      * first to produce radio waves artificially.
      */
     public static final AlternateUnit<Frequency> HERTZ
-            = addUnit(new AlternateUnit<Frequency>("Hz", PhysicalUnit.ONE.divide(SECOND)), Frequency.class);
+            = addUnit(new AlternateUnit<Frequency>("Hz", PhysicsUnit.ONE.divide(SECOND)), Frequency.class);
 
     /**
      * The SI unit for force (standard name <code>N</code>).
@@ -377,7 +377,7 @@ public final class SI implements SystemOfUnits {
      */
     public static final AlternateUnit<RadioactiveActivity> BECQUEREL
             = addUnit(new AlternateUnit<RadioactiveActivity>(
-            "Bq", PhysicalUnit.ONE.divide(SECOND)), RadioactiveActivity.class);
+            "Bq", PhysicsUnit.ONE.divide(SECOND)), RadioactiveActivity.class);
 
     /**
      * The SI unit for absorbed dose, specific energy (imparted), kerma
@@ -498,14 +498,14 @@ public final class SI implements SystemOfUnits {
      * (CGPM, Conférence Générale des Poids et Mesures) and is thus not an SI unit.
      */
     public static final TransformedUnit<Dimensionless> NEPER
-        = new TransformedUnit<Dimensionless>(PhysicalUnit.ONE, new ExpConverter(MathLib.E));
+        = new TransformedUnit<Dimensionless>(PhysicsUnit.ONE, new ExpConverter(MathLib.E));
 
     /**
      * A dimensionless unit accepted for use with SI units (standard name <code>B</code>).
      * The bel is most commonly used with the SI prefix deci: 1 dB = 0.1 B
      */
     public static final TransformedUnit<Dimensionless> BEL
-        = new TransformedUnit<Dimensionless>(PhysicalUnit.ONE, new ExpConverter(10));
+        = new TransformedUnit<Dimensionless>(PhysicsUnit.ONE, new ExpConverter(10));
 
     /**
      * An energy unit accepted for use with SI units (standard name <code>eV</code>).
@@ -554,19 +554,19 @@ public final class SI implements SystemOfUnits {
     }
 
     @Override
-    public Set<? extends PhysicalUnit> getUnits() {
+    public Set<? extends PhysicsUnit> getUnits() {
         return units.unmodifiable();
     }
 
     @Override
-    public <Q extends Quantity<Q>> PhysicalUnit<Q> getUnit(Class<Q> quantityType) {
+    public <Q extends Quantity<Q>> PhysicsUnit<Q> getUnit(Class<Q> quantityType) {
         return quantityToUnit.get(quantityType);
     }
 
     @Override
-    public Set<? extends PhysicalUnit> getUnits(Dimension dimension) {
-        FastSet<PhysicalUnit> set = FastSet.newInstance();
-        for (PhysicalUnit unit : this.getUnits()) {
+    public Set<? extends PhysicsUnit> getUnits(Dimension dimension) {
+        FastSet<PhysicsUnit> set = FastSet.newInstance();
+        for (PhysicsUnit unit : this.getUnits()) {
             if (dimension.equals(unit.getDimension())) {
                 set.add(unit);
             }
@@ -580,7 +580,7 @@ public final class SI implements SystemOfUnits {
      * @param  unit the unit being added.
      * @return <code>unit</code>.
      */
-    private static <U extends PhysicalUnit<?>>  U addUnit(U unit) {
+    private static <U extends PhysicsUnit<?>>  U addUnit(U unit) {
         INSTANCE.units.add(unit);
         return unit;
     }
@@ -592,7 +592,7 @@ public final class SI implements SystemOfUnits {
      * @param type the quantity type.
      * @return <code>unit</code>.
      */
-    private static <U extends PhysicalUnit<?>>  U addUnit(U unit, Class<? extends Quantity> type) {
+    private static <U extends PhysicsUnit<?>>  U addUnit(U unit, Class<? extends Quantity> type) {
         INSTANCE.units.add(unit);
         INSTANCE.quantityToUnit.put(type, unit);
         return unit;

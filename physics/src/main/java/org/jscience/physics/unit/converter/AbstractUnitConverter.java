@@ -23,17 +23,17 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public abstract class PhysicalUnitConverter implements UnitConverter, ValueType, XMLSerializable {
+public abstract class AbstractUnitConverter implements UnitConverter, ValueType, XMLSerializable {
 
     /**
      * Holds identity converter.
      */
-    public static final PhysicalUnitConverter IDENTITY = new Identity();
+    public static final AbstractUnitConverter IDENTITY = new Identity();
 
     /**
      * Default constructor.
      */
-    protected PhysicalUnitConverter() {
+    protected AbstractUnitConverter() {
     }
 
     @Override
@@ -48,7 +48,7 @@ public abstract class PhysicalUnitConverter implements UnitConverter, ValueType,
     public abstract int hashCode();
 
     @Override
-    public abstract PhysicalUnitConverter inverse();
+    public abstract AbstractUnitConverter inverse();
 
     @Override
     public UnitConverter concatenate(UnitConverter converter) {
@@ -57,7 +57,7 @@ public abstract class PhysicalUnitConverter implements UnitConverter, ValueType,
 
     @Override
     public List<? extends UnitConverter> getCompoundConverters() {
-        FastTable<PhysicalUnitConverter> converters = FastTable.newInstance();
+        FastTable<AbstractUnitConverter> converters = FastTable.newInstance();
         converters.add(this);
         return converters;
     }
@@ -70,7 +70,7 @@ public abstract class PhysicalUnitConverter implements UnitConverter, ValueType,
     /**
      * This class represents the identity converter (singleton).
      */
-    private static final class Identity extends PhysicalUnitConverter {
+    private static final class Identity extends AbstractUnitConverter {
 
         @Override
         public boolean isIdentity() {
@@ -121,7 +121,7 @@ public abstract class PhysicalUnitConverter implements UnitConverter, ValueType,
      * This class represents converters made up of two or more separate
      * converters (in matrix notation <code>[compound] = [left] x [right]</code>).
      */
-    private static final class Compound extends PhysicalUnitConverter {
+    private static final class Compound extends AbstractUnitConverter {
 
         /**
          * Holds the first converter.

@@ -8,8 +8,8 @@
  */
 package org.jscience.physics.unit;
 
-import org.jscience.physics.unit.converter.PhysicalUnitConverter;
-import org.jscience.physics.unit.PhysicalUnit;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -27,14 +27,14 @@ import org.unitsofmeasurement.unit.UnitConverter;
  *     they may have labels attached to them (see {@link org.jscience.physics.unit.SymbolMap
  *     SymbolMap}</p>
  *
- * <p> Instances of this class are created through the {@link PhysicalUnit#transform} method.</p>
+ * <p> Instances of this class are created through the {@link PhysicsUnit#transform} method.</p>
  *
  * @param <Q> The type of the quantity measured by this unit.
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q> {
+public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
   
     /**
 	 * For cross-version compatibility.
@@ -44,12 +44,12 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q
 	/**
      * Holds the parent unit (not a transformed unit).
      */
-    private final PhysicalUnit<Q> parentUnit;
+    private final PhysicsUnit<Q> parentUnit;
 
     /**
      * Holds the converter to the parent unit.
      */
-    private final PhysicalUnitConverter toParentUnit;
+    private final AbstractUnitConverter toParentUnit;
 
     /**
      * Creates a transformed unit from the specified (non transformed)
@@ -63,8 +63,8 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q
      * @throws IllegalArgumentException if the specified unit is a
      *         transformed unit.
      */
-    public TransformedUnit(PhysicalUnit<Q> parentUnit, PhysicalUnitConverter toParentUnit) {
-        if (toParentUnit == PhysicalUnitConverter.IDENTITY)
+    public TransformedUnit(PhysicsUnit<Q> parentUnit, AbstractUnitConverter toParentUnit) {
+        if (toParentUnit == AbstractUnitConverter.IDENTITY)
             throw new IllegalArgumentException("Identity not allowed");
         if (parentUnit instanceof TransformedUnit)
             throw new IllegalArgumentException("The parent unit cannot be a transformed unit");
@@ -78,7 +78,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q
      *
      * @return the untransformed unit from which this unit is derived.
      */
-    public PhysicalUnit<Q> getParentUnit() {
+    public PhysicsUnit<Q> getParentUnit() {
         return parentUnit;
     }
 
@@ -87,7 +87,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q
      *
      * @return the converter to the parent unit.
      */
-    public PhysicalUnitConverter toParentUnit() {
+    public AbstractUnitConverter toParentUnit() {
         return toParentUnit;
     }
 
@@ -108,7 +108,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicalUnit<Q
     }
 
     @Override
-    public PhysicalUnit<Q> toMetric() {
+    public PhysicsUnit<Q> toMetric() {
         return parentUnit.toMetric();
     }
 

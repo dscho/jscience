@@ -21,7 +21,7 @@ import javolution.context.ObjectFactory;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class ExpConverter extends PhysicalUnitConverter {
+public final class ExpConverter extends AbstractUnitConverter {
 
     /**
      * Holds the logarithmic base.
@@ -67,7 +67,7 @@ public final class ExpConverter extends PhysicalUnitConverter {
     }
 
     @Override
-    public PhysicalUnitConverter inverse() {
+    public AbstractUnitConverter inverse() {
         return LogConverter.valueOf(base);
     }
 

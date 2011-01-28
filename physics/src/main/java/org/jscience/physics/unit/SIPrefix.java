@@ -20,8 +20,8 @@ import org.unitsofmeasurement.quantity.Quantity;
  *     import static org.jscience.physics.unit.SIPrefix.*; // Static import.
  *     import org.unitsofmeasurement.quantity.*;
  *     ...
- *     PhysicalUnit<Pressure> HECTOPASCAL = HECTO(PASCAL);
- *     PhysicalUnit<Length> KILOMETRE = KILO(METRE);
+ *     PhysicsUnit<Pressure> HECTOPASCAL = HECTO(PASCAL);
+ *     PhysicsUnit<Length> KILOMETRE = KILO(METRE);
  *     </code></pre>
  * </p>
  *
@@ -47,7 +47,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e24)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> YOTTA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> YOTTA(PhysicsUnit<Q> unit) {
         return unit.transform(E24);
     }
 
@@ -59,7 +59,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e21)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> ZETTA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> ZETTA(PhysicsUnit<Q> unit) {
         return unit.transform(E21);
     }
 
@@ -71,7 +71,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e18)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> EXA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> EXA(PhysicsUnit<Q> unit) {
         return unit.transform(E18);
     }
 
@@ -83,7 +83,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e15)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> PETA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> PETA(PhysicsUnit<Q> unit) {
         return unit.transform(E15);
     }
 
@@ -95,7 +95,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e12)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> TERA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> TERA(PhysicsUnit<Q> unit) {
         return unit.transform(E12);
     }
 
@@ -107,7 +107,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e9)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> GIGA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> GIGA(PhysicsUnit<Q> unit) {
         return unit.transform(E9);
     }
 
@@ -119,7 +119,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e6)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> MEGA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> MEGA(PhysicsUnit<Q> unit) {
         return unit.transform(E6);
     }
 
@@ -131,7 +131,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e3)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> KILO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> KILO(PhysicsUnit<Q> unit) {
         return unit.transform(E3);
     }
 
@@ -143,7 +143,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e2)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> HECTO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> HECTO(PhysicsUnit<Q> unit) {
         return unit.transform(E2);
     }
 
@@ -155,7 +155,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e1)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> DEKA(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> DEKA(PhysicsUnit<Q> unit) {
         return unit.transform(E1);
     }
 
@@ -167,7 +167,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-1)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> DECI(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> DECI(PhysicsUnit<Q> unit) {
         return unit.transform(Em1);
     }
 
@@ -179,7 +179,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-2)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> CENTI(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> CENTI(PhysicsUnit<Q> unit) {
         return unit.transform(Em2);
     }
 
@@ -191,7 +191,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-3)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> MILLI(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> MILLI(PhysicsUnit<Q> unit) {
         return unit.transform(Em3);
     }
 
@@ -203,7 +203,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-6)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> MICRO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> MICRO(PhysicsUnit<Q> unit) {
         return unit.transform(Em6);
     }
 
@@ -215,7 +215,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-9)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> NANO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> NANO(PhysicsUnit<Q> unit) {
         return unit.transform(Em9);
     }
 
@@ -227,7 +227,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-12)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> PICO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> PICO(PhysicsUnit<Q> unit) {
         return unit.transform(Em12);
     }
 
@@ -239,7 +239,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-15)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> FEMTO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> FEMTO(PhysicsUnit<Q> unit) {
         return unit.transform(Em15);
     }
 
@@ -251,7 +251,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-18)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> ATTO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> ATTO(PhysicsUnit<Q> unit) {
         return unit.transform(Em18);
     }
 
@@ -263,7 +263,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-21)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> ZEPTO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> ZEPTO(PhysicsUnit<Q> unit) {
         return unit.transform(Em21);
     }
 
@@ -275,7 +275,7 @@ public final class SIPrefix {
      * @param unit any unit.
      * @return <code>unit.times(1e-24)</code>.
      */
-    public static <Q extends Quantity<Q>> PhysicalUnit<Q> YOCTO(PhysicalUnit<Q> unit) {
+    public static <Q extends Quantity<Q>> PhysicsUnit<Q> YOCTO(PhysicsUnit<Q> unit) {
         return unit.transform(Em24);
     }
 

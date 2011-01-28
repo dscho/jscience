@@ -27,7 +27,7 @@ public class NaturalModel extends QuantumModel {
      * Selects the natural model as the currentPhysicalModel model.
      */
     public static void select() {
-        PhysicalModel.setCurrent(INSTANCE);
+        PhysicsModel.setCurrent(INSTANCE);
     }
 
     /**
