@@ -8,4 +8,12 @@
     <artifactId>jscience-physics</artifactId>
     <name>JScience Physics Bundle</name>
     <packaging>jar</packaging>
+      <dependencies>
+        <dependency>
+            <groupId>org.unitsofmeasurement</groupId>
+            <artifactId>unit-api</artifactId>
+            <version>0.6-RC1</version>
+        </dependency>
+    </dependencies>
+
  </project>

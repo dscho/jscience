@@ -10,7 +10,6 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import javolution.context.ObjectFactory;
 
 /**
  * <p> This class represents a exponential converter of limited precision.
@@ -34,26 +33,14 @@ public final class ExpConverter extends AbstractUnitConverter {
     private double logOfBase;
 
     /**
-     * Returns a logarithmic converter having the specified base.
+     * Creates a logarithmic converter having the specified base.
      *
      * @param  base the logarithmic base (e.g. <code>Math.E</code> for
      *         the Natural Logarithm).
      */
-    public static ExpConverter valueOf(double base) {
-        ExpConverter cvtr = FACTORY.object();
-        cvtr.base = base;
-        cvtr.logOfBase = Math.log(base);
-        return cvtr;
-    }
-    private static final ObjectFactory<ExpConverter> FACTORY = new ObjectFactory<ExpConverter>() {
-
-        @Override
-        protected ExpConverter create() {
-            return new ExpConverter();
-        }
-    };
-
-    private ExpConverter() {
+    public ExpConverter(double base) {
+        this.base = base;
+        this.logOfBase = Math.log(base);
     }
 
     /**
@@ -68,7 +55,7 @@ public final class ExpConverter extends AbstractUnitConverter {
 
     @Override
     public AbstractUnitConverter inverse() {
-        return LogConverter.valueOf(base);
+        return new LogConverter(base);
     }
 
     @Override
@@ -105,9 +92,5 @@ public final class ExpConverter extends AbstractUnitConverter {
         return false;
     }
 
-    @Override
-    public ExpConverter copy() {
-        return ExpConverter.valueOf(base);
-    }
 
 }

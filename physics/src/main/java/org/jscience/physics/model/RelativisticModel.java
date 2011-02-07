@@ -8,12 +8,11 @@
  */
 package org.jscience.physics.model;
 
-import org.jscience.physics.unit.PhysicsDimension;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import org.jscience.physics.unit.SI;
-import java.math.BigInteger;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.jscience.physics.unit.BaseUnit;
+import org.unitsofmeasurement.unit.Dimension;
+import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * This class represents the relativistic model.
@@ -27,7 +26,7 @@ public class RelativisticModel extends StandardModel {
      * Holds the meter to time transform.
      */
     private static RationalConverter METRE_TO_TIME 
-        = new RationalConverter(BigInteger.ONE, BigInteger.valueOf(299792458));
+        = new RationalConverter(1, 299792458);
     
     /**
      * Holds the single instance of this class.
@@ -35,7 +34,14 @@ public class RelativisticModel extends StandardModel {
     private final static RelativisticModel INSTANCE = new RelativisticModel();
 
     /**
-     * Selects the relativistic model as the currentPhysicalModel model.
+     * Returns the relativistic model instance.
+     */
+    public static RelativisticModel getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Selects the relativistic model as the getCurrent model.
      */
     public static void select() {
         PhysicsModel.setCurrent(INSTANCE);
@@ -54,7 +60,7 @@ public class RelativisticModel extends StandardModel {
     }
 
     @Override
-    public AbstractUnitConverter getDimensionalTransform(BaseUnit<?> unit) {
+    public UnitConverter getDimensionalTransform(BaseUnit<?> unit) {
         if (unit.equals(SI.METRE)) return METRE_TO_TIME;
         return super.getDimensionalTransform(unit);
     }

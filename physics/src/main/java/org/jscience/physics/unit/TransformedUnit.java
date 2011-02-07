@@ -8,8 +8,9 @@
  */
 package org.jscience.physics.unit;
 
+import org.jscience.physics.model.PhysicsDimension;
+import java.util.Map;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
-import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -34,13 +35,8 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
+final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
   
-    /**
-	 * For cross-version compatibility.
-	 */
-	private static final long serialVersionUID = -442449068482939939L;
-
 	/**
      * Holds the parent unit (not a transformed unit).
      */
@@ -49,46 +45,43 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q>
     /**
      * Holds the converter to the parent unit.
      */
-    private final AbstractUnitConverter toParentUnit;
+    private final UnitConverter toParentUnit;
 
     /**
      * Creates a transformed unit from the specified (non transformed)
      * parent unit.
      *
-     * @param parentUnit the untransformed unit from which this unit is
-     *        derived.
-     * @param  toParentUnit the converter to the parent units.
-     * @throws IllegalArgumentException if <code>toParentUnit ==
-     *         {@link UnitConverter#IDENTITY UnitConverter.IDENTITY}</code>
-     * @throws IllegalArgumentException if the specified unit is a
-     *         transformed unit.
+     * @param parentUnit the system unit from which this unit is derived.
+     * @param toParentUnit the converter to the parent units.
      */
-    public TransformedUnit(PhysicsUnit<Q> parentUnit, AbstractUnitConverter toParentUnit) {
-        if (toParentUnit == AbstractUnitConverter.IDENTITY)
-            throw new IllegalArgumentException("Identity not allowed");
-        if (parentUnit instanceof TransformedUnit)
-            throw new IllegalArgumentException("The parent unit cannot be a transformed unit");
+    public TransformedUnit(PhysicsUnit<Q> parentUnit, UnitConverter toParentUnit) {
         this.parentUnit = parentUnit;
         this.toParentUnit = toParentUnit;
     }
 
-    /**
-     * Returns the parent unit for this unit. The parent unit is the
-     * untransformed unit from which this unit is derived.
-     *
-     * @return the untransformed unit from which this unit is derived.
-     */
-    public PhysicsUnit<Q> getParentUnit() {
-        return parentUnit;
+    @Override
+    public PhysicsDimension getDimension() {
+        return parentUnit.getDimension();
     }
 
-    /**
-     * Returns the converter to the parent unit.
-     *
-     * @return the converter to the parent unit.
-     */
-    public AbstractUnitConverter toParentUnit() {
-        return toParentUnit;
+    @Override
+    public UnitConverter getConverterToSystemUnit() {
+        return parentUnit.getConverterToSystemUnit().concatenate(toParentUnit);
+    }
+
+    @Override
+    public PhysicsUnit<Q> getSystemUnit() {
+        return parentUnit.getSystemUnit();
+    }
+
+    @Override
+    public Map<? extends PhysicsUnit, Integer> getProductUnits() {
+        return parentUnit.getProductUnits();
+    }
+
+    @Override
+    public int hashCode() {
+        return parentUnit.hashCode() + toParentUnit.hashCode();
     }
 
     @Override
@@ -100,20 +93,5 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q>
         TransformedUnit thatUnit = (TransformedUnit) that;
         return this.parentUnit.equals(thatUnit.parentUnit) &&
                 this.toParentUnit.equals(thatUnit.toParentUnit);
-    }
-
-    @Override
-    public int hashCode() {
-        return parentUnit.hashCode() + toParentUnit.hashCode();
-    }
-
-    @Override
-    public PhysicsUnit<Q> toMetric() {
-        return parentUnit.toMetric();
-    }
-
-    @Override
-    public UnitConverter getConverterToMetric() {
-        return parentUnit.getConverterToMetric().concatenate(toParentUnit);
     }
 }

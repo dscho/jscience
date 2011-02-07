@@ -10,7 +10,6 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import javolution.context.ObjectFactory;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -30,28 +29,16 @@ public final class AddConverter extends AbstractUnitConverter {
     private double offset;
 
     /**
-     * Returns an additive converter having the specified offset.
+     * Creates an additive converter having the specified offset.
      *
      * @param  offset the offset value.
      * @throws IllegalArgumentException if offset is <code>0.0</code>
      *         (would result in identity converter).
      */
-    public static AddConverter valueOf(double offset) {
+    public AddConverter(double offset) {
         if (offset == 0.0)
             throw new IllegalArgumentException("Would result in identity converter");
-        AddConverter cvtr = FACTORY.object();
-        cvtr.offset = offset;
-        return cvtr;
-    }
-    private static final ObjectFactory<AddConverter> FACTORY = new ObjectFactory<AddConverter>() {
-
-        @Override
-        protected AddConverter create() {
-            return new AddConverter();
-        }
-    };
-
-    private AddConverter() {
+        this.offset = offset;
     }
 
     /**
@@ -68,12 +55,12 @@ public final class AddConverter extends AbstractUnitConverter {
         if (!(converter instanceof AddConverter))
             return super.concatenate(converter);
         double newOffset = offset + ((AddConverter) converter).offset;
-        return newOffset == 0.0 ? IDENTITY : AddConverter.valueOf(newOffset);
+        return newOffset == 0.0 ? IDENTITY : new AddConverter(newOffset);
     }
 
     @Override
     public AddConverter inverse() {
-        return AddConverter.valueOf(-offset);
+        return new AddConverter(-offset);
     }
 
     @Override
@@ -109,11 +96,6 @@ public final class AddConverter extends AbstractUnitConverter {
     @Override
     public boolean isLinear() {
         return false;
-    }
-
-    @Override
-    public AddConverter copy() {
-        return AddConverter.valueOf(offset);
     }
     
 }

@@ -13,19 +13,17 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.text.*;
+import java.util.Map;
 import java.util.ResourceBundle;
-import org.jscience.physics.unit.AlternateUnit;
-import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
-import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.SI;
-import org.jscience.physics.unit.TransformedUnit;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.Unit;
+import org.unitsofmeasurement.unit.UnitConverter;
 import org.unitsofmeasurement.unit.UnitFormat;
 
 /**
@@ -141,41 +139,37 @@ public abstract class UCUMFormat implements UnitFormat {
         PhysicsUnit unit = (PhysicsUnit) unknownUnit;
 		CharSequence symbol;
 		CharSequence annotation = null;
-		if (unit instanceof AnnotatedUnit<?>) {
-                     AnnotatedUnit<?> annotatedUnit = (AnnotatedUnit<?>) unit;
-                     unit = annotatedUnit.getActualUnit();
-                     annotation = annotatedUnit.getAnnotation();
+		if (unit.getAnnotation() != null) {
+             PhysicsUnit<?> annotatedUnit = unit;
+             unit = annotatedUnit.getUnannotatedUnit();
+             annotation = annotatedUnit.getAnnotation();
 		}
 		String mapSymbol = _symbolMap.getSymbol(unit);
 		if (mapSymbol != null) {
 			symbol = mapSymbol;
-		} else if (unit instanceof ProductUnit<?>) {
-			ProductUnit<?> productUnit = (ProductUnit<?>) unit;
+		} else if (unit.getProductUnits() != null) {
+			Map<? extends PhysicsUnit, Integer> productUnits = unit.getProductUnits();
 			StringBuffer app = new StringBuffer();
-			for (int i = 0; i < productUnit.getUnitCount(); i++) {
-				if (productUnit.getUnitRoot(i) != 1) {
-					throw new IllegalArgumentException(
-							"Unable to format units in UCUM (fractional powers not supported)");
-				}
+			for (PhysicsUnit u: productUnits.keySet()) {
 				StringBuffer temp = new StringBuffer();
-				temp = (StringBuffer) format(productUnit.getUnit(i), temp);
+				temp = (StringBuffer) format(u, temp);
 				if ((temp.indexOf(".") >= 0) || (temp.indexOf("/") >= 0)) {
 					temp.insert(0, '(');
 					temp.append(')');
 				}
-				int pow = productUnit.getUnitPow(i);
-				if (i > 0) {
+				int pow = productUnits.get(u);
+				if (app.length() > 0) { // Not the first unit.
 					if (pow >= 0) {
-						app.append('.');
-					} else if (i < (productUnit.getUnitCount() - 1)) {
 						app.append('.');
 					} else {
 						app.append('/');
 						pow = -pow;
 					}
-				} else if (pow < 0) {
-					app.append('/');
-					pow = -pow;
+				} else { // First unit.
+                    if (pow < 0) {
+					   app.append("1/");
+					   pow = -pow;
+                    }
 				}
 				app.append(temp);
 				if (pow != 1) {
@@ -183,10 +177,9 @@ public abstract class UCUMFormat implements UnitFormat {
 				}
 			}
 			symbol = app;
-		} else if ((unit instanceof TransformedUnit<?>)
-				|| unit.equals(SI.KILOGRAM)) {
+		} else if (!unit.isSystemUnit() || unit.equals(SI.KILOGRAM)) {
 			StringBuffer temp = new StringBuffer();
-			AbstractUnitConverter converter;
+			UnitConverter converter;
 			boolean printSeparator;
 			if (unit.equals(SI.KILOGRAM)) {
 				// A special case because KILOGRAM is a BaseUnit instead of
@@ -196,25 +189,22 @@ public abstract class UCUMFormat implements UnitFormat {
 				converter = Prefix.KILO.getConverter();
 				printSeparator = true;
 			} else {
-				TransformedUnit<?> transformedUnit = (TransformedUnit<?>) unit;
-				PhysicsUnit<?> parentUnits = transformedUnit.getParentUnit();
-				converter = transformedUnit.toParentUnit();
-				if (parentUnits.equals(SI.KILOGRAM)) {
+				PhysicsUnit<?> parentUnit = unit.getSystemUnit();
+				converter = unit.getConverterTo(parentUnit);
+				if (parentUnit.equals(SI.KILOGRAM)) {
 					// More special-case hackery to work around gram/kilogram
 					// incosistency
-					parentUnits = SI.GRAM;
+					parentUnit = SI.GRAM;
 					converter = converter.concatenate(Prefix.KILO
 							.getConverter());
 				}
-				format(parentUnits, temp);
-				printSeparator = !parentUnits.equals(PhysicsUnit.ONE);
+				format(parentUnit, temp);
+				printSeparator = !parentUnit.equals(SI.ONE);
 			}
 			formatConverter(converter, printSeparator, temp);
 			symbol = temp;
-		} else if (unit instanceof BaseUnit<?>) {
+		} else if (unit.getSymbol() != null) {
 			symbol = ((BaseUnit<?>) unit).getSymbol();
-		} else if (unit instanceof AlternateUnit<?>) {
-			symbol = ((AlternateUnit<?>) unit).getSymbol();
 		} else {
 			throw new IllegalArgumentException(
 					"Cannot format the given Object as UCUM units (unsupported unit "
@@ -256,7 +246,7 @@ public abstract class UCUMFormat implements UnitFormat {
 	 *            the <code>StringBuffer</code> to append to. Contains the
 	 *            already-formatted unit being modified by the given converter.
 	 */
-	void formatConverter(AbstractUnitConverter converter, boolean continued,
+	void formatConverter(UnitConverter converter, boolean continued,
 			StringBuffer buffer) {
 		boolean unitIsExpression = ((buffer.indexOf(".") >= 0) || (buffer
 				.indexOf("/") >= 0));
@@ -382,10 +372,10 @@ public abstract class UCUMFormat implements UnitFormat {
 			int start = cursor.getIndex();
 			int end = csq.length();
 			if (end <= start)
-				return PhysicsUnit.ONE;
+				return SI.ONE;
 			String source = csq.subSequence(start, end).toString().trim();
 			if (source.length() == 0)
-				return PhysicsUnit.ONE;
+				return SI.ONE;
 			if (!_caseSensitive) {
 				source = source.toUpperCase();
 			}

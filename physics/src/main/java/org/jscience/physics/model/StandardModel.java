@@ -22,7 +22,14 @@ public class StandardModel extends PhysicsModel {
     private final static StandardModel INSTANCE = new StandardModel();
 
     /**
-     * Selects the standard model as the currentPhysicalModel model.
+     * Returns the standard model instance.
+     */
+    public static StandardModel getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Selects the standard model as the getCurrent model.
      */
     public static void select() {
         PhysicsModel.setCurrent(INSTANCE);

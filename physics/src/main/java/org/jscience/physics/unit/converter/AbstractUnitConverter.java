@@ -11,8 +11,6 @@ package org.jscience.physics.unit.converter;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
-import javolution.context.ObjectFactory;
-import javolution.lang.ValueType;
 import javolution.util.FastTable;
 import javolution.xml.XMLSerializable;
 import org.unitsofmeasurement.unit.UnitConverter;
@@ -23,7 +21,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public abstract class AbstractUnitConverter implements UnitConverter, ValueType, XMLSerializable {
+public abstract class AbstractUnitConverter implements UnitConverter, XMLSerializable {
 
     /**
      * Holds identity converter.
@@ -52,7 +50,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, ValueType,
 
     @Override
     public UnitConverter concatenate(UnitConverter converter) {
-        return (converter == IDENTITY) ? this : Compound.valueOf(this, converter);
+        return (converter == IDENTITY) ? this : new Compound(this, converter);
     }
 
     @Override
@@ -140,19 +138,9 @@ public abstract class AbstractUnitConverter implements UnitConverter, ValueType,
          * @param  left the left converter.
          * @param  right the right converter.
          */
-        public static Compound valueOf(UnitConverter left, UnitConverter right) {
-            Compound c = FACTORY.object();
-            c.left = left;
-            c.right = right;
-            return c;
-        }
-        private static final ObjectFactory<Compound> FACTORY = new ObjectFactory<Compound>() {
-            @Override
-            protected Compound create() {
-                return new Compound();
-            }
-        };
-        private Compound() {
+        public Compound(UnitConverter left, UnitConverter right) {
+            this.left = left;
+            this.right = right;
         }
 
         @Override
@@ -177,7 +165,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, ValueType,
 
         @Override
         public Compound inverse() {
-            return Compound.valueOf(right.inverse(), left.inverse());
+            return new Compound(right.inverse(), left.inverse());
         }
 
         @Override
@@ -203,10 +191,6 @@ public abstract class AbstractUnitConverter implements UnitConverter, ValueType,
             return left.hashCode() + right.hashCode();
         }
 
-        @Override
-        public Compound copy() {
-            return Compound.valueOf(left, right);
-        }
     }
 
 }

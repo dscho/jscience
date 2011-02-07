@@ -10,8 +10,6 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import javolution.context.ObjectFactory;
-
 
 /**
  * <p> This class represents a logarithmic converter of limited precision.
@@ -42,21 +40,9 @@ public final class LogConverter extends AbstractUnitConverter {
      * @param  base the logarithmic base (e.g. <code>Math.E</code> for
      *         the Natural Logarithm).
      */
-    public static LogConverter valueOf(double base) {
-        LogConverter cvtr = FACTORY.object();
-        cvtr.base = base;
-        cvtr.logOfBase = Math.log(base);
-        return cvtr;
-    }
-    private static final ObjectFactory<LogConverter> FACTORY = new ObjectFactory<LogConverter>() {
-
-        @Override
-        protected LogConverter create() {
-            return new LogConverter();
-        }
-    };
-
-    private LogConverter() {
+    public LogConverter(double base) {
+        this.base = base;
+        this.logOfBase = Math.log(base);
     }
 
     /**
@@ -71,7 +57,7 @@ public final class LogConverter extends AbstractUnitConverter {
 
     @Override
     public AbstractUnitConverter inverse() {
-        return ExpConverter.valueOf(base);
+        return new ExpConverter(base);
     }
 
     @Override
@@ -106,10 +92,5 @@ public final class LogConverter extends AbstractUnitConverter {
     @Override
     public boolean isLinear() {
         return false;
-    }
-
-    @Override
-    public LogConverter copy() {
-        return LogConverter.valueOf(base);
     }
 }

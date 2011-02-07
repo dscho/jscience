@@ -8,12 +8,14 @@
  */
 package org.jscience.physics.unit;
 
+import org.jscience.physics.model.PhysicsDimension;
 import org.unitsofmeasurement.unit.UnitConverter;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.jscience.physics.unit.converter.AbstractUnitConverter;
 
-import org.jscience.physics.quantity.Quantity;
+import org.unitsofmeasurement.quantity.Quantity;
 
 /**
  * <p>  This class represents units formed by the product of rational powers of
@@ -28,12 +30,7 @@ import org.jscience.physics.quantity.Quantity;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
-
-    /**
-	 * For cross-version compatibility.
-	 */
-	private static final long serialVersionUID = -736056598162783537L;
+final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
 	/**
      * Holds the units composing this product unit.
@@ -122,7 +119,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
         // Returns or creates instance.
         if (resultIndex == 0)
-            return ONE;
+            return SI.ONE;
         else if ((resultIndex == 1) && (result[0].pow == result[0].root))
             return result[0].unit;
         else {
@@ -325,13 +322,12 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public PhysicsUnit<Q> toMetric() {
+    public PhysicsUnit<Q> getSystemUnit() {
         if (hasOnlyUnscaledMetricUnits())
             return this;
-        PhysicsUnit<?> systemUnit = ONE;
+        PhysicsUnit<?> systemUnit = SI.ONE;
         for (int i = 0; i < elements.length; i++) {
-            PhysicsUnit<?> unit = elements[i].unit.toMetric();
+            PhysicsUnit<?> unit = elements[i].unit.getSystemUnit();
             unit = unit.pow(elements[i].pow);
             unit = unit.root(elements[i].root);
             systemUnit = systemUnit.multiply(unit);
@@ -340,13 +336,13 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public final UnitConverter getConverterToMetric() {
+    public UnitConverter getConverterToSystemUnit() {
         if (hasOnlyUnscaledMetricUnits()) // Product of standard units is a standard unit itself.
-            return UnitConverter.IDENTITY;
-        UnitConverter converter = UnitConverter.IDENTITY;
+            return AbstractUnitConverter.IDENTITY;
+        UnitConverter converter = AbstractUnitConverter.IDENTITY;
         for (int i = 0; i < elements.length; i++) {
             Element e = elements[i];
-            UnitConverter cvtr = e.unit.getConverterToMetric();
+            UnitConverter cvtr = e.unit.getConverterToSystemUnit();
             if (!(cvtr.isLinear()))
                 throw new UnsupportedOperationException(e.unit + " is non-linear, cannot convert");
             if (e.root != 1)
@@ -372,7 +368,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     private boolean hasOnlyUnscaledMetricUnits() {
         for (int i = 0; i < elements.length; i++) {
             PhysicsUnit<?> u = elements[i].unit;
-            if (!u.isUnscaledMetric())
+            if (!u.getConverterToSystemUnit().equals(AbstractUnitConverter.IDENTITY))
                 return false;
         }
         return true;
@@ -387,28 +383,6 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
             dimension = dimension.multiply(d);
         }
         return dimension;
-    }
-
-    @Override
-    public UnitConverter getDimensionalTransform() {
-        UnitConverter converter = UnitConverter.IDENTITY;
-        for (int i = 0; i < this.getUnitCount(); i++) {
-            PhysicsUnit<?> unit = this.getUnit(i);
-            UnitConverter cvtr = unit.getDimensionalTransform();
-            if (!(cvtr.isLinear()))
-                throw new UnsupportedOperationException(cvtr.getClass() + " is non-linear, cannot convert product unit");
-            if (this.getUnitRoot(i) != 1)
-                throw new UnsupportedOperationException(this + " holds a unit with fractional exponent");
-            int pow = this.getUnitPow(i);
-            if (pow < 0) { // Negative power.
-                pow = -pow;
-                cvtr = cvtr.inverse();
-            }
-            for (int j = 0; j < pow; j++) {
-                converter = converter.concatenate(cvtr);
-            }
-        }
-        return converter;
     }
 
     /**

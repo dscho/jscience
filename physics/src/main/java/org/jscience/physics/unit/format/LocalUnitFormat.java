@@ -13,21 +13,17 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.text.ParsePosition;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
-import org.jscience.physics.unit.AlternateUnit;
-import org.jscience.physics.unit.AnnotatedUnit;
-import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
-import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.SI;
-import org.jscience.physics.unit.TransformedUnit;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.ExpConverter;
 import org.jscience.physics.unit.converter.LogConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.unit.Unit;
+import org.unitsofmeasurement.unit.UnitConverter;
 import org.unitsofmeasurement.unit.UnitFormat;
 
 
@@ -218,11 +214,11 @@ public class LocalUnitFormat implements UnitFormat {
         int start = cursor.getIndex();
         int end = csq.length();
         if (end <= start) {
-            return PhysicsUnit.ONE;
+            return SI.ONE;
         }
         String source = csq.subSequence(start, end).toString().trim();
         if (source.length() == 0) {
-            return PhysicsUnit.ONE;
+            return SI.ONE;
         }
         try {
             UnitParser parser = new UnitParser(symbolMap, new StringReader(source));
@@ -253,22 +249,20 @@ public class LocalUnitFormat implements UnitFormat {
      *   expression that was output
      */
     private int formatInternal(PhysicsUnit<?> unit, Appendable buffer) throws IOException {
-        if (unit instanceof AnnotatedUnit<?>) {
-            unit = ((AnnotatedUnit<?>) unit).getActualUnit();
-        }
+        unit = unit.getUnannotatedUnit();
         String symbol = symbolMap.getSymbol(unit);
         if (symbol != null) {
             buffer.append(symbol);
             return NOOP_PRECEDENCE;
-        } else if (unit instanceof ProductUnit<?>) {
-            ProductUnit<?> productUnit = (ProductUnit<?>) unit;
+        } else if (unit.getProductUnits() != null) {
+            Map<? extends PhysicsUnit, Integer> productUnits = unit.getProductUnits();
             int negativeExponentCount = 0;
             // Write positive exponents first...
             boolean start = true;
-            for (int i = 0; i < productUnit.getUnitCount(); i += 1) {
-                int pow = productUnit.getUnitPow(i);
+            for (PhysicsUnit u : productUnits.keySet()) {
+                int pow = productUnits.get(u);
                 if (pow >= 0) {
-                    formatExponent(productUnit.getUnit(i), pow, productUnit.getUnitRoot(i), !start, buffer);
+                    formatExponent(u, pow, 1, !start, buffer);
                     start = false;
                 } else {
                     negativeExponentCount += 1;
@@ -284,10 +278,10 @@ public class LocalUnitFormat implements UnitFormat {
                     buffer.append('(');
                 }
                 start = true;
-                for (int i = 0; i < productUnit.getUnitCount(); i += 1) {
-                    int pow = productUnit.getUnitPow(i);
+                for (PhysicsUnit u : productUnits.keySet()) {
+                    int pow = productUnits.get(u);
                     if (pow < 0) {
-                        formatExponent(productUnit.getUnit(i), -pow, productUnit.getUnitRoot(i), !start, buffer);
+                        formatExponent(u, -pow, 1, !start, buffer);
                         start = false;
                     }
                 }
@@ -296,8 +290,8 @@ public class LocalUnitFormat implements UnitFormat {
                 }
             }
             return PRODUCT_PRECEDENCE;
-        } else if ((unit instanceof TransformedUnit<?>) || unit.equals(SI.KILOGRAM)) {
-            AbstractUnitConverter converter = null;
+        } else if ((!unit.isSystemUnit()) || unit.equals(SI.KILOGRAM)) {
+            UnitConverter converter = null;
             boolean printSeparator = false;
             StringBuffer temp = new StringBuffer();
             int unitPrecedence = NOOP_PRECEDENCE;
@@ -308,26 +302,22 @@ public class LocalUnitFormat implements UnitFormat {
                 unitPrecedence = formatInternal(SI.GRAM, temp);
                 printSeparator = true;
             } else {
-                TransformedUnit<?> transformedUnit = (TransformedUnit<?>) unit;
-                PhysicsUnit<?> parentUnits = transformedUnit.getParentUnit();
-                converter = transformedUnit.toParentUnit();
-                if (parentUnits.equals(SI.KILOGRAM)) {
+                PhysicsUnit parentUnit = unit.getSystemUnit();
+                converter = unit.getConverterTo(parentUnit);
+                if (parentUnit.equals(SI.KILOGRAM)) {
                     // More special-case hackery to work around gram/kilogram 
                     // incosistency
-                    parentUnits = SI.GRAM;
+                    parentUnit = SI.GRAM;
                     converter = converter.concatenate(Prefix.KILO.getConverter());
                 }
-                unitPrecedence = formatInternal(parentUnits, temp);
-                printSeparator = !parentUnits.equals(PhysicsUnit.ONE);
+                unitPrecedence = formatInternal(parentUnit, temp);
+                printSeparator = !parentUnit.equals(SI.ONE);
             }
             int result = formatConverter(converter, printSeparator, unitPrecedence, temp);
             buffer.append(temp);
             return result;
-        } else if (unit instanceof AlternateUnit<?>) {
-            buffer.append(((AlternateUnit<?>) unit).getSymbol());
-            return NOOP_PRECEDENCE;
-        } else if (unit instanceof BaseUnit<?>) {
-            buffer.append(((BaseUnit<?>) unit).getSymbol());
+        } else if (unit.getSymbol() != null) {
+            buffer.append(unit.getSymbol());
             return NOOP_PRECEDENCE;
         } else {
             throw new IllegalArgumentException("Cannot format the given Object as a Unit (unsupported unit type " + unit.getClass().getName() + ")");
@@ -423,7 +413,7 @@ public class LocalUnitFormat implements UnitFormat {
      * @param buffer the <code>StringBuffer</code> to append to.
      * @return the operator precedence of the given UnitConverter
      */
-    private int formatConverter(AbstractUnitConverter converter,
+    private int formatConverter(UnitConverter converter,
             boolean continued,
             int unitPrecedence,
             StringBuffer buffer) {

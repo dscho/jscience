@@ -11,7 +11,6 @@ package org.jscience.physics.unit.converter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import javolution.context.ObjectFactory;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -37,7 +36,7 @@ public final class RationalConverter extends AbstractUnitConverter {
     private BigInteger divisor;
 
     /**
-     * Returns a rational converter with the specified dividend and
+     * Creates a rational converter with the specified dividend and
      * divisor.
      *
      * @param dividend the dividend.
@@ -45,25 +44,13 @@ public final class RationalConverter extends AbstractUnitConverter {
      * @throws IllegalArgumentException if <code>divisor &lt;= 0</code>
      * @throws IllegalArgumentException if <code>dividend == divisor</code>
      */
-    public static RationalConverter valueOf(BigInteger dividend, BigInteger divisor) {
+    public RationalConverter(BigInteger dividend, BigInteger divisor) {
         if (divisor.compareTo(BigInteger.ZERO) <= 0)
             throw new IllegalArgumentException("Negative or zero divisor");
         if (dividend.equals(divisor))
             throw new IllegalArgumentException("Would result in identity converter");
-        RationalConverter cvtr = FACTORY.object();
-        cvtr.dividend = dividend; // Exact conversion.
-        cvtr.divisor = divisor; // Exact conversion.
-        return cvtr;
-    }
-    private static final ObjectFactory<RationalConverter> FACTORY = new ObjectFactory<RationalConverter>() {
-
-        @Override
-        protected RationalConverter create() {
-            return new RationalConverter();
-        }
-    };
-
-    private RationalConverter() {
+        this.dividend = dividend; // Exact conversion.
+        this.divisor = divisor; // Exact conversion.
     }
 
     /**
@@ -75,8 +62,8 @@ public final class RationalConverter extends AbstractUnitConverter {
      * @throws IllegalArgumentException if <code>divisor &lt;= 0</code>
      * @throws IllegalArgumentException if <code>dividend == divisor</code>
      */
-    public static RationalConverter valueOf(long dividend, long divisor) {
-        return valueOf(BigInteger.valueOf(dividend), BigInteger.valueOf(divisor));
+    public RationalConverter (long dividend, long divisor) {
+        this(BigInteger.valueOf(dividend), BigInteger.valueOf(divisor));
     }
 
     /**
@@ -125,13 +112,13 @@ public final class RationalConverter extends AbstractUnitConverter {
         newDividend = newDividend.divide(gcd);
         newDivisor = newDivisor.divide(gcd);
         return (newDividend.equals(BigInteger.ONE) && newDivisor.equals(BigInteger.ONE))
-                ? IDENTITY : RationalConverter.valueOf(newDividend, newDivisor);
+                ? IDENTITY : new RationalConverter(newDividend, newDivisor);
     }
 
     @Override
     public RationalConverter inverse() {
-        return dividend.signum() == -1 ? RationalConverter.valueOf(getDivisor().negate(), getDividend().negate())
-                : RationalConverter.valueOf(getDivisor(), getDividend());
+        return dividend.signum() == -1 ? new RationalConverter(getDivisor().negate(), getDividend().negate())
+                : new RationalConverter(getDivisor(), getDividend());
     }
 
     @Override
@@ -156,10 +143,5 @@ public final class RationalConverter extends AbstractUnitConverter {
     @Override
     public boolean isLinear() {
         return true;
-    }
-
-    @Override
-    public RationalConverter copy() {
-        return RationalConverter.valueOf(dividend, divisor);
     }
 }

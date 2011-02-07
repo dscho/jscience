@@ -22,6 +22,13 @@ public class QuantumModel extends HighEnergyModel {
     private final static QuantumModel INSTANCE = new QuantumModel();
 
     /**
+     * Returns the quantum model instance.
+     */
+    public static QuantumModel getInstance() {
+        return INSTANCE;
+    }
+
+    /**
      * Selects the quantum model as the currentPhysicalModel model.
      */
     public static void select() {

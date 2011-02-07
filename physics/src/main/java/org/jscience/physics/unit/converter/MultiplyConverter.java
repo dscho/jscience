@@ -9,9 +9,7 @@
 package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
-import javolution.context.ObjectFactory;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -37,22 +35,10 @@ public final class MultiplyConverter extends AbstractUnitConverter {
      * @throws IllegalArgumentException if coefficient is <code>1.0</code>
      *        (would result in identity converter)
      */
-    public static MultiplyConverter valueOf(double factor) {
+    public MultiplyConverter(double factor) {
         if (factor == 1.0)
             throw new IllegalArgumentException("Would result in identity converter");
-        MultiplyConverter cvtr = FACTORY.object();
-        cvtr.factor = factor;
-        return cvtr;
-    }
-    private static final ObjectFactory<MultiplyConverter> FACTORY = new ObjectFactory<MultiplyConverter>() {
-
-        @Override
-        protected MultiplyConverter create() {
-            return new MultiplyConverter();
-        }
-    };
-
-    private MultiplyConverter() {
+        this.factor = factor;
     }
 
     /**
@@ -69,12 +55,12 @@ public final class MultiplyConverter extends AbstractUnitConverter {
         if (!(converter instanceof MultiplyConverter))
             return super.concatenate(converter);
         double newfactor = factor * ((MultiplyConverter) converter).factor;
-        return newfactor == 1.0 ? IDENTITY : MultiplyConverter.valueOf(newfactor);
+        return newfactor == 1.0 ? IDENTITY : new MultiplyConverter(newfactor);
     }
 
     @Override
     public MultiplyConverter inverse() {
-        return MultiplyConverter.valueOf(1.0 / factor);
+        return new MultiplyConverter(1.0 / factor);
     }
 
     @Override
@@ -109,10 +95,5 @@ public final class MultiplyConverter extends AbstractUnitConverter {
     @Override
     public boolean isLinear() {
         return true;
-    }
-
-    @Override
-    public MultiplyConverter copy() {
-        return MultiplyConverter.valueOf(factor);
     }
 }

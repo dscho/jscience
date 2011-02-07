@@ -22,6 +22,13 @@ public class HighEnergyModel extends RelativisticModel {
     private final static HighEnergyModel INSTANCE = new HighEnergyModel();
 
     /**
+     * Returns the high energy model instance.
+     */
+    public static HighEnergyModel getInstance() {
+        return INSTANCE;
+    }
+
+    /**
      * Selects the high energy model as the currentPhysicalModel model.
      */
     public static void select() {

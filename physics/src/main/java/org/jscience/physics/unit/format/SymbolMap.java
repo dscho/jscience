@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import javolution.util.FastMap;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class provides a set of mappings between
@@ -46,7 +47,7 @@ public class SymbolMap {
     private FastMap<PhysicsUnit<?>, String> _unitToSymbol;
     private FastMap<String, Object> _symbolToPrefix;
     private FastMap<Object, String> _prefixToSymbol;
-    private FastMap<AbstractUnitConverter, Prefix> _converterToPrefix;
+    private FastMap<UnitConverter, Prefix> _converterToPrefix;
     
     /**
      * Creates an empty mapping.
@@ -56,7 +57,7 @@ public class SymbolMap {
         _unitToSymbol = new FastMap<PhysicsUnit<?>, String>();
         _symbolToPrefix = new FastMap<String, Object>();
         _prefixToSymbol = new FastMap<Object, String>();
-        _converterToPrefix = new FastMap<AbstractUnitConverter, Prefix>();
+        _converterToPrefix = new FastMap<UnitConverter, Prefix>();
     }
 
     /** 
@@ -186,7 +187,7 @@ public class SymbolMap {
      * @param converter the unit converter.
      * @return the corresponding prefix or <code>null</code> if none.
      */
-    public Prefix getPrefix (AbstractUnitConverter converter) {
+    public Prefix getPrefix (UnitConverter converter) {
         return (Prefix)_converterToPrefix.get(converter);
     }
     

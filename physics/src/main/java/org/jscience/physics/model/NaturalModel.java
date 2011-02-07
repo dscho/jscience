@@ -21,8 +21,15 @@ public class NaturalModel extends QuantumModel {
 	/**
 	 * Holds the single instance of this class.
 	 */
-	final static NaturalModel INSTANCE = new NaturalModel();
+	private final static NaturalModel INSTANCE = new NaturalModel();
     
+    /**
+     * Returns the natural model instance.
+     */
+    public static NaturalModel getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Selects the natural model as the currentPhysicalModel model.
      */

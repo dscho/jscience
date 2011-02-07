@@ -8,6 +8,9 @@
  */
 package org.jscience.physics.unit;
 
+import java.util.Map;
+import org.jscience.physics.model.PhysicsDimension;
+import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -22,12 +25,12 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
+final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
 	/**
      * Holds the parent unit (a system unit).
      */
-    private final PhysicsUnit<?> parent;
+    private final PhysicsUnit<?> parentUnit;
 
     /**
      * Holds the symbol for this unit.
@@ -38,33 +41,22 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
      * Creates an alternate unit for the specified unit identified by the
      * specified name and symbol.
      *
+     * @param parent the system unit from which this alternate unit is derived.
      * @param symbol the symbol for this alternate unit.
-     * @param parent the system unit from which this alternate unit is
-     *        derived.
-     * @throws UnsupportedOperationException if the parent is not
-     *         an unscaled metric unit.
-     * @throws IllegalArgumentException if the specified symbol is
-     *         associated to a different unit.
      */
-    AlternateUnit(String symbol, PhysicsUnit<?> parent) {
-        if (!parent.isUnscaledMetric())
-            throw new UnsupportedOperationException(parent + " is not an unscaled metric unit");
-        this.parent = parent;
+    AlternateUnit(PhysicsUnit<?> parentUnit, String symbol) {
+        this.parentUnit = (parentUnit instanceof AlternateUnit) ?
+            ((AlternateUnit)parentUnit).parentUnit : parentUnit;
         this.symbol = symbol;
-        // Checks if the symbol is associated to a different unit.
-        synchronized (PhysicsUnit.SYMBOL_TO_UNIT) {
-            PhysicsUnit<?> unit = PhysicsUnit.SYMBOL_TO_UNIT.get(symbol);
-            if (unit == null) {
-                PhysicsUnit.SYMBOL_TO_UNIT.put(symbol, this);
-                return;
-            }
-            if (unit instanceof AlternateUnit<?>) {
-                AlternateUnit<?> existingUnit = (AlternateUnit<?>) unit;
-                if (symbol.equals(existingUnit.getSymbol()) && this.parent.equals(existingUnit.parent))
-                    return; // OK, same unit.
-            }
-            throw new IllegalArgumentException("Symbol " + symbol + " is associated to a different unit");
-        }
+    }
+
+    /**
+     * Returns the parent unit of this alternate unit (always a system unit).
+     *
+     * @return the parent unit.
+     */
+    public PhysicsUnit<?> getParentUnit() {
+        return parentUnit;
     }
 
     @Override
@@ -73,37 +65,39 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public final PhysicsUnit<Q> toMetric() {
-        return this;
-    }
-
-    @Override
-    public final UnitConverter getConverterToMetric() {
-        return UnitConverter.IDENTITY;
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        if (this == that)
-            return true;
-        if (!(that instanceof AlternateUnit<?>))
-            return false;
-        AlternateUnit<?> thatUnit = (AlternateUnit<?>) that;
-        return this.symbol.equals(thatUnit.symbol); // Symbols are unique.
-    }
-
-    @Override
     public PhysicsDimension getDimension() {
-        return parent.getDimension();
+        return parentUnit.getDimension();
     }
 
     @Override
-    public UnitConverter getDimensionalTransform() {
-        return parent.getDimensionalTransform();
+    public UnitConverter getConverterToSystemUnit() {
+        return parentUnit.getConverterToSystemUnit();
+    }
+
+    @Override
+    public PhysicsUnit<Q> getSystemUnit() {
+        return this; // Alternate Units are system units.
+    }
+
+    @Override
+    public Map<? extends PhysicsUnit, Integer> getProductUnits() {
+        return parentUnit.getProductUnits();
     }
 
     @Override
     public int hashCode() {
         return symbol.hashCode();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof AlternateUnit))
+            return false;
+        AlternateUnit that = (AlternateUnit) obj;
+        return this.parentUnit.equals(that.parentUnit) &&
+                this.symbol.equals(that.symbol);
+    }
+
 }

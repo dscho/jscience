@@ -10,6 +10,7 @@
 package org.jscience.physics.unit.format;
 
 import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.SI;
 import org.jscience.physics.unit.converter.LogConverter;
 
 /** */
@@ -52,7 +53,7 @@ class UnitParser implements UnitParserConstants {
     }
 
     final public PhysicsUnit AddExpr() throws ParseException {
-        PhysicsUnit result = PhysicsUnit.ONE;
+        PhysicsUnit result = SI.ONE;
         Number n1 = null;
         Token sign1 = null;
         Number n2 = null;
@@ -95,8 +96,8 @@ class UnitParser implements UnitParserConstants {
     }
 
     final public PhysicsUnit MulExpr() throws ParseException {
-        PhysicsUnit result = PhysicsUnit.ONE;
-        PhysicsUnit temp = PhysicsUnit.ONE;
+        PhysicsUnit result = SI.ONE;
+        PhysicsUnit temp = SI.ONE;
         result = ExponentExpr();
         label_2:
         while (true) {
@@ -147,8 +148,8 @@ class UnitParser implements UnitParserConstants {
     }
 
     final public PhysicsUnit ExponentExpr() throws ParseException {
-        PhysicsUnit result = PhysicsUnit.ONE;
-        PhysicsUnit temp = PhysicsUnit.ONE;
+        PhysicsUnit result = SI.ONE;
+        PhysicsUnit temp = SI.ONE;
         Exponent exponent = null;
         Token token = null;
         if (jj_2_2(2147483647)) {
@@ -251,8 +252,8 @@ class UnitParser implements UnitParserConstants {
     }
 
     final public PhysicsUnit AtomicExpr() throws ParseException {
-        PhysicsUnit result = PhysicsUnit.ONE;
-        PhysicsUnit temp = PhysicsUnit.ONE;
+        PhysicsUnit result = SI.ONE;
+        PhysicsUnit temp = SI.ONE;
         Number n = null;
         Token token = null;
         switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {

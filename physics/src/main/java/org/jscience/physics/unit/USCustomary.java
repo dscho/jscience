@@ -21,6 +21,8 @@ import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.quantity.Temperature;
 import org.unitsofmeasurement.quantity.Velocity;
 import org.unitsofmeasurement.quantity.Volume;
+import org.unitsofmeasurement.unit.Dimension;
+import org.unitsofmeasurement.unit.SystemOfUnits;
 
 /**
  * <p> This class contains units from the United States customary system.</p>
@@ -42,7 +44,7 @@ import org.unitsofmeasurement.quantity.Volume;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class USCustomary extends PhysicalSystemOfUnits {
+public final class USCustomary implements SystemOfUnits {
 
     /**
      * Holds the units.
@@ -93,112 +95,112 @@ public final class USCustomary extends PhysicalSystemOfUnits {
      * A US customary unit for length quantities equals to <code>2.54 cm</code>
      * (standard name <code>[in_i]</code>).
      */
-    public static final TransformedUnit<Length> INCH
+    public static final PhysicsUnit<Length> INCH
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254, 10000)), Length.class);
 
     /**
      * A unit of length equals to <code>12 [in_i]</code> (standard name
      * <code>[ft_i]</code>).
      */
-    public static final TransformedUnit<Length> FOOT
+    public static final PhysicsUnit<Length> FOOT
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12, 10000)));
 
     /**
      * A unit of length equals to <code>3 [ft_i]</code> (standard name
      * <code>[yd_i]</code>).
      */
-    public static final TransformedUnit<Length> YARD
+    public static final PhysicsUnit<Length> YARD
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 3, 10000)));
 
     /**
      * A unit of length equals to <code>5280 [ft_i]</code> (standard name
      * <code>[mi_i]</code>).
      */
-    public static final TransformedUnit<Length> STATUTE_MILE
+    public static final PhysicsUnit<Length> STATUTE_MILE
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 5280L, 10000)));
 
     /**
      * A unit of depth of water equals to <code>6 [ft_i]</code> (standard name
      * <code>[fth_i]</code>).
      */
-    public static final TransformedUnit<Length> FATHOM
+    public static final PhysicsUnit<Length> FATHOM
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 6, 10000)));
 
     /**
      * A unit of length equals to <code>1852 m</code> (standard name
      * <code>[nmi_i]</code>).
      */
-    public static final TransformedUnit<Length> NAUTICAL_MILE
+    public static final PhysicsUnit<Length> NAUTICAL_MILE
            = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(1852, 1)));
 
     /**
      * A unit of velocity equals to <code>1 [nmi_i]/h</code> (standard name
      * <code>[kn_i]</code>).
      */
-    public static final ProductUnit<Velocity> KNOT
+    public static final PhysicsUnit<Velocity> KNOT
             = addUnit(new ProductUnit<Velocity>(NAUTICAL_MILE.divide(HOUR)));
 
     /**
      * A unit of area equals to <code>1 [in_i]2</code> (standard name
      * <code>[sin_i]</code>).
      */
-    public static final ProductUnit<Area> SQUARE_INCH
+    public static final PhysicsUnit<Area> SQUARE_INCH
             = addUnit(new ProductUnit<Area>(INCH.pow(2)));
 
     /**
      * A unit of area equals to <code>1 [ft_i]2</code> (standard name
      * <code>[sft_i]</code>).
      */
-    public static final ProductUnit<Area> SQUARE_FOOT
+    public static final PhysicsUnit<Area> SQUARE_FOOT
             = addUnit(new ProductUnit<Area>(FOOT.pow(2)));
 
     /**
      * A unit of area equals to <code>1 [yd_i]2</code> (standard name
      * <code>[syd_i]</code>).
      */
-    public static final ProductUnit<Area> SQUARE_YARD
+    public static final PhysicsUnit<Area> SQUARE_YARD
             = addUnit(new ProductUnit<Area>(YARD.pow(2)));
 
     /**
      * A unit of volume equals to <code>1 [in_i]3</code> (standard name
      * <code>[cin_i]</code>).
      */
-    public static final ProductUnit<Volume> CUBIC_INCH
+    public static final PhysicsUnit<Volume> CUBIC_INCH
             = addUnit(new ProductUnit<Volume>(INCH.pow(3)));
 
     /**
      * A unit of volume equals to <code>1 [ft_i]3</code> (standard name
      * <code>[cft_i]</code>).
      */
-    public static final ProductUnit<Volume> CUBIC_FOOT
+    public static final PhysicsUnit<Volume> CUBIC_FOOT
             = addUnit(new ProductUnit<Volume>(FOOT.pow(3)));
 
     /**
      * A unit of volume equals to <code>1 [yd_i]3</code> (standard name
      * <code>[cyd_i]</code>).
      */
-    public static final ProductUnit<Volume> CUBIC_YARD
+    public static final PhysicsUnit<Volume> CUBIC_YARD
             = addUnit(new ProductUnit<Volume>(YARD.pow(3)));
 
     /**
      * A unit of volume equals to <code>144 [in_i]3</code> (standard name
      * <code>[bf_i]</code>).
      */
-    public static final TransformedUnit<Volume> BOARD_FOOT
+    public static final PhysicsUnit<Volume> BOARD_FOOT
             = addUnit(new TransformedUnit<Volume>(CUBIC_INCH, new RationalConverter(144, 1)));
 
     /**
      * A unit of volume equals to <code>128 [ft_i]3</code> (standard name
      * <code>[cr_i]</code>).
      */
-    public static final TransformedUnit<Volume> CORD
+    public static final PhysicsUnit<Volume> CORD
             = addUnit(new TransformedUnit<Volume>(CUBIC_FOOT, new RationalConverter(128, 1)));
 
     /**
      * A unit of length equals to <code>1 × 10-3 [in_i]</code> (standard name
      * <code>[mil_i]</code>).
      */
-    public static final TransformedUnit<Length> MIL
+    public static final PhysicsUnit<Length> MIL
             = addUnit(new TransformedUnit<Length>(INCH, new RationalConverter(1, 1000)));
 
 
@@ -349,9 +351,18 @@ public final class USCustomary extends PhysicalSystemOfUnits {
 
     @Override
     public <Q extends Quantity<Q>> PhysicsUnit<Q> getUnit(Class<Q> quantityType) {
-        PhysicsUnit<Q> unit = quantityToUnit.get(quantityType);
-        // If not found, returns the SI one.
-        return (unit == null) ? SI.getInstance().getUnit(quantityType) : unit;
+        return quantityToUnit.get(quantityType);
+    }
+
+    @Override
+    public Set<? extends PhysicsUnit> getUnits(Dimension dimension) {
+        FastSet<PhysicsUnit> set = FastSet.newInstance();
+        for (PhysicsUnit unit : this.getUnits()) {
+            if (dimension.equals(unit.getDimension())) {
+                set.add(unit);
+            }
+        }
+        return set;
     }
 
     /**
@@ -377,6 +388,5 @@ public final class USCustomary extends PhysicalSystemOfUnits {
         INSTANCE.quantityToUnit.put(type, unit);
         return unit;
     }
-
 
 }
