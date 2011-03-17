@@ -10,7 +10,6 @@ package org.jscience.physics.unit;
 
 import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
