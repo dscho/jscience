@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry path="src" kind="src"/>
-	<classpathentry path="colapi.jar" kind="lib"/>
-	<classpathentry path="lib/geoapi.jar" kind="lib"/>
-	<classpathentry path="lib/javolution.jar" kind="lib"/>
-	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
-	<classpathentry path="bin" kind="output"/>
-</classpath>
