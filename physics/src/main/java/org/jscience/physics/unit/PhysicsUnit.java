@@ -23,7 +23,7 @@ import org.unitsofmeasurement.quantity.Quantity;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
-import org.jscience.physics.unit.format.UCUMFormat;
+import org.jscience.physics.internal.unit.format.UCUMFormat;
 import org.unitsofmeasurement.unit.Dimension;
 import org.unitsofmeasurement.unit.UnconvertibleException;
 import org.unitsofmeasurement.unit.Unit;

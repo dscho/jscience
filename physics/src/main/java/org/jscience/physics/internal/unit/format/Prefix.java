@@ -6,7 +6,7 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit.format;
+package org.jscience.physics.internal.unit.format;
 
 import java.math.BigInteger;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
