@@ -127,9 +127,7 @@
          <TR>
          <TD CLASS="lineheight1 style5">
          <UL>
-            <LI> Reference Implementation (RI) for <A HREF="http://www.jcp.org/jsr/detail/275.jsp">JSR-275</A>:
-                 <B>javax.measure.*</B>
-                 (<A href="http://kenai.com/projects/jsr-275/downloads">Latest Draft Specification</A>).</LI>
+            <LI> Implementation of <A HREF="http://www.unitsofmeasurement.org/">unitsofmeasurement.org</A> services</LI>
 
             <LI> A<A HREF="api/org/jscience/geography/coordinates/package-summary.html#package_description">
             coordinates</A> module compliant with
@@ -177,7 +175,7 @@
          <TR>
          <TD BACKGROUND="doc/img/quotebg.gif">
          <DIV ALIGN="center"><SPAN CLASS="style7">
-                 <IMG src="doc/img/inprogress.jpg" /><B>JS</B>cience version 5.0 incrementaly migrated to <A href="http://kenai.com/projects/jscience">Kenai</A></SPAN></DIV></TD>
+                 <IMG src="doc/img/inprogress.jpg" /><B>JS</B>cience version 5.0 migration to <A href="http://java.net/projects/jscience">java.net</A> started (to be completed by the end of the week)</SPAN></DIV></TD>
          </TR>
          <TR>
          <TD>
@@ -185,14 +183,13 @@
                 WIDTH="100%">
             <TR BACKGROUND="doc/img/bar_center.jpg">
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"><A HREF="api/index.html">Browse API </A></DIV>
+            <DIV ALIGN="center"><A HREF="api/index.html">API (not updated yet)</A></DIV>
             </TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="33%">
-            <DIV ALIGN="center"> <A HREF="http://kenai.com/projects/jscience">Get Source
+            <DIV ALIGN="center"> <A HREF="http://java.net/projects/jscience">Development
                </A></DIV></TD>
             <TD BGCOLOR="#F3F5F8" WIDTH="34%">
-            <DIV ALIGN="center"> <A HREF="jscience-5.0-SNAPSHOT.jar">Get
-               Library </A></DIV></TD>
+            <DIV ALIGN="center"> <A HREF="https://maven.java.net/index.html">Maven Repository</A></DIV></TD>
             </TR>
          </TABLE></TD>
          </TR>
@@ -251,12 +248,8 @@
          <B>JS</B>cience binary includes the latest <I><B>J</B>avolution</I> classes for the J2SE 1.5+ platform. </TD>
          </TR>
          <TR>
-         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience core library (<B>jscience.jar</B>)
-         ) is self-executable for versioning, testing and benchmark purpose.
-         <H4 CLASS="lineheight1 style10">java -jar jscience.jar version (shows version
-         information)
-         <BR> java -jar jscience.jar test (performs self-tests)
-         <BR> java -jar jscience.jar perf (runs benchmark)</H4>
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience is composed of several OSGi modules
+             (<B>jscience-mathematics, jscience-physics, etc.</B>)
          <I>Note: <A HREF="http://javolution.org/api/javolution/lang/Configurable.html">Configuration</A>
          parameters are loaded from system properties at start-up (e.g.
          <code>-Djavolution.context.ConcurrentContext#MAXIMUM_CONCURRENCY=0</code>
@@ -267,11 +260,10 @@
          </TD>
          </TR>
          <TR>
-         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience core modules are
+         <TD CLASS="lineheight1 style5" VALIGN="top"><B>JS</B>cience modules are
          <A HREF="doc/license.txt">free</A>; permission to use, copy,
          modify, and distribute these modules is freely granted, provided
-         that copyright notices are preserved.<BR> Optional modules (none
-         currently) may be covered by different licencing agreements.</TD>
+         that copyright notices are preserved.</TD>
          </TR>
       </TABLE>
       <TABLE ALIGN="center" HEIGHT="46" BORDER="0" CELLSPACING="0"
@@ -297,7 +289,7 @@
              WIDTH="85%">
          <TR>
          <TD CLASS="lineheight1 style5">
-         <P>Additional core modules for 2010: </P>
+         <P>Additional packages for 2011: </P>
          <UL>
             <LI>org.jscience.mathematics.transforms (FFT) </LI>
             <LI>org.jscience.physics.nuclear </LI>
@@ -313,21 +305,16 @@
          </UL>
 
          <P>Feel free to let us know if you are interested in developping
-            new modules. There are very few rules: </P>
+            new packages. It is very easy: </P>
          <UL>
             <LI>Document well </LI>
-            <LI>Integrate with others modules (e.g. physical measures,
+            <LI>Integrate with others packages (e.g. physical measures,
             mathematics numbers, functions etc..) </LI>
-            <LI>Respect module ownership (changes to others packages than
-            yours must be approved). </LI>
-            <LI>Conform to our <A HREF="doc/coding_standard.txt">Coding Standard Addendum</A></LI>
-         </UL>To participate: First register as "Observer" to
-         <A HREF="http://jscience.dev.java.net">
-         http://jscience.dev.java.net </A>, then send an e-mail with your
-         proposal to <A HREF="mailto:dev@jscience.dev.java.net">dev@jscience.dev.java.net
-         </A> upon acceptance you are granted a "Developer" role. You might
-         also want to subscribe to the DEV mailing list in order to comment
-         on others proposals (even if you are not a developer). </TD>
+            <LI>License your code under the JScience BSD License. </LI>
+            <LI>Conform to our <A HREF="doc/coding_standard.txt">Coding Standard</A></LI>
+            <LI>Subsribe to the users@jscience.java.net mailing list</LI>
+         </UL>New packages are submitted by entering an enhancement issue at <A HREF="http://java.net/jira/browse/JSCIENCE">
+         java.net</A> and by attaching your code to the issue. Your code will then get reviewed, hopefully approved and integrated. </TD>
          </TR>
       </TABLE>
 
@@ -414,7 +401,10 @@
          <TR>
          <TD>
          <UL>
-            <LI CLASS="lineheight1 style5"><B>October 3, 2007: JScience 4.3/4.4</B><BR>
+          <LI CLASS="lineheight1 style5"><B>June 20-25, 2011: JScience 5.0</B><BR>
+            Three initial modules released: mathematics, physics and economics</LI>
+
+         <LI CLASS="lineheight1 style5"><B>October 3, 2007: JScience 4.3/4.4</B><BR>
 
            JavaWorld Article: <A href="http://www.javaworld.com/javaworld/jw-10-2007/jw-10-jsr275.html">Introduction to JSR-275: Measures and Units</A>
             <OL>
@@ -502,7 +492,7 @@
              WIDTH="92%">
          <TR>
          <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="31%">
-         <DIV ALIGN="center"><A HREF="http://jscience.dev.java.net/"><IMG
+         <DIV ALIGN="center"><A HREF="http://java.net/projects/jscience"><IMG
                HEIGHT="47" BORDER="0" SRC="doc/img/javanet.gif" WIDTH="170"></A></DIV>
          </TD>
          <TD CLASS="lineheight1 style5" VALIGN="middle" ALIGN="center" WIDTH="14%">
@@ -510,9 +500,9 @@
                BORDER="0" SRC="doc/img/JCPlogoEC.jpg"
                WIDTH="125" HEIGHT="71"></A></DIV></TD>
          <TD CLASS="lineheight1 style5" WIDTH="55%">
-          Comments      : <A HREF="http://kenai.com/projects/jscience/lists">Mailing Lists</A><BR>
+          Comments      : <A HREF="http://java.net/projects/jscience/lists">Mailing Lists</A><BR>
           Project Owner : <A HREF="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle </A><BR>
-          Revision      : January 21, 2010<BR>
+          Revision      : June 20, 2011<BR>
          </TD>
          </TR>
       </TABLE>
@@ -521,7 +511,7 @@
              WIDTH="92%">
          <TR>
          <TD><A HREF="http://java.sun.com/">Java</A> is a trademark of
-         <A HREF="http://www.sun.com/">Sun Microsystems, Inc </A><BR>
+         <A HREF="http://www.oracle.com/">Oracle</A><BR>
          Designed by <A HREF="http://members.shaw.ca/ventro2/design/">Ventro</A>
          </TD>
          </TR>
