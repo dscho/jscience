@@ -1,10 +1,6 @@
 /*
- * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2011 - JScience (http://jscience.org/)
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software is
- * freely granted, provided that this notice is preserved.
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 package org.jscience.physics.unit;
@@ -15,7 +11,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  *
@@ -36,6 +31,7 @@ public class PhysicsUnitTest {
 
     @Test
     public void testValueOf() {
+        assertEquals(SI.KILOGRAM, PhysicsUnit.valueOf("Kg"));
     }
 
     @Test
@@ -111,11 +107,7 @@ public class PhysicsUnitTest {
     }
 
     @Test
-    public void testMultiply_Unit() {
-    }
-
-    @Test
-    public void testMultiply_PhysicsUnit() {
+    public void testMultiply_ErrorType() {
     }
 
     @Test
@@ -127,11 +119,7 @@ public class PhysicsUnitTest {
     }
 
     @Test
-    public void testDivide_Unit() {
-    }
-
-    @Test
-    public void testDivide_PhysicsUnit() {
+    public void testDivide_ErrorType() {
     }
 
     @Test
@@ -150,31 +138,5 @@ public class PhysicsUnitTest {
     public void testEquals() {
     }
 
-    public class PhysicsUnitImpl extends PhysicsUnit {
-
-        public UnitConverter getConverterToSystemUnit() {
-            return null;
-        }
-
-        public PhysicsUnit<Q> getSystemUnit() {
-            return null;
-        }
-
-        public Map<? extends PhysicsUnit, Integer> getProductUnits() {
-            return null;
-        }
-
-        public PhysicsDimension getDimension() {
-            return null;
-        }
-
-        public int hashCode() {
-            return 0;
-        }
-
-        public boolean equals(Object that) {
-            return false;
-        }
-    }
 
 }
