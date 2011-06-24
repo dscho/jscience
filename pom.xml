@@ -274,6 +274,7 @@
     <!-- ====================== -->
     <modules>
         <module>mathematics</module>
+        <module>physics</module>
     </modules>
 
 </project>
