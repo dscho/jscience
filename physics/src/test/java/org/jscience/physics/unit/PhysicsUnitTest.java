@@ -5,6 +5,7 @@
 
 package org.jscience.physics.unit;
 
+import org.jscience.physics.unit.system.SI;
 import java.util.Map;
 import org.jscience.physics.model.PhysicsDimension;
 import org.junit.AfterClass;

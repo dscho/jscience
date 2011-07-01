@@ -6,7 +6,7 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.internal.unit.format;
+package org.jscience.physics.unit.format;
 
 
 import java.io.ByteArrayInputStream;
@@ -15,10 +15,15 @@ import java.math.BigInteger;
 import java.text.*;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.jscience.physics.internal.unit.format.ParseException;
+import org.jscience.physics.internal.unit.format.Prefix;
+import org.jscience.physics.internal.unit.format.SymbolMap;
+import org.jscience.physics.internal.unit.format.TokenMgrError;
+import org.jscience.physics.internal.unit.format.UCUMParser;
 import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
-import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Quantity;

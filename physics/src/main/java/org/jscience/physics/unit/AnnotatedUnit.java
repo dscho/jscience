@@ -10,6 +10,7 @@ package org.jscience.physics.unit;
 
 import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -24,7 +25,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
+public final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     /**
      * Holds the actual unit.
@@ -58,8 +59,12 @@ final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
         return actualUnit;
     }
 
-    @Override
-    public String getAnnotation() {
+    /**
+     * Returns the annotqtion of this annotated unit.
+     *
+     * @return the annotation.
+     */
+     public String getAnnotation() {
         return annotation;
     }
 

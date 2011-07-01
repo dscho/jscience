@@ -6,12 +6,17 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.system;
 
 import java.util.Set;
 import javolution.lang.MathLib;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
+import org.jscience.physics.unit.AlternateUnit;
+import org.jscience.physics.unit.BaseUnit;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.ProductUnit;
+import org.jscience.physics.unit.TransformedUnit;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.ExpConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
@@ -50,9 +55,9 @@ import org.unitsofmeasurement.quantity.Temperature;
 import org.unitsofmeasurement.quantity.Time;
 import org.unitsofmeasurement.quantity.Velocity;
 import org.unitsofmeasurement.quantity.Volume;
+import org.unitsofmeasurement.quantity.Dimensionless;
 
 import org.jscience.physics.unit.converter.RationalConverter;
-import org.unitsofmeasurement.quantity.Dimensionless;
 import org.unitsofmeasurement.unit.Dimension;
 import org.unitsofmeasurement.unit.SystemOfUnits;
 

@@ -6,7 +6,7 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.system;
 
 import org.unitsofmeasurement.unit.Unit;
 import org.unitsofmeasurement.quantity.Quantity;
@@ -14,8 +14,6 @@ import org.unitsofmeasurement.quantity.Quantity;
 /**
  * <p> This class provides support for common binary prefixes to be used by
  *     units.</p>
- *
- * @noextend This class is not intended to be extended by clients.
  *
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>
  * @version 5.0, October 12, 2010

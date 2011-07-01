@@ -8,6 +8,7 @@
  */
 package org.jscience.physics.unit;
 
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
 import java.io.IOException;
 import org.unitsofmeasurement.unit.IncommensurableException;
@@ -23,29 +24,26 @@ import org.unitsofmeasurement.quantity.Quantity;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
-import org.jscience.physics.internal.unit.format.UCUMFormat;
+import org.jscience.physics.unit.format.UCUMFormat;
 import org.unitsofmeasurement.unit.Dimension;
 import org.unitsofmeasurement.unit.UnconvertibleException;
 import org.unitsofmeasurement.unit.Unit;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
- * <p> The class represents physical units.</p>
+ * <p> The class represents units founded on the seven
+ *     {@link org.jscience.physics.unit.system.SI SI} base units for
+ *     seven base quantities assumed to be mutually independent.</p>
  *
- * <p> All physical units can be devised around the seven base units defined
- *     by the {@link SI} units.</p>
- *
- * <p> For all physical units, units conversions are symmetrical:
- *     <code>u1.getConverterTo(u2).equals(u2.getConverterTo(u1).inverse()</code>.
+ * <p> For all physics units, units conversions are symmetrical:
+ *     <code>u1.getConverterTo(u2).equals(u2.getConverterTo(u1).inverse())</code>.
  *     Non-physical units (e.g. currency units) for which conversion is
  *     not symmetrical should have their own separate class hierarchy and
  *     are considered distinct (e.g. financial units), although
- *     they can always be combined with physical units (e.g."€/Kg", "$/h").</p>
-7 *
- * @param <Q> The type of the quantity measured by this unit.
+ *     they can always be combined with physics units (e.g. "€/Kg", "$/h").</p>
  *
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 5.0, October 12, 2010
+ * @version 5.0, July 1, 2011
  */
 public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XMLSerializable {
 
@@ -56,13 +54,13 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     /**
-     * Returns the physical unit represented by the specified characters
+     * Returns the physics unit represented by the specified characters
      * as per standard <a href="http://www.unitsofmeasure.org/">UCUM</a> format.
      *
      * Locale-sensitive unit parsing should be handled using the OSGi
-     * {@link org.unitsofmeasurement.service.UnitFormat} service (or
-     * the {@link org.jscience.physics.unit.format.LocalUnitFormat} class
-     * for non-OSGi applications).
+     * {@link org.unitsofmeasurement.service.UnitFormatService} or
+     * for non-OSGi applications the
+     * {@link org.jscience.physics.unit.format.LocalUnitFormat} utility class.
      *
      * <p>Note: The standard UCUM format supports dimensionless units.[code]
      *       PhysicsUnit<Dimensionless> PERCENT = PhysicsUnit.valueOf("100").inverse().asType(Dimensionless.class);
@@ -78,55 +76,8 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     /**
-     * Annotates the specified unit. Annotation does not change the unit
-     * semantic. Annotations are often written between curly braces behind units.
-     * For example:
-     * [code]
-     *     PhysicsUnit<Volume> PERCENT_VOL = SI.PERCENT.annotate("vol"); // "%{vol}"
-     *     PhysicsUnit<Mass> KG_TOTAL = SI.KILOGRAM.annotate("total"); // "kg{total}"
-     *     PhysicsUnit<Dimensionless> RED_BLOOD_CELLS = SI.ONE.annotate("RBC"); // "{RBC}"
-     * [/code]
-     *
-     * @param annotation the unit annotation.
-     * @return the annotated unit.
-     */
-    public PhysicsUnit<Q> annotate(String annotation) { // TODO: Move to spec.
-        return new AnnotatedUnit<Q>(this, annotation);
-    }
-
-    /**
-     * Returns the annotation for the specified unit or <code>null</code>
-     * if none.
-     *
-     * @return this unit annotation or <code>null</code>
-     */
-    public String getAnnotation() { // TODO: Move to spec.
-        return null;
-    }
-
-    /**
-     * Returns this unit without its annotation or <code>this</code> if
-     * this unit has no {@link #getAnnotation() annotation}.
-     *
-     * @return this unit without annotation or <code>this</code>
-     */
-    public PhysicsUnit<Q> getUnannotatedUnit() {
-        return (this instanceof AnnotatedUnit) ? ((AnnotatedUnit)this).getActualUnit() : this;
-    }
-
-    /**
-     * Indicates if this unit is a system unit.
-     * System units are always unscaled metric units.
-     *
-     * @return <code>this.equals(getSystemUnit())</code>
-     */
-    public boolean isSystemUnit() {
-        return this.equals(getSystemUnit());
-    }
-
-    /**
      * Returns the standard <a href="http://unitsofmeasure.org/">UCUM</a>
-     * representation of this physical unit. The string produced for a given unit is
+     * representation of this physics unit. The string produced for a given unit is
      * always the same; it is not affected by the locale. It can be used as a
      * canonical string representation for exchanging units, or as a key for a
      * Hashtable, etc.
@@ -151,16 +102,98 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     /**
-     * Returns the converter from this unit to its system unit (SI).
+     * Returns the unscaled {@link org.jscience.physics.unit.system.SI SI} unit
+     * from which this unit is derived.
+     * Unscaled SI units are either {@link BaseUnit}, {@link AlternateUnit} or
+     * {@link ProductUnit}.
+     * SI units are unique by quantity type, they can be be used to identify
+     * the quantity given the unit. For example:[code]
+     *    static boolean isAngularVelocity(Unit<?> unit) {
+     *        return unit.toSI().equals(RADIAN.divide(SECOND));
+     *    }
+     *    assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true.
+     * [/code]
      *
-     * @return <code>getConverterTo(this.getSystemUnit())</code>
-     */
-   public abstract UnitConverter getConverterToSystemUnit();
+     * @return the unscaled SI unit from which this unit is derived.
+      */
+   public abstract PhysicsUnit<Q> toSI();
 
+    /**
+     * Returns the converter from this unit to its 
+     * {@link org.jscience.physics.unit.system.SI SI} unit.
+     *
+     * @return <code>getConverterTo(this.toSI())</code>
+     * @see #toSI
+     */
+   public abstract UnitConverter getConverterToSI();
+
+    /**
+     * Annotates the specified unit. Annotation does not change the unit
+     * semantic. Annotations are often written between curly braces behind units.
+     * For example:
+     * [code]
+     *     PhysicsUnit<Volume> PERCENT_VOL = SI.PERCENT.annotate("vol"); // "%{vol}"
+     *     PhysicsUnit<Mass> KG_TOTAL = SI.KILOGRAM.annotate("total"); // "kg{total}"
+     *     PhysicsUnit<Dimensionless> RED_BLOOD_CELLS = SI.ONE.annotate("RBC"); // "{RBC}"
+     * [/code]
+     *
+     * @param annotation the unit annotation.
+     * @return the annotated unit.
+     */
+    public AnnotatedUnit<Q> annotate(String annotation) {
+        return new AnnotatedUnit<Q>(this, annotation);
+    }
+
+   /* PhysicsDimension peuvent etre créer a partir de rien.
+         Chaque Unit a une dimension e.g. METRE -> LENGTH
+         Les dimensions sont distinct mais pas forcement incompatible.
+         Par example:  LENGTH, TIME -> Conversion possible dans le cas
+                                       du modele relativistic.
+         asType: Utilise le model physic pour associer une dimension a un type donné.
+                 Par example: METRE.asType(Duration.class) // Erreur (pas les meme dimensions)
+                              METRE.getConverterTo(SECOND) // Possible.
+
+   */
 
    /////////////////////////////////////////////////////////
     // Implements org.unitsofmeasurement.Unit<Q> interface //
     /////////////////////////////////////////////////////////
+
+    /**
+     * Indicates if this unit is compatible with the unit specified.
+     * To be compatible the specified unit must be a physics unit having
+     * either the same dimension or a dimension for which the current physics
+     * model allows conversion to this unit's dimension.
+     *
+     * @param that the other unit.
+     */
+    @Override
+    public final boolean isCompatible(Unit<?> that) {
+        if ((this == that) || this.equals(that)) return true;
+        if (!(that instanceof PhysicsUnit)) return false;
+        if (this.getDimension().equals(that.getDimension())) return true;
+        return PhysicsModel.getCurrent().getConverter(this.getDimension(), that.getDimension())
+            != null;
+    }
+
+    /**
+     * Casts this unit to a parameterized unit of specified nature or throw a
+     * ClassCastException if the dimension of the specified quantity and
+     * this unit's dimension do not match (regardless whether or not
+     * the dimensions are independent or not).
+     *
+     * @param type the quantity class identifying the nature of the unit.
+     * @throws ClassCastException if the dimension of this unit is different
+     *         from the {@link SI} dimension of the specified type.
+     * @see    SI#getUnit(Class)
+     */
+    @Override
+    public final <T extends Quantity<T>> PhysicsUnit<T> asType(Class<T> type) {
+        PhysicsDimension typeDimension = PhysicsDimension.getDimension(type);
+        if ((typeDimension != null) && (!this.getDimension().equals(typeDimension)))
+           throw new ClassCastException("The unit: " + this + " is not compatible with quantities of type " + type);
+        return (PhysicsUnit<T>) this;
+    }
 
     @Override
     public String getSymbol() {
@@ -168,7 +201,9 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     @Override
-    public abstract PhysicsUnit<Q> getSystemUnit();
+    public final PhysicsUnit<Q> getSystemUnit() {
+        return toSI();
+    }
 
     @Override
     public abstract Map<? extends PhysicsUnit, Integer> getProductUnits();
@@ -176,29 +211,19 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     @Override
     public abstract PhysicsDimension getDimension();
 
-    @Override
-    public final boolean isCompatible(Unit<?> that) {
-        return this.getDimension().equals(that.getDimension());
-    }
-
-    @Override
-    public final <T extends Quantity<T>> PhysicsUnit<T> asType(Class<T> type) {
-        Dimension typeDimension = PhysicsModel.getCurrent().getDimension(type);
-        if ((typeDimension != null) && (!this.getDimension().equals(typeDimension)))
-           throw new ClassCastException("The unit: " + this + " is not compatible with quantities of type " + type);
-        return (PhysicsUnit<T>) this;
-    }
 
     @Override
     public final UnitConverter getConverterTo(Unit<Q> that) throws UnconvertibleException {
         if ((this == that) || this.equals(that)) return AbstractUnitConverter.IDENTITY; // Shortcut.
+        if (isCompatible(this))
         Unit<Q> thisSystemUnit = this.getSystemUnit();
         Unit<Q> thatSystemUnit = that.getSystemUnit();
         if (!thisSystemUnit.equals(thatSystemUnit)) return getConverterToAny(that); // They don't have the same system of unit!
         UnitConverter thisToSI= this.getConverterToSystemUnit();
         UnitConverter thatToSI= that.getConverterTo(thatSystemUnit);
-        return thatToSI.inverse().concatenate(thisToSI);
+        return thatToSI.inverse().concatenate(thisToSI);    
     }
+    private
 
     @Override
     public final UnitConverter getConverterToAny(Unit<?> that) throws IncommensurableException,

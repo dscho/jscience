@@ -8,7 +8,7 @@
  */
 package org.jscience.physics.model;
 
-import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.jscience.physics.unit.BaseUnit;
 import org.unitsofmeasurement.unit.Dimension;

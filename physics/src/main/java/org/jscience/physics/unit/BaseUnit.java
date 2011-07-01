@@ -18,15 +18,11 @@ import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class represents the building blocks on top of which all others
- *     units are created. Base units are always unscaled metric units.</p>
+ *     physical units are created. Base units are always unscaled metric units.</p>
  * 
- * <p> When using the standard model, all seven {@link SI} base units
+ * <p> When using the {@link org.jscience.physics.model.StandardModel standard model},
+ *     all seven {@link org.jscience.physics.unit.system.SI SI} base units
  *     are dimensionally independent.</p>
- *
- * <p> The actual dimension of a base unit is determined by the current
-      {@link PhysicsModel physical model}.</p>
- *
- * @param <Q> The type of the quantity measured by this unit.
  *
  * @see <a href="http://en.wikipedia.org/wiki/SI_base_unit">
  *       Wikipedia: SI base unit</a>
@@ -42,12 +38,18 @@ public class BaseUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     private final String symbol;
 
     /**
-     * Creates a base unit having the specified symbol.
+     * Holds the base unit dimension.
+     */
+    private final PhysicsDimension dimension;
+
+    /**
+     * Creates a base unit having the specified symbol and dimension.
      *
      * @param symbol the symbol of this base unit.
      */
-    public BaseUnit(String symbol) {
+    public BaseUnit(String symbol, PhysicsDimension dimension) {
         this.symbol = symbol;
+        this.dimension = dimension;
     }
 
     @Override
@@ -72,17 +74,16 @@ public class BaseUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     @Override
     public PhysicsDimension getDimension() {
-        return PhysicsModel.getCurrent().getDimension(this);
+        return dimension;
     }
 
     @Override
     public final boolean equals(Object that) {
-        if (this == that)
-            return true;
-        if (!(that instanceof BaseUnit))
-            return false;
+        if (this == that) return true;
+        if (!(that instanceof BaseUnit)) return false;
         BaseUnit thatUnit = (BaseUnit) that;
-        return this.symbol.equals(thatUnit.symbol);
+        return this.symbol.equals(thatUnit.symbol) 
+                && this.dimension.equals(thatUnit.dimension);
     }
 
     @Override

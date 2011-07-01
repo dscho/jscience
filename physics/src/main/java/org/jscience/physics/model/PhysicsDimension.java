@@ -14,19 +14,25 @@ import javolution.text.TextBuilder;
 import javolution.xml.XMLSerializable;
 import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.system.SI;
+import org.unitsofmeasurement.quantity.Quantity;
 
 import org.unitsofmeasurement.unit.Dimension;
 
 /**
-*  <p> This class represents a physical dimension.</p>
+*  <p> This class represents a physics dimension (dimension of a physical
+ *     quantity).</p>
  *
- * <p> The dimension for any given quantity can be retrieved from the current
- *     {@link PhysicsModel physical model}.
+ * <p> The dimension associated to any given quantity are given by the
+ *      OSGi published {@link PhysicsDimensionService} instances.
+ *     For convenience, a static method {@link PhysicsDimension#getDimension(Class)
+ *     aggregating the results of all {@link PhysicsDimensionService} instances
+ *     is provided.
  *     [code]
  *        PhysicsDimension velocityDimension
- *            = PhysicsModel.getCurrent().getDimension(Velocity.class);
- *     [/code]<p>
+ *            = PhysicsDimension.getDimension(Velocity.class);
+ *     [/code]
+ * </p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
@@ -79,6 +85,18 @@ public class PhysicsDimension implements Dimension, XMLSerializable {
     private PhysicsUnit<?> pseudoUnit;
 
     /**
+     * Returns the dimension for the specified quantity type by aggregating
+     * the results of {@link PhysicsDimensionService}.
+     *
+     * @param quantityType the quantity type.
+     * @return the dimension for the quantity type.
+     */
+    public static <Q extends Quantity<Q>> PhysicsDimension getDimension(Class<Q> quantityType) {
+        // TODO: Track OSGi services and aggregate results.
+        return SI.getInstance().getUnit(quantityType).getDimension();
+    }
+
+    /**
      * Returns the physical dimension having the specified symbol.
      *
      * @param symbol the associated symbol.
@@ -86,7 +104,7 @@ public class PhysicsDimension implements Dimension, XMLSerializable {
     public PhysicsDimension(char symbol) {
         TextBuilder label = TextBuilder.newInstance();
         label.append('[').append(symbol).append(']');
-        pseudoUnit = new BaseUnit(label.toString());
+        pseudoUnit = new BaseUnit(label.toString(), NONE);
     }
 
     /**
@@ -100,24 +118,44 @@ public class PhysicsDimension implements Dimension, XMLSerializable {
 
     /**
      * Returns the product of this dimension with the one specified.
+     * If the specified dimension is not a physics dimension, then
+     * <code>that.multiply(this)</code> is returned.
      *
      * @param  that the dimension multiplicand.
      * @return <code>this * that</code>
      */
-    public final PhysicsDimension multiply(Dimension that) {
-        PhysicsUnit thisPseudoUnit = this.pseudoUnit;
-        PhysicsUnit thatPseudoUnit = (that instanceof PhysicsDimension) ?
-            ((PhysicsDimension)that).pseudoUnit : new BaseUnit(that.toString());
-        return new PhysicsDimension(thisPseudoUnit.multiply(thatPseudoUnit));
+    public Dimension multiply(Dimension that) {
+        return (that instanceof PhysicsDimension) ?
+            this.multiply((PhysicsDimension)that) : that.multiply(this);
+    }
+
+    /**
+     * Returns the product of this dimension with the one specified.
+     *
+     * @param  that the dimension multiplicand.
+     * @return <code>this * that</code>
+     */
+    public PhysicsDimension multiply(PhysicsDimension that) {
+        return new PhysicsDimension(this.pseudoUnit.multiply(that.pseudoUnit));
     }
 
     /**
      * Returns the quotient of this dimension with the one specified.
      *
      * @param  that the dimension divisor.
-     * @return <code>this / that</code>
+     * @return <code>this.multiply(that.pow(-1))</code>
      */
-    public final PhysicsDimension divide(Dimension that) {
+    public Dimension divide(Dimension that) {
+        return this.multiply(that.pow(-1));
+    }
+
+    /**
+     * Returns the quotient of this dimension with the one specified.
+     *
+     * @param  that the dimension divisor.
+     * @return <code>this.multiply(that.pow(-1))</code>
+     */
+    public PhysicsDimension divide(PhysicsDimension that) {
         return this.multiply(that.pow(-1));
     }
 

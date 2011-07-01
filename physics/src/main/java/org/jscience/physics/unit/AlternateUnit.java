@@ -17,15 +17,10 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * <p> This class represents units used in expressions to distinguish
  *     between quantities of a different nature but of the same dimensions.</p>
  *
- * <p> Instances of this class are created through the
- *     {@link PhysicsUnit#alternate(String)} method.</p>
- *
- * @param <Q> The type of the quantity measured by this unit.
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
+public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
 	/**
      * Holds the parent unit (a system unit).
@@ -43,10 +38,14 @@ final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
      *
      * @param parent the system unit from which this alternate unit is derived.
      * @param symbol the symbol for this alternate unit.
+     * @throws IllegalArgumentException if the specified unit is not a
+     *         {@link PhysicsUnit#isSystemUnit() system unit}
      */
-    AlternateUnit(PhysicsUnit<?> parentUnit, String symbol) {
-        this.parentUnit = (parentUnit instanceof AlternateUnit) ?
-            ((AlternateUnit)parentUnit).parentUnit : parentUnit;
+    public AlternateUnit(PhysicsUnit<?> parentUnit, String symbol) {
+        if (!parentUnit.isSystemUnit())
+            throw new IllegalArgumentException("The parent unit: " +  parentUnit
+                    + " is not a system unit");
+        this.parentUnit = parentUnit;
         this.symbol = symbol;
     }
 
@@ -76,7 +75,7 @@ final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     @Override
     public PhysicsUnit<Q> getSystemUnit() {
-        return this; // Alternate Units are system units.
+        return this; // Alternate units are system units.
     }
 
     @Override
@@ -93,6 +92,8 @@ final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
+        Two alternate unit are equale if same symbol and same system unit.
+
         if (!(obj instanceof AlternateUnit))
             return false;
         AlternateUnit that = (AlternateUnit) obj;

@@ -10,7 +10,7 @@
 package org.jscience.physics.internal.unit.format;
 
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.LogConverter;
 
 /** */

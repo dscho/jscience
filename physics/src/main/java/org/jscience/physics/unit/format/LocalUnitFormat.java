@@ -6,7 +6,7 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.internal.unit.format;
+package org.jscience.physics.unit.format;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -15,8 +15,13 @@ import java.text.ParsePosition;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.jscience.physics.internal.unit.format.ParseException;
+import org.jscience.physics.internal.unit.format.Prefix;
+import org.jscience.physics.internal.unit.format.SymbolMap;
+import org.jscience.physics.internal.unit.format.TokenMgrError;
+import org.jscience.physics.internal.unit.format.UnitParser;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.ExpConverter;
 import org.jscience.physics.unit.converter.LogConverter;

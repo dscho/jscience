@@ -11,15 +11,18 @@ package org.jscience.physics.unit;
 import org.jscience.physics.model.PhysicsDimension;
 import org.unitsofmeasurement.unit.UnitConverter;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
+import javolution.util.FastMap;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.AbstractUnitConverter;
 
 import org.unitsofmeasurement.quantity.Quantity;
+import org.unitsofmeasurement.unit.Unit;
 
 /**
  * <p>  This class represents units formed by the product of rational powers of
- *      existing units.</p>
+ *      existing physical units.</p>
  *
  * <p> This class maintains the canonical form of this product (simplest form
  *     after factorization). For example: <code>METRE.pow(2).divide(METRE)</code>
@@ -30,7 +33,7 @@ import org.unitsofmeasurement.quantity.Quantity;
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
+public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
 	/**
      * Holds the units composing this product unit.
@@ -68,6 +71,238 @@ final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
         this.elements = elements;
     }
 
+
+    /**
+     * Returns the product of the specified units.
+     *
+     * @param left the left unit operand.
+     * @param right the right unit operand.
+     * @return <code>left * right</code>
+     */
+    public static PhysicsUnit<?> getProductInstance(PhysicsUnit<?> left, PhysicsUnit<?> right) {
+        Element[] leftElems;
+        if (left instanceof ProductUnit<?>)
+            leftElems = ((ProductUnit<?>) left).elements;
+        else
+            leftElems = new Element[]{new Element(left, 1, 1)};
+        Element[] rightElems;
+        if (right instanceof ProductUnit<?>)
+            rightElems = ((ProductUnit<?>) right).elements;
+        else
+            rightElems = new Element[]{new Element(right, 1, 1)};
+        return getInstance(leftElems, rightElems);
+    }
+
+    /**
+     * Returns the quotient of the specified units.
+     *
+     * @param left the dividend unit operand.
+     * @param right the divisor unit operand.
+     * @return <code>dividend / divisor</code>
+     */
+    public static PhysicsUnit<?> getQuotientInstance(PhysicsUnit<?> left, PhysicsUnit<?> right) {
+        Element[] leftElems;
+        if (left instanceof ProductUnit<?>)
+            leftElems = ((ProductUnit<?>) left).elements;
+        else
+            leftElems = new Element[]{new Element(left, 1, 1)};
+        Element[] rightElems;
+        if (right instanceof ProductUnit<?>) {
+            Element[] elems = ((ProductUnit<?>) right).elements;
+            rightElems = new Element[elems.length];
+            for (int i = 0; i < elems.length; i++) {
+                rightElems[i] = new Element(elems[i].unit, -elems[i].pow,
+                        elems[i].root);
+            }
+        } else
+            rightElems = new Element[]{new Element(right, -1, 1)};
+        return getInstance(leftElems, rightElems);
+    }
+
+    /**
+     * Returns the product unit corresponding to the specified root of the
+     * specified unit.
+     *
+     * @param unit the unit.
+     * @param n the root's order (n &gt; 0).
+     * @return <code>unit^(1/nn)</code>
+     * @throws ArithmeticException if <code>n == 0</code>.
+     */
+    public static PhysicsUnit<?> getRootInstance(PhysicsUnit<?> unit, int n) {
+        Element[] unitElems;
+        if (unit instanceof ProductUnit<?>) {
+            Element[] elems = ((ProductUnit<?>) unit).elements;
+            unitElems = new Element[elems.length];
+            for (int i = 0; i < elems.length; i++) {
+                int gcd = gcd(Math.abs(elems[i].pow), elems[i].root * n);
+                unitElems[i] = new Element(elems[i].unit, elems[i].pow / gcd,
+                        elems[i].root * n / gcd);
+            }
+        } else
+            unitElems = new Element[]{new Element(unit, 1, n)};
+        return getInstance(unitElems, new Element[0]);
+    }
+
+    /**
+     * Returns the product unit corresponding to this unit raised to the
+     * specified exponent.
+     *
+     * @param unit the unit.
+     * @param nn the exponent (nn &gt; 0).
+     * @return <code>unit^n</code>
+     */
+    static PhysicsUnit<?> getPowInstance(PhysicsUnit<?> unit, int n) {
+        Element[] unitElems;
+        if (unit instanceof ProductUnit<?>) {
+            Element[] elems = ((ProductUnit<?>) unit).elements;
+            unitElems = new Element[elems.length];
+            for (int i = 0; i < elems.length; i++) {
+                int gcd = gcd(Math.abs(elems[i].pow * n), elems[i].root);
+                unitElems[i] = new Element(elems[i].unit, elems[i].pow * n / gcd, elems[i].root / gcd);
+            }
+        } else
+            unitElems = new Element[]{new Element(unit, n, 1)};
+        return getInstance(unitElems, new Element[0]);
+    }
+
+    /**
+     * Returns the number of unit elements in this product.
+     *
+     * @return the number of unit elements.
+     */
+    public int getUnitCount() {
+        return elements.length;
+    }
+
+    /**
+     * Returns the unit element at the specified position.
+     *
+     * @param index the index of the unit element to return.
+     * @return the unit element at the specified position.
+     * @throws IndexOutOfBoundsException if index is out of range
+     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+     */
+    public PhysicsUnit<?> getUnit(int index) {
+        return elements[index].getUnit();
+    }
+
+    /**
+     * Returns the power exponent of the unit element at the specified position.
+     *
+     * @param index the index of the unit element.
+     * @return the unit power exponent at the specified position.
+     * @throws IndexOutOfBoundsException if index is out of range
+     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+     */
+    public int getUnitPow(int index) {
+        return elements[index].getPow();
+    }
+
+    /**
+     * Returns the root exponent of the unit element at the specified position.
+     *
+     * @param index the index of the unit element.
+     * @return the unit root exponent at the specified position.
+     * @throws IndexOutOfBoundsException if index is out of range
+     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+     */
+    public int getUnitRoot(int index) {
+        return elements[index].getRoot();
+    }
+
+    @Override
+    public Map<PhysicsUnit<?>, Integer> getProductUnits() {
+        FastMap<PhysicsUnit<?>, Integer> units = FastMap.newInstance();
+        for (int i = 0; i < getUnitCount(); i++) {
+            units.put(getUnit(i), getUnitPow(i));
+        }
+        return units;
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that)
+            return true;
+        if (!(that instanceof ProductUnit<?>))
+            return false;
+        // Two products are equals if they have the same elements
+        // regardless of the elements' order.
+        Element[] elems = ((ProductUnit<?>) that).elements;
+        if (elements.length != elems.length)
+            return false;
+        for (int i = 0; i < elements.length; i++) {
+            boolean unitFound = false;
+            Element e = elements[i];
+            for (int j = 0; j < elems.length; j++) {
+                if (e.unit.equals(elems[j].unit))
+                    if ((e.pow != elems[j].pow) || (e.root != elems[j].root))
+                        return false;
+                    else {
+                        unitFound = true;
+                        break;
+                    }
+            }
+            if (!unitFound)
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.hashCode != 0)
+            return this.hashCode;
+        int code = 0;
+        for (int i = 0; i < elements.length; i++) {
+            code += elements[i].unit.hashCode() * (elements[i].pow * 3 - elements[i].root * 2);
+        }
+        this.hashCode = code;
+        return code;
+    }
+
+    public PhysicsUnit<Q> getSystemUnit() {
+        Unit<?> systemUnit = SI.ONE;
+        for (int i = 0; i < elements.length; i++) {
+            Unit<?> unit = elements[i].unit.getSystemUnit();
+            unit = unit.pow(elements[i].pow);
+            unit = unit.root(elements[i].root);
+            systemUnit = systemUnit.multiply(unit);
+        }
+        return (PhysicsUnit<Q>) systemUnit;
+    }
+
+    public UnitConverter getConverterToSystemUnit() {
+        UnitConverter converter = AbstractUnitConverter.IDENTITY;
+        for (int i = 0; i < elements.length; i++) {
+            Element e = elements[i];
+            UnitConverter cvtr = e.unit.getConverterToSystemUnit();
+            if (!(cvtr.isLinear()))
+                throw new UnsupportedOperationException(e.unit + " is non-linear, cannot convert");
+            if (e.root != 1)
+                throw new UnsupportedOperationException(e.unit + " holds a base unit with fractional exponent");
+            int pow = e.pow;
+            if (pow < 0) { // Negative power.
+                pow = -pow;
+                cvtr = cvtr.inverse();
+            }
+            for (int j = 0; j < pow; j++) {
+                converter = converter.concatenate(cvtr);
+            }
+        }
+        return converter;
+    }
+
+    @Override
+    public PhysicsDimension getDimension() {
+        PhysicsDimension dimension = PhysicsDimension.NONE;
+        for (int i = 0; i < this.getUnitCount(); i++) {
+            PhysicsUnit<?> unit = this.getUnit(i);
+            PhysicsDimension d = unit.getDimension().pow(this.getUnitPow(i)).root(this.getUnitRoot(i));
+            dimension = dimension.multiply(d);
+        }
+        return dimension;
+    }
+
     /**
      * Returns the unit defined from the product of the specified elements.
      *
@@ -75,15 +310,13 @@ final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
      * @param rightElems right multiplicand elements.
      * @return the corresponding unit.
      */
-    @SuppressWarnings("unchecked")
-    private static PhysicsUnit<? extends Quantity<?>> getInstance(Element[] leftElems,
-            Element[] rightElems) {
+    private static PhysicsUnit<?> getInstance(Element[] leftElems, Element[] rightElems) {
 
         // Merges left elements with right elements.
         Element[] result = new Element[leftElems.length + rightElems.length];
         int resultIndex = 0;
         for (int i = 0; i < leftElems.length; i++) {
-            PhysicsUnit<?> unit = leftElems[i].unit;
+            PhysicsUnit unit = leftElems[i].unit;
             int p1 = leftElems[i].pow;
             int r1 = leftElems[i].root;
             int p2 = 0;
@@ -132,260 +365,6 @@ final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     /**
-     * Returns the product of the specified units.
-     *
-     * @param left the left unit operand.
-     * @param right the right unit operand.
-     * @return <code>left * right</code>
-     */
-    public static PhysicsUnit<? extends Quantity<?>> getProductInstance(PhysicsUnit<?> left,
-            PhysicsUnit<?> right) {
-        Element[] leftElems;
-        if (left instanceof ProductUnit<?>)
-            leftElems = ((ProductUnit<?>) left).elements;
-        else
-            leftElems = new Element[]{new Element(left, 1, 1)};
-        Element[] rightElems;
-        if (right instanceof ProductUnit<?>)
-            rightElems = ((ProductUnit<?>) right).elements;
-        else
-            rightElems = new Element[]{new Element(right, 1, 1)};
-        return getInstance(leftElems, rightElems);
-    }
-
-    /**
-     * Returns the quotient of the specified units.
-     *
-     * @param left the dividend unit operand.
-     * @param right the divisor unit operand.
-     * @return <code>dividend / divisor</code>
-     */
-    public static PhysicsUnit<? extends Quantity<?>> getQuotientInstance(PhysicsUnit<?> left,
-            PhysicsUnit<?> right) {
-        Element[] leftElems;
-        if (left instanceof ProductUnit<?>)
-            leftElems = ((ProductUnit<?>) left).elements;
-        else
-            leftElems = new Element[]{new Element(left, 1, 1)};
-        Element[] rightElems;
-        if (right instanceof ProductUnit<?>) {
-            Element[] elems = ((ProductUnit<?>) right).elements;
-            rightElems = new Element[elems.length];
-            for (int i = 0; i < elems.length; i++) {
-                rightElems[i] = new Element(elems[i].unit, -elems[i].pow,
-                        elems[i].root);
-            }
-        } else
-            rightElems = new Element[]{new Element(right, -1, 1)};
-        return getInstance(leftElems, rightElems);
-    }
-
-    /**
-     * Returns the product unit corresponding to the specified root of the
-     * specified unit.
-     *
-     * @param unit the unit.
-     * @param n the root's order (n &gt; 0).
-     * @return <code>unit^(1/nn)</code>
-     * @throws ArithmeticException if <code>n == 0</code>.
-     */
-    public static PhysicsUnit<? extends Quantity<?>> getRootInstance(PhysicsUnit<?> unit, int n) {
-        Element[] unitElems;
-        if (unit instanceof ProductUnit<?>) {
-            Element[] elems = ((ProductUnit<?>) unit).elements;
-            unitElems = new Element[elems.length];
-            for (int i = 0; i < elems.length; i++) {
-                int gcd = gcd(Math.abs(elems[i].pow), elems[i].root * n);
-                unitElems[i] = new Element(elems[i].unit, elems[i].pow / gcd,
-                        elems[i].root * n / gcd);
-            }
-        } else
-            unitElems = new Element[]{new Element(unit, 1, n)};
-        return getInstance(unitElems, new Element[0]);
-    }
-
-    /**
-     * Returns the product unit corresponding to this unit raised to the
-     * specified exponent.
-     *
-     * @param unit the unit.
-     * @param nn the exponent (nn &gt; 0).
-     * @return <code>unit^n</code>
-     */
-    static PhysicsUnit<? extends Quantity<?>> getPowInstance(PhysicsUnit<?> unit, int n) {
-        Element[] unitElems;
-        if (unit instanceof ProductUnit<?>) {
-            Element[] elems = ((ProductUnit<?>) unit).elements;
-            unitElems = new Element[elems.length];
-            for (int i = 0; i < elems.length; i++) {
-                int gcd = gcd(Math.abs(elems[i].pow * n), elems[i].root);
-                unitElems[i] = new Element(elems[i].unit, elems[i].pow * n / gcd, elems[i].root / gcd);
-            }
-        } else
-            unitElems = new Element[]{new Element(unit, n, 1)};
-        return getInstance(unitElems, new Element[0]);
-    }
-
-    /**
-     * Returns the number of unit elements in this product.
-     *
-     * @return the number of unit elements.
-     */
-    public int getUnitCount() {
-        return elements.length;
-    }
-
-    /**
-     * Returns the unit element at the specified position.
-     *
-     * @param index the index of the unit element to return.
-     * @return the unit element at the specified position.
-     * @throws IndexOutOfBoundsException if index is out of range
-     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
-     */
-    public PhysicsUnit<? extends Quantity<?>> getUnit(int index) {
-        return elements[index].getUnit();
-    }
-
-    /**
-     * Returns the power exponent of the unit element at the specified position.
-     *
-     * @param index the index of the unit element.
-     * @return the unit power exponent at the specified position.
-     * @throws IndexOutOfBoundsException if index is out of range
-     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
-     */
-    public int getUnitPow(int index) {
-        return elements[index].getPow();
-    }
-
-    /**
-     * Returns the root exponent of the unit element at the specified position.
-     *
-     * @param index the index of the unit element.
-     * @return the unit root exponent at the specified position.
-     * @throws IndexOutOfBoundsException if index is out of range
-     *         <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
-     */
-    public int getUnitRoot(int index) {
-        return elements[index].getRoot();
-    }
-
-    @Override
-    public Map<PhysicsUnit<?>, Integer> getProductUnits() {
-        HashMap<PhysicsUnit<?>, Integer> units = new HashMap<PhysicsUnit<?>, Integer>();
-        for (int i = 0; i < getUnitCount(); i++) {
-            units.put(getUnit(i), getUnitPow(i));
-        }
-        return units;
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        if (this == that)
-            return true;
-        if (!(that instanceof ProductUnit<?>))
-            return false;
-        // Two products are equals if they have the same elements
-        // regardless of the elements' order.
-        Element[] elems = ((ProductUnit<?>) that).elements;
-        if (elements.length != elems.length)
-            return false;
-        for (int i = 0; i < elements.length; i++) {
-            boolean unitFound = false;
-            Element e = elements[i];
-            for (int j = 0; j < elems.length; j++) {
-                if (e.unit.equals(elems[j].unit))
-                    if ((e.pow != elems[j].pow) || (e.root != elems[j].root))
-                        return false;
-                    else {
-                        unitFound = true;
-                        break;
-                    }
-            }
-            if (!unitFound)
-                return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        if (this.hashCode != 0)
-            return this.hashCode;
-        int code = 0;
-        for (int i = 0; i < elements.length; i++) {
-            code += elements[i].unit.hashCode() * (elements[i].pow * 3 - elements[i].root * 2);
-        }
-        this.hashCode = code;
-        return code;
-    }
-
-    @SuppressWarnings("unchecked")
-    public PhysicsUnit<Q> getSystemUnit() {
-        if (hasOnlyUnscaledMetricUnits())
-            return this;
-        PhysicsUnit<?> systemUnit = SI.ONE;
-        for (int i = 0; i < elements.length; i++) {
-            PhysicsUnit<?> unit = elements[i].unit.getSystemUnit();
-            unit = unit.pow(elements[i].pow);
-            unit = unit.root(elements[i].root);
-            systemUnit = systemUnit.multiply(unit);
-        }
-        return (PhysicsUnit<Q>) systemUnit;
-    }
-
-    @Override
-    public UnitConverter getConverterToSystemUnit() {
-        if (hasOnlyUnscaledMetricUnits()) // Product of standard units is a standard unit itself.
-            return AbstractUnitConverter.IDENTITY;
-        UnitConverter converter = AbstractUnitConverter.IDENTITY;
-        for (int i = 0; i < elements.length; i++) {
-            Element e = elements[i];
-            UnitConverter cvtr = e.unit.getConverterToSystemUnit();
-            if (!(cvtr.isLinear()))
-                throw new UnsupportedOperationException(e.unit + " is non-linear, cannot convert");
-            if (e.root != 1)
-                throw new UnsupportedOperationException(e.unit + " holds a base unit with fractional exponent");
-            int pow = e.pow;
-            if (pow < 0) { // Negative power.
-                pow = -pow;
-                cvtr = cvtr.inverse();
-            }
-            for (int j = 0; j < pow; j++) {
-                converter = converter.concatenate(cvtr);
-            }
-        }
-        return converter;
-    }
-
-    /**
-     * Indicates if this product unit is a standard unit.
-     *
-     * @return <code>true</code> if all elements are standard units;
-     *         <code>false</code> otherwise.
-     */
-    private boolean hasOnlyUnscaledMetricUnits() {
-        for (int i = 0; i < elements.length; i++) {
-            PhysicsUnit<?> u = elements[i].unit;
-            if (!u.getConverterToSystemUnit().equals(AbstractUnitConverter.IDENTITY))
-                return false;
-        }
-        return true;
-    }
-
-    @Override
-    public PhysicsDimension getDimension() {
-        PhysicsDimension dimension = PhysicsDimension.NONE;
-        for (int i = 0; i < this.getUnitCount(); i++) {
-            PhysicsUnit<?> unit = this.getUnit(i);
-            PhysicsDimension d = unit.getDimension().pow(this.getUnitPow(i)).root(this.getUnitRoot(i));
-            dimension = dimension.multiply(d);
-        }
-        return dimension;
-    }
-
-    /**
      * Returns the greatest common divisor (Euclid's algorithm).
      *
      * @param m the first number.
@@ -399,15 +378,11 @@ final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
             return gcd(n, m % n);
     }
 
+
     /**
      * Inner product element represents a rational power of a single unit.
      */
     private final static class Element implements Serializable {
-
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1649532173171667701L;
 
         /**
          * Holds the single unit.

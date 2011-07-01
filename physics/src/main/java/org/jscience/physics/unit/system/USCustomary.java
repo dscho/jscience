@@ -6,13 +6,16 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.system;
 
-import static org.jscience.physics.unit.SI.*;
+import static org.jscience.physics.unit.system.SI.*;
 
 import java.util.Set;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
+import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.ProductUnit;
+import org.jscience.physics.unit.TransformedUnit;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Area;
 import org.unitsofmeasurement.quantity.Length;
