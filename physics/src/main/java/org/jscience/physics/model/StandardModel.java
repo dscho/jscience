@@ -17,25 +17,6 @@ package org.jscience.physics.model;
 public class StandardModel extends PhysicsModel {
 
     /**
-     * Holds the single instance of this class.
-     */
-    private final static StandardModel INSTANCE = new StandardModel();
-
-    /**
-     * Returns the standard model instance.
-     */
-    public static StandardModel getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Selects the standard model as the getCurrent model.
-     */
-    public static void select() {
-        PhysicsModel.setCurrent(INSTANCE);
-    }
-
-    /**
      * Default constructor.
      */
     protected StandardModel() {

@@ -17,28 +17,9 @@ package org.jscience.physics.model;
 public class QuantumModel extends HighEnergyModel {
 
     /**
-     * Holds the single instance of this class.
-     */
-    private final static QuantumModel INSTANCE = new QuantumModel();
-
-    /**
-     * Returns the quantum model instance.
-     */
-    public static QuantumModel getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Selects the quantum model as the currentPhysicalModel model.
-     */
-    public static void select() {
-        PhysicsModel.setCurrent(INSTANCE);
-    }
-
-    /**
      * Default constructor.
      */
-    protected QuantumModel() {
+    public QuantumModel() {
     }
     
 // TODO: Allow more conversion.

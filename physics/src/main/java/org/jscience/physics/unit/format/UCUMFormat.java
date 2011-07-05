@@ -22,7 +22,7 @@ import org.jscience.physics.internal.unit.format.TokenMgrError;
 import org.jscience.physics.internal.unit.format.UCUMParser;
 import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
@@ -258,7 +258,7 @@ public abstract class UCUMFormat implements UnitFormat {
 		Prefix prefix = _symbolMap.getPrefix(converter);
 		if ((prefix != null) && (!unitIsExpression)) {
 			buffer.insert(0, _symbolMap.getSymbol(prefix));
-		} else if (converter == AbstractUnitConverter.IDENTITY) {
+		} else if (converter == PhysicsUnitConverter.IDENTITY) {
 			// do nothing
 		} else if (converter instanceof MultiplyConverter) {
 			if (unitIsExpression) {

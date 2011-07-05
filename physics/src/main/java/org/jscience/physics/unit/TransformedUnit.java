@@ -10,7 +10,6 @@ package org.jscience.physics.unit;
 
 import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
-import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -38,7 +37,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
 public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
   
 	/**
-     * Holds the parent unit (not a transformed unit).
+     * Holds the parent unit (always a system unit).
      */
     private final PhysicsUnit<Q> parentUnit;
 
@@ -48,13 +47,17 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q>
     private final UnitConverter toParentUnit;
 
     /**
-     * Creates a transformed unit from the specified (non transformed)
-     * parent unit.
+     * Creates a transformed unit from the specified system unit.
      *
      * @param parentUnit the system unit from which this unit is derived.
      * @param toParentUnit the converter to the parent units.
+     * @throws IllegalArgumentException if the specified parent unit is not an
+     *         {@link PhysicsUnit#isSystemUnit() system unit}
      */
     public TransformedUnit(PhysicsUnit<Q> parentUnit, UnitConverter toParentUnit) {
+        if (!parentUnit.isSystemUnit())
+            throw new IllegalArgumentException("The parent unit: " +  parentUnit
+                    + " is not a system unit");
         this.parentUnit = parentUnit;
         this.toParentUnit = toParentUnit;
     }

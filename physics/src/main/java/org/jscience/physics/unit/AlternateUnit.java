@@ -33,24 +33,26 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     private final String symbol;
 
     /**
-     * Creates an alternate unit for the specified unit identified by the
+     * Creates an alternate unit for the specified system unit identified by the
      * specified name and symbol.
      *
      * @param parent the system unit from which this alternate unit is derived.
      * @param symbol the symbol for this alternate unit.
-     * @throws IllegalArgumentException if the specified unit is not a
+     * @throws IllegalArgumentException if the specified parent unit is not an
      *         {@link PhysicsUnit#isSystemUnit() system unit}
      */
     public AlternateUnit(PhysicsUnit<?> parentUnit, String symbol) {
         if (!parentUnit.isSystemUnit())
             throw new IllegalArgumentException("The parent unit: " +  parentUnit
                     + " is not a system unit");
-        this.parentUnit = parentUnit;
+        this.parentUnit = (parentUnit instanceof AlternateUnit) ?
+            ((AlternateUnit)parentUnit).getParentUnit() : parentUnit;
         this.symbol = symbol;
     }
 
     /**
-     * Returns the parent unit of this alternate unit (always a system unit).
+     * Returns the parent unit of this alternate unit, always a system unit and
+     * never an alternate unit.
      *
      * @return the parent unit.
      */
@@ -92,8 +94,6 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
-        Two alternate unit are equale if same symbol and same system unit.
-
         if (!(obj instanceof AlternateUnit))
             return false;
         AlternateUnit that = (AlternateUnit) obj;

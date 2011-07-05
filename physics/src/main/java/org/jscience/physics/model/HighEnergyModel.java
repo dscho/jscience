@@ -16,29 +16,11 @@ package org.jscience.physics.model;
  */
 public class HighEnergyModel extends RelativisticModel {
 
-    /**
-     * Holds the single instance of this class.
-     */
-    private final static HighEnergyModel INSTANCE = new HighEnergyModel();
-
-    /**
-     * Returns the high energy model instance.
-     */
-    public static HighEnergyModel getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Selects the high energy model as the currentPhysicalModel model.
-     */
-    public static void select() {
-        PhysicsModel.setCurrent(INSTANCE);
-    }
 
     /**
      * Default constructor.
      */
-    protected HighEnergyModel() {
+    public HighEnergyModel() {
     }
 
 // TODO: Allow more conversion.

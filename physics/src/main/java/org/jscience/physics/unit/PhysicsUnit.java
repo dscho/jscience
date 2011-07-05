@@ -9,7 +9,7 @@
 package org.jscience.physics.unit;
 
 import org.jscience.physics.unit.system.SI;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import java.io.IOException;
 import org.unitsofmeasurement.unit.IncommensurableException;
 import java.math.BigInteger;
@@ -25,7 +25,6 @@ import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.jscience.physics.unit.format.UCUMFormat;
-import org.unitsofmeasurement.unit.Dimension;
 import org.unitsofmeasurement.unit.UnconvertibleException;
 import org.unitsofmeasurement.unit.Unit;
 import org.unitsofmeasurement.unit.UnitConverter;
@@ -102,21 +101,16 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     /**
-     * Returns the unscaled {@link org.jscience.physics.unit.system.SI SI} unit
-     * from which this unit is derived.
-     * Unscaled SI units are either {@link BaseUnit}, {@link AlternateUnit} or
-     * {@link ProductUnit}.
-     * SI units are unique by quantity type, they can be be used to identify
-     * the quantity given the unit. For example:[code]
-     *    static boolean isAngularVelocity(Unit<?> unit) {
-     *        return unit.toSI().equals(RADIAN.divide(SECOND));
-     *    }
-     *    assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true.
-     * [/code]
+     * Indicates if this unit is a system unit (unscaled SI unit).
+     * System units are either {@link BaseUnit},
+     * {@link AlternateUnit} or {@link ProductUnit} of system units.
      *
-     * @return the unscaled SI unit from which this unit is derived.
-      */
-   public abstract PhysicsUnit<Q> toSI();
+     * @return the unscaled metric unit from which this unit is derived.
+     */
+    public boolean isSystemUnit() {
+        PhysicsUnit<Q> systemUnit = this.getSystemUnit();
+        return (this == systemUnit) || this.equals(systemUnit);
+    }
 
     /**
      * Returns the converter from this unit to its 
@@ -125,7 +119,7 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
      * @return <code>getConverterTo(this.toSI())</code>
      * @see #toSI
      */
-   public abstract UnitConverter getConverterToSI();
+   public abstract UnitConverter getConverterToSystemUnit();
 
     /**
      * Annotates the specified unit. Annotation does not change the unit
@@ -137,6 +131,8 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
      *     PhysicsUnit<Dimensionless> RED_BLOOD_CELLS = SI.ONE.annotate("RBC"); // "{RBC}"
      * [/code]
      *
+     * Note: Annotation of system units are not considered themselves as system units.
+     *
      * @param annotation the unit annotation.
      * @return the annotated unit.
      */
@@ -144,36 +140,43 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
         return new AnnotatedUnit<Q>(this, annotation);
     }
 
-   /* PhysicsDimension peuvent etre créer a partir de rien.
-         Chaque Unit a une dimension e.g. METRE -> LENGTH
-         Les dimensions sont distinct mais pas forcement incompatible.
-         Par example:  LENGTH, TIME -> Conversion possible dans le cas
-                                       du modele relativistic.
-         asType: Utilise le model physic pour associer une dimension a un type donné.
-                 Par example: METRE.asType(Duration.class) // Erreur (pas les meme dimensions)
-                              METRE.getConverterTo(SECOND) // Possible.
-
-   */
-
    /////////////////////////////////////////////////////////
     // Implements org.unitsofmeasurement.Unit<Q> interface //
     /////////////////////////////////////////////////////////
 
     /**
+     * Returns the system unit (unscaled SI unit) from which this unit is derived.
+     * They can be be used to identify a quantity given the unit. For example:[code]
+     *    static boolean isAngularVelocity(PhysicsUnit<?> unit) {
+     *        return unit.getSystemUnit().equals(RADIAN.divide(SECOND));
+     *    }
+     *    assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true.
+     * [/code]
+     *
+     * @return the unscaled metric unit from which this unit is derived.
+     */
+    @Override
+    public abstract PhysicsUnit<Q> getSystemUnit();
+
+    /**
      * Indicates if this unit is compatible with the unit specified.
-     * To be compatible the specified unit must be a physics unit having
-     * either the same dimension or a dimension for which the current physics
-     * model allows conversion to this unit's dimension.
+     * To be compatible both units must be physics units having
+     * the same fundamental dimension.
      *
      * @param that the other unit.
+     * @return <code>true</code> if this unit and that unit have equals
+     *         fundamental dimension according to the current physics model;
+     *         <code>false</code> otherwise.
      */
     @Override
     public final boolean isCompatible(Unit<?> that) {
         if ((this == that) || this.equals(that)) return true;
         if (!(that instanceof PhysicsUnit)) return false;
-        if (this.getDimension().equals(that.getDimension())) return true;
-        return PhysicsModel.getCurrent().getConverter(this.getDimension(), that.getDimension())
-            != null;
+        PhysicsDimension thisDimension = this.getDimension();
+        PhysicsDimension thatDimension = ((PhysicsUnit)that).getDimension();
+        if (thisDimension.equals(thatDimension)) return true;
+        PhysicsModel model = PhysicsModel.getCurrent(); // Use dimensional analysis model.
+        return model.getFundamentalDimension(thisDimension).equals(model.getFundamentalDimension(thatDimension));
     }
 
     /**
@@ -201,11 +204,6 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     }
 
     @Override
-    public final PhysicsUnit<Q> getSystemUnit() {
-        return toSI();
-    }
-
-    @Override
     public abstract Map<? extends PhysicsUnit, Integer> getProductUnits();
 
     @Override
@@ -214,84 +212,42 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
 
     @Override
     public final UnitConverter getConverterTo(Unit<Q> that) throws UnconvertibleException {
-        if ((this == that) || this.equals(that)) return AbstractUnitConverter.IDENTITY; // Shortcut.
-        if (isCompatible(this))
+        if ((this == that) || this.equals(that)) return PhysicsUnitConverter.IDENTITY; // Shortcut.
         Unit<Q> thisSystemUnit = this.getSystemUnit();
         Unit<Q> thatSystemUnit = that.getSystemUnit();
-        if (!thisSystemUnit.equals(thatSystemUnit)) return getConverterToAny(that); // They don't have the same system of unit!
+        if (!thisSystemUnit.equals(thatSystemUnit)) return getConverterToAny(that); 
         UnitConverter thisToSI= this.getConverterToSystemUnit();
         UnitConverter thatToSI= that.getConverterTo(thatSystemUnit);
         return thatToSI.inverse().concatenate(thisToSI);    
     }
-    private
 
     @Override
     public final UnitConverter getConverterToAny(Unit<?> that) throws IncommensurableException,
             UnconvertibleException {
         if (!isCompatible(that))
             throw new IncommensurableException(this + " is not compatible with " + that);
+        PhysicsUnit thatPhysics = (PhysicsUnit)that; // Since both units are compatible they must be both physics units.
         PhysicsModel model = PhysicsModel.getCurrent();
-        Unit thisSystemUnit = this.getSystemUnit();
-        UnitConverter thisToDimension = getDimensionalTransform(thisSystemUnit, model).concatenate(this.getConverterToSystemUnit());
-        Unit thatSystemUnit = that.getSystemUnit();
-        UnitConverter thatToDimension = getDimensionalTransform(thatSystemUnit, model).concatenate(that.getConverterTo(thatSystemUnit));
+        PhysicsUnit thisSystemUnit = this.getSystemUnit();
+        UnitConverter thisToDimension = model.getDimensionalTransform(thisSystemUnit.getDimension()).concatenate(this.getConverterToSystemUnit());
+        PhysicsUnit thatSystemUnit = thatPhysics.getSystemUnit();
+        UnitConverter thatToDimension = model.getDimensionalTransform(thatSystemUnit.getDimension()).concatenate(thatPhysics.getConverterToSystemUnit());
         return thatToDimension.inverse().concatenate(thisToDimension);
     }
 
-    // Returns the dimensional transform of the specified system unit.
-    // System units are always unscaled. There are cases known:
-    // BaseUnit, AlternateUnit or ProductUnit (rational product of system units).
-    // For other types of system unit, the dimensional transform is assumed to be the identity.
-    private static UnitConverter getDimensionalTransform(Unit systemUnit, PhysicsModel model) throws IncommensurableException,
-            UnconvertibleException {
-        if (systemUnit instanceof BaseUnit) {
-            return model.getDimensionalTransform((BaseUnit)systemUnit);
-        } else if (systemUnit instanceof AlternateUnit) {
-            return getDimensionalTransform(((AlternateUnit)systemUnit).getParentUnit(), model);
-        } else if (systemUnit instanceof ProductUnit) {
-            ProductUnit productUnit = (ProductUnit) systemUnit;
-            UnitConverter dimensionalTransform = AbstractUnitConverter.IDENTITY;
-            for (int i = 0; i < productUnit.getUnitCount(); i++) {
-                Unit unit = productUnit.getUnit(i); // A system unit.
-                int pow = productUnit.getUnitPow(i);
-                int root = productUnit.getUnitRoot(i);
-                if (root !=1)
-                    throw new UnconvertibleException("Fractional exponents not supported");
-                UnitConverter cvtr = getDimensionalTransform(unit, model);
-                if (!(cvtr.isLinear()))
-                    throw new UnconvertibleException(cvtr.getClass() + " is non-linear, cannot convert product unit");
-                if (pow < 0) {
-                    pow = -pow;
-                    cvtr = cvtr.inverse();
-                }
-                for (int j=0; j < pow; j++) {
-                    dimensionalTransform = dimensionalTransform.concatenate(cvtr);
-                }
-            }
-            return dimensionalTransform;
-        } else { // System unit of unknown type. Assume the dimensional transform is the identity.
-            return AbstractUnitConverter.IDENTITY;
-        }
-    }
-    
 
     @Override
     public final PhysicsUnit<?> alternate(String symbol) {
-        if (!isSystemUnit()) throw new UnsupportedOperationException(this + " is not a system unit");
         return new AlternateUnit(this, symbol);
     }
 
     @Override
     public final PhysicsUnit<Q> transform(UnitConverter operation) {
-        PhysicsUnit<Q> unit = this;
-        UnitConverter cvtr = operation;
-        if (this instanceof TransformedUnit<?>) {
-            unit = this.getSystemUnit();
-            cvtr = this.getConverterToSystemUnit().concatenate(operation);
-        }
-        if (cvtr.equals(AbstractUnitConverter.IDENTITY))
-            return unit;
-        return new TransformedUnit<Q>(unit, cvtr);
+        PhysicsUnit<Q> systemUnit = this.getSystemUnit();
+        UnitConverter cvtr = this.getConverterToSystemUnit().concatenate(operation);
+        if (cvtr.equals(PhysicsUnitConverter.IDENTITY))
+            return systemUnit;
+        return new TransformedUnit<Q>(systemUnit, cvtr);
     }
 
     @Override

@@ -21,7 +21,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class AddConverter extends AbstractUnitConverter {
+public final class AddConverter extends PhysicsUnitConverter {
 
     /**
      * Holds the offset.

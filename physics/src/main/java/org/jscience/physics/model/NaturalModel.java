@@ -18,29 +18,11 @@ package org.jscience.physics.model;
  */
 public class NaturalModel extends QuantumModel {
 
-	/**
-	 * Holds the single instance of this class.
-	 */
-	private final static NaturalModel INSTANCE = new NaturalModel();
-    
-    /**
-     * Returns the natural model instance.
-     */
-    public static NaturalModel getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Selects the natural model as the currentPhysicalModel model.
-     */
-    public static void select() {
-        PhysicsModel.setCurrent(INSTANCE);
-    }
 
     /**
      * Default constructor.
      */
-    protected NaturalModel() {
+    public NaturalModel() {
     }
 
 // TODO: Allow more conversion.

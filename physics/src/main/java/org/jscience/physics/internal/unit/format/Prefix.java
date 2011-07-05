@@ -9,7 +9,7 @@
 package org.jscience.physics.internal.unit.format;
 
 import java.math.BigInteger;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 
 /**
@@ -40,14 +40,14 @@ public enum Prefix {
     ZEPTO(new RationalConverter( BigInteger.ONE, BigInteger.TEN.pow(21))),
     YOCTO(new RationalConverter( BigInteger.ONE, BigInteger.TEN.pow(24)));
 
-    private final AbstractUnitConverter _converter;
+    private final PhysicsUnitConverter _converter;
 
     /**
      * Creates a new prefix.
      *
      * @param converter the associated unit converter.
      */
-    Prefix (AbstractUnitConverter converter) {
+    Prefix (PhysicsUnitConverter converter) {
         _converter = converter;
     }
 
@@ -56,7 +56,7 @@ public enum Prefix {
      *
      * @return the unit converter.
      */
-    public AbstractUnitConverter getConverter() {
+    public PhysicsUnitConverter getConverter() {
         return _converter;
     }
 }

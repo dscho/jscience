@@ -10,7 +10,6 @@ package org.jscience.physics.unit;
 
 import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
-import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -51,7 +50,8 @@ public final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     /**
-     * Returns the actual unit of this annotated unit.
+     * Returns the actual unit of this annotated unit (never an annotated unit
+     * itself).
      *
      * @return the actual unit.
      */

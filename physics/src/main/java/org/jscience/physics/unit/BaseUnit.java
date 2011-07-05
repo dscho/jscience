@@ -10,8 +10,7 @@ package org.jscience.physics.unit;
 
 import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
-import org.jscience.physics.model.PhysicsModel;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -64,7 +63,7 @@ public class BaseUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
 
     @Override
     public UnitConverter getConverterToSystemUnit() throws UnsupportedOperationException {
-        return AbstractUnitConverter.IDENTITY;
+        return PhysicsUnitConverter.IDENTITY;
     }
 
     @Override

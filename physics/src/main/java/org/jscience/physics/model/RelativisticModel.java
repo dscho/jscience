@@ -8,11 +8,8 @@
  */
 package org.jscience.physics.model;
 
-import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.RationalConverter;
-import org.jscience.physics.unit.BaseUnit;
-import org.unitsofmeasurement.unit.Dimension;
-import org.unitsofmeasurement.unit.UnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 
 /**
  * This class represents the relativistic model.
@@ -29,40 +26,21 @@ public class RelativisticModel extends StandardModel {
         = new RationalConverter(1, 299792458);
     
     /**
-     * Holds the single instance of this class.
-     */
-    private final static RelativisticModel INSTANCE = new RelativisticModel();
-
-    /**
-     * Returns the relativistic model instance.
-     */
-    public static RelativisticModel getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Selects the relativistic model as the getCurrent model.
-     */
-    public static void select() {
-        PhysicsModel.setCurrent(INSTANCE);
-    }
-
-    /**
      * Default constructor.
      */
-    protected RelativisticModel() {
+    public RelativisticModel() {
     }
 
     @Override
-    public PhysicsDimension getDimension(BaseUnit<?> unit) {
-        if (unit.equals(SI.METRE)) return PhysicsDimension.TIME;
-        return super.getDimension(unit);
+    public PhysicsDimension getFundamentalDimension(PhysicsDimension dimension) {
+        if (dimension.equals(PhysicsDimension.LENGTH)) return PhysicsDimension.TIME;
+        return super.getFundamentalDimension(dimension);
     }
 
     @Override
-    public UnitConverter getDimensionalTransform(BaseUnit<?> unit) {
-        if (unit.equals(SI.METRE)) return METRE_TO_TIME;
-        return super.getDimensionalTransform(unit);
+    public PhysicsUnitConverter getDimensionalTransform(PhysicsDimension dimension) {
+        if (dimension.equals(PhysicsDimension.LENGTH)) return METRE_TO_TIME;
+        return super.getDimensionalTransform(dimension);
     }
 
 }

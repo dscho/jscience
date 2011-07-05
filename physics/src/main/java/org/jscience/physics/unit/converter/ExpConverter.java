@@ -20,7 +20,7 @@ import java.math.MathContext;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class ExpConverter extends AbstractUnitConverter {
+public final class ExpConverter extends PhysicsUnitConverter {
 
     /**
      * Holds the logarithmic base.
@@ -54,7 +54,7 @@ public final class ExpConverter extends AbstractUnitConverter {
     }
 
     @Override
-    public AbstractUnitConverter inverse() {
+    public PhysicsUnitConverter inverse() {
         return new LogConverter(base);
     }
 

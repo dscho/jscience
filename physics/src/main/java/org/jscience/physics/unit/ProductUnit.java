@@ -15,7 +15,7 @@ import java.util.Map;
 import javolution.util.FastMap;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.system.SI;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.Unit;
@@ -272,7 +272,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     public UnitConverter getConverterToSystemUnit() {
-        UnitConverter converter = AbstractUnitConverter.IDENTITY;
+        UnitConverter converter = PhysicsUnitConverter.IDENTITY;
         for (int i = 0; i < elements.length; i++) {
             Element e = elements[i];
             UnitConverter cvtr = e.unit.getConverterToSystemUnit();

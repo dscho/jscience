@@ -8,25 +8,33 @@
  */
 package org.jscience.physics.model;
 
+import java.util.Map;
 import javolution.context.LocalContext;
-import org.jscience.physics.unit.BaseUnit;
-import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.system.SI;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
-import org.unitsofmeasurement.quantity.Quantity;
-import org.unitsofmeasurement.unit.UnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 
 /**
- * <p> This class represents the model used to perform dimensional analysis.</p>
+ * <p> This class represents the model used for dimensional analysis.</p>
  *
- * <p> To select a model, one may use any of the physics model sub-classes.
+ * <p> The default model is {@link StandardModel Standard}. Applications may
+ *     use one of the predefined model or create their own.
  *     [code]
- *     LocalContext.enter(); 
+ *     PhysicsModel relativistic = new PhysicsModel() {
+ *         public Dimension getFundamentalDimension(PhysicsDimension dimension) {
+ *             if (dimension.equals(PhysicsDimension.LENGTH)) return PhysicsDimension.TIME; // Consider length derived from time.
+ *                 return super.getDimension(dimension); // Returns product of fundamental dimension.
+ *             }
+ *             public UnitConverter getDimensionalTransform(PhysicsDimension dimension) {
+ *                 if (dimension.equals(PhysicsDimension.LENGTH)) return new RationalConverter(1, 299792458); // Converter (1/C) from LENGTH SI unit (m) to TIME SI unit (s).
+ *                 return super.getDimensionalTransform(dimension);
+ *             }
+ *     };
+ *     LocalContext.enter();
  *     try {
- *         PhysicsModel.setCurrent(new RelativisticModel());
- *         SI.KILOGRAM.getConverterToAny(SI.JOULE); // Mass to Energy conversion allowed!
+ *         PhysicsModel.setCurrent(relativistic); // Current thread use the relativistic model.
+ *         SI.KILOGRAM.getConverterToAny(SI.JOULE); // Allowed.
+ *         ...
  *     } finally {
- *         LocalContext.exit(); // Revert to previous model.
+ *         LocalContext.exit();
  *     }
  *     [/code]</p>
  *     
@@ -70,34 +78,56 @@ public abstract class PhysicsModel {
     }
 
     /**
-     * Returns the dimensions is equivalent to the one specified but made up
-     * of independent dimensions. The default implementation returns
-     * the specified dimension.
+     * Returns the fundamental dimension for the one specified.
+     * If the specified dimension is a dimensional product, the dimensional
+     * product its fundamental dimensions is returned.
+     * Physical quantities are considered commensurate only if their
+     * fundamental dimensions are equals using the current physics model.
      *
-     * @param dimension the dimension for which a commensurate dimension is returned.
-     * @return <code>this</code>
+     * @param dimension the dimension for which the fundamental dimension is returned.
+     * @return <code>this</code> or a rational product of fundamental dimension.
      */
-    public PhysicsDimension getBaseDimension(PhysicsDimension dimension) {
-        return dimension;
+    public PhysicsDimension getFundamentalDimension(PhysicsDimension dimension) {
+        Map<? extends PhysicsDimension, Integer> dimensions = dimension.getProductDimensions();
+        if (dimensions == null) return dimension; // Fundamental dimension.
+        // Dimensional Product.
+        PhysicsDimension fundamentalProduct = PhysicsDimension.NONE;
+        for (Map.Entry<? extends PhysicsDimension, Integer> e : dimensions.entrySet()) {
+             fundamentalProduct = fundamentalProduct.multiply(this.getFundamentalDimension(e.getKey())).pow(e.getValue());
+        }
+        return fundamentalProduct;
     }
 
     /**
-     * Returns the converter from dimensional transform of the specified dimension to its
-     * commensurate dimension. For example, using a relativistic model
-     * the dimensional transform of length is <code>RationalConverter(1, 299792458)</code>
-     * (convertion to TIME dimensional unit (1/C).
- *
+     * Returns the dimensional transform of the specified dimension.
+     * If the specified dimension is a fundamental dimension or
+     * a product of fundamental dimensions the identity converter is
+     * returned; otherwise the converter from the system unit (SI) of
+     * the specified dimension to the system unit (SI) of its fundamental
+     * dimension is returned.
      *
-     * to its commensurate
-     * dimension.base unit
-     * (converter to its dimensional unit). The default implementation
-     * returns the identity converter.
-     *
-     * @param unit the base unit for which the dimensional transform is returned.
-     * @return the unit converter to the dimensional unit of the specified unit.
+     * @param dimension the dimension for which the dimensional transform is returned.
+     * @return the dimensional transform (identity for fundamental dimensions).
      */
-    public UnitConverter getConverterToBase(PhysicsDimension dimension) {
-        return AbstractUnitConverter.IDENTITY;
+    public PhysicsUnitConverter getDimensionalTransform(PhysicsDimension dimension) {
+        Map<? extends PhysicsDimension, Integer> dimensions = dimension.getProductDimensions();
+        if (dimensions == null) return PhysicsUnitConverter.IDENTITY; // Fundamental dimension.
+        // Dimensional Product.
+        PhysicsUnitConverter toFundamental = PhysicsUnitConverter.IDENTITY;
+        for (Map.Entry<? extends PhysicsDimension, Integer> e : dimensions.entrySet()) {
+            PhysicsUnitConverter cvtr = this.getDimensionalTransform(e.getKey());
+            if (!(cvtr.isLinear()))
+                throw new UnsupportedOperationException("Non-linear dimensional transform");
+            int pow = e.getValue();
+            if (pow < 0) { // Negative power.
+                pow = -pow;
+                cvtr = cvtr.inverse();
+            }
+            for (int j = 0; j < pow; j++) {
+                toFundamental = toFundamental.concatenate(cvtr);
+            }
+        }
+        return toFundamental;
     }
 
 }

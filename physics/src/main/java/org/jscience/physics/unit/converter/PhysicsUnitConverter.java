@@ -21,17 +21,30 @@ import org.unitsofmeasurement.unit.UnitConverter;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public abstract class AbstractUnitConverter implements UnitConverter, XMLSerializable {
+public abstract class PhysicsUnitConverter implements UnitConverter, XMLSerializable {
 
     /**
      * Holds identity converter.
      */
-    public static final AbstractUnitConverter IDENTITY = new Identity();
+    public static final PhysicsUnitConverter IDENTITY = new Identity();
 
     /**
      * Default constructor.
      */
-    protected AbstractUnitConverter() {
+    protected PhysicsUnitConverter() {
+    }
+
+    /**
+     * Concatenates this physics converter with another physics converter.
+     * The resulting converter is equivalent to first converting by the
+     * specified converter (right converter), and then converting by
+     * this converter (left converter).
+     *
+     * @param that the other converter.
+     * @return the concatenation of this converter with that converter.
+     */
+    public PhysicsUnitConverter concatenate(PhysicsUnitConverter that) {
+        return (that == IDENTITY) ? this : new Compound(this, that);
     }
 
     @Override
@@ -46,7 +59,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, XMLSeriali
     public abstract int hashCode();
 
     @Override
-    public abstract AbstractUnitConverter inverse();
+    public abstract PhysicsUnitConverter inverse();
 
     @Override
     public UnitConverter concatenate(UnitConverter converter) {
@@ -55,7 +68,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, XMLSeriali
 
     @Override
     public List<? extends UnitConverter> getCompoundConverters() {
-        FastTable<AbstractUnitConverter> converters = FastTable.newInstance();
+        FastTable<PhysicsUnitConverter> converters = FastTable.newInstance();
         converters.add(this);
         return converters;
     }
@@ -68,7 +81,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, XMLSeriali
     /**
      * This class represents the identity converter (singleton).
      */
-    private static final class Identity extends AbstractUnitConverter {
+    private static final class Identity extends PhysicsUnitConverter {
 
         @Override
         public boolean isIdentity() {
@@ -119,7 +132,7 @@ public abstract class AbstractUnitConverter implements UnitConverter, XMLSeriali
      * This class represents converters made up of two or more separate
      * converters (in matrix notation <code>[compound] = [left] x [right]</code>).
      */
-    private static final class Compound extends AbstractUnitConverter {
+    private static final class Compound extends PhysicsUnitConverter {
 
         /**
          * Holds the first converter.

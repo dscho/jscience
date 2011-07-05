@@ -14,14 +14,14 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import javolution.util.FastMap;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.converter.AbstractUnitConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class provides a set of mappings between
  *     {@link PhysicsUnit physical units} and symbols (both ways),
  *     between {@link Prefix prefixes} and symbols
- *     (both ways), and from {@link AbstractUnitConverter
+ *     (both ways), and from {@link PhysicsUnitConverter
  *     physical unit converters} to {@link Prefix prefixes} (one way).
  *     No attempt is made to verify the uniqueness of the mappings.</p>
  *
