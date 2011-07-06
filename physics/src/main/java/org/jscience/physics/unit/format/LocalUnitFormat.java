@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import org.jscience.physics.internal.unit.format.ParseException;
 import org.jscience.physics.internal.unit.format.Prefix;
-import org.jscience.physics.internal.unit.format.SymbolMap;
 import org.jscience.physics.internal.unit.format.TokenMgrError;
 import org.jscience.physics.internal.unit.format.UnitParser;
+import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.AddConverter;
@@ -254,7 +254,9 @@ public class LocalUnitFormat implements UnitFormat {
      *   expression that was output
      */
     private int formatInternal(PhysicsUnit<?> unit, Appendable buffer) throws IOException {
-        unit = unit.getUnannotatedUnit();
+        if (unit instanceof AnnotatedUnit) {
+            unit = ((AnnotatedUnit)unit).getActualUnit();
+        }
         String symbol = symbolMap.getSymbol(unit);
         if (symbol != null) {
             buffer.append(symbol);

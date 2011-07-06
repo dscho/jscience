@@ -6,13 +6,14 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.internal.unit.format;
+package org.jscience.physics.unit.format;
 
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import javolution.util.FastMap;
+import org.jscience.physics.internal.unit.format.Prefix;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.unit.UnitConverter;

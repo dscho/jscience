@@ -16,6 +16,7 @@ import javolution.util.FastSet;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.TransformedUnit;
+import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Area;
 import org.unitsofmeasurement.quantity.Length;
@@ -29,9 +30,6 @@ import org.unitsofmeasurement.unit.SystemOfUnits;
 
 /**
  * <p> This class contains units from the United States customary system.</p>
- *
- * <p> The standard symbol/names used for US customary units are case sensitive
- *     <a href="http://aurora.regenstrief.org/~ucum/ucum.html">UCUM</a> names.</p>
  *
  * <p> The US customary system uses {@link #getUnit(java.lang.Class) units} different
  *     from {@link SI} for physical quantities. For example "[lb_i]", "[ft_i]"
@@ -206,6 +204,19 @@ public final class USCustomary implements SystemOfUnits {
     public static final PhysicsUnit<Length> MIL
             = addUnit(new TransformedUnit<Length>(INCH, new RationalConverter(1, 1000)));
 
+    /**
+     * A unit of are equals to <code>[pi]/4.[mil_i]2</code> (standard name
+     * <code>[cmil_i]</code>).
+     */
+    public static final PhysicsUnit<Area> CIRCULAR_MIL
+            = addUnit(new TransformedUnit<Area>(MIL.pow(2).asType(Area.class), new MultiplyConverter(StrictMath.PI / 4.0)));
+
+    /**
+     * A unit of are equals to <code>4.[in_i]</code> (standard name
+     * <code>[hd_i]</code>).
+     */
+    public static final PhysicsUnit<Length> HAND
+            = addUnit(new TransformedUnit<Length>(INCH, new RationalConverter(4, 1)));
 
     // ////////
     // Mass //

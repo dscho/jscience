@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import org.jscience.physics.internal.unit.format.ParseException;
 import org.jscience.physics.internal.unit.format.Prefix;
-import org.jscience.physics.internal.unit.format.SymbolMap;
 import org.jscience.physics.internal.unit.format.TokenMgrError;
 import org.jscience.physics.internal.unit.format.UCUMParser;
+import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.BaseUnit;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
@@ -144,9 +144,9 @@ public abstract class UCUMFormat implements UnitFormat {
         PhysicsUnit unit = (PhysicsUnit) unknownUnit;
 		CharSequence symbol;
 		CharSequence annotation = null;
-		if (unit.getAnnotation() != null) {
-             PhysicsUnit<?> annotatedUnit = unit;
-             unit = annotatedUnit.getUnannotatedUnit();
+		if (unit instanceof AnnotatedUnit) {
+             AnnotatedUnit annotatedUnit = (AnnotatedUnit)unit;
+             unit = annotatedUnit.getActualUnit();
              annotation = annotatedUnit.getAnnotation();
 		}
 		String mapSymbol = _symbolMap.getSymbol(unit);
