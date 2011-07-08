@@ -10,18 +10,17 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import javolution.lang.Immutable;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class represents a converter adding a constant offset
  *     to numeric values (<code>double</code> based).</p>
  *
- * <p> Instances of this class are immutable.</p>
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class AddConverter extends PhysicsUnitConverter {
+public final class AddConverter extends PhysicsUnitConverter implements Immutable {
 
     /**
      * Holds the offset.

@@ -11,6 +11,7 @@ package org.jscience.physics.unit.converter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import javolution.lang.Immutable;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
@@ -18,12 +19,10 @@ import org.unitsofmeasurement.unit.UnitConverter;
  *     exact scaling factor (represented as the quotient of two
  *     <code>BigInteger</code> numbers).</p>
  *
- * <p> Instances of this class are immutable.</p>
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class RationalConverter extends PhysicsUnitConverter {
+public final class RationalConverter extends PhysicsUnitConverter implements Immutable {
 
     /**
      * Holds the converter dividend.

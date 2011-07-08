@@ -10,6 +10,7 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import javolution.lang.Immutable;
 
 /**
  * <p> This class represents a logarithmic converter of limited precision.
@@ -18,12 +19,10 @@ import java.math.MathContext;
  *     Unit<Dimensionless> BEL = Unit.ONE.transform(new LogConverter(10).inverse());
  *     [/code]</p>
  *
- * <p> Instances of this class are immutable.</p>
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class LogConverter extends PhysicsUnitConverter {
+public final class LogConverter extends PhysicsUnitConverter implements Immutable {
 
     /**
      * Holds the logarithmic base.
@@ -62,7 +61,11 @@ public final class LogConverter extends PhysicsUnitConverter {
 
     @Override
     public final String toString() {
-        return "LogConverter("+ base + ")";
+        if (base == Math.E) {
+            return "ln";
+        } else {
+            return "Log(" + base + ")";
+        }
     }
 
     @Override

@@ -19,8 +19,9 @@ import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.ProductUnit;
 import org.jscience.physics.unit.TransformedUnit;
 import org.jscience.physics.unit.converter.AddConverter;
-import org.jscience.physics.unit.converter.ExpConverter;
+import org.jscience.physics.unit.converter.LogConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
+import org.jscience.physics.unit.converter.PiMultiplierConverter;
 import org.unitsofmeasurement.quantity.Acceleration;
 import org.unitsofmeasurement.quantity.AmountOfSubstance;
 import org.unitsofmeasurement.quantity.Angle;
@@ -62,6 +63,7 @@ import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Action;
 import org.unitsofmeasurement.quantity.DynamicViscosity;
 import org.unitsofmeasurement.quantity.ElectricPermittivity;
+import org.unitsofmeasurement.quantity.InformationRate;
 import org.unitsofmeasurement.quantity.IonizingRadiation;
 import org.unitsofmeasurement.quantity.KinematicViscosity;
 import org.unitsofmeasurement.quantity.MagneticFieldStrength;
@@ -78,7 +80,7 @@ import org.unitsofmeasurement.unit.SystemOfUnits;
  * @see <a href="http://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia: International System of Units</a>
  * @see <a href="http://physics.nist.gov/cuu/Units/outside.html>Units outside the SI that are accepted for use with the SI</a>
  * @see <a href="http://www.bipm.org/utils/common/pdf/si_brochure_8.pdf>SI 2006 - Official Specification</a>
- * @see SIPrefix
+ * @see SIPrefixOld
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
@@ -209,7 +211,7 @@ public final class SI implements SystemOfUnits {
      * The base unit for mass quantity is {@link #KILOGRAM}.
      */
     public static final TransformedUnit<Mass> GRAM
-            = new TransformedUnit(KILOGRAM, SIPrefix.E3);
+            = new TransformedUnit(KILOGRAM, SIPrefix.KILO.getConverter());
 
     /**
      * The SI unit for plane angle quantities (standard name <code>rad</code>).
@@ -486,7 +488,7 @@ public final class SI implements SystemOfUnits {
     /**
      * The SI unit for wave number quantities (standard name <code>1/m</code>).
      */
-    public static final ProductUnit<WaveNumber> RECIPROCAL_METRES
+    public static final ProductUnit<WaveNumber> RECIPROCAL_METRE
             = addUnit(new ProductUnit<WaveNumber>(
             METRE.pow(-1)), WaveNumber.class);
 
@@ -517,6 +519,12 @@ public final class SI implements SystemOfUnits {
     public static final ProductUnit<IonizingRadiation> COULOMBS_PER_KILOGRAM
             = addUnit(new ProductUnit<IonizingRadiation>(
             COULOMB.divide(KILOGRAM)), IonizingRadiation.class);
+
+    /**
+     * The SI unit for binary information rate (standard name <code>bit/s</code>).
+     */
+    public static final ProductUnit<InformationRate> BITS_PER_SECOND
+            = addUnit(new ProductUnit<InformationRate>(BIT.divide(SECOND)), InformationRate.class);
 
     /////////////////////////////////////////////////////////////////
     // Units outside the SI that are accepted for use with the SI. //
@@ -550,19 +558,19 @@ public final class SI implements SystemOfUnits {
      * An angle unit accepted for use with SI units (standard name <code>deg/code>).
      */
     public static final TransformedUnit<Angle> DEGREE_ANGLE
-        = new TransformedUnit<Angle>(RADIAN, new MultiplyConverter(MathLib.PI / 180.0));
+        = new TransformedUnit<Angle>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(1, 180)));
 
     /**
      * An angle unit accepted for use with SI units (standard name <code>'/code>).
      */
     public static final TransformedUnit<Angle> MINUTE_ANGLE
-        = new TransformedUnit<Angle>(RADIAN, new MultiplyConverter(MathLib.PI / (180 * 60)));
+        = new TransformedUnit<Angle>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(1, 180 * 60)));
 
     /**
      * An angle unit accepted for use with SI units (standard name <code>''</code>).
      */
     public static final TransformedUnit<Angle> SECOND_ANGLE
-        = new TransformedUnit<Angle>(RADIAN, new MultiplyConverter(MathLib.PI / (180 * 60 * 60)));
+        = new TransformedUnit<Angle>(RADIAN,  new PiMultiplierConverter().concatenate(new RationalConverter(1, 180 * 60 * 60)));
 
     /**
      * A volume unit accepted for use with SI units (standard name <code>l</code>).
@@ -583,14 +591,14 @@ public final class SI implements SystemOfUnits {
      * (CGPM, Conférence Générale des Poids et Mesures) and is thus not an SI unit.
      */
     public static final TransformedUnit<Dimensionless> NEPER
-        = new TransformedUnit<Dimensionless>(ONE, new ExpConverter(MathLib.E));
+        = new TransformedUnit<Dimensionless>(ONE, new LogConverter(MathLib.E).inverse());
 
     /**
      * A dimensionless unit accepted for use with SI units (standard name <code>B</code>).
      * The bel is most commonly used with the SI prefix deci: 1 dB = 0.1 B
      */
     public static final TransformedUnit<Dimensionless> BEL
-        = new TransformedUnit<Dimensionless>(ONE, new ExpConverter(10));
+        = new TransformedUnit<Dimensionless>(ONE, new LogConverter(10).inverse());
 
     /**
      * An energy unit accepted for use with SI units (standard name <code>eV</code>).
@@ -627,7 +635,7 @@ public final class SI implements SystemOfUnits {
      *  An angle unit accepted for use with SI units (standard name <code>rev</code>).
      */
     public static final TransformedUnit<Angle> REVOLUTION
-            = new TransformedUnit<Angle>(RADIAN, new MultiplyConverter(2.0 * MathLib.PI));
+            = new TransformedUnit<Angle>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(2, 1)));
 
     /**
      *  An angle unit accepted for use with SI units (standard name <code>ha</code>).

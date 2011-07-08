@@ -16,14 +16,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.jscience.physics.internal.unit.format.ParseException;
-import org.jscience.physics.internal.unit.format.Prefix;
+import org.jscience.physics.unit.system.SIPrefix;
 import org.jscience.physics.internal.unit.format.TokenMgrError;
 import org.jscience.physics.internal.unit.format.UnitParser;
 import org.jscience.physics.unit.AnnotatedUnit;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.system.SI;
 import org.jscience.physics.unit.converter.AddConverter;
-import org.jscience.physics.unit.converter.ExpConverter;
 import org.jscience.physics.unit.converter.LogConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
@@ -305,7 +304,7 @@ public class LocalUnitFormat implements UnitFormat {
             if (unit.equals(SI.KILOGRAM)) {
                 // A special case because KILOGRAM is a BaseUnit instead of 
                 // a transformed unit, even though it has a prefix.
-                converter = Prefix.KILO.getConverter();
+                converter = SIPrefix.KILO.getConverter();
                 unitPrecedence = formatInternal(SI.GRAM, temp);
                 printSeparator = true;
             } else {
@@ -315,7 +314,7 @@ public class LocalUnitFormat implements UnitFormat {
                     // More special-case hackery to work around gram/kilogram 
                     // incosistency
                     parentUnit = SI.GRAM;
-                    converter = converter.concatenate(Prefix.KILO.getConverter());
+                    converter = converter.concatenate(SIPrefix.KILO.getConverter());
                 }
                 unitPrecedence = formatInternal(parentUnit, temp);
                 printSeparator = !parentUnit.equals(SI.ONE);
@@ -424,7 +423,7 @@ public class LocalUnitFormat implements UnitFormat {
             boolean continued,
             int unitPrecedence,
             StringBuffer buffer) {
-        Prefix prefix = symbolMap.getPrefix(converter);
+        SIPrefix prefix = symbolMap.getPrefix(converter);
         if ((prefix != null) && (unitPrecedence == NOOP_PRECEDENCE)) {
             buffer.insert(0, symbolMap.getSymbol(prefix));
             return NOOP_PRECEDENCE;
@@ -447,36 +446,6 @@ public class LocalUnitFormat implements UnitFormat {
                 buffer.append(offset);
             }
             return ADDITION_PRECEDENCE;
-        } else if (converter instanceof LogConverter) {
-            double base = ((LogConverter) converter).getBase();
-            StringBuffer expr = new StringBuffer();
-            if (base == StrictMath.E) {
-                expr.append("ln");
-            } else {
-                expr.append("log");
-                if (base != 10) {
-                    expr.append((int) base);
-                }
-            }
-            expr.append("(");
-            buffer.insert(0, expr);
-            buffer.append(")");
-            return EXPONENT_PRECEDENCE;
-        } else if (converter instanceof ExpConverter) {
-            if (unitPrecedence < EXPONENT_PRECEDENCE) {
-                buffer.insert(0, '(');
-                buffer.append(')');
-            }
-            StringBuffer expr = new StringBuffer();
-            double base = ((ExpConverter) converter).getBase();
-            if (base == StrictMath.E) {
-                expr.append('e');
-            } else {
-                expr.append((int) base);
-            }
-            expr.append('^');
-            buffer.insert(0, expr);
-            return EXPONENT_PRECEDENCE;
         } else if (converter instanceof MultiplyConverter) {
             if (unitPrecedence < PRODUCT_PRECEDENCE) {
                 buffer.insert(0, '(');
@@ -510,8 +479,10 @@ public class LocalUnitFormat implements UnitFormat {
                 buffer.append(rationalConverter.getDivisor());
             }
             return PRODUCT_PRECEDENCE;
-        } else {
-            throw new IllegalArgumentException("Unable to format the given UnitConverter: " + converter.getClass());
+        } else { // All other converter type (e.g. exponential) we use the string representation.
+            buffer.insert(0, converter.toString() + "(");
+            buffer.append(")");
+            return EXPONENT_PRECEDENCE;
         }
     }
 }

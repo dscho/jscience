@@ -8,16 +8,10 @@
  */
 package org.jscience.physics.unit.system;
 
-import static org.jscience.physics.unit.system.SI.*;
-
 import java.util.Set;
 import javolution.util.FastMap;
 import javolution.util.FastSet;
 import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.ProductUnit;
-import org.jscience.physics.unit.TransformedUnit;
-import org.jscience.physics.unit.converter.MultiplyConverter;
-import org.jscience.physics.unit.converter.RationalConverter;
 import org.unitsofmeasurement.quantity.Area;
 import org.unitsofmeasurement.quantity.Length;
 import org.unitsofmeasurement.quantity.Mass;
@@ -36,9 +30,9 @@ import org.unitsofmeasurement.unit.SystemOfUnits;
  *     and "[degF]"  instead of "kg", "m" and "K" for {@link Mass}, {@link Length}
  *     and {@link Temperature}.</p>
  *
- * <p> This version holds all the international customary units used by both
- *     the British and US systems as well as a limited set of US customary units.
- *     This set will be completed in future releases.</p>
+ * <p> This version holds the international customary units used by both
+ *     the British and US systems as well as a limited set of specific US
+ *     customary units when an international equivalent does not exist.</p>
  *
  * @see <a href="http://en.wikipedia.org/wiki/United_States_customary_units">Wikipedia: United State Customary Units</a>
  *
@@ -81,153 +75,110 @@ public final class USCustomary implements SystemOfUnits {
     /**
      * US name for {@link SI#METRE}.
      */
-    public static final PhysicsUnit<Length> METER = METRE;
+    public static final PhysicsUnit<Length> METER = SI.METRE;
 
     /**
      * US name for {@link SI#LITRE}.
      */
-    public static final PhysicsUnit<Volume> LITER = LITRE;
+    public static final PhysicsUnit<Volume> LITER = SI.LITRE;
 
     //
     // International customary units
     //
 
     /**
-     * A US customary unit for length quantities equals to <code>2.54 cm</code>
-     * (standard name <code>[in_i]</code>).
+     * The unit {@link UCUM#INCH_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> INCH
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254, 10000)), Length.class);
+    public static final PhysicsUnit<Length> INCH = addUnit(UCUM.INCH_INTERNATIONAL);
 
     /**
-     * A unit of length equals to <code>12 [in_i]</code> (standard name
-     * <code>[ft_i]</code>).
+     * The unit {@link UCUM#FOOT_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> FOOT
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12, 10000)));
+    public static final PhysicsUnit<Length> FOOT = addUnit(UCUM.FOOT_INTERNATIONAL);
 
     /**
-     * A unit of length equals to <code>3 [ft_i]</code> (standard name
-     * <code>[yd_i]</code>).
+     * The unit {@link UCUM#YARD_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> YARD
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 3, 10000)));
+    public static final PhysicsUnit<Length> YARD = addUnit(UCUM.YARD_INTERNATIONAL);
 
     /**
-     * A unit of length equals to <code>5280 [ft_i]</code> (standard name
-     * <code>[mi_i]</code>).
+     * The unit {@link UCUM#MILE_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> STATUTE_MILE
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 5280L, 10000)));
+    public static final PhysicsUnit<Length> STATUTE_MILE = addUnit(UCUM.MILE_INTERNATIONAL);
 
     /**
-     * A unit of depth of water equals to <code>6 [ft_i]</code> (standard name
-     * <code>[fth_i]</code>).
+     * The unit {@link UCUM#FATHOM_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> FATHOM
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(254 * 12 * 6, 10000)));
+    public static final PhysicsUnit<Length> FATHOM = addUnit(UCUM.FATHOM_INTERNATIONAL);
 
     /**
-     * A unit of length equals to <code>1852 m</code> (standard name
-     * <code>[nmi_i]</code>).
+     * The unit {@link UCUM#NAUTICAL_MILE_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> NAUTICAL_MILE
-           = addUnit(new TransformedUnit<Length>(METER, new RationalConverter(1852, 1)));
+    public static final PhysicsUnit<Length> NAUTICAL_MILE = addUnit(UCUM.NAUTICAL_MILE_INTERNATIONAL);
 
     /**
-     * A unit of velocity equals to <code>1 [nmi_i]/h</code> (standard name
-     * <code>[kn_i]</code>).
+     * The unit {@link UCUM#KNOT_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Velocity> KNOT
-            = addUnit(new ProductUnit<Velocity>(NAUTICAL_MILE.divide(HOUR)));
+    public static final PhysicsUnit<Velocity> KNOT = addUnit(UCUM.KNOT_INTERNATIONAL);
 
     /**
-     * A unit of area equals to <code>1 [in_i]2</code> (standard name
-     * <code>[sin_i]</code>).
+     * The unit {@link UCUM#SQUARE_INCH_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Area> SQUARE_INCH
-            = addUnit(new ProductUnit<Area>(INCH.pow(2)));
+    public static final PhysicsUnit<Area> SQUARE_INCH = addUnit(UCUM.SQUARE_INCH_INTERNATIONAL);
 
     /**
-     * A unit of area equals to <code>1 [ft_i]2</code> (standard name
-     * <code>[sft_i]</code>).
+     * The unit {@link UCUM#SQUARE_FOOT_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Area> SQUARE_FOOT
-            = addUnit(new ProductUnit<Area>(FOOT.pow(2)));
+    public static final PhysicsUnit<Area> SQUARE_FOOT = addUnit(UCUM.SQUARE_FOOT_INTERNATIONAL);
 
     /**
-     * A unit of area equals to <code>1 [yd_i]2</code> (standard name
-     * <code>[syd_i]</code>).
+     * The unit {@link UCUM#SQUARE_YARD_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Area> SQUARE_YARD
-            = addUnit(new ProductUnit<Area>(YARD.pow(2)));
+    public static final PhysicsUnit<Area> SQUARE_YARD = addUnit(UCUM.SQUARE_YARD_INTERNATIONAL);
 
     /**
-     * A unit of volume equals to <code>1 [in_i]3</code> (standard name
-     * <code>[cin_i]</code>).
+     * The unit {@link UCUM#CUBIC_INCH_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Volume> CUBIC_INCH
-            = addUnit(new ProductUnit<Volume>(INCH.pow(3)));
+    public static final PhysicsUnit<Volume> CUBIC_INCH = addUnit(UCUM.CUBIC_INCH_INTERNATIONAL);
 
     /**
-     * A unit of volume equals to <code>1 [ft_i]3</code> (standard name
-     * <code>[cft_i]</code>).
+     * The unit {@link UCUM#CUBIC_FOOT_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Volume> CUBIC_FOOT
-            = addUnit(new ProductUnit<Volume>(FOOT.pow(3)));
+    public static final PhysicsUnit<Volume> CUBIC_FOOT = addUnit(UCUM.CUBIC_FOOT_INTERNATIONAL);
 
     /**
-     * A unit of volume equals to <code>1 [yd_i]3</code> (standard name
-     * <code>[cyd_i]</code>).
+     * The unit {@link UCUM#CUBIC_YARD_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Volume> CUBIC_YARD
-            = addUnit(new ProductUnit<Volume>(YARD.pow(3)));
+    public static final PhysicsUnit<Volume> CUBIC_YARD = addUnit(UCUM.CUBIC_YARD_INTERNATIONAL);
 
     /**
-     * A unit of volume equals to <code>144 [in_i]3</code> (standard name
-     * <code>[bf_i]</code>).
+     * The unit {@link UCUM#BOARD_FOOT_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Volume> BOARD_FOOT
-            = addUnit(new TransformedUnit<Volume>(CUBIC_INCH, new RationalConverter(144, 1)));
+    public static final PhysicsUnit<Volume> BOARD_FOOT = addUnit(UCUM.BOARD_FOOT_INTERNATIONAL);
 
     /**
-     * A unit of volume equals to <code>128 [ft_i]3</code> (standard name
-     * <code>[cr_i]</code>).
+     * The unit {@link UCUM#MIL_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Volume> CORD
-            = addUnit(new TransformedUnit<Volume>(CUBIC_FOOT, new RationalConverter(128, 1)));
+    public static final PhysicsUnit<Length> MIL = addUnit(UCUM.MIL_INTERNATIONAL);
 
     /**
-     * A unit of length equals to <code>1 × 10-3 [in_i]</code> (standard name
-     * <code>[mil_i]</code>).
+     * The unit {@link UCUM#CIRCULAR_MIL_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Length> MIL
-            = addUnit(new TransformedUnit<Length>(INCH, new RationalConverter(1, 1000)));
+    public static final PhysicsUnit<Area> CIRCULAR_MIL = addUnit(UCUM.CIRCULAR_MIL_INTERNATIONAL);
 
     /**
-     * A unit of are equals to <code>[pi]/4.[mil_i]2</code> (standard name
-     * <code>[cmil_i]</code>).
+     * The unit {@link UCUM#HAND_INTERNATIONAL}
      */
-    public static final PhysicsUnit<Area> CIRCULAR_MIL
-            = addUnit(new TransformedUnit<Area>(MIL.pow(2).asType(Area.class), new MultiplyConverter(StrictMath.PI / 4.0)));
-
-    /**
-     * A unit of are equals to <code>4.[in_i]</code> (standard name
-     * <code>[hd_i]</code>).
-     */
-    public static final PhysicsUnit<Length> HAND
-            = addUnit(new TransformedUnit<Length>(INCH, new RationalConverter(4, 1)));
+    public static final PhysicsUnit<Length> HAND = addUnit(UCUM.HAND_INTERNATIONAL);
 
     // ////////
     // Mass //
     // ////////
 
     /**
-     * A unit of mass equal to <code>453.59237 grams</code> (avoirdupois pound,
-     * standard name <code>lb</code>).
+     * The unit {@link UCUM#POUND}
      */
-    public static final PhysicsUnit<Mass> POUND = addUnit(KILOGRAM.multiply(
-            45359237).divide(100000000), Mass.class);
+    public static final PhysicsUnit<Mass> POUND = addUnit(UCUM.POUND);
 
     /**
      * A unit of mass equal to <code>1 / 16 {@link #POUND}</code> (standard name <code>oz</code>).
@@ -249,15 +200,12 @@ public final class USCustomary implements SystemOfUnits {
      * A unit of temperature equal to <code>5/9 °K</code> (standard name
      * <code>°R</code>).
      */
-    public static final PhysicsUnit<Temperature> RANKINE = addUnit(KELVIN.multiply(5).divide(9));
+    public static final PhysicsUnit<Temperature> RANKINE = addUnit(SI.KELVIN.multiply(5).divide(9));
 
     /**
-     * A unit of temperature equal to degree Rankine minus
-     * <code>459.67 °R</code> (standard name <code>°F</code>).
-     *
-     * @see #RANKINE
+     * The unit {@link UCUM#FAHRENHEIT}
      */
-    public static final PhysicsUnit<Temperature> FAHRENHEIT = addUnit(RANKINE.add(459.67), Temperature.class);
+    public static final PhysicsUnit<Temperature> FAHRENHEIT = addUnit(UCUM.FAHRENHEIT);
 
     // ////////////
     // Velocity //
@@ -267,30 +215,28 @@ public final class USCustomary implements SystemOfUnits {
      * A unit of velocity expressing the number of {@link #FOOT feet} per
      * {@link SI#SECOND second}.
      */
-    public static final PhysicsUnit<Velocity> FEET_PER_SECOND = addUnit(
-            FOOT.divide(SECOND)).asType(Velocity.class);
+    public static final PhysicsUnit<Velocity> FEET_PER_SECOND = addUnit(FOOT.divide(SI.SECOND)).asType(Velocity.class);
 
     /**
      * A unit of velocity expressing the number of international {@link #NAUTICAL_MILE
-     * miles} per {@link #HOUR hour} (abbreviation <code>mph</code>).
+     * nautical miles} per {@link SI#HOUR hour} (abbreviation <code>mph</code>).
      */
     public static final PhysicsUnit<Velocity> MILES_PER_HOUR = addUnit(
-            NAUTICAL_MILE.divide(HOUR), Velocity.class).asType(Velocity.class);
+            NAUTICAL_MILE.divide(SI.HOUR).asType(Velocity.class), Velocity.class);
 
     // ////////
     // Area //
     // ////////
 
-      /**
-     * A unit of area equal to <code>43 560 square feet </code> 
-     * (standard name <code>[acr_us]</code>).
+    /**
+     * The unit {@link UCUM#ACRE_US_SURVEY}
      */
-    public static final PhysicsUnit<Area> ACRE = addUnit(SQUARE_FOOT.multiply(43560));
+    public static final PhysicsUnit<Area> ACRE = addUnit(UCUM.ACRE_US_SURVEY);
 
     /**
-     * A unit of area equal to <code>100 m²</code> (standard name <code>a</code>).
+     * The unit {@link UCUM#ARE}
      */
-    public static final PhysicsUnit<Area> ARE = addUnit(SQUARE_METRE.multiply(100));
+    public static final PhysicsUnit<Area> ARE = addUnit(UCUM.ARE);
 
 
     // //////////
@@ -298,55 +244,40 @@ public final class USCustomary implements SystemOfUnits {
     // //////////
     
     /**
-     * A unit of volume equal to one US dry gallon. (standard name
-     * <code>gallon_dry_us</code>).
+     * The unit {@link UCUM#GALLON_US}
      */
-    public static final PhysicsUnit<Volume> GALLON_DRY = addUnit(CUBIC_INCH.multiply(
-            2688025).divide(10000));
-    
-    /**
-     * A unit of volume equal to one US gallon, Liquid PhysicsUnit. The U.S. liquid
-     * gallon is based on the Queen Anne or Wine gallon occupying 231 cubic
-     * inches (standard name <code>gal</code>).
-     */
-    public static final PhysicsUnit<Volume> GALLON_LIQUID = addUnit(CUBIC_INCH.multiply(231));
+    public static final PhysicsUnit<Volume> GALLON = addUnit(UCUM.GALLON_US);
 
     /**
-     * A unit of volume equal to <code>1 / 128 {@link #GALLON_LIQUID}</code> (standard name
-     * <code>oz_fl</code>).
+     * A unit of volume equal to <code>1 / 128 {@link #GALLON}</code>.
      */
-    public static final PhysicsUnit<Volume> OUNCE_LIQUID = addUnit(GALLON_LIQUID.divide(128));
+    public static final PhysicsUnit<Volume> OUNCE_LIQUID = addUnit(GALLON.divide(128));
 
     /**
-     * A unit of volume <code>~ 1 drop or 0.95 grain of water </code> (standard name
-     * <code>min</code>).
+     * The unit {@link UCUM#MINIM_US}
      */
-    public static final PhysicsUnit<Volume> MINIM = addUnit(SIPrefix.MICRO(LITER).multiply(61.61152d));
+    public static final PhysicsUnit<Volume> MINIM = addUnit(UCUM.MINIM_US);
 
     /**
-     * A unit of volume equal to <code>60 {@link #MINIM}</code> (standard name
-     * <code>fl dr</code>).
+     * The unit {@link UCUM#FLUID_DRAM_US}
      */
-    public static final PhysicsUnit<Volume> FLUID_DRAM = addUnit(MINIM.multiply(60));
+    public static final PhysicsUnit<Volume> FLUID_DRAM = addUnit(UCUM.FLUID_DRAM_US);
 
     /**
-     * A unit of volume equal to <code>80 {@link #MINIM}</code> (standard name
-     * <code>tsp</code>).
+     * The unit {@link UCUM#TEASPOON_US}
      */
-    public static final PhysicsUnit<Volume> TEASPOON = addUnit(MINIM.multiply(80));
+    public static final PhysicsUnit<Volume> TEASPOON = addUnit(UCUM.TEASPOON_US);
 
     /**
-     * A unit of volume equal to <code>3 {@link #TEASPOON}</code> (standard name
-     * <code>Tbsp</code>).
+     * The unit {@link UCUM#TABLESPOON_US}
      */
-    public static final PhysicsUnit<Volume> TABLESPOON = addUnit(TEASPOON.multiply(3));
+    public static final PhysicsUnit<Volume> TABLESPOON = addUnit(UCUM.TABLESPOON_US);
 
     
     /**
-     * A unit of volume equal to <code>238.4810 {@link #LITER}</code> (standard name
-     * <code>bbl</code>).
+     * The unit {@link UCUM#BARREL_US}
      */
-    public static final PhysicsUnit<Volume> OIL_BARREL = addUnit(LITER.multiply(238.4810d));
+    public static final PhysicsUnit<Volume> BARREL = addUnit(UCUM.BARREL_US);
 
 
     /////////////////////

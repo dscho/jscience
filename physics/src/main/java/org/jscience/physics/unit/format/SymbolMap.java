@@ -13,7 +13,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import javolution.util.FastMap;
-import org.jscience.physics.internal.unit.format.Prefix;
+import org.jscience.physics.unit.system.SIPrefix;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.unit.UnitConverter;
@@ -21,9 +21,9 @@ import org.unitsofmeasurement.unit.UnitConverter;
 /**
  * <p> This class provides a set of mappings between
  *     {@link PhysicsUnit physical units} and symbols (both ways),
- *     between {@link Prefix prefixes} and symbols
+ *     between {@link SIPrefix prefixes} and symbols
  *     (both ways), and from {@link PhysicsUnitConverter
- *     physical unit converters} to {@link Prefix prefixes} (one way).
+ *     physical unit converters} to {@link SIPrefix prefixes} (one way).
  *     No attempt is made to verify the uniqueness of the mappings.</p>
  *
  * <p> Mappings are read from a <code>ResourceBundle</code>, the keys
@@ -48,7 +48,7 @@ public class SymbolMap {
     private FastMap<PhysicsUnit<?>, String> _unitToSymbol;
     private FastMap<String, Object> _symbolToPrefix;
     private FastMap<Object, String> _prefixToSymbol;
-    private FastMap<UnitConverter, Prefix> _converterToPrefix;
+    private FastMap<UnitConverter, SIPrefix> _converterToPrefix;
     
     /**
      * Creates an empty mapping.
@@ -58,7 +58,7 @@ public class SymbolMap {
         _unitToSymbol = new FastMap<PhysicsUnit<?>, String>();
         _symbolToPrefix = new FastMap<String, Object>();
         _prefixToSymbol = new FastMap<Object, String>();
-        _converterToPrefix = new FastMap<UnitConverter, Prefix>();
+        _converterToPrefix = new FastMap<UnitConverter, SIPrefix>();
     }
 
     /** 
@@ -92,8 +92,8 @@ public class SymbolMap {
                     } else {
                         label((PhysicsUnit<?>)value, symbol);
                     }
-                } else if (value instanceof Prefix) {
-                    label((Prefix)value, symbol);
+                } else if (value instanceof SIPrefix) {
+                    label((SIPrefix)value, symbol);
                 } else {
                     throw new ClassCastException("unable to cast "+value+" to Unit or Prefix");
                 }
@@ -136,11 +136,11 @@ public class SymbolMap {
     
     /**
      * Attaches a label to the specified prefix. For example:[code]
-     *    symbolMap.label(Prefix.GIGA, "G");
-     *    symbolMap.label(Prefix.MICRO, "µ");
+     *    symbolMap.label(SIPrefix.GIGA, "G");
+     *    symbolMap.label(SIPrefix.MICRO, "µ");
      * [/code]
      */
-    public void label(Prefix prefix, String symbol) {
+    public void label(SIPrefix prefix, String symbol) {
         _symbolToPrefix.put(symbol, prefix);
         _prefixToSymbol.put(prefix, symbol);
         _converterToPrefix.put(prefix.getConverter(), prefix);
@@ -172,11 +172,11 @@ public class SymbolMap {
      * @param symbol the unit symbol.
      * @return the corresponding prefix or <code>null</code> if none.
      */
-    public Prefix getPrefix (String symbol) {
+    public SIPrefix getPrefix (String symbol) {
         for (Iterator<String> i = _symbolToPrefix.keySet().iterator(); i.hasNext(); ) {
             String pfSymbol = i.next();
             if (symbol.startsWith(pfSymbol)) {
-                return (Prefix)_symbolToPrefix.get(pfSymbol);
+                return (SIPrefix)_symbolToPrefix.get(pfSymbol);
             }
         }
         return null;
@@ -188,8 +188,8 @@ public class SymbolMap {
      * @param converter the unit converter.
      * @return the corresponding prefix or <code>null</code> if none.
      */
-    public Prefix getPrefix (UnitConverter converter) {
-        return (Prefix)_converterToPrefix.get(converter);
+    public SIPrefix getPrefix (UnitConverter converter) {
+        return (SIPrefix)_converterToPrefix.get(converter);
     }
     
     /**
@@ -198,7 +198,7 @@ public class SymbolMap {
      * @param prefix the prefix.
      * @return the corresponding symbol or <code>null</code> if none.
      */
-    public String getSymbol (Prefix prefix) {
+    public String getSymbol (SIPrefix prefix) {
         return _prefixToSymbol.get(prefix);
     }
 }

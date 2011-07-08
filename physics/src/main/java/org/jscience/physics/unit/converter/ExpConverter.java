@@ -10,17 +10,19 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import javolution.lang.Immutable;
 
 /**
  * <p> This class represents a exponential converter of limited precision.
- *     Such converter  is typically used to create inverse of logarithmic unit.
+ *     Such converter is used to create inverse of logarithmic unit.
  *
- * <p> Instances of this class are immutable.</p>
+ * <p> This class is package private, instances are created
+ *     using the {@link LogConverter#inverse()} method.</p>
  *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class ExpConverter extends PhysicsUnitConverter {
+final class ExpConverter extends PhysicsUnitConverter implements Immutable {
 
     /**
      * Holds the logarithmic base.
@@ -60,7 +62,11 @@ public final class ExpConverter extends PhysicsUnitConverter {
 
     @Override
     public final String toString() {
-        return "ExpConverter("+ base + ")";
+        if (base == Math.E) {
+            return "e";
+        } else {
+            return "Exp(" + base + ")";
+        }
     }
 
     @Override

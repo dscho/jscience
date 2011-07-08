@@ -10,18 +10,17 @@ package org.jscience.physics.unit.converter;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import javolution.lang.Immutable;
 import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class represents a converter multiplying numeric values by a
  *     constant scaling factor (<code>double</code> based).</p>
  *
- * <p> Instances of this class are immutable.</p>
- *
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 12, 2010
  */
-public final class MultiplyConverter extends PhysicsUnitConverter {
+public final class MultiplyConverter extends PhysicsUnitConverter implements Immutable {
 
     /**
      * Holds the scale factor.

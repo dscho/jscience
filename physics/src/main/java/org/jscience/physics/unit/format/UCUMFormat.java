@@ -16,7 +16,7 @@ import java.text.*;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.jscience.physics.internal.unit.format.ParseException;
-import org.jscience.physics.internal.unit.format.Prefix;
+import org.jscience.physics.unit.system.SIPrefix;
 import org.jscience.physics.internal.unit.format.TokenMgrError;
 import org.jscience.physics.internal.unit.format.UCUMParser;
 import org.jscience.physics.unit.AnnotatedUnit;
@@ -58,10 +58,6 @@ import org.unitsofmeasurement.unit.UnitFormat;
  * @version 5.0, October 12, 2010
 */
 public abstract class UCUMFormat implements UnitFormat {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -7753687108842507677L;
 	
 	// A helper to declare bundle names for all instances
 	private static final String BUNDLE_BASE = UCUMFormat.class.getName();
@@ -191,7 +187,7 @@ public abstract class UCUMFormat implements UnitFormat {
 				// a transformed unit, for compatability with existing SI
 				// unit system.
 				format(SI.GRAM, temp);
-				converter = Prefix.KILO.getConverter();
+				converter = SIPrefix.KILO.getConverter();
 				printSeparator = true;
 			} else {
 				PhysicsUnit<?> parentUnit = unit.getSystemUnit();
@@ -200,7 +196,7 @@ public abstract class UCUMFormat implements UnitFormat {
 					// More special-case hackery to work around gram/kilogram
 					// incosistency
 					parentUnit = SI.GRAM;
-					converter = converter.concatenate(Prefix.KILO
+					converter = converter.concatenate(SIPrefix.KILO
 							.getConverter());
 				}
 				format(parentUnit, temp);
@@ -255,7 +251,7 @@ public abstract class UCUMFormat implements UnitFormat {
 			StringBuffer buffer) {
 		boolean unitIsExpression = ((buffer.indexOf(".") >= 0) || (buffer
 				.indexOf("/") >= 0));
-		Prefix prefix = _symbolMap.getPrefix(converter);
+		SIPrefix prefix = _symbolMap.getPrefix(converter);
 		if ((prefix != null) && (!unitIsExpression)) {
 			buffer.insert(0, _symbolMap.getSymbol(prefix));
 		} else if (converter == PhysicsUnitConverter.IDENTITY) {
@@ -293,11 +289,10 @@ public abstract class UCUMFormat implements UnitFormat {
 				buffer.append('/');
 				buffer.append(rationalConverter.getDivisor());
 			}
-		} else {
-			throw new IllegalArgumentException(
-					"Unable to format units in UCUM (unsupported UnitConverter "
-							+ converter + ")");
-		}
+        } else { // All other converter type (e.g. exponential) we use the string representation.
+            buffer.insert(0, converter.toString() + "(");
+            buffer.append(")");
+        }
 	}
 
 	// /////////////////

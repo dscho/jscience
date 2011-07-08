@@ -4,8 +4,10 @@
  */
 package org.jscience.physics.unit.system;
 
+import org.unitsofmeasurement.quantity.InformationRate;
+import org.unitsofmeasurement.quantity.Information;
+import org.jscience.physics.unit.converter.PiMultiplierConverter;
 import java.util.Set;
-import javolution.util.FastMap;
 import javolution.util.FastSet;
 import org.jscience.physics.unit.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Acceleration;
@@ -53,16 +55,15 @@ import org.unitsofmeasurement.quantity.Volume;
 import org.unitsofmeasurement.quantity.WaveNumber;
 import org.unitsofmeasurement.unit.Dimension;
 import org.unitsofmeasurement.unit.SystemOfUnits;
-import org.unitsofmeasurement.unit.Unit;
 
 import static org.jscience.physics.unit.system.SIPrefix.*;
 
 /**
- * <p> This class contains the units ({@link SI} and Non-SI as defined
+ * <p> This class contains {@link SI} and Non-SI units as defined
  *     in the <a href="http://unitsofmeasure.org/"> Uniform Code for Units
  *     of Measure</a>.</p>
  *
- * <p> Compatibility with {@link SI} and {@link USCustomary} units has been given
+ * <p> Compatibility with {@link SI} units has been given
  *     priority over strict adherence to the standard. We have attempted to note
  *     every place where the definitions in this class deviate from the
  *     UCUM standard, but such notes are likely to be incomplete.</p>
@@ -83,11 +84,6 @@ public final class UCUM implements SystemOfUnits {
      */
     private final FastSet<PhysicsUnit> units = new FastSet<PhysicsUnit>();
 
-    /**
-     * Holds the mapping quantity to unit.
-     */
-    private final FastMap<Class<? extends Quantity>, PhysicsUnit>
-            quantityToUnit = new FastMap<Class<? extends Quantity>, PhysicsUnit>();
 
     /**
      * Default constructor (prevents this class from being instantiated).
@@ -140,7 +136,7 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Dimensionless> HUNDREDS = addUnit(SI.ONE.multiply(100));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Dimensionless> PI = addUnit(SI.ONE.multiply(StrictMath.PI));
+    public static final PhysicsUnit<Dimensionless> PI = addUnit(SI.ONE.transform(new PiMultiplierConverter()));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Dimensionless> PERCENT = addUnit(SI.ONE.divide(100));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -232,9 +228,9 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Angle> SECOND_ANGLE = addUnit(SI.SECOND_ANGLE);
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> LITER = addUnit(USCustomary.LITER);
+    public static final PhysicsUnit<Volume> LITER = addUnit(SI.LITRE);
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> ARE = addUnit(USCustomary.ARE);
+    public static final PhysicsUnit<Area> ARE = addUnit(SI.SQUARE_METRE.multiply(100));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Time> MINUTE = addUnit(SI.MINUTE);
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -258,7 +254,7 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Time> MONTH = addUnit(YEAR_JULIAN.divide(12));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Mass> TONNE = addUnit(USCustomary.TON); // FIXME Use SI.Ton?!
+    public static final PhysicsUnit<Mass> TONNE = addUnit(SI.KILOGRAM.multiply(1000));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Pressure> BAR = addUnit(SI.PASCAL.multiply(100000));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -281,7 +277,8 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<ElectricPermittivity> PERMITTIVITY_OF_VACUUM = addUnit(SI.FARADS_PER_METRE.multiply(8.854187817E-12));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<MagneticPermeability> PERMEABILITY_OF_VACUUM = addUnit(SI.NEWTONS_PER_SQUARE_AMPERE.multiply(4E-7 * StrictMath.PI));
+    public static final PhysicsUnit<MagneticPermeability> PERMEABILITY_OF_VACUUM 
+            = addUnit(SI.NEWTONS_PER_SQUARE_AMPERE.multiply(PI).multiply(4).divide(1E7).asType(MagneticPermeability.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<ElectricCharge> ELEMENTARY_CHARGE = addUnit(SI.COULOMB.transform(SI.ELECTRON_VOLT.getConverterToSystemUnit()));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -303,7 +300,7 @@ public final class UCUM implements SystemOfUnits {
     // CGS UNITS: UCUM 4.3 §30 //
     /////////////////////////////
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<WaveNumber> KAYSER = addUnit(SI.RECIPROCAL_METRES.divide(100));
+    public static final PhysicsUnit<WaveNumber> KAYSER = addUnit(SI.RECIPROCAL_METRE.divide(100));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Acceleration> GAL = addUnit(CENTI(METER).divide(SECOND.pow(2)).asType(Acceleration.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -321,13 +318,13 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<MagneticFluxDensity> GAUSS = addUnit(SI.TESLA.divide(1E4));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<MagneticFieldStrength> OERSTED = addUnit(SI.AMPERES_PER_METRE.multiply(250).divide(StrictMath.PI));
+    public static final PhysicsUnit<MagneticFieldStrength> OERSTED = addUnit(SI.AMPERES_PER_METRE.multiply(250).divide(PI).asType(MagneticFieldStrength.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<MagnetomotiveForce> GILBERT = addUnit(OERSTED.multiply(CENTI(SI.METRE)).asType(MagnetomotiveForce.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Luminance> STILB = addUnit(CANDELA.divide(CENTI(METER).pow(2)).asType(Luminance.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Luminance> LAMBERT = addUnit(STILB.divide(StrictMath.PI));
+    public static final PhysicsUnit<Luminance> LAMBERT = addUnit(STILB.divide(PI).asType(Luminance.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Illuminance> PHOT = addUnit(LUX.divide(1E4));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
@@ -354,29 +351,29 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> NAUTICAL_MILE_INTERNATIONAL = addUnit(METER.multiply(1852));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Velocity> KNOT_INTERNATIONAL = addUnit(USCustomary.KNOT);
+    public static final PhysicsUnit<Velocity> KNOT_INTERNATIONAL = addUnit(NAUTICAL_MILE_INTERNATIONAL.divide(HOUR).asType(Velocity.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SQUARE_INCH_INTERNATIONAL = addUnit(USCustomary.SQUARE_INCH);
+    public static final PhysicsUnit<Area> SQUARE_INCH_INTERNATIONAL = addUnit(INCH_INTERNATIONAL.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SQUARE_FOOT_INTERNATIONAL = addUnit(USCustomary.SQUARE_FOOT);
+    public static final PhysicsUnit<Area> SQUARE_FOOT_INTERNATIONAL = addUnit(FOOT_INTERNATIONAL.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SQUARE_YARD_INTERNATIONAL = addUnit(USCustomary.SQUARE_YARD);
+    public static final PhysicsUnit<Area> SQUARE_YARD_INTERNATIONAL = addUnit(YARD_INTERNATIONAL.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> CUBIC_INCH_INTERNATIONAL = addUnit(USCustomary.CUBIC_INCH);
+    public static final PhysicsUnit<Volume> CUBIC_INCH_INTERNATIONAL = addUnit(INCH_INTERNATIONAL.pow(3).asType(Volume.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> CUBIC_FOOT_INTERNATIONAL = addUnit(USCustomary.CUBIC_FOOT);
+    public static final PhysicsUnit<Volume> CUBIC_FOOT_INTERNATIONAL = addUnit(FOOT_INTERNATIONAL.pow(3).asType(Volume.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> CUBIC_YARD_INTERNATIONAL = addUnit(USCustomary.CUBIC_YARD);
+    public static final PhysicsUnit<Volume> CUBIC_YARD_INTERNATIONAL = addUnit(YARD_INTERNATIONAL.pow(3).asType(Volume.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> BOARD_FOOT_INTERNATIONAL = addUnit(USCustomary.BOARD_FOOT);
+    public static final PhysicsUnit<Volume> BOARD_FOOT_INTERNATIONAL = addUnit(CUBIC_INCH_INTERNATIONAL.multiply(144));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> CORD_INTERNATIONAL = addUnit(USCustomary.CORD);
+    public static final PhysicsUnit<Volume> CORD_INTERNATIONAL = addUnit(CUBIC_FOOT_INTERNATIONAL.multiply(128));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Length> MIL_INTERNATIONAL = addUnit(USCustomary.MIL);
+    public static final PhysicsUnit<Length> MIL_INTERNATIONAL = addUnit(INCH_INTERNATIONAL.divide(1000));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> CIRCULAR_MIL_INTERNATIONAL = addUnit(USCustomary.CIRCULAR_MIL);
+    public static final PhysicsUnit<Area> CIRCULAR_MIL_INTERNATIONAL = addUnit(MIL_INTERNATIONAL.pow(2).multiply(PI).divide(4).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Length> HAND_INTERNATIONAL = addUnit(USCustomary.HAND);
+    public static final PhysicsUnit<Length> HAND_INTERNATIONAL = addUnit(INCH_INTERNATIONAL.multiply(4));
     //////////////////////////////////////////
     // US SURVEY LENGTH UNITS: UCUM 4.4 §32 //
     //////////////////////////////////////////
@@ -403,15 +400,15 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> MILE_US_SURVEY = addUnit(FURLONG_US_SURVEY.multiply(8));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> ACRE_US_SURVEY = (Unit<Area>) addUnit(ROD_US_SURVEY.pow(2).multiply(160));
+    public static final PhysicsUnit<Area> ACRE_US_SURVEY = addUnit(ROD_US_SURVEY.pow(2).multiply(160).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SQUARE_ROD_US_SURVEY = (Unit<Area>) addUnit(ROD_US_SURVEY.pow(2));
+    public static final PhysicsUnit<Area> SQUARE_ROD_US_SURVEY = addUnit(ROD_US_SURVEY.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SQUARE_MILE_US_SURVEY = (Unit<Area>) addUnit(MILE_US_SURVEY.pow(2));
+    public static final PhysicsUnit<Area> SQUARE_MILE_US_SURVEY = addUnit(MILE_US_SURVEY.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> SECTION_US_SURVEY = (Unit<Area>) addUnit(MILE_US_SURVEY.pow(2));
+    public static final PhysicsUnit<Area> SECTION_US_SURVEY = addUnit(MILE_US_SURVEY.pow(2).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> TOWNSHP_US_SURVEY = (Unit<Area>) addUnit(SECTION_US_SURVEY.multiply(36));
+    public static final PhysicsUnit<Area> TOWNSHP_US_SURVEY = addUnit(SECTION_US_SURVEY.multiply(36));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> MIL_US_SURVEY = addUnit(INCH_US_SURVEY.divide(1000));
     /////////////////////////////////////////////////
@@ -438,9 +435,9 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> NAUTICAL_MILE_BRITISH = addUnit(FOOT_BRITISH.multiply(6080));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Length> KNOT_BRITISH = (Unit<Length>) addUnit(NAUTICAL_MILE_BRITISH.divide(HOUR));
+    public static final PhysicsUnit<Length> KNOT_BRITISH = addUnit(NAUTICAL_MILE_BRITISH.divide(HOUR).asType(Length.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> ACRE_BRITISH = (Unit<Area>) addUnit(YARD_BRITISH.pow(2).multiply(4840));
+    public static final PhysicsUnit<Area> ACRE_BRITISH = addUnit(YARD_BRITISH.pow(2).multiply(4840).asType(Area.class));
     ///////////////////////////////////
     // US VOLUME UNITS: UCUM 4.4 §34 //
     ///////////////////////////////////
@@ -523,7 +520,7 @@ public final class UCUM implements SystemOfUnits {
     // CONTINUED FROM SECTION §29
     // contains a forward reference to POUND, so we had to move it here, below section §36
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Force> POUND_FORCE = (Unit<Force>) addUnit(POUND.multiply(ACCELLERATION_OF_FREEFALL));
+    public static final PhysicsUnit<Force> POUND_FORCE = addUnit(POUND.multiply(ACCELLERATION_OF_FREEFALL).asType(Force.class));
     /////////////////////////////////////
     // TROY WIEGHT UNITS: UCUM 4.4 §37 //
     /////////////////////////////////////
@@ -601,7 +598,7 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Energy> BTU = addUnit(BTU_THERMOCHEMICAL);
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Power> HORSEPOWER = (Unit<Power>) addUnit(FOOT_INTERNATIONAL.multiply(POUND_FORCE).divide(SECOND));
+    public static final PhysicsUnit<Power> HORSEPOWER = addUnit(FOOT_INTERNATIONAL.multiply(POUND_FORCE).divide(SECOND).asType(Power.class));
     /////////////////////////////////////////////////////////
     // SECTIONS §41-§43 skipped; implement later if needed //
     /////////////////////////////////////////////////////////
@@ -612,41 +609,41 @@ public final class UCUM implements SystemOfUnits {
     private static final PhysicsUnit<? extends Quantity> TMP_MHO = SIEMENS.alternate("mho");
 
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Volume> STERE = (Unit<Volume>) addUnit(METER.pow(3));
+    public static final PhysicsUnit<Volume> STERE = addUnit(METER.pow(3).asType(Volume.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> ANGSTROM = addUnit(NANO(METER).divide(10));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Area> BARN = (Unit<Area>) addUnit(FEMTO(METER).pow(2).multiply(100));
+    public static final PhysicsUnit<Area> BARN = addUnit(FEMTO(METER).pow(2).multiply(100).asType(Area.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Pressure> ATMOSPHERE_TECHNICAL = (Unit<Pressure>) addUnit(KILO(GRAM_FORCE).divide(CENTI(METER).pow(2)));
+    public static final PhysicsUnit<Pressure> ATMOSPHERE_TECHNICAL = addUnit(KILO(GRAM_FORCE).divide(CENTI(METER).pow(2)).asType(Pressure.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<ElectricConductance> MHO = addUnit(TMP_MHO.asType(ElectricConductance.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Pressure> POUND_PER_SQUARE_INCH = (Unit<Pressure>) addUnit(POUND_FORCE.divide(INCH_INTERNATIONAL.pow(2)));
+    public static final PhysicsUnit<Pressure> POUND_PER_SQUARE_INCH =  addUnit(POUND_FORCE.divide(INCH_INTERNATIONAL.pow(2)).asType(Pressure.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Pressure> CIRCLE = (Unit<Pressure>) addUnit(PI.multiply(RADIAN).multiply(2));
+    public static final PhysicsUnit<Angle> CIRCLE = addUnit(PI.multiply(RADIAN).multiply(2).asType(Angle.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Pressure> SPHERE = (Unit<Pressure>) addUnit(PI.multiply(STERADIAN).multiply(4));
+    public static final PhysicsUnit<SolidAngle> SPHERE = addUnit(PI.multiply(STERADIAN).multiply(4).asType(SolidAngle.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Mass> CARAT_METRIC = addUnit(GRAM.divide(5));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Dimensionless> CARAT_GOLD = addUnit(Unit.ONE.divide(24));
+    public static final PhysicsUnit<Dimensionless> CARAT_GOLD = addUnit(SI.ONE.divide(24));
     ////////////////////////////////////////////////
     // INFORMATION TECHNOLOGY UNITS: UCUM 4.6 §45 //
     ////////////////////////////////////////////////
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<DataAmount> BIT = addUnit(SI.BIT);
+    public static final PhysicsUnit<Information> BIT = addUnit(SI.BIT);
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<DataAmount> BYTE = addUnit(USCustomary.BYTE);
+    public static final PhysicsUnit<Information> BYTE = addUnit(SI.BIT.multiply(8));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<DataRate> BAUD = addUnit(Unit.ONE.divide(SECOND)).asType(DataRate.class);
+    public static final PhysicsUnit<InformationRate> BAUD = addUnit(SI.BITS_PER_SECOND);
 
     ///////////////////////
     // MISSING FROM UCUM //
     ///////////////////////
 
     /** To be added to the <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Frequency> FRAMES_PER_SECOND = addUnit(Unit.ONE.divide(SECOND)).asType(Frequency.class);
+    public static final PhysicsUnit<Frequency> FRAMES_PER_SECOND = addUnit(SI.ONE.divide(SECOND)).asType(Frequency.class);
 
 
     /////////////////////
@@ -663,11 +660,16 @@ public final class UCUM implements SystemOfUnits {
         return units.unmodifiable();
     }
 
+    /**
+     * Returns the unit corresponding to the specified quantity type.
+     * The UCUM system uses the same mapping as the {@link SI} system.
+     *
+     * @param quantityType
+     * @return <code>SI.getInstance().getUnit(quantityType)</code>
+     */
     @Override
     public <Q extends Quantity<Q>> PhysicsUnit<Q> getUnit(Class<Q> quantityType) {
-        return quantityToUnit.get(quantityType);
-
-
+        return SI.getInstance().getUnit(quantityType);
     }
 
     @Override
@@ -691,19 +693,4 @@ public final class UCUM implements SystemOfUnits {
         INSTANCE.units.add(unit);
         return unit;
     }
-
-    /**
-     * Adds a new unit and maps it to the specified quantity type.
-     *
-     * @param  unit the unit being added.
-     * @param type the quantity type.
-     * @return <code>unit</code>.
-     */
-    private static <U extends PhysicsUnit<?>>  U addUnit(U unit, Class<? extends Quantity> type) {
-        INSTANCE.units.add(unit);
-        INSTANCE.quantityToUnit.put(type, unit);
-        return unit;
-    }
-
-
 }
