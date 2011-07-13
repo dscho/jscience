@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.ResourceBundle;
+import javolution.context.LogContext;
 import javolution.util.FastMap;
 import org.jscience.physics.unit.system.SIPrefix;
 import org.jscience.physics.unit.PhysicsUnit;
@@ -97,8 +98,8 @@ public class SymbolMap {
                 } else {
                     throw new ClassCastException("unable to cast "+value+" to Unit or Prefix");
                 }
-            } catch (Exception e) {
-                System.err.println("ERROR reading Unit names: " + e.toString());
+            } catch (Exception error) {
+                LogContext.error(error);
             }
         }
     }

@@ -205,7 +205,7 @@ public abstract class UCUMFormat implements UnitFormat {
 			formatConverter(converter, printSeparator, temp);
 			symbol = temp;
 		} else if (unit.getSymbol() != null) {
-			symbol = ((BaseUnit<?>) unit).getSymbol();
+			symbol = unit.getSymbol();
 		} else {
 			throw new IllegalArgumentException(
 					"Cannot format the given Object as UCUM units (unsupported unit "

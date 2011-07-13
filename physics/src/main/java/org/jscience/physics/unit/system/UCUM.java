@@ -435,7 +435,7 @@ public final class UCUM implements SystemOfUnits {
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Length> NAUTICAL_MILE_BRITISH = addUnit(FOOT_BRITISH.multiply(6080));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
-    public static final PhysicsUnit<Length> KNOT_BRITISH = addUnit(NAUTICAL_MILE_BRITISH.divide(HOUR).asType(Length.class));
+    public static final PhysicsUnit<Velocity> KNOT_BRITISH = addUnit(NAUTICAL_MILE_BRITISH.divide(HOUR).asType(Velocity.class));
     /** As per <a href="http://unitsofmeasure.org/">UCUM</a> standard. */
     public static final PhysicsUnit<Area> ACRE_BRITISH = addUnit(YARD_BRITISH.pow(2).multiply(4840).asType(Area.class));
     ///////////////////////////////////

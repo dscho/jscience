@@ -66,6 +66,7 @@ import org.unitsofmeasurement.quantity.ElectricPermittivity;
 import org.unitsofmeasurement.quantity.InformationRate;
 import org.unitsofmeasurement.quantity.IonizingRadiation;
 import org.unitsofmeasurement.quantity.KinematicViscosity;
+import org.unitsofmeasurement.quantity.Luminance;
 import org.unitsofmeasurement.quantity.MagneticFieldStrength;
 import org.unitsofmeasurement.quantity.MagneticPermeability;
 import org.unitsofmeasurement.quantity.WaveNumber;
@@ -498,6 +499,13 @@ public final class SI implements SystemOfUnits {
     public static final ProductUnit<DynamicViscosity> PASCAL_SECOND
             = addUnit(new ProductUnit<DynamicViscosity>(
             PASCAL.multiply(SECOND)), DynamicViscosity.class);
+
+    /**
+     * The SI unit for luminance quantities (standard name <code>cd/m2</code>).
+     */
+    public static final ProductUnit<Luminance> CANDELAS_PER_SQUARE_METRE
+            = addUnit(new ProductUnit<Luminance>(
+            CANDELA.divide(SQUARE_METRE)), Luminance.class);
 
     /**
      * The SI unit for kinematic viscosity quantities (standard name <code>m2/s"</code>).

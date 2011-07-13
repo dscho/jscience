@@ -10,6 +10,7 @@ package org.jscience.physics.model;
 
 import javolution.util.FastMap;
 import java.util.Map;
+import javolution.context.LogContext;
 import javolution.text.TextBuilder;
 import javolution.xml.XMLSerializable;
 import org.jscience.physics.unit.BaseUnit;
@@ -86,14 +87,17 @@ public class PhysicsDimension implements Dimension, XMLSerializable {
 
     /**
      * Returns the dimension for the specified quantity type by aggregating
-     * the results of {@link PhysicsDimensionService}.
+     * the results of {@link PhysicsDimensionService} or <code>null</code>
+     * if the specified quantity is unknown.
      *
      * @param quantityType the quantity type.
-     * @return the dimension for the quantity type.
+     * @return the dimension for the quantity type or <code>null</code>.
      */
     public static <Q extends Quantity<Q>> PhysicsDimension getDimension(Class<Q> quantityType) {
         // TODO: Track OSGi services and aggregate results.
-        return SI.getInstance().getUnit(quantityType).getDimension();
+        PhysicsUnit<Q> siUnit = SI.getInstance().getUnit(quantityType);
+        if (siUnit == null) LogContext.warning("Quantity type: " + quantityType + " unknown");
+        return (siUnit != null) ? siUnit.getDimension() : null;
     }
 
     /**
