@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>org.unitsofmeasurement</groupId>
 			<artifactId>unit-api</artifactId>
-			<version>0.6-RC1</version>
+			<version>0.6.0</version>
 		</dependency>
 	</dependencies>
 
