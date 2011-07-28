@@ -80,7 +80,7 @@ public abstract class PhysicsModel {
     /**
      * Returns the fundamental dimension for the one specified.
      * If the specified dimension is a dimensional product, the dimensional
-     * product its fundamental dimensions is returned.
+     * product of its fundamental dimensions is returned.
      * Physical quantities are considered commensurate only if their
      * fundamental dimensions are equals using the current physics model.
      *
