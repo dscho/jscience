@@ -234,15 +234,10 @@
     <!--     Common dependencies  -->
     <!-- ======================== -->
     <dependencies>
-        <dependency> <!-- OSGI Core Library -->
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi_R4_core</artifactId>
-            <version>1.0</version>
-        </dependency>
         <dependency> <!-- Javolution Utilities -->
-            <groupId>javolution</groupId>
+            <groupId>org.javolution</groupId>
             <artifactId>javolution</artifactId>
-            <version>5.5.1</version>
+            <version>5.6-SNAPSHOT</version>
         </dependency>
         <dependency> <!-- JUnit -->
             <groupId>junit</groupId>
@@ -256,13 +251,7 @@
     <!--     Additional repositories    -->
     <!-- ============================== -->
     <repositories>
-        <repository> <!-- To Be Removed once Javolution is in central -->
-            <id>maven2-repository.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-            <layout>default</layout>
-        </repository>
-        <repository> <!-- To Be Removed once GeoAPI is in central -->
+        <repository> <!-- To Be Removed once unit-api is in central -->
             <id>geotoolkit</id>
             <name>Geotoolkit repository</name>
             <url>http://maven.geotoolkit.org</url>
