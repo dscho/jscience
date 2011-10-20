@@ -15,8 +15,8 @@ import javolution.util.Index;
 import org.jscience.mathematics.structure.Field;
 
 /**
- * <p> This class represents a square diagonal matrix. It is a 
- *     {@link SparseMatrix sparse matrix} for which the non-zero elements are
+ * <p> This class represents a square diagonal matrix. 
+ *     It is a {@link SparseMatrix sparse matrix} for which the non-zero elements are
  *     on the matrix diagonal. Diagonal matrices are typically used to create
  *     identity matrices or coefficient matrix.
  *     For example:[code]
