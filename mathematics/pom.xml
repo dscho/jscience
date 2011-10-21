@@ -7,5 +7,24 @@
     </parent>
     <artifactId>jscience-mathematics</artifactId>
     <name>JScience Mathematics Bundle</name>
-    <packaging>jar</packaging>
- </project>
+    <packaging>bundle</packaging>
+
+    <!-- Build Settings -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>!org.jscience.mathematics.internal.*,org.jscience.mathematics.*</Export-Package>
+                        <Private-Package>org.jscience.mathematics.internal.*</Private-Package>
+                        <Bundle-Activator>org.jscience.mathematics.internal.osgi.Activator</Bundle-Activator>
+                        <Export-Service></Export-Service>  <!-- No service API -->
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
