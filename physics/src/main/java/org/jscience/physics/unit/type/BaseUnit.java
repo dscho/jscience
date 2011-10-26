@@ -6,10 +6,10 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
-import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
+import org.jscience.physics.model.PhysicsDimension;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
@@ -17,7 +17,7 @@ import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p> This class represents the building blocks on top of which all others
- *     physical units are created. Base units are always unscaled metric units.</p>
+ *     physical units are created. Base units are always unscaled SI units.</p>
  * 
  * <p> When using the {@link org.jscience.physics.model.StandardModel standard model},
  *     all seven {@link org.jscience.physics.unit.system.SI SI} base units
@@ -57,12 +57,12 @@ public class BaseUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public PhysicsUnit<Q> getSystemUnit() {
+    public PhysicsUnit<Q> toSI() {
         return this;
     }
 
     @Override
-    public UnitConverter getConverterToSystemUnit() throws UnsupportedOperationException {
+    public UnitConverter getConverterToSI() throws UnsupportedOperationException {
         return PhysicsUnitConverter.IDENTITY;
     }
 

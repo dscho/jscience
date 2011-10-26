@@ -1,24 +1,31 @@
-/**
- *   Copyright (c) 2005-2010, Jean-Marie Dautelle, Werner Keil
- *   All rights reserved.
+/*
+ * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
+ * Copyright (C) 2010 - JScience (http://jscience.org/)
+ * All rights reserved.
  *
- *   See LICENSE.txt for the Specification License
+ * Permission to use, copy, modify, and distribute this software is
+ * freely granted, provided that this notice is preserved.
  */
 /**
  * Provides support for programatic unit handling.
  *
- * <h3> Standard/NonStandard Units</h3>
- *      Standard units and prefixes are provided by the
- *      {@link org.jscience.physics.unit.SI} class (Système International d'Unités) and
- *      about 50 non-standard units are available through the
- *      {@link org.jscience.physics.unit.NonSI} class.
+ * <h3> Standard / Non Standard Units</h3>
+ *      This package provides standard units in accordance with the 
+ *       <a href="http://physics.nist.gov/Pubs/SP330/sp330.pdf">
+ *      "The International System of Units (SI)"</a> as well as non-standard 
+ *      units in accordance  with the <a href="http://unitsofmeasure.org/">
+ *      "Uniform Code for Units of Measure (UCUM)"</a>.
  *
  * <h3>Usage examples:</h3>
  * [code]
  *
+ * import org.unitofmeasurement.unit.*;
+ * import org.unitofmeasurement.quantity.*;
+ * 
  * import static org.jscience.physics.unit.SI.*;
- * import static org.jscience.physics.unit.NonSI.*;
-
+ * import static org.jscience.physics.unit.SIPrefix.*;
+ * import static org.jscience.physics.unit.UCUM.*;
+ *
  * public class Main {
  *     public void main(String[] args) {
  *
@@ -31,8 +38,8 @@
  *         // Same conversion than above, packed in one line.
  *         System.out.println(KILO(METRE).getConverterTo(MILE).convert(10));
  *
- *         // Retrieval of the system unit (identifies the measurement type).
- *         System.out.println(REVOLUTION.divide(MINUTE).toMetric());
+ *         // Retrieval of the SI unit (identifies the measurement type).
+ *         System.out.println(REVOLUTION.divide(MINUTE).toSI());
  *
  *         // Dimension checking (allows/disallows conversions)
  *         System.out.println(ELECTRON_VOLT.isCompatible(WATT.times(HOUR)));
@@ -51,8 +58,7 @@
  *
  * <h3>Unit Parameterization</h3>
  *
- *     Units are parameterized (e.g. &lt;Time extends {@link org.jscience.physics.quantity.Quantity Quantity}>) to
- *     enforce compile-time checks of units/measures consistency, for example:[code]
+ *     Units are parameterized enforce compile-time checks of units/measures consistency, for example:[code]
  *
  *     Unit<Time> MINUTE = SECOND.times(60); // Ok.
  *     Unit<Time> MINUTE = METRE.times(60); // Compile error.
@@ -60,8 +66,8 @@
  *     Unit<Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
  *     Unit<Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
  *
- *     Time duration = QuantityFactory.getInstance(Time.class).create(2, MINUTE); // Ok.
- *     Time duration = QuantityFactory.getInstance(Time.class).create(2, CELSIUS); // Compile error.
+ *     Measure<Time> duration = Measure.valueOf(2, MINUTE); // Ok.
+ *     Measure<Time> duration = Measure.valueOf(2, CELSIUS); // Compile error.
  *
  *     long milliseconds = duration.longValue(MILLI(SECOND)); // Ok.
  *     long milliseconds = duration.longValue(POUND); // Compile error.
@@ -79,6 +85,6 @@
  *     </p>
  *
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
- * @version 0.9.5, February 24, 2010
+ * @version 5.0.0
  */
 package org.jscience.physics.unit;

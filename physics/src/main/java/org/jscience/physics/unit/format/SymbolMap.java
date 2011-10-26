@@ -14,8 +14,8 @@ import java.util.Iterator;
 import java.util.ResourceBundle;
 import javolution.context.LogContext;
 import javolution.util.FastMap;
-import org.jscience.physics.unit.system.SIPrefix;
-import org.jscience.physics.unit.PhysicsUnit;
+import org.jscience.physics.unit.SIPrefix;
+import org.jscience.physics.unit.type.PhysicsUnit;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.unitsofmeasurement.unit.UnitConverter;
 

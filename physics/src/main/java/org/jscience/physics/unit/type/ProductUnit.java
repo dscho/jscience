@@ -6,19 +6,18 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
-import org.jscience.physics.model.PhysicsDimension;
-import org.unitsofmeasurement.unit.UnitConverter;
+
 import java.io.Serializable;
 import java.util.Map;
 import javolution.util.FastMap;
-import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.system.SI;
+import org.jscience.physics.model.PhysicsDimension;
+import org.jscience.physics.unit.SI;
 import org.jscience.physics.unit.converter.PhysicsUnitConverter;
-
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.Unit;
+import org.unitsofmeasurement.unit.UnitConverter;
 
 /**
  * <p>  This class represents units formed by the product of rational powers of
@@ -260,10 +259,11 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
         return code;
     }
 
-    public PhysicsUnit<Q> getSystemUnit() {
+    @Override
+    public PhysicsUnit<Q> toSI() {
         Unit<?> systemUnit = SI.ONE;
         for (int i = 0; i < elements.length; i++) {
-            Unit<?> unit = elements[i].unit.getSystemUnit();
+            Unit<?> unit = elements[i].unit.toSI();
             unit = unit.pow(elements[i].pow);
             unit = unit.root(elements[i].root);
             systemUnit = systemUnit.multiply(unit);
@@ -271,11 +271,11 @@ public final class ProductUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
         return (PhysicsUnit<Q>) systemUnit;
     }
 
-    public UnitConverter getConverterToSystemUnit() {
+    public UnitConverter getConverterToSI() {
         UnitConverter converter = PhysicsUnitConverter.IDENTITY;
         for (int i = 0; i < elements.length; i++) {
             Element e = elements[i];
-            UnitConverter cvtr = e.unit.getConverterToSystemUnit();
+            UnitConverter cvtr = e.unit.getConverterToSI();
             if (!(cvtr.isLinear()))
                 throw new UnsupportedOperationException(e.unit + " is non-linear, cannot convert");
             if (e.root != 1)

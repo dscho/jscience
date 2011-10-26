@@ -6,12 +6,9 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
-import org.jscience.physics.unit.system.SI;
-import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import java.io.IOException;
-import org.unitsofmeasurement.unit.IncommensurableException;
 import java.math.BigInteger;
 import java.text.ParsePosition;
 import java.util.Map;
@@ -19,12 +16,14 @@ import javolution.text.TextBuilder;
 import javolution.xml.XMLSerializable;
 import org.jscience.physics.model.PhysicsDimension;
 import org.jscience.physics.model.PhysicsModel;
-import org.unitsofmeasurement.quantity.Quantity;
-
+import org.jscience.physics.unit.SI;
 import org.jscience.physics.unit.converter.AddConverter;
 import org.jscience.physics.unit.converter.MultiplyConverter;
+import org.jscience.physics.unit.converter.PhysicsUnitConverter;
 import org.jscience.physics.unit.converter.RationalConverter;
 import org.jscience.physics.unit.format.UCUMFormat;
+import org.unitsofmeasurement.quantity.Quantity;
+import org.unitsofmeasurement.unit.IncommensurableException;
 import org.unitsofmeasurement.unit.UnconvertibleException;
 import org.unitsofmeasurement.unit.Unit;
 import org.unitsofmeasurement.unit.UnitConverter;
@@ -52,6 +51,68 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     protected PhysicsUnit() {
     }
 
+   /**
+     * Indicates if this unit belongs to the set of coherent SI units 
+     * (unscaled SI units).
+     * 
+     * The base and coherent derived units of the SI form a coherent set, 
+     * designated the set of coherent SI units. The word coherent is used here 
+     * in the following sense: when coherent units are used, equations between 
+     * the numerical values of quantities take exactly the same form as the 
+     * equations between the quantities themselves. Thus if only units from 
+     * a coherent set are used, conversion factors between units are never 
+     * required. 
+     * 
+     * @return <code>equals(toSI())</code>
+     */
+    public boolean isSI() {
+        PhysicsUnit<Q> si = this.toSI();
+        return (this == si) || this.equals(si);
+    }
+
+    /**
+     * Returns the unscaled {@link SI} unit  from which this unit is derived.
+     * 
+     * They SI unit can be be used to identify a quantity given the unit.
+     * For example:[code]
+     *    static boolean isAngularVelocity(PhysicsUnit<?> unit) {
+     *        return unit.toSI().equals(RADIAN.divide(SECOND));
+     *    }
+     *    assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true.
+     * [/code]
+     *
+     * @return the unscaled metric unit from which this unit is derived.
+     */
+    public abstract PhysicsUnit<Q> toSI();
+
+    /**
+     * Returns the converter from this unit to its unscaled {@link #toSI SI} 
+     * unit.
+     *
+     * @return <code>getConverterTo(this.toSI())</code>
+     * @see #toSI
+     */
+    public abstract UnitConverter getConverterToSI();
+
+   /**
+     * Annotates the specified unit. Annotation does not change the unit
+     * semantic. Annotations are often written between curly braces behind units.
+     * For example:
+     * [code]
+     *     PhysicsUnit<Volume> PERCENT_VOL = SI.PERCENT.annotate("vol"); // "%{vol}"
+     *     PhysicsUnit<Mass> KG_TOTAL = SI.KILOGRAM.annotate("total"); // "kg{total}"
+     *     PhysicsUnit<Dimensionless> RED_BLOOD_CELLS = SI.ONE.annotate("RBC"); // "{RBC}"
+     * [/code]
+     *
+     * Note: Annotation of system units are not considered themselves as system units.
+     *
+     * @param annotation the unit annotation.
+     * @return the annotated unit.
+     */
+    public AnnotatedUnit<Q> annotate(String annotation) {
+        return new AnnotatedUnit<Q>(this, annotation);
+    }
+    
     /**
      * Returns the physics unit represented by the specified characters
      * as per standard <a href="http://www.unitsofmeasure.org/">UCUM</a> format.
@@ -100,45 +161,6 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
         }
     }
 
-    /**
-     * Indicates if this unit is a system unit (unscaled SI unit).
-     * System units are either {@link BaseUnit},
-     * {@link AlternateUnit} or {@link ProductUnit} of system units.
-     *
-     * @return the unscaled metric unit from which this unit is derived.
-     */
-    public boolean isSystemUnit() {
-        PhysicsUnit<Q> systemUnit = this.getSystemUnit();
-        return (this == systemUnit) || this.equals(systemUnit);
-    }
-
-    /**
-     * Returns the converter from this unit to its 
-     * {@link org.jscience.physics.unit.system.SI SI} unit.
-     *
-     * @return <code>getConverterTo(this.toSI())</code>
-     * @see #toSI
-     */
-   public abstract UnitConverter getConverterToSystemUnit();
-
-    /**
-     * Annotates the specified unit. Annotation does not change the unit
-     * semantic. Annotations are often written between curly braces behind units.
-     * For example:
-     * [code]
-     *     PhysicsUnit<Volume> PERCENT_VOL = SI.PERCENT.annotate("vol"); // "%{vol}"
-     *     PhysicsUnit<Mass> KG_TOTAL = SI.KILOGRAM.annotate("total"); // "kg{total}"
-     *     PhysicsUnit<Dimensionless> RED_BLOOD_CELLS = SI.ONE.annotate("RBC"); // "{RBC}"
-     * [/code]
-     *
-     * Note: Annotation of system units are not considered themselves as system units.
-     *
-     * @param annotation the unit annotation.
-     * @return the annotated unit.
-     */
-    public AnnotatedUnit<Q> annotate(String annotation) {
-        return new AnnotatedUnit<Q>(this, annotation);
-    }
 
    /////////////////////////////////////////////////////////
     // Implements org.unitsofmeasurement.Unit<Q> interface //
@@ -156,7 +178,9 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
      * @return the unscaled metric unit from which this unit is derived.
      */
     @Override
-    public abstract PhysicsUnit<Q> getSystemUnit();
+    public final PhysicsUnit<Q> getSystemUnit() {
+        return toSI();
+    }
 
     /**
      * Indicates if this unit is compatible with the unit specified.
@@ -216,7 +240,7 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
         Unit<Q> thisSystemUnit = this.getSystemUnit();
         Unit<Q> thatSystemUnit = that.getSystemUnit();
         if (!thisSystemUnit.equals(thatSystemUnit)) return getConverterToAny(that); 
-        UnitConverter thisToSI= this.getConverterToSystemUnit();
+        UnitConverter thisToSI= this.getConverterToSI();
         UnitConverter thatToSI= that.getConverterTo(thatSystemUnit);
         return thatToSI.inverse().concatenate(thisToSI);    
     }
@@ -229,9 +253,9 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
         PhysicsUnit thatPhysics = (PhysicsUnit)that; // Since both units are compatible they must be both physics units.
         PhysicsModel model = PhysicsModel.getCurrent();
         PhysicsUnit thisSystemUnit = this.getSystemUnit();
-        UnitConverter thisToDimension = model.getDimensionalTransform(thisSystemUnit.getDimension()).concatenate(this.getConverterToSystemUnit());
+        UnitConverter thisToDimension = model.getDimensionalTransform(thisSystemUnit.getDimension()).concatenate(this.getConverterToSI());
         PhysicsUnit thatSystemUnit = thatPhysics.getSystemUnit();
-        UnitConverter thatToDimension = model.getDimensionalTransform(thatSystemUnit.getDimension()).concatenate(thatPhysics.getConverterToSystemUnit());
+        UnitConverter thatToDimension = model.getDimensionalTransform(thatSystemUnit.getDimension()).concatenate(thatPhysics.getConverterToSI());
         return thatToDimension.inverse().concatenate(thisToDimension);
     }
 
@@ -244,7 +268,7 @@ public abstract class PhysicsUnit<Q extends Quantity<Q>> implements Unit<Q>, XML
     @Override
     public final PhysicsUnit<Q> transform(UnitConverter operation) {
         PhysicsUnit<Q> systemUnit = this.getSystemUnit();
-        UnitConverter cvtr = this.getConverterToSystemUnit().concatenate(operation);
+        UnitConverter cvtr = this.getConverterToSI().concatenate(operation);
         if (cvtr.equals(PhysicsUnitConverter.IDENTITY))
             return systemUnit;
         return new TransformedUnit<Q>(systemUnit, cvtr);

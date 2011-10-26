@@ -6,10 +6,10 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
-import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
+import org.jscience.physics.model.PhysicsDimension;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -79,7 +79,7 @@ public final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public PhysicsUnit<Q> getSystemUnit() {
+    public PhysicsUnit<Q> toSI() {
         return actualUnit.getSystemUnit();
     }
 
@@ -89,8 +89,8 @@ public final class AnnotatedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public UnitConverter getConverterToSystemUnit() {
-        return actualUnit.getConverterToSystemUnit();
+    public UnitConverter getConverterToSI() {
+        return actualUnit.getConverterToSI();
     }
 
     @Override

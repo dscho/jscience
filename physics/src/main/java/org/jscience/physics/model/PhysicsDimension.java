@@ -13,9 +13,9 @@ import java.util.Map;
 import javolution.context.LogContext;
 import javolution.text.TextBuilder;
 import javolution.xml.XMLSerializable;
-import org.jscience.physics.unit.BaseUnit;
-import org.jscience.physics.unit.PhysicsUnit;
-import org.jscience.physics.unit.system.SI;
+import org.jscience.physics.unit.type.BaseUnit;
+import org.jscience.physics.unit.type.PhysicsUnit;
+import org.jscience.physics.unit.SI;
 import org.unitsofmeasurement.quantity.Quantity;
 
 import org.unitsofmeasurement.unit.Dimension;

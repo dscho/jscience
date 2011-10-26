@@ -6,10 +6,10 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
-import org.jscience.physics.model.PhysicsDimension;
 import java.util.Map;
+import org.jscience.physics.model.PhysicsDimension;
 import org.unitsofmeasurement.quantity.Quantity;
 import org.unitsofmeasurement.unit.UnitConverter;
 
@@ -55,7 +55,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q>
      *         {@link PhysicsUnit#isSystemUnit() system unit}
      */
     public TransformedUnit(PhysicsUnit<Q> parentUnit, UnitConverter toParentUnit) {
-        if (!parentUnit.isSystemUnit())
+        if (!parentUnit.isSI())
             throw new IllegalArgumentException("The parent unit: " +  parentUnit
                     + " is not a system unit");
         this.parentUnit = parentUnit;
@@ -68,13 +68,13 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q>
     }
 
     @Override
-    public UnitConverter getConverterToSystemUnit() {
-        return parentUnit.getConverterToSystemUnit().concatenate(toParentUnit);
+    public UnitConverter getConverterToSI() {
+        return parentUnit.getConverterToSI().concatenate(toParentUnit);
     }
 
     @Override
-    public PhysicsUnit<Q> getSystemUnit() {
-        return parentUnit.getSystemUnit();
+    public PhysicsUnit<Q> toSI() {
+        return parentUnit.toSI();
     }
 
     @Override

@@ -8,9 +8,8 @@
  */
 package org.jscience.physics.internal.osgi;
 
-import org.jscience.physics.unit.system.SI;
-import org.jscience.physics.unit.system.UCUM;
-import org.jscience.physics.unit.system.USCustomary;
+import org.jscience.physics.unit.SI;
+import org.jscience.physics.unit.UCUM;
 import org.unitsofmeasurement.service.SystemOfUnitsService;
 import org.unitsofmeasurement.unit.SystemOfUnits;
 
@@ -32,7 +31,6 @@ class SystemOfUnitsServiceImpl implements SystemOfUnitsService {
     public SystemOfUnits getSystemOfUnits(String name) {
         if (name.equals("SI")) return SI.getInstance();
         if (name.equals("UCUM")) return UCUM.getInstance();
-        if (name.equals("USCustomary")) return USCustomary.getInstance();
         return null;
     }
     

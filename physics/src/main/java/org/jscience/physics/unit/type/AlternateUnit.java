@@ -6,7 +6,7 @@
  * Permission to use, copy, modify, and distribute this software is
  * freely granted, provided that this notice is preserved.
  */
-package org.jscience.physics.unit;
+package org.jscience.physics.unit.type;
 
 import java.util.Map;
 import org.jscience.physics.model.PhysicsDimension;
@@ -42,9 +42,9 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
      *         {@link PhysicsUnit#isSystemUnit() system unit}
      */
     public AlternateUnit(PhysicsUnit<?> parentUnit, String symbol) {
-        if (!parentUnit.isSystemUnit())
+        if (!parentUnit.isSI())
             throw new IllegalArgumentException("The parent unit: " +  parentUnit
-                    + " is not a system unit");
+                    + " is not an unscaled SI unit");
         this.parentUnit = (parentUnit instanceof AlternateUnit) ?
             ((AlternateUnit)parentUnit).getParentUnit() : parentUnit;
         this.symbol = symbol;
@@ -71,13 +71,13 @@ public final class AlternateUnit<Q extends Quantity<Q>> extends PhysicsUnit<Q> {
     }
 
     @Override
-    public UnitConverter getConverterToSystemUnit() {
-        return parentUnit.getConverterToSystemUnit();
+    public UnitConverter getConverterToSI() {
+        return parentUnit.getConverterToSI();
     }
 
     @Override
-    public PhysicsUnit<Q> getSystemUnit() {
-        return this; // Alternate units are system units.
+    public PhysicsUnit<Q> toSI() {
+        return this; // Alternate units are SI units.
     }
 
     @Override
