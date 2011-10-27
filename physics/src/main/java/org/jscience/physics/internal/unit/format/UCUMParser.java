@@ -10,8 +10,8 @@
 package org.jscience.physics.internal.unit.format;
 
 import org.jscience.physics.unit.SIPrefix;
-import org.jscience.physics.unit.format.SymbolMap;
-import org.jscience.physics.unit.type.PhysicsUnit;
+import org.jscience.physics.unit.formats.SymbolMap;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.SI;
 
 /**

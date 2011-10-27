@@ -10,10 +10,10 @@
 package org.jscience.physics.internal.unit.format;
 
 import org.jscience.physics.unit.SIPrefix;
-import org.jscience.physics.unit.format.SymbolMap;
-import org.jscience.physics.unit.type.PhysicsUnit;
+import org.jscience.physics.unit.formats.SymbolMap;
+import org.jscience.physics.unit.PhysicsUnit;
 import org.jscience.physics.unit.SI;
-import org.jscience.physics.unit.converter.LogConverter;
+import org.jscience.physics.unit.converters.LogConverter;
 
 /** */
 public class UnitParser implements UnitParserConstants {

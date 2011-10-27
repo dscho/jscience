@@ -6,10 +6,9 @@ package org.jscience.physics.unit;
 
 import org.unitsofmeasurement.quantity.InformationRate;
 import org.unitsofmeasurement.quantity.Information;
-import org.jscience.physics.unit.converter.PiMultiplierConverter;
+import org.jscience.physics.unit.converters.PiMultiplierConverter;
 import java.util.Set;
 import javolution.util.FastSet;
-import org.jscience.physics.unit.type.PhysicsUnit;
 import org.unitsofmeasurement.quantity.Acceleration;
 import org.unitsofmeasurement.quantity.Action;
 import org.unitsofmeasurement.quantity.AmountOfSubstance;

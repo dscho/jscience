@@ -1,38 +1,36 @@
-/*
- * JScience - Java(TM) Tools and Libraries for the Advancement of Sciences.
- * Copyright (C) 2010 - JScience (http://jscience.org/)
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software is
- * freely granted, provided that this notice is preserved.
- */
 /**
- * Provides support for programatic unit handling.
+ * This package provides supports for physics units, in conformity with the
+ * <a href="http://www.unitsofmeasurement.org/">Units of Measurement API</a>.
  *
  * <h3> Standard / Non Standard Units</h3>
- *      This package provides standard units in accordance with the 
+ * <ul>
+ *    <li> The class {@link SI} contains standard units as defined by the 
  *       <a href="http://physics.nist.gov/Pubs/SP330/sp330.pdf">
- *      "The International System of Units (SI)"</a> as well as non-standard 
- *      units in accordance  with the <a href="http://unitsofmeasure.org/">
- *      "Uniform Code for Units of Measure (UCUM)"</a>.
+ *      "The International System of Units"</a>.</li>
+ *    <li> The class {@link UCUM} contains standard and non-standard units 
+ *      as defined by the <a href="http://unitsofmeasure.org/">
+ *      "Uniform Code for Units of Measure"</a>.</li>
+ * </ul>
  *
- * <h3>Usage examples:</h3>
+ * <h3>Usage:</h3>
  * [code]
  *
- * import org.unitofmeasurement.unit.*;
- * import org.unitofmeasurement.quantity.*;
+ * import org.unitsofmeasurement.quantity.*; // Holds quantity types.
  * 
- * import static org.jscience.physics.unit.SI.*;
+ * import org.jscience.physics.unit.PhysicsUnit;
+ * import org.jscience.physics.unit.PhysicsConverter;
+ * 
+ * import static org.jscience.physics.unit.SI.*; // Standard Units.
  * import static org.jscience.physics.unit.SIPrefix.*;
- * import static org.jscience.physics.unit.UCUM.*;
+ * import static org.jscience.physics.unit.UCUM.*; // Standard & Non-Standard Units.
  *
  * public class Main {
  *     public void main(String[] args) {
  *
  *         // Conversion between units (explicit way).
- *         Unit<Length> sourceUnit = KILO(METRE);
- *         Unit<Length> targetUnit = MILE;
- *         UnitConverter uc = sourceUnit.getConverterTo(targetUnit);
+ *         PhysicsUnit<Length> sourceUnit = KILO(METRE);
+ *         PhysicsUnit<Length> targetUnit = MILE;
+ *         PhysicsConverter uc = sourceUnit.getConverterTo(targetUnit);
  *         System.out.println(uc.convert(10)); // Converts 10 km to miles.
  *
  *         // Same conversion than above, packed in one line.
@@ -60,11 +58,11 @@
  *
  *     Units are parameterized enforce compile-time checks of units/measures consistency, for example:[code]
  *
- *     Unit<Time> MINUTE = SECOND.times(60); // Ok.
- *     Unit<Time> MINUTE = METRE.times(60); // Compile error.
+ *     PhysicsUnit<Time> MINUTE = SECOND.times(60); // Ok.
+ *     PhysicsUnit<Time> MINUTE = METRE.times(60); // Compile error.
  *
- *     Unit<Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
- *     Unit<Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
+ *     PhysicsUnit<Pressure> HECTOPASCAL = HECTO(PASCAL); // Ok.
+ *     PhysicsUnit<Pressure> HECTOPASCAL = HECTO(NEWTON); // Compile error.
  *
  *     Measure<Time> duration = Measure.valueOf(2, MINUTE); // Ok.
  *     Measure<Time> duration = Measure.valueOf(2, CELSIUS); // Compile error.
@@ -76,11 +74,11 @@
  *     Runtime checks of dimension consistency can be done for more complex cases.
  *
  *     [code]
- *     Unit<Area> SQUARE_FOOT = FOOT.times(FOOT).asType(Area.class); // Ok.
- *     Unit<Area> SQUARE_FOOT = FOOT.times(KELVIN).asType(Area.class); // Runtime error.
+ *     PhysicsUnit<Area> SQUARE_FOOT = FOOT.times(FOOT).asType(Area.class); // Ok.
+ *     PhysicsUnit<Area> SQUARE_FOOT = FOOT.times(KELVIN).asType(Area.class); // Runtime error.
  *
- *     Unit<Temperature> KELVIN = Unit.valueOf("K").asType(Temperature.class); // Ok.
- *     Unit<Temperature> KELVIN = Unit.valueOf("kg").asType(Temperature.class); // Runtime error.
+ *     PhysicsUnit<Temperature> KELVIN = PhysicsUnit.valueOf("K").asType(Temperature.class); // Ok.
+ *     PhysicsUnit<Temperature> KELVIN = PhysicsUnit.valueOf("kg").asType(Temperature.class); // Runtime error.
  *     [/code]
  *     </p>
  *

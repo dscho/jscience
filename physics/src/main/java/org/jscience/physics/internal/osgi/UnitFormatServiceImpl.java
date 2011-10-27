@@ -9,8 +9,8 @@
 package org.jscience.physics.internal.osgi;
 
 import java.util.Locale;
-import org.jscience.physics.unit.format.LocalUnitFormat;
-import org.jscience.physics.unit.format.UCUMFormat;
+import org.jscience.physics.unit.formats.LocalUnitFormat;
+import org.jscience.physics.unit.formats.UCUMFormat;
 import org.unitsofmeasurement.service.UnitFormatService;
 import org.unitsofmeasurement.unit.UnitFormat;
 

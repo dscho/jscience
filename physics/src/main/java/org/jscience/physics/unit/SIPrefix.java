@@ -9,8 +9,7 @@
 package org.jscience.physics.unit;
 
 import java.math.BigInteger;
-import org.jscience.physics.unit.type.PhysicsUnit;
-import org.jscience.physics.unit.converter.RationalConverter;
+import org.jscience.physics.unit.converters.RationalConverter;
 import org.unitsofmeasurement.quantity.Quantity;
 
 /**
