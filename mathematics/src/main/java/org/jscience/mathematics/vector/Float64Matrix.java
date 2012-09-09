@@ -51,24 +51,24 @@ public class Float64Matrix extends DenseMatrix<Float64> {
     private final TransposedView _transposedView = new TransposedView();
 
     // See parent static method.
-    public static Float64Matrix valueOf(List<? extends Vector<Float64>> rows) {
+    public static Float64Matrix valueOfList(List<? extends Vector<Float64>> rows) {
         Float64Matrix M = Float64Matrix.FACTORY.object();
         final int n = rows.get(0).getDimension();
         for (Vector<Float64> row : rows) {
             if (row.getDimension() != n)
                 throw new DimensionException();
-            M._rows.add(Float64Vector.valueOf(row));
+            M._rows.add(Float64Vector.valueOfVector(row));
         }
         return M;
     }
 
     // See parent static method.
-    public static Float64Matrix valueOf(Matrix<Float64> that) {
+    public static Float64Matrix valueOfMatrix(Matrix<Float64> that) {
         if (that instanceof Float64Matrix)
             return (Float64Matrix) that;
         Float64Matrix M = Float64Matrix.FACTORY.object();
         for (int i = 0, m = that.getNumberOfRows(); i < m; i++) {
-            M._rows.add(Float64Vector.valueOf(that.getRow(i)));
+            M._rows.add(Float64Vector.valueOfVector(that.getRow(i)));
         }
         return M;
     }
@@ -84,8 +84,8 @@ public class Float64Matrix extends DenseMatrix<Float64> {
     }
 
     // See parent static method.
-    public static Float64Matrix valueOf(Vector<Float64>... rows) {
-        return Float64Matrix.valueOf(Arrays.asList(rows));
+    public static Float64Matrix valueOfVector(Vector<Float64>... rows) {
+        return Float64Matrix.valueOfList(Arrays.asList(rows));
     }
 
   /**
@@ -268,7 +268,7 @@ public class Float64Matrix extends DenseMatrix<Float64> {
 
         @Override
         public Float64Matrix copy() {
-            return Float64Matrix.valueOf(this).copy();
+            return Float64Matrix.valueOfMatrix(this).copy();
         }
 
         @Override

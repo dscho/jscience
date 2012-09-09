@@ -95,7 +95,7 @@ public class Float64Vector extends DenseVector<Float64> implements
      * @param that the vector to convert. 
      * @return <code>that</code> or new equivalent Float64Vector.
      */
-    public static Float64Vector valueOf(Vector<Float64> that) {
+    public static Float64Vector valueOfVector(Vector<Float64> that) {
         if (that instanceof Float64Vector)
             return (Float64Vector) that;
         int n = that.getDimension();
@@ -114,7 +114,7 @@ public class Float64Vector extends DenseVector<Float64> implements
      * @param elements the collection of numbers.
      * @return the vector having the specified elements.
      */
-    public static Float64Vector valueOf(List<Float64> elements) {
+    public static Float64Vector valueOfList(List<Float64> elements) {
         int n = elements.size();
         Float64Vector V = FACTORY.array(n);
         V._dimension = n;
@@ -216,7 +216,7 @@ public class Float64Vector extends DenseVector<Float64> implements
 
     @Override
     public Float64Vector plus(Vector<Float64> that) {
-        Float64Vector T = Float64Vector.valueOf(that);
+        Float64Vector T = Float64Vector.valueOfVector(that);
         if (T._dimension != _dimension)
             throw new DimensionException();
         Float64Vector V = FACTORY.array(_dimension);
@@ -229,7 +229,7 @@ public class Float64Vector extends DenseVector<Float64> implements
 
     @Override
     public Float64Vector minus(Vector<Float64> that) {
-        Float64Vector T = Float64Vector.valueOf(that);
+        Float64Vector T = Float64Vector.valueOfVector(that);
         if (T._dimension != _dimension)
             throw new DimensionException();
         Float64Vector V = FACTORY.array(_dimension);
@@ -268,7 +268,7 @@ public class Float64Vector extends DenseVector<Float64> implements
 
     @Override
     public Float64 times(Vector<Float64> that) {
-        Float64Vector T = Float64Vector.valueOf(that);
+        Float64Vector T = Float64Vector.valueOfVector(that);
         if (T._dimension != _dimension)
             throw new DimensionException();
         double[] T_values = T._values;
@@ -281,7 +281,7 @@ public class Float64Vector extends DenseVector<Float64> implements
 
     @Override
     public Float64Vector cross(Vector<Float64> that) {
-        Float64Vector T = Float64Vector.valueOf(that);
+        Float64Vector T = Float64Vector.valueOfVector(that);
         if ((this._dimension != 3) || (T._dimension != 3))
             throw new DimensionException(
                     "The cross product of two vectors requires " + "3-dimensional vectors");

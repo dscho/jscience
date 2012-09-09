@@ -83,7 +83,7 @@ public class DiagonalMatrix<F extends Field<F>> extends SparseMatrix<F> {
      * @param elements the diagonal elements.
      * @return the matrix having the specified diagonal elements.
      */
-    public static <F extends Field<F>> DiagonalMatrix<F> valueOf(
+    public static <F extends Field<F>> DiagonalMatrix<F> valueOfList(
             List<F> elements) {
         DiagonalMatrix M = FACTORY.object();
         M._diagonal = DenseVectorImpl.valueOf(elements);
