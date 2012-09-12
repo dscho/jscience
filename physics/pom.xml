@@ -8,6 +8,7 @@
     <artifactId>jscience-physics</artifactId>
     <name>JScience Physics Bundle</name>
     <packaging>bundle</packaging>
+
     <dependencies>
         <dependency>
             <groupId>org.unitsofmeasurement</groupId>
