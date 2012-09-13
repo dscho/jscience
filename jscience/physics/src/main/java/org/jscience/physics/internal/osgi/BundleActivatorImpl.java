@@ -21,7 +21,7 @@ import org.unitsofmeasurement.service.UnitFormatService;
  * @author  <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @version 5.0, October 21, 2011
  */
-public class Activator implements BundleActivator {
+public class BundleActivatorImpl implements BundleActivator {
 
     public void start(BundleContext bc) throws Exception {
         Object name = bc.getBundle().getHeaders().get(Constants.BUNDLE_NAME);

@@ -10,7 +10,7 @@ package org.jscience.physics.dimension;
 
 import java.util.Map;
 import javolution.context.LocalContext;
-import org.jscience.physics.dimension.models.StandardModel;
+import org.jscience.physics.model.StandardModel;
 import org.jscience.physics.unit.PhysicsConverter;
 
 /**
